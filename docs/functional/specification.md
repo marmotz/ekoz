@@ -172,6 +172,7 @@ product decision.
 
 ## Detailed scoping
 
+- [Server core](../../backlog/features/server-core/overview.md) (non-functional foundations)
 - [Identity and profiles](../../backlog/features/identity-and-profiles/overview.md)
 - [Conversations](../../backlog/features/conversations/overview.md)
 - [Content and sharing](../../backlog/features/content-and-sharing/overview.md)

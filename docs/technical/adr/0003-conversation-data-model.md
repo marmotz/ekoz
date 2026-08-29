@@ -37,8 +37,9 @@ shared and ignore the `type`. The differences are rules conditioned on the
 
 Space hierarchy: `parent_id` + a closure table for ancestor queries (permission
 inheritance) and subtree queries. Cycles forbidden. Depth: configurable soft
-limit, 4 by default. Permission resolution: merge of the space chain and the
-room overrides, "most restrictive wins".
+limit, 4 by default. Permission resolution is specified in
+[ADR 0018](0018-permission-model.md) (capability-based ACL, closest node wins) —
+this replaces the informal "most restrictive wins" hint originally in this ADR.
 
 The wording "special private room" is dropped in favour of `dm` / `group_dm`.
 

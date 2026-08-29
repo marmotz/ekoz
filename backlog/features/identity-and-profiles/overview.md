@@ -1,6 +1,6 @@
 # Identity and profiles
 
-**Status**: in discussion
+**Status**: [technical design](technical.md)
 
 ## Context
 

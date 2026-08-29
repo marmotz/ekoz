@@ -1,6 +1,6 @@
 # Conversations
 
-**Status**: in discussion
+**Status**: [technical design](technical.md)
 
 ## Context
 

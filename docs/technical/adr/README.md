@@ -23,3 +23,5 @@ Statuses: `proposed`, `accepted`, `superseded by NNNN`, `deprecated`.
 | [0014](0014-changelog-discipline.md) | Changelog discipline | accepted |
 | [0015](0015-decisions-are-recorded-as-adrs.md) | Decisions are recorded as ADRs | accepted |
 | [0016](0016-web-client-stack.md) | Web client stack | accepted |
+| [0017](0017-api-conventions.md) | HTTP API conventions | accepted |
+| [0018](0018-permission-model.md) | Permission model | accepted |
