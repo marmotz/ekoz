@@ -34,3 +34,21 @@ model Setting {
 
   @@map("settings")
 }
+
+/// Append-only audit trail (technical.md §8). Written through `AuditService`
+/// only; there is no update/delete API. `actorUserId` null = system action.
+model AuditLog {
+  id          String @id @default(ulid())
+  at          temporal.createdAtString()
+  actorUserId String?                    @map("actor_user_id")
+  actorIp     String?                    @map("actor_ip")
+  action      String
+  targetType  String?                    @map("target_type")
+  targetId    String?                    @map("target_id")
+  // `Jsonb` → a `jsonb` column; the service always supplies an object.
+  metadata    Jsonb
+
+  @@index([at])
+  @@index([actorUserId])
+  @@map("audit_log")
+}

@@ -1,6 +1,6 @@
 # server — HTTP conventions (problem+json, validation, context, logging)
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#3](https://github.com/ekoz-chat/server/issues/3)
@@ -13,7 +13,7 @@ and [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/00
 1. Global exception filter producing `application/problem+json` (RFC 9457):
    `{ type, title, status, detail, code }`. A `DomainError` base class carries a
    stable `code`; validation errors map to `422` + `code = "validation_failed"`
-   + an `errors` array.
+   - an `errors` array.
 2. `ZodValidationPipe` validating body/query/params against Zod schemas at the
    edge; inferred types flow inward.
 3. Request context via `AsyncLocalStorage`: `requestId` (accept + echo

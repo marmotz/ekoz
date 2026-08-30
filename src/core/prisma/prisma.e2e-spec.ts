@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
+import { applyTestInfraConfig } from '../config/testing/test-infra-config.js';
 import { PrismaService } from './prisma.service.js';
 import { startTestDatabase, type TestDatabase } from './testing/test-database.js';
 
@@ -43,9 +44,11 @@ describe('Prisma database access (integration)', () => {
 
   describe('wired into a NestJS application', () => {
     let app: INestApplication;
+    let restoreConfig: () => void;
 
     beforeAll(async () => {
       process.env['DATABASE_URL'] = database.url;
+      restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
       const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
       app = moduleRef.createNestApplication();
       app.enableShutdownHooks();
@@ -53,6 +56,7 @@ describe('Prisma database access (integration)', () => {
     });
 
     afterAll(async () => {
+      restoreConfig?.();
       await app?.close();
     });
 

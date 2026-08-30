@@ -1,0 +1,49 @@
+# Ekoz server configuration (ADR 0009, backlog/features/server-core/technical.md §2).
+#
+# Layered precedence, lowest to highest:
+#   code defaults  <  this file  <  settings table (admin)  <  environment
+#
+# `infra` parameters resolve from this file + environment only. `runtime`
+# parameters take this file as their default; the admin overrides them at
+# runtime, and an `EKOZ_<SECTION>__<KEY>` environment variable *locks* them.
+#
+# String values support `${ENV_VAR}` interpolation, resolved at load time.
+# Secrets belong in the environment, referenced here — never inline.
+
+[server]
+domain = "ekoz.example.com"
+api_url = "https://ekoz.example.com"
+web_url = "https://app.ekoz.example.com"
+
+[http]
+host = "0.0.0.0"
+port = 3000
+
+[database]
+url = "${DATABASE_URL}"
+
+[secret]
+# 32 bytes, base64. Generate with: openssl rand -base64 32
+key = "${EKOZ_SECRET_KEY}"
+
+[storage]
+driver = "local"
+[storage.local]
+path = "./var/blobs"
+
+[email]
+driver = "smtp"
+from = "Ekoz <no-reply@ekoz.example.com>"
+[email.smtp]
+host = "localhost"
+port = 1025
+secure = false
+
+[registration]
+mode = "invite"
+
+[observability]
+log_level = "info"
+log_format = "json"
+metrics_enabled = false
+trace_sample_ratio = 0
