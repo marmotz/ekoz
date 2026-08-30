@@ -1,6 +1,6 @@
 # server — layered configuration system
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#4](https://github.com/ekoz-chat/server/issues/4)

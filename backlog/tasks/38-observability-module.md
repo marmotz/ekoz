@@ -1,6 +1,6 @@
 # server — observability module (logs, metrics, traces)
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#38](https://github.com/ekoz-chat/server/issues/38)

@@ -3,6 +3,8 @@ dist/
 coverage/
 
 .env
+compose.override.yaml
+config.toml
 
 .agents/
 .claude/
