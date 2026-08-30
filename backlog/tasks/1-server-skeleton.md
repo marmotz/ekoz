@@ -1,6 +1,6 @@
 # server — application skeleton and CI
 
-**Status**: todo
+**Status**: done
 **Type**: backend / CI
 **Repo**: ekoz-chat/server
 **Issue**: [#1](https://github.com/ekoz-chat/server/issues/1)

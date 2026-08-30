@@ -58,3 +58,14 @@ their templates; use the English equivalents:
 Any design decision or notable change gets an ADR in the `spec` repo
 (`docs/technical/adr/`), per
 [ADR 0015](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0015-decisions-are-recorded-as-adrs.md).
+
+## CHANGELOG entries
+
+`server/CHANGELOG.md` records **what changed**, not why. One short bullet per
+user-visible change, tagged with its issue (`(#42)`). No paragraphs, no version
+pins (those live in `package.json`), no "notes on the approach".
+
+Rationale, trade-offs, tooling surprises, "an ADR is owed" → the ADR itself and
+the commit/PR body, never the changelog. The only caveats that belong in a
+`### Notes` block are ones a *consumer* must act on right now (e.g. a known bug
+with a workaround).

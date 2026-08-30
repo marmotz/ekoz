@@ -10,7 +10,8 @@ Related: [ADR 0002](https://github.com/ekoz-chat/spec/blob/main/docs/technical/a
 [0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md),
 [0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md),
 [0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md),
-[0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+[0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md),
+[0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md).
 
 ## 1. Repository skeleton and tooling
 
@@ -27,6 +28,7 @@ server/
       bootstrap/         # init flow (first owner, setup token), lifecycle
       discovery/         # /.well-known/ekoz controller
       health/            # /healthz, /readyz
+      observability/     # logger factory, OTel bootstrap, metrics registry, /metrics
       http/              # exception filter, problem+json, request context
     modules/             # functional features (identity, conversations, ...)
     main.ts
@@ -101,6 +103,12 @@ Initial parameters:
 | `profile.bio_max_length` | runtime | int (default `500`) |
 | `avatar.max_size_bytes` | runtime | int (default `2_000_000`) |
 | `avatar.allowed_mime` | runtime | list (default `["image/png","image/jpeg","image/webp","image/gif"]`) |
+| `observability.log_level` | runtime | `trace`..`fatal` (default `info`) |
+| `observability.log_format` | infra | `json` \| `pretty` (default `json`, `pretty` for local dev) |
+| `observability.metrics_enabled` | runtime | bool (default `false`) |
+| `observability.metrics_token` | infra, secret | bearer token guarding `/metrics` when set |
+| `observability.otlp_endpoint` | infra | OTLP traces exporter target (unset = tracing off) |
+| `observability.trace_sample_ratio` | runtime | float `0`..`1` (default `0`) |
 
 ### Loader
 
@@ -281,12 +289,83 @@ interface StorageDriver {
   `requestId`, authenticated `userId`/`sessionId` (when present), client IP.
   `requestId` is echoed in the `X-Request-Id` header and included in logs.
 - **Logging**: structured JSON (pino), one line per request, plus explicit
-  domain events. No secrets in logs.
+  domain events. No secrets in logs. Full contract in section 11.
 - **Time**: all timestamps UTC, ISO-8601 in payloads, `timestamptz` in the DB.
-- **IDs**: UUID v7 (`id` columns), generated app-side, so they are
-  time-ordered and safe to expose.
+- **IDs**: ULID (`id` columns), via Prisma's `@default(ulid())` — generated
+  client-side, 26-char Crockford base32, `text` column. Dash-free (one
+  double-click to select in a URL or log line). The ms-timestamp prefix (as in
+  UUID v7) buys insert locality in the PK B-tree and "roughly newest first"
+  listings — **not** a reliable order: across instances / under clock skew,
+  same-ms ids sort by their random tail. Authoritative ordering is the per-room
+  `seq` ([ADR 0004] / §… event log); feed cursors carry their own monotonic key.
+  Natural keys (`settings.key`) and content-addressed keys (`blob.hash`) keep
+  their own scheme. See [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md).
 
-## 11. Consolidated Prisma schema (server-core slice)
+## 11. Observability and instrumentation
+
+Per [ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md).
+Server-core ships the emission side (logs, metrics, traces, health); the
+operator-facing supervision screens belong to
+[server administration](../server-administration/overview.md) and only consume
+what is defined here.
+
+### Logging
+
+- One `pino` logger, built by a factory in `observability/`, injected as the Nest
+  logger. Level from `observability.log_level`, format from
+  `observability.log_format` (`pretty` uses `pino-pretty` in dev only).
+- Every line within a request carries `requestId` from the `AsyncLocalStorage`
+  context (section 10); background jobs carry a generated `jobId`. Authenticated
+  lines also carry `userId`.
+- A Nest interceptor emits **one line per completed request**: method, matched
+  route, status, duration ms, `requestId`, `userId?`. `/healthz`, `/readyz`,
+  `/metrics` are excluded.
+- Redaction: the logger is configured with a `redact` path list covering
+  `req.headers.authorization`, `req.headers.cookie`, `password`, `token`,
+  `*.privateKey`, `email.smtp.pass`, `secret*`. New secret-bearing fields are
+  added to the list as they appear; message bodies and email contents are never
+  passed to the logger.
+
+### Metrics
+
+- `GET /metrics`, Prometheus text format, **disabled unless**
+  `observability.metrics_enabled`. When `observability.metrics_token` is set the
+  route requires `Authorization: Bearer <token>`; when unset the route is served
+  only on the loopback / private bind. Excluded from the request access log.
+- Instrumentation goes through the **OpenTelemetry** metrics SDK with the
+  Prometheus exporter, so an OTLP push can be added later without touching call
+  sites. A thin `MetricsService` wraps counter/histogram/gauge creation.
+- Baseline instruments registered by server-core:
+  - process: RSS, heap used, event-loop lag, GC pause, open FDs, uptime
+  - HTTP: `http_server_requests_total{route,status_class}`,
+    `http_server_request_duration_seconds` histogram
+  - database: Prisma pool size / in-use / wait time, query duration histogram
+  - email: `email_queue_depth`, `email_send_attempts_total`,
+    `email_send_failures_total`
+  - blob storage: `blob_bytes_total`, `blob_count`, `blob_dedup_ratio`
+- **Domain metrics are owned by the feature that introduces the subsystem**, not
+  by server-core. Reserved names, to keep them consistent:
+  - conversations: `ekoz_sse_connections` (gauge),
+    `ekoz_sse_connection_events_total{event=open|close|reconnect}`,
+    `ekoz_sse_fanout_dropped_total`, `ekoz_room_event_lag_seconds`,
+    event-bus publish/consume counters and lag
+  - any feature with background jobs: `job_runs_total{job}`,
+    `job_duration_seconds{job}`, `job_failures_total{job}`
+  - federation: peer reachability gauge, outbound-queue depth, delivery latency
+
+### Traces
+
+- OpenTelemetry tracing, exporter **off by default**. Setting
+  `observability.otlp_endpoint` turns on OTLP export for HTTP handler, Prisma
+  query and outbound (SMTP, later federation) spans. Head-based sampling ratio
+  from `observability.trace_sample_ratio` (default `0`).
+
+### Health
+
+- Unchanged from section 9: `GET /healthz` (liveness) and `GET /readyz`
+  (DB, migrations, signing key, storage driver; `503` + per-check breakdown).
+
+## 12. Consolidated Prisma schema (server-core slice)
 
 ```prisma
 model Setting {
@@ -309,7 +388,7 @@ model ServerSigningKey {
 }
 
 model SetupToken {
-  id         String    @id @default(uuid(7))
+  id         String    @id @default(ulid())
   tokenHash  String
   createdAt  DateTime  @default(now())
   consumedAt DateTime?
@@ -317,7 +396,7 @@ model SetupToken {
 }
 
 model Blob {
-  id          String   @id @default(uuid(7))
+  id          String   @id @default(ulid())
   hash        String   @unique
   sizeBytes   BigInt
   contentType String
@@ -328,7 +407,7 @@ model Blob {
 }
 
 model EmailMessage {
-  id         String   @id @default(uuid(7))
+  id         String   @id @default(ulid())
   to         String
   template   String
   category   String
@@ -340,7 +419,7 @@ model EmailMessage {
 }
 
 model AuditLog {
-  id          String   @id @default(uuid(7))
+  id          String   @id @default(ulid())
   at          DateTime @default(now())
   actorUserId String?
   actorIp     String?
@@ -357,7 +436,7 @@ model AuditLog {
 (`User` / `Session` are defined by
 [identity and profiles](../identity-and-profiles/overview.md).)
 
-## 12. Alternatives considered
+## 13. Alternatives considered
 
 | Point | Retained | Rejected | Why |
 |-------|----------|----------|-----|
@@ -368,10 +447,13 @@ model AuditLog {
 | Blob deletion | deferred GC sweep at `ref_count = 0` | immediate delete on release | Avoids races with concurrent new references |
 | Error format | RFC 9457 problem+json | ad-hoc `{error}` | Standard, good for third-party SDK consumers |
 | Email queue | in-process retry queue | Redis/BullMQ, external broker | First increment stays single-process; broker is added only if needed |
-| ID scheme | UUID v7 | auto-increment, UUID v4, ULID | Time-ordered, non-enumerable, safe to expose, native `uuid(7)` support |
+| ID scheme | ULID (`@default(ulid())`) | UUID v7, UUID v4, auto-increment, CUID2 | Non-enumerable + insert locality like UUID v7 but dash-free. Neither v7 nor ULID gives a cross-instance total order (that is `seq`'s job). CUID2 rejected: no timestamp (no locality), non-standard JS-only, slow. v4 rejected: fully random. See [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md) |
 | Migrations at deploy | entrypoint step before app start | app runs migrations on boot | Avoids races between replicas; app only *checks* schema is current |
+| Metrics stack | OpenTelemetry SDK + Prometheus exporter | `prom-client` directly | Traces and OTLP push add later without rewriting instrumentation call sites ([ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md)) |
+| `/metrics` exposure | opt-in, token- or bind-guarded | always on, public | Internal metrics must not leak on a public bind by default |
+| Log shipping | JSON to stdout, platform collects | in-process shipper | Keeps the process single-purpose; every host platform collects stdout |
 
-## 13. Consequences
+## 14. Consequences
 
 - Nothing to migrate (greenfield). This feature creates the initial schema and
   the CI pipeline.
@@ -382,8 +464,12 @@ model AuditLog {
 - `conversations` additionally introduces the per-room event log and the SSE
   stream; server-core deliberately does not ship an event bus or SSE endpoint
   yet (nothing to stream).
-- `server-administration` will build its admin API on `ConfigService.describe`,
-  `audit_log`, and `readyz` checks.
+- `server-administration` will build its supervision screens on
+  `ConfigService.describe`, `audit_log`, `readyz` checks and the `/metrics`
+  endpoint; it introduces no new telemetry pipeline.
+- `conversations`, `notifications` and `federation` each own the domain metrics
+  and domain log events for the subsystem they add, following the naming
+  reserved in section 11.
 - The `s3` storage driver and a real email rate-limiting policy are explicitly
   deferred but their config/schema surface is reserved now.
 
@@ -402,3 +488,4 @@ GitHub issues live in `ekoz-chat/server`. Order below is the dependency order.
 9. [#9 — object storage with deduplication (local driver)](../../tasks/9-object-storage.md)
 10. [#10 — outbound email (SMTP driver)](../../tasks/10-outbound-email.md)
 11. [#11 — health and readiness endpoints](../../tasks/11-health-endpoints.md)
+12. [#38 — observability module (logs, metrics, traces)](../../tasks/38-observability-module.md)

@@ -1,0 +1,34 @@
+# Local development dependencies only (technical.md §1). The server itself runs
+# on the host (`bun run start:dev`) against these.
+name: ekoz
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ekoz
+      POSTGRES_PASSWORD: ekoz
+      POSTGRES_DB: ekoz
+    ports:
+      - '5432:5432'
+    volumes:
+      # postgres:18+ wants a single mount at /var/lib/postgresql (data lands in a
+      # version subdirectory) — not the old /var/lib/postgresql/data.
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ekoz']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # web UI
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+  postgres_data:

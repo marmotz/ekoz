@@ -1,0 +1,36 @@
+// use prisma-next
+//
+// Ekoz reference server — Prisma Next data contract.
+//
+// This is NOT a classic `schema.prisma`: Prisma 8 ("Prisma Next") replaced the
+// generator + `PrismaClient` with an emitted *contract* (`generated/contract.json`
+// + `generated/contract.d.ts`, both committed) and a lightweight runtime client
+// (`db.ts`). See the CHANGELOG entry for issue #2 and ADR 0002 (server stack).
+//
+// Conventions (task #2, item 7):
+//   - models are PascalCase, tables/columns snake_case via `@@map` / `@map`;
+//   - generated ids are ULID via `@default(ulid())` — 26-char Crockford base32,
+//     dash-free; ms-prefix gives insert locality, NOT a reliable order
+//     (that is the per-room `seq`, ADR 0004 / 0021);
+//   - timestamps are `timestamptz`, carried as ISO-8601 strings;
+//   - the connection URL lives only in the environment (infra `database.url`),
+//     never here — migrations read it from `prisma.config.ts`, the runtime from
+//     the `url` passed to `postgres()` in `db.ts`.
+//
+// Only the `Setting` model lands here: it is pure infrastructure (the admin
+// override store for the layered configuration system) and gives the migration
+// workflow and the integration tests a real table to exercise. The remaining
+// server-core models (ServerSigningKey, SetupToken, Blob, EmailMessage,
+// AuditLog — technical.md §11) are each introduced by their own task (#4, #5,
+// #7, #8, #9, #10).
+
+/// Layered configuration: admin overrides for `runtime` parameters only.
+model Setting {
+  key       String @id
+  // `Jsonb` (not `Json`) → a `jsonb` column, per technical.md §11.
+  value     Jsonb
+  updatedAt temporal.updatedAtString() @map("updated_at")
+  updatedBy String?                    @map("updated_by")
+
+  @@map("settings")
+}
