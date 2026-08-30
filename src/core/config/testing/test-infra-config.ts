@@ -2,13 +2,16 @@
  * Infra configuration for e2e specs that boot the full `AppModule`.
  *
  * `ConfigService` validates every infra parameter on module init and aborts boot
- * on a missing one (technical.md §2). Local runs pick these up from an untracked
- * `config.toml`, but CI has no such file, so specs must supply the infra keys
- * themselves. This sets the `EKOZ_*` env overrides in place and returns a
- * cleanup that restores the previous environment.
+ * on a missing one (technical.md §2). Specs supply every infra key themselves
+ * through `EKOZ_*` env overrides and point `EKOZ_CONFIG_FILE` at a path that
+ * does not exist, so a developer's local `config.toml` (which may reference
+ * `${ENV}` variables absent from the test environment) is never read. This sets
+ * the overrides in place and returns a cleanup that restores the previous
+ * environment.
  */
 
 const STATIC_OVERRIDES: Record<string, string> = {
+  EKOZ_CONFIG_FILE: '/nonexistent/ekoz-test-config.toml',
   EKOZ_SERVER__DOMAIN: 'ekoz.example.com',
   EKOZ_SERVER__API_URL: 'https://api.ekoz.example.com',
   EKOZ_SERVER__WEB_URL: 'https://app.ekoz.example.com',

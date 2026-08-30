@@ -1,4 +1,5 @@
 import { z, type ZodType } from 'zod';
+import { isValidServerDomain } from '../discovery/server-domain.js';
 
 /** `infra` resolves from file + env only; `runtime` also reads the settings table. */
 export type ParameterKind = 'infra' | 'runtime';
@@ -20,9 +21,7 @@ export interface ParameterSpec {
 const fqdn = z
   .string()
   .toLowerCase()
-  .refine((v) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(v) && v !== 'localhost', {
-    message: 'must be a public FQDN (not localhost or an IP)',
-  });
+  .refine(isValidServerDomain, { message: 'must be a public FQDN (not localhost or an IP)' });
 
 const url = z.url();
 const port = z.coerce.number().int().min(1).max(65535);
@@ -150,6 +149,13 @@ export const PARAMETER_REGISTRY = {
     schema: ratio,
     default: 0,
     hotReloadable: true,
+    secret: false,
+  },
+  'signing.key_overlap_seconds': {
+    kind: 'infra',
+    schema: int.pipe(z.number().min(0)),
+    default: 604_800,
+    hotReloadable: false,
     secret: false,
   },
 } as const satisfies Record<string, ParameterSpec>;

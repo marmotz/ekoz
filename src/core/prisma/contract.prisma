@@ -26,7 +26,7 @@
 
 /// Layered configuration: admin overrides for `runtime` parameters only.
 model Setting {
-  key       String @id
+  key       String                     @id
   // `Jsonb` (not `Json`) → a `jsonb` column, per technical.md §11.
   value     Jsonb
   updatedAt temporal.updatedAtString() @map("updated_at")
@@ -35,10 +35,41 @@ model Setting {
   @@map("settings")
 }
 
+/// Canonical server identity, single row (technical.md §4, ADR 0007). Written
+/// once on the first boot that reaches identity setup; a later `server.domain`
+/// change is refused at boot because it would break every `name/server`
+/// identifier. `id` is the fixed sentinel `"server"`.
+model ServerIdentity {
+  id        String                     @id
+  domain    String
+  createdAt temporal.createdAtString() @map("created_at")
+
+  @@map("server_identity")
+}
+
+/// Server signing keypair (technical.md §4, ADR 0006). Exactly one row is
+/// active at a time (`activatedAt` set, `retiredAt` null); rotation retires the
+/// previous key and a sweep drops keys past the overlap window. `id` is a short
+/// random key id, not a ULID — it is published in the discovery document and
+/// referenced by every signature. The private key is stored sealed by
+/// `SecretBox` (AES-256-GCM under the infra `secret.key`).
+model ServerSigningKey {
+  id            String                     @id
+  algorithm     String                     @default("ed25519")
+  publicKey     String                     @map("public_key")
+  privateKeyEnc Bytes                      @map("private_key_enc")
+  createdAt     temporal.createdAtString() @map("created_at")
+  activatedAt   TimestamptzString?         @map("activated_at")
+  retiredAt     TimestamptzString?         @map("retired_at")
+
+  @@index([activatedAt])
+  @@map("server_signing_key")
+}
+
 /// Append-only audit trail (technical.md §8). Written through `AuditService`
 /// only; there is no update/delete API. `actorUserId` null = system action.
 model AuditLog {
-  id          String @id @default(ulid())
+  id          String                     @id @default(ulid())
   at          temporal.createdAtString()
   actorUserId String?                    @map("actor_user_id")
   actorIp     String?                    @map("actor_ip")

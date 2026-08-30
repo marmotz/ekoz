@@ -16,6 +16,8 @@ that does not touch this file.
   of crashing boot with `DRIVER.ALREADY_CONNECTED`. (#2)
 - Integration specs booting `AppModule` configure infra via an
   `applyTestInfraConfig` helper instead of an untracked local `config.toml`. (#3)
+- `applyTestInfraConfig` also points `EKOZ_CONFIG_FILE` at a nonexistent path, so
+  a developer's local `config.toml` no longer breaks `AppModule` e2e specs. (#6)
 
 ### Added
 
@@ -42,6 +44,15 @@ that does not touch this file.
   validation. `config.example.toml` documents the parameter set. (#4)
 - `ConfigService.describe()` reports and masks secret values; `get()` returns the
   real value. (#4)
+- Crypto helpers: `SecretBox` (AES-256-GCM seal/open under `secret.key`), SHA-256
+  hashing helpers, and Ed25519 keypair helpers. (#5)
+- `SigningService`: server Ed25519 signing keys in `server_signing_key`, exactly
+  one active, `sign` / `verify`, `rotate()` with a `signing.key_overlap_seconds`
+  window (default 7d) and a retired-key sweep. (#5)
+- `GET /.well-known/ekoz`: public, cacheable server discovery document (server,
+  api, web, `protocol_versions`, `signing_keys`). (#6)
+- Boot guard: `server.domain` is validated as a public FQDN and pinned in
+  `server_identity`; a later change is refused at startup. (#6)
 - Append-only audit log: `audit_log` table, `AuditService.record`, and an
   `expectAuditEntry` test helper. (#7)
 - Observability module: OpenTelemetry meter provider with a Prometheus reader,

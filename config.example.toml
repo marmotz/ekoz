@@ -204,3 +204,13 @@ metrics_enabled = false
 # every trace, 0.1 = ~10%. Only meaningful when `otlp_endpoint` is set. runtime,
 # hot-reloadable. Default: 0.
 trace_sample_ratio = 0
+
+
+# ---------------------------------------------------------------------------
+# [signing] — server signing keys (Ed25519), published at /.well-known/ekoz.
+# ---------------------------------------------------------------------------
+[signing]
+# Overlap window, in seconds, that a rotated signing key stays published (and
+# accepted for verification) after it is retired. A sweep drops keys past this
+# window. infra (restart required). Default: 604800 (7 days).
+key_overlap_seconds = 604800

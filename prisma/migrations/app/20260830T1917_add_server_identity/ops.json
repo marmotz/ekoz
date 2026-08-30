@@ -1,0 +1,41 @@
+[
+  {
+    "id": "table.server_identity",
+    "label": "Create table \"server_identity\"",
+    "summary": "Creates table \"server_identity\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "server_identity"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"server_identity\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"server_identity\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"server_identity\"",
+        "sql": "CREATE TABLE \"public\".\"server_identity\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"domain\" text NOT NULL,\n  \"id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"server_identity\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"server_identity\""
+        ]
+      }
+    ]
+  }
+]
