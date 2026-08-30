@@ -1,0 +1,404 @@
+# Server core — technical design
+
+Foundational technical design for the `server` repository. Since the repository
+is greenfield (only `AGENTS.md`, `LICENSE`, `NOTICE`, `CHANGELOG.md` at the time
+of writing), this document establishes the initial structure rather than
+referencing existing code.
+
+Related: [ADR 0002](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0002-server-stack.md),
+[0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md),
+[0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md),
+[0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md),
+[0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md),
+[0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+
+## 1. Repository skeleton and tooling
+
+```
+server/
+  src/
+    core/                # cross-cutting infrastructure (this feature)
+      config/            # TOML loader, registry, settings table, ConfigService
+      prisma/            # PrismaService, prisma schema is at prisma/
+      crypto/            # Ed25519 keypair, AES-GCM secret box, hashing helpers
+      storage/           # StorageDriver interface + local driver + BlobService
+      mail/              # Mailer interface + SMTP driver + templating
+      audit/             # AuditService + audit_log
+      bootstrap/         # init flow (first owner, setup token), lifecycle
+      discovery/         # /.well-known/ekoz controller
+      health/            # /healthz, /readyz
+      http/              # exception filter, problem+json, request context
+    modules/             # functional features (identity, conversations, ...)
+    main.ts
+  prisma/
+    schema.prisma
+    migrations/
+  prisma.config.ts
+  test/                  # vitest setup, testcontainers helpers
+  Dockerfile
+  compose.yaml           # local dev: postgres + mailpit
+```
+
+- **Runtime**: Bun. `package.json` `"type": "module"`. Scripts run through Bun
+  (`bun run`, `bun test` delegating to Vitest).
+- **NestJS 12** (ESM). `tsconfig.json`: `module`/`moduleResolution` = `NodeNext`,
+  `experimentalDecorators` + `emitDecoratorMetadata` (validated by the
+  [stack POC](https://github.com/ekoz-chat/spec/blob/main/docs/technical/poc-nestjs12-prisma-bun.md)).
+- **Prisma 8** (`8.0.0-rc` line): `prisma-client` generator with
+  `output = "../src/core/prisma/generated"`, `@prisma/adapter-pg`, connection via
+  `prisma.config.ts` (loads `.env` explicitly). Generated client is committed.
+- **Vitest** + `@nestjs/testing`. Integration tests run against a real
+  PostgreSQL and a real SMTP sink (Mailpit) via Testcontainers; no mocking of
+  Prisma in integration tests.
+- **Lint**: ESLint flat config, `eslint-plugin-boundaries` to forbid
+  `modules/<a>` importing `modules/<b>` directly (they talk through explicit
+  provider interfaces or events).
+- **CI**: typecheck, lint, unit + integration tests, and the changelog check
+  (fails when `src/**` changes without `CHANGELOG.md`).
+- **Docker image**: multi-stage, `oven/bun` base, non-root, runs
+  `bun run src/main.ts`. `prisma migrate deploy` runs as an init step / entrypoint
+  hook, not inside the app process.
+
+## 2. Configuration system
+
+Layered precedence (lowest to highest), per
+[ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md):
+
+```
+code defaults  <  TOML file  <  settings table (admin)  <  environment
+```
+
+### Parameter registry
+
+A single typed registry (`src/core/config/registry.ts`) declares every
+parameter: `key`, `kind` (`infra` | `runtime`), `schema` (Zod), `default`,
+`hotReloadable` (bool), `secret` (bool).
+
+- `infra` parameters resolve from **file + env only**. Never read from the
+  settings table.
+- `runtime` parameters resolve from **file default, then settings table override,
+  then an env value that also *locks* the parameter** (admin sees it read-only).
+
+Initial parameters:
+
+| key | kind | notes |
+|-----|------|-------|
+| `server.domain` | infra | required, FQDN, not `localhost`/IP, lowercased |
+| `server.api_url` | infra | public base URL of the API (may differ from `server.domain`) |
+| `server.web_url` | infra | public base URL of the demo web client (for links in emails) |
+| `http.host` / `http.port` | infra | bind address |
+| `database.url` | infra, secret | PostgreSQL connection string |
+| `secret.key` | infra, secret | 32-byte base64; key-encryption key for secret box |
+| `storage.driver` | infra | `local` \| `s3` (only `local` implemented now) |
+| `storage.local.path` | infra | blob root directory |
+| `storage.s3.*` | infra, secret | endpoint, region, bucket, credentials (schema only) |
+| `email.driver` | infra | `smtp` |
+| `email.smtp.*` | infra, secret | host, port, secure, user, pass |
+| `email.from` | infra | `From` header |
+| `registration.mode` | runtime | `open` \| `invite` \| `admin` (default `invite`) |
+| `email.verification_required` | runtime | bool (default `true`) |
+| `identity.username_change_policy` | runtime | `immutable` \| `available` \| `approval` (default `immutable`) |
+| `profile.bio_max_length` | runtime | int (default `500`) |
+| `avatar.max_size_bytes` | runtime | int (default `2_000_000`) |
+| `avatar.allowed_mime` | runtime | list (default `["image/png","image/jpeg","image/webp","image/gif"]`) |
+
+### Loader
+
+- TOML parsed with `smol-toml`.
+- String values support `${ENV_VAR}` interpolation at load time.
+- Additionally, any parameter can be overridden by `EKOZ_<SECTION>__<KEY>`
+  (double underscore = nesting), 12-factor style. An env override on a `runtime`
+  parameter marks it **locked**.
+- `settings` table: `key text primary key`, `value jsonb`, `updated_at`,
+  `updated_by`. Only `runtime` keys allowed. Validated against the registry
+  schema on write.
+- `ConfigService.get(key)` returns the resolved, validated value.
+  `ConfigService.describe(key)` returns `{ value, source, locked, hotReloadable }`
+  for the future admin UI.
+- Changes to hot-reloadable `runtime` keys take effect without restart (the
+  service caches with a short TTL / an invalidation signal); others are flagged
+  "restart required".
+
+## 3. Database and Prisma
+
+- Single PostgreSQL database. Prisma migrations are the only schema authority.
+- `PrismaService` extends the generated `PrismaClient`, constructs it with
+  `new PrismaPg({ connectionString: config infra database.url })`, `$connect` on
+  module init.
+- Raw SQL (`$queryRaw` / `$executeRaw`) is allowed for: full-text search,
+  recursive/closure queries, and advisory locks. Wrapped in small typed
+  repository methods, never scattered.
+- Naming: tables and columns `snake_case` via `@@map` / `@map`; Prisma models
+  `PascalCase`.
+
+## 4. Server identity
+
+### Domain
+
+`server.domain` is validated at boot (FQDN, not an IP, not `localhost`, not a
+bare hostname). In development the operator adds a fake domain to `/etc/hosts`.
+It is immutable for the lifetime of a deployment (changing it would break every
+`name/server` identifier); a guard refuses to start if it changed while users
+exist.
+
+### Signing keypair
+
+- Table `server_signing_key`:
+  `id` (key id, short random), `algorithm` (`ed25519`), `public_key` (base64),
+  `private_key_enc` (bytea, AES-256-GCM sealed with `secret.key`),
+  `created_at`, `activated_at`, `retired_at` (nullable).
+- Generated at initialization with `crypto.generateKeyPair('ed25519')` (works
+  under Bun). Exactly one active key; rotation inserts a new key, keeps the old
+  one published until `retired_at` + overlap window.
+- `SigningService.sign(bytes)` / `verify(keyId, bytes, sig)`.
+- Until federation exists, the active key also signs the refresh-token pepper /
+  internal tokens if useful; not exposed otherwise.
+
+### Discovery document
+
+`GET /.well-known/ekoz` (unauthenticated, cacheable):
+
+```json
+{
+  "server": "chat.example",
+  "api": "https://api.chat.example",
+  "web": "https://chat.example",
+  "protocol_versions": ["0"],
+  "signing_keys": {
+    "<keyId>": { "public_key": "<base64>", "valid_from": "<iso8601>", "valid_until": null }
+  }
+}
+```
+
+## 5. Bootstrap / initialization
+
+Per [ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md).
+
+On start, `BootstrapService`:
+
+1. Validates infra config; aborts with a clear message on any missing/invalid
+   `infra` parameter.
+2. Runs pending migrations check (in prod, migrations are applied by the
+   entrypoint before the app starts; the app refuses to serve if the schema is
+   behind).
+3. Ensures a signing key exists (generates one otherwise).
+4. Determines **setup state**:
+   - if an `owner` user exists → setup closed.
+   - else if `EKOZ_INITIAL_OWNER_EMAIL` is set → setup open, *email-pinned*.
+   - else → setup open, *token-pinned*: generate a single-use token, print it to
+     stdout (`level=warn`, once), store its hash in `setup_token`.
+5. Exposes setup endpoints only while setup is open:
+   - `POST /setup/owner` `{ email, password, name, displayName }`
+     - email-pinned: `email` must equal `EKOZ_INITIAL_OWNER_EMAIL`.
+     - token-pinned: body must carry the matching `token`.
+     - creates the first `User` with `is_owner = true`, email marked verified,
+       an initial `Session`, writes an `audit_log` entry (`server.initialized`).
+   - after success, all `/setup/*` routes return `410 Gone` for the process
+     lifetime and forever after (guard checks "owner exists").
+
+`setup_token`: `token_hash`, `created_at`, `consumed_at`. Single row.
+
+## 6. Object storage
+
+Per [ADR 0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+First increment ships the schema, the `local` driver and deduplication.
+Per-user quota, MIME filtering by magic bytes and message attachments come with
+[content and sharing](../content-and-sharing/overview.md).
+
+### Driver interface
+
+```ts
+interface StorageDriver {
+  put(key: string, body: ReadableStream, contentType: string): Promise<void>;
+  get(key: string): Promise<ReadableStream>;
+  delete(key: string): Promise<void>;
+  presignGet?(key: string, ttlSeconds: number): Promise<string | null>;
+}
+```
+
+- `local`: writes under `storage.local.path`, key = `blobs/<hash[0:2]>/<hash>`.
+  `presignGet` returns `null` (downloads always proxied through the API for
+  access control).
+- `s3`: schema/config only for now.
+
+### Blob model
+
+- Table `blob`: `id`, `hash` (sha-256 hex, **unique**), `size_bytes`,
+  `content_type`, `storage_key`, `created_at`, `ref_count` (int, default 0).
+- `BlobService.ingest(stream, { declaredType }) -> Blob`:
+  streams to a temp location while hashing, then:
+  - if `hash` exists → discard temp, return existing blob.
+  - else → move into the driver at the content-addressed key, insert row.
+- Referencing: `BlobService.retain(blobId)` / `release(blobId)` adjust `ref_count`
+  inside the caller's transaction.
+- GC: a periodic sweep deletes driver objects + rows for blobs with
+  `ref_count = 0` older than a grace period (default 1 h), to avoid races with
+  in-flight references.
+- Download: `GET /blobs/:id` — authenticated; the concrete access policy is
+  enforced by the referencing feature (e.g. identity checks the blob is the
+  caller's-visible avatar; content-and-sharing checks room membership). Serves
+  with strong caching + `ETag = hash`.
+
+## 7. Outbound email
+
+- `Mailer.send({ to, subject, template, vars, category }) -> Promise<void>`.
+- `smtp` driver on `nodemailer`. Config from `email.smtp.*`, sender `email.from`.
+- Templates in `src/core/mail/templates/<name>.{txt,html}.ts` — English only,
+  simple string interpolation, no external template engine. Shared layout with
+  `server.domain` / `server.web_url`.
+- `email_message` table: `id`, `to`, `template`, `category`, `sent_at`,
+  `dedupe_key` (nullable, unique-per-window). Used now for a coarse
+  anti-duplication guard; the real rate-limiting policy is
+  [notifications](../notifications/overview.md).
+- Failures: retried with backoff by a small in-process queue; after N attempts,
+  logged + an `audit_log`-adjacent `email.failed` record. No external broker in
+  the first increment.
+
+## 8. Audit log
+
+- Table `audit_log` (append-only): `id`, `at`, `actor_user_id` (nullable = system),
+  `actor_ip` (nullable), `action` (string), `target_type` (nullable),
+  `target_id` (nullable), `metadata jsonb`.
+- `AuditService.record(entry)` — called by features. No update/delete API.
+- Retention/rotation of the audit log itself is out of scope here (revisited in
+  [server administration](../server-administration/overview.md)).
+
+## 9. Health
+
+- `GET /healthz`: process is up (no dependencies checked).
+- `GET /readyz`: DB reachable, migrations current, signing key present, storage
+  driver writable. Returns `503` with a per-check breakdown otherwise.
+
+## 10. Cross-cutting HTTP conventions
+
+- **Errors**: `application/problem+json` (RFC 9457):
+  `{ type, title, status, detail, code }`. `code` is a stable machine string
+  (e.g. `identity.username_taken`). A global Nest exception filter maps domain
+  errors and validation errors to this shape. Messages in English.
+- **Validation**: Zod schemas at the edge (a `ZodValidationPipe`), inferred types
+  flow inward.
+- **Request context**: a per-request store (`AsyncLocalStorage`) carrying
+  `requestId`, authenticated `userId`/`sessionId` (when present), client IP.
+  `requestId` is echoed in the `X-Request-Id` header and included in logs.
+- **Logging**: structured JSON (pino), one line per request, plus explicit
+  domain events. No secrets in logs.
+- **Time**: all timestamps UTC, ISO-8601 in payloads, `timestamptz` in the DB.
+- **IDs**: UUID v7 (`id` columns), generated app-side, so they are
+  time-ordered and safe to expose.
+
+## 11. Consolidated Prisma schema (server-core slice)
+
+```prisma
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+  @@map("settings")
+}
+
+model ServerSigningKey {
+  id             String    @id
+  algorithm      String    @default("ed25519")
+  publicKey      String
+  privateKeyEnc  Bytes
+  createdAt      DateTime  @default(now())
+  activatedAt    DateTime?
+  retiredAt      DateTime?
+  @@map("server_signing_key")
+}
+
+model SetupToken {
+  id         String    @id @default(uuid(7))
+  tokenHash  String
+  createdAt  DateTime  @default(now())
+  consumedAt DateTime?
+  @@map("setup_token")
+}
+
+model Blob {
+  id          String   @id @default(uuid(7))
+  hash        String   @unique
+  sizeBytes   BigInt
+  contentType String
+  storageKey  String
+  refCount    Int      @default(0)
+  createdAt   DateTime @default(now())
+  @@map("blob")
+}
+
+model EmailMessage {
+  id         String   @id @default(uuid(7))
+  to         String
+  template   String
+  category   String
+  dedupeKey  String?
+  sentAt     DateTime?
+  createdAt  DateTime @default(now())
+  @@unique([dedupeKey])
+  @@map("email_message")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid(7))
+  at          DateTime @default(now())
+  actorUserId String?
+  actorIp     String?
+  action      String
+  targetType  String?
+  targetId    String?
+  metadata    Json     @default("{}")
+  @@index([at])
+  @@index([actorUserId])
+  @@map("audit_log")
+}
+```
+
+(`User` / `Session` are defined by
+[identity and profiles](../identity-and-profiles/overview.md).)
+
+## 12. Alternatives considered
+
+| Point | Retained | Rejected | Why |
+|-------|----------|----------|-----|
+| Config format | TOML (`smol-toml`) | YAML, JSON, env-only | Operator-facing, unambiguous types, comments; env-only does not scale to nested structure ([ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md)) |
+| Admin edits config | `settings` table overriding file | Rewrite the TOML file | File often read-only in containers, comments lost, concurrent writes |
+| Private signing key at rest | AES-256-GCM in DB, KEK from `secret.key` | Plaintext file, KMS | Simple, no extra dependency; KMS is a later option |
+| Blob keys | content-addressed (`hash`) | random UUID key | Free deduplication, idempotent writes |
+| Blob deletion | deferred GC sweep at `ref_count = 0` | immediate delete on release | Avoids races with concurrent new references |
+| Error format | RFC 9457 problem+json | ad-hoc `{error}` | Standard, good for third-party SDK consumers |
+| Email queue | in-process retry queue | Redis/BullMQ, external broker | First increment stays single-process; broker is added only if needed |
+| ID scheme | UUID v7 | auto-increment, UUID v4, ULID | Time-ordered, non-enumerable, safe to expose, native `uuid(7)` support |
+| Migrations at deploy | entrypoint step before app start | app runs migrations on boot | Avoids races between replicas; app only *checks* schema is current |
+
+## 13. Consequences
+
+- Nothing to migrate (greenfield). This feature creates the initial schema and
+  the CI pipeline.
+- `identity-and-profiles` depends on: `ConfigService`, `PrismaService`,
+  `BlobService` (avatars), `Mailer` (verification + reset), `AuditService`,
+  the bootstrap `is_owner` seed, and the problem+json + request-context
+  conventions.
+- `conversations` additionally introduces the per-room event log and the SSE
+  stream; server-core deliberately does not ship an event bus or SSE endpoint
+  yet (nothing to stream).
+- `server-administration` will build its admin API on `ConfigService.describe`,
+  `audit_log`, and `readyz` checks.
+- The `s3` storage driver and a real email rate-limiting policy are explicitly
+  deferred but their config/schema surface is reserved now.
+
+## Implementation task breakdown
+
+GitHub issues live in `ekoz-chat/server`. Order below is the dependency order.
+
+1. [#1 — server skeleton and CI](../../tasks/1-server-skeleton.md)
+2. [#2 — Prisma 8 setup and database access](../../tasks/2-prisma-setup.md)
+3. [#3 — HTTP conventions (problem+json, validation, context, logging)](../../tasks/3-http-conventions.md)
+4. [#4 — layered configuration system](../../tasks/4-config-system.md)
+5. [#5 — crypto helpers and server signing keys](../../tasks/5-crypto-and-signing-keys.md)
+6. [#6 — server identity and discovery document](../../tasks/6-server-identity-and-discovery.md)
+7. [#7 — audit log](../../tasks/7-audit-log.md)
+8. [#8 — bootstrap and setup state machine](../../tasks/8-bootstrap-initialization.md)
+9. [#9 — object storage with deduplication (local driver)](../../tasks/9-object-storage.md)
+10. [#10 — outbound email (SMTP driver)](../../tasks/10-outbound-email.md)
+11. [#11 — health and readiness endpoints](../../tasks/11-health-endpoints.md)
