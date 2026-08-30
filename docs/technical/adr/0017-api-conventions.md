@@ -19,9 +19,12 @@ email / audit), delivered before `identity-and-profiles`.
   `{ type, title, status, detail, code }`. `code` is a stable machine-readable
   string namespaced by domain (e.g. `identity.username_taken`). The SDK surfaces
   `code` as a typed error.
-- **Identifiers**: UUID v7 for all entity ids, generated application-side. They
-  are time-ordered and safe to expose in URLs and payloads. No sequential
+- **Identifiers**: ~~UUID v7 for all entity ids, generated application-side. They
+  are time-ordered and safe to expose in URLs and payloads.~~ No sequential
   integer ids are exposed.
+  → **Superseded by [ADR 0021](0021-entity-identifier-format.md)**: generated ids
+  are ULID (dash-free; the timestamp prefix buys index locality, not a reliable
+  order).
 - **Timestamps**: UTC everywhere, ISO-8601 strings in payloads, `timestamptz` in
   the database.
 - **Request correlation**: every response carries `X-Request-Id`; clients may

@@ -12,7 +12,7 @@ All notable changes to the Ekoz protocol. Format
   server↔server REST), per-room event model with a monotonic `seq`, list of
   sections to write.
 - Transport conventions: `application/problem+json` errors with a stable `code`,
-  UUID v7 identifiers, UTC ISO-8601 timestamps, `X-Request-Id` correlation
+  ULID identifiers, UTC ISO-8601 timestamps, `X-Request-Id` correlation
   (see ADR 0017).
 - Discovery document shape at `GET /.well-known/ekoz` (server, api, web,
   protocol_versions, signing_keys).

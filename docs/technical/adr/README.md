@@ -5,6 +5,11 @@ its consequences. Short format inspired by MADR.
 
 Statuses: `proposed`, `accepted`, `superseded by NNNN`, `deprecated`.
 
+When a later ADR supersedes only *part* of an earlier one, the earlier ADR keeps
+its status: the affected sentence is struck through in place and followed by a
+`→ **Superseded by [ADR NNNN]**` pointer. The original text stays readable; its
+obsolescence is visible at the point of use.
+
 | # | Title | Status |
 |---|-------|--------|
 | [0001](0001-repository-layout.md) | Repository layout | accepted |
@@ -26,3 +31,5 @@ Statuses: `proposed`, `accepted`, `superseded by NNNN`, `deprecated`.
 | [0017](0017-api-conventions.md) | HTTP API conventions | accepted |
 | [0018](0018-permission-model.md) | Permission model | accepted |
 | [0019](0019-backlog-lives-in-the-implementing-repo.md) | The backlog lives in the implementing repository | accepted |
+| [0020](0020-observability-and-instrumentation.md) | Observability and instrumentation | accepted |
+| [0021](0021-entity-identifier-format.md) | Entity identifier format | accepted |

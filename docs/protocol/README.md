@@ -18,7 +18,9 @@ with SemVer, independently of the server implementation. See
 - Technical error messages in English.
 - Error responses: `application/problem+json` (RFC 9457) with a stable
   domain-namespaced `code` (see [ADR 0017](../technical/adr/0017-api-conventions.md)).
-- Entity identifiers: UUID v7. Timestamps: UTC ISO-8601.
+- Entity identifiers: ULID (opaque 26-char string; see
+  [ADR 0021](../technical/adr/0021-entity-identifier-format.md)). Timestamps:
+  UTC ISO-8601.
 
 ## Event model
 
