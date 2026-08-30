@@ -14,7 +14,8 @@ with SemVer, independently of the server implementation. See
 - Server → client: one **SSE** stream per client, multiplexing rooms and
   account-scoped events (see [ADR 0005](../technical/adr/0005-realtime-transport.md)).
 - Server → server: signed REST/JSON API (Ed25519), discovery via
-  `/.well-known/ekoz` (see [ADR 0006](../technical/adr/0006-federation-protocol.md)).
+  `/.well-known/ekoz` (see [discovery.md](discovery.md) and
+  [ADR 0006](../technical/adr/0006-federation-protocol.md)).
 - Technical error messages in English.
 - Error responses: `application/problem+json` (RFC 9457) with a stable
   domain-namespaced `code` (see [ADR 0017](../technical/adr/0017-api-conventions.md)).

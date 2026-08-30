@@ -14,8 +14,10 @@ All notable changes to the Ekoz protocol. Format
 - Transport conventions: `application/problem+json` errors with a stable `code`,
   ULID identifiers, UTC ISO-8601 timestamps, `X-Request-Id` correlation
   (see ADR 0017).
-- Discovery document shape at `GET /.well-known/ekoz` (server, api, web,
-  protocol_versions, signing_keys).
+- Discovery document at `GET /.well-known/ekoz` fully specified in
+  [`discovery.md`](discovery.md): request/caching rules, response fields,
+  `KeyEntry` shape (raw base64 Ed25519 `public_key`, `valid_from`,
+  `valid_until`), and active/retired signing-key semantics with `keyId` lookup.
 - Identity surface (draft): `name/server` identifier rules, auth token model
   (JWT access + rotating opaque refresh, reuse detection), session objects,
   SSE stream ticket.

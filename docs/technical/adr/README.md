@@ -33,3 +33,4 @@ obsolescence is visible at the point of use.
 | [0019](0019-backlog-lives-in-the-implementing-repo.md) | The backlog lives in the implementing repository | accepted |
 | [0020](0020-observability-and-instrumentation.md) | Observability and instrumentation | accepted |
 | [0021](0021-entity-identifier-format.md) | Entity identifier format | accepted |
+| [0022](0022-server-secret-box-and-signing-keys.md) | Server secret box and signing keys | accepted |
