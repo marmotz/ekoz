@@ -5,8 +5,8 @@
 **Repo**: ekoz-chat/spec
 **Issue**: [#1](https://github.com/ekoz-chat/spec/issues/1)
 
-Reference: [../features/conversations/technical.md](../features/conversations/technical.md),
-[docs/protocol/README.md](../../docs/protocol/README.md).
+Reference: [conversations technical design](https://github.com/ekoz-chat/server/blob/main/backlog/features/conversations/technical.md),
+[docs/protocol/README.md](https://github.com/ekoz-chat/spec/blob/main/docs/protocol/README.md).
 
 ## To do
 
@@ -21,5 +21,5 @@ Reference: [../features/conversations/technical.md](../features/conversations/te
 ## Dependencies
 
 - Tracks the server conversations tasks; can start once
-  [25-conv-event-log-and-seq](25-conv-event-log-and-seq.md) and
-  [26-conv-permission-model](26-conv-permission-model.md) are settled.
+  [25-conv-event-log-and-seq](https://github.com/ekoz-chat/server/blob/main/backlog/tasks/25-conv-event-log-and-seq.md) and
+  [26-conv-permission-model](https://github.com/ekoz-chat/server/blob/main/backlog/tasks/26-conv-permission-model.md) are settled.

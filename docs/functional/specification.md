@@ -172,11 +172,8 @@ product decision.
 
 ## Detailed scoping
 
-- [Server core](../../backlog/features/server-core/overview.md) (non-functional foundations)
-- [Identity and profiles](../../backlog/features/identity-and-profiles/overview.md)
-- [Conversations](../../backlog/features/conversations/overview.md)
-- [Content and sharing](../../backlog/features/content-and-sharing/overview.md)
-- [Notifications](../../backlog/features/notifications/overview.md)
-- [Server administration](../../backlog/features/server-administration/overview.md)
-- [Federation](../../backlog/features/federation/overview.md)
-- [Extensibility](../../backlog/features/extensibility/overview.md)
+Per-feature product scoping, technical design and tasks live in the `server`
+repository's backlog:
+[github.com/ekoz-chat/server/tree/main/backlog/features](https://github.com/ekoz-chat/server/tree/main/backlog/features)
+(`server-core`, `identity-and-profiles`, `conversations`, `content-and-sharing`,
+`notifications`, `server-administration`, `federation`, `extensibility`).

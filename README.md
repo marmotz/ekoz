@@ -16,12 +16,16 @@ not Matrix-compatible.
 | `sdk-js` | JavaScript/TypeScript SDK for the protocol, usable by any client |
 | `client-web` | Demonstration web client (React), exercises the server features |
 
-Each code repository documents only its own implementation. Every contract or
-cross-cutting decision lives here and is referenced by version.
+Each code repository documents only its own implementation and holds its own
+backlog (per-feature scoping, design and tasks). Every contract or cross-cutting
+decision lives here and is referenced by version.
 
 ## Contents
 
 - [`docs/functional/`](docs/functional/) — product requirements, scope, expected behaviour
 - [`docs/protocol/`](docs/protocol/) — client↔server and server↔server protocol specification
 - [`docs/technical/`](docs/technical/) — architecture and [architecture decision records (ADRs)](docs/technical/adr/)
-- [`backlog/`](backlog/) — features, tasks, delivery order
+- [`backlog/`](backlog/) — spec-only tasks (protocol authoring)
+
+The server backlog is at
+[github.com/ekoz-chat/server/tree/main/backlog](https://github.com/ekoz-chat/server/tree/main/backlog).

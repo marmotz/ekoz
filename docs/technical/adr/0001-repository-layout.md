@@ -13,13 +13,23 @@ server implementation.
 
 Four separate Git repositories, one per domain:
 
-- `spec`: functional specification, protocol, ADRs, backlog.
-- `server`: reference server and its implementation documentation.
-- `sdk-js`: JavaScript/TypeScript SDK for the protocol.
-- `client-web`: React demonstration web client.
+- `spec`: functional specification, protocol, ADRs. Plus a small backlog for
+  spec-only tasks (protocol authoring).
+- `server`: reference server, its implementation documentation, **and its
+  backlog** — per-feature `overview.md` (product scoping), `technical.md`
+  (design) and `tasks/` (one GitHub issue each, in `ekoz-chat/server`).
+- `sdk-js`: JavaScript/TypeScript SDK for the protocol (its own backlog when work
+  starts).
+- `client-web`: React demonstration web client (its own backlog when work
+  starts).
 
 No global monorepo. Each code repository documents only its own implementation.
 The protocol lives in `spec` and is referenced by version.
+
+**The backlog for a feature lives in the repository that implements it** — see
+[ADR 0019](0019-backlog-lives-in-the-implementing-repo.md). `spec` holds only what
+is genuinely global (functional spec, protocol, ADRs); it is referenced from the
+code repos by absolute URL.
 
 ## Consequences
 

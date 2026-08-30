@@ -25,3 +25,4 @@ Statuses: `proposed`, `accepted`, `superseded by NNNN`, `deprecated`.
 | [0016](0016-web-client-stack.md) | Web client stack | accepted |
 | [0017](0017-api-conventions.md) | HTTP API conventions | accepted |
 | [0018](0018-permission-model.md) | Permission model | accepted |
+| [0019](0019-backlog-lives-in-the-implementing-repo.md) | The backlog lives in the implementing repository | accepted |

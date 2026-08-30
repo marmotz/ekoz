@@ -30,5 +30,5 @@ under `spec/docs/technical/adr/`, regardless of which repository is concerned.
 
 - A small overhead per decision, offset by traceability and onboarding.
 - Reviews also check "is the ADR present and correct?".
-- Product discussions keep feeding `backlog/features/*/overview.md`; the ADR
+- Product discussions keep feeding the server backlog (`overview.md` per feature); the ADR
   captures the design/technical side.

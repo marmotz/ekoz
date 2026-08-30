@@ -1,9 +1,10 @@
-# Backlog
+# Backlog — `spec`
 
-The backlog organises the work by feature, then by task.
+This repository's backlog holds only tasks whose deliverable is in `spec` itself
+— protocol specification and cross-cutting documentation.
 
-- `features/` holds the scoping and design documentation for each feature.
-- `tasks/` holds the associated implementation tasks.
-- `todo.md` shows the delivery order.
+Server implementation work lives in the [`server` backlog](https://github.com/ekoz-chat/server/tree/main/backlog);
+the SDK and web client will each get their own backlog when work starts there.
 
-The `backlog-*` skills maintain this structure and evolve the backlog items.
+- `tasks/` — protocol/spec tasks, `<issue-number>-<slug>.md`.
+- Issues are created in `ekoz-chat/spec`.
