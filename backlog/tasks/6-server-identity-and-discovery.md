@@ -1,6 +1,6 @@
 # server — server identity and discovery document
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#6](https://github.com/ekoz-chat/server/issues/6)

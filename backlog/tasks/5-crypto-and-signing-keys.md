@@ -1,6 +1,6 @@
 # server — crypto helpers and server signing keys
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#5](https://github.com/ekoz-chat/server/issues/5)
