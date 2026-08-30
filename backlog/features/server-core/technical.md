@@ -79,36 +79,36 @@ parameter: `key`, `kind` (`infra` | `runtime`), `schema` (Zod), `default`,
 - `infra` parameters resolve from **file + env only**. Never read from the
   settings table.
 - `runtime` parameters resolve from **file default, then settings table override,
-  then an env value that also *locks* the parameter** (admin sees it read-only).
+  then an env value that also _locks_ the parameter** (admin sees it read-only).
 
 Initial parameters:
 
-| key | kind | notes |
-|-----|------|-------|
-| `server.domain` | infra | required, FQDN, not `localhost`/IP, lowercased |
-| `server.api_url` | infra | public base URL of the API (may differ from `server.domain`) |
-| `server.web_url` | infra | public base URL of the demo web client (for links in emails) |
-| `http.host` / `http.port` | infra | bind address |
-| `database.url` | infra, secret | PostgreSQL connection string |
-| `secret.key` | infra, secret | 32-byte base64; key-encryption key for secret box |
-| `storage.driver` | infra | `local` \| `s3` (only `local` implemented now) |
-| `storage.local.path` | infra | blob root directory |
-| `storage.s3.*` | infra, secret | endpoint, region, bucket, credentials (schema only) |
-| `email.driver` | infra | `smtp` |
-| `email.smtp.*` | infra, secret | host, port, secure, user, pass |
-| `email.from` | infra | `From` header |
-| `registration.mode` | runtime | `open` \| `invite` \| `admin` (default `invite`) |
-| `email.verification_required` | runtime | bool (default `true`) |
-| `identity.username_change_policy` | runtime | `immutable` \| `available` \| `approval` (default `immutable`) |
-| `profile.bio_max_length` | runtime | int (default `500`) |
-| `avatar.max_size_bytes` | runtime | int (default `2_000_000`) |
-| `avatar.allowed_mime` | runtime | list (default `["image/png","image/jpeg","image/webp","image/gif"]`) |
-| `observability.log_level` | runtime | `trace`..`fatal` (default `info`) |
-| `observability.log_format` | infra | `json` \| `pretty` (default `json`, `pretty` for local dev) |
-| `observability.metrics_enabled` | runtime | bool (default `false`) |
-| `observability.metrics_token` | infra, secret | bearer token guarding `/metrics` when set |
-| `observability.otlp_endpoint` | infra | OTLP traces exporter target (unset = tracing off) |
-| `observability.trace_sample_ratio` | runtime | float `0`..`1` (default `0`) |
+| key                                | kind          | notes                                                                |
+| ---------------------------------- | ------------- | -------------------------------------------------------------------- |
+| `server.domain`                    | infra         | required, FQDN, not `localhost`/IP, lowercased                       |
+| `server.api_url`                   | infra         | public base URL of the API (may differ from `server.domain`)         |
+| `server.web_url`                   | infra         | public base URL of the demo web client (for links in emails)         |
+| `http.host` / `http.port`          | infra         | bind address                                                         |
+| `database.url`                     | infra, secret | PostgreSQL connection string                                         |
+| `secret.key`                       | infra, secret | 32-byte base64; key-encryption key for secret box                    |
+| `storage.driver`                   | infra         | `local` \| `s3` (only `local` implemented now)                       |
+| `storage.local.path`               | infra         | blob root directory                                                  |
+| `storage.s3.*`                     | infra, secret | endpoint, region, bucket, credentials (schema only)                  |
+| `email.driver`                     | infra         | `smtp`                                                               |
+| `email.smtp.*`                     | infra, secret | host, port, secure, user, pass                                       |
+| `email.from`                       | infra         | `From` header                                                        |
+| `registration.mode`                | runtime       | `open` \| `invite` \| `admin` (default `invite`)                     |
+| `email.verification_required`      | runtime       | bool (default `true`)                                                |
+| `identity.username_change_policy`  | runtime       | `immutable` \| `available` \| `approval` (default `immutable`)       |
+| `profile.bio_max_length`           | runtime       | int (default `500`)                                                  |
+| `avatar.max_size_bytes`            | runtime       | int (default `2_000_000`)                                            |
+| `avatar.allowed_mime`              | runtime       | list (default `["image/png","image/jpeg","image/webp","image/gif"]`) |
+| `observability.log_level`          | runtime       | `trace`..`fatal` (default `info`)                                    |
+| `observability.log_format`         | infra         | `json` \| `pretty` (default `json`, `pretty` for local dev)          |
+| `observability.metrics_enabled`    | runtime       | bool (default `false`)                                               |
+| `observability.metrics_token`      | infra, secret | bearer token guarding `/metrics` when set                            |
+| `observability.otlp_endpoint`      | infra         | OTLP traces exporter target (unset = tracing off)                    |
+| `observability.trace_sample_ratio` | runtime       | float `0`..`1` (default `0`)                                         |
 
 ### Loader
 
@@ -192,8 +192,8 @@ On start, `BootstrapService`:
 3. Ensures a signing key exists (generates one otherwise).
 4. Determines **setup state**:
    - if an `owner` user exists → setup closed.
-   - else if `EKOZ_INITIAL_OWNER_EMAIL` is set → setup open, *email-pinned*.
-   - else → setup open, *token-pinned*: generate a single-use token, print it to
+   - else if `EKOZ_INITIAL_OWNER_EMAIL` is set → setup open, _email-pinned_.
+   - else → setup open, _token-pinned_: generate a single-use token, print it to
      stdout (`level=warn`, once), store its hash in `setup_token`.
 5. Exposes setup endpoints only while setup is open:
    - `POST /setup/owner` `{ email, password, name, displayName }`
@@ -313,7 +313,8 @@ what is defined here.
 
 - One `pino` logger, built by a factory in `observability/`, injected as the Nest
   logger. Level from `observability.log_level`, format from
-  `observability.log_format` (`pretty` uses `pino-pretty` in dev only).
+  `observability.log_format` (`pretty` = an in-house one-line `pino` renderer,
+  dev only; `json` otherwise).
 - Every line within a request carries `requestId` from the `AsyncLocalStorage`
   context (section 10); background jobs carry a generated `jobId`. Authenticated
   lines also carry `userId`.
@@ -438,20 +439,20 @@ model AuditLog {
 
 ## 13. Alternatives considered
 
-| Point | Retained | Rejected | Why |
-|-------|----------|----------|-----|
-| Config format | TOML (`smol-toml`) | YAML, JSON, env-only | Operator-facing, unambiguous types, comments; env-only does not scale to nested structure ([ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md)) |
-| Admin edits config | `settings` table overriding file | Rewrite the TOML file | File often read-only in containers, comments lost, concurrent writes |
-| Private signing key at rest | AES-256-GCM in DB, KEK from `secret.key` | Plaintext file, KMS | Simple, no extra dependency; KMS is a later option |
-| Blob keys | content-addressed (`hash`) | random UUID key | Free deduplication, idempotent writes |
-| Blob deletion | deferred GC sweep at `ref_count = 0` | immediate delete on release | Avoids races with concurrent new references |
-| Error format | RFC 9457 problem+json | ad-hoc `{error}` | Standard, good for third-party SDK consumers |
-| Email queue | in-process retry queue | Redis/BullMQ, external broker | First increment stays single-process; broker is added only if needed |
-| ID scheme | ULID (`@default(ulid())`) | UUID v7, UUID v4, auto-increment, CUID2 | Non-enumerable + insert locality like UUID v7 but dash-free. Neither v7 nor ULID gives a cross-instance total order (that is `seq`'s job). CUID2 rejected: no timestamp (no locality), non-standard JS-only, slow. v4 rejected: fully random. See [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md) |
-| Migrations at deploy | entrypoint step before app start | app runs migrations on boot | Avoids races between replicas; app only *checks* schema is current |
-| Metrics stack | OpenTelemetry SDK + Prometheus exporter | `prom-client` directly | Traces and OTLP push add later without rewriting instrumentation call sites ([ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md)) |
-| `/metrics` exposure | opt-in, token- or bind-guarded | always on, public | Internal metrics must not leak on a public bind by default |
-| Log shipping | JSON to stdout, platform collects | in-process shipper | Keeps the process single-purpose; every host platform collects stdout |
+| Point                       | Retained                                 | Rejected                                | Why                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------- | ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Config format               | TOML (`smol-toml`)                       | YAML, JSON, env-only                    | Operator-facing, unambiguous types, comments; env-only does not scale to nested structure ([ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md))                                                                                                                                                            |
+| Admin edits config          | `settings` table overriding file         | Rewrite the TOML file                   | File often read-only in containers, comments lost, concurrent writes                                                                                                                                                                                                                                                                                          |
+| Private signing key at rest | AES-256-GCM in DB, KEK from `secret.key` | Plaintext file, KMS                     | Simple, no extra dependency; KMS is a later option                                                                                                                                                                                                                                                                                                            |
+| Blob keys                   | content-addressed (`hash`)               | random UUID key                         | Free deduplication, idempotent writes                                                                                                                                                                                                                                                                                                                         |
+| Blob deletion               | deferred GC sweep at `ref_count = 0`     | immediate delete on release             | Avoids races with concurrent new references                                                                                                                                                                                                                                                                                                                   |
+| Error format                | RFC 9457 problem+json                    | ad-hoc `{error}`                        | Standard, good for third-party SDK consumers                                                                                                                                                                                                                                                                                                                  |
+| Email queue                 | in-process retry queue                   | Redis/BullMQ, external broker           | First increment stays single-process; broker is added only if needed                                                                                                                                                                                                                                                                                          |
+| ID scheme                   | ULID (`@default(ulid())`)                | UUID v7, UUID v4, auto-increment, CUID2 | Non-enumerable + insert locality like UUID v7 but dash-free. Neither v7 nor ULID gives a cross-instance total order (that is `seq`'s job). CUID2 rejected: no timestamp (no locality), non-standard JS-only, slow. v4 rejected: fully random. See [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md) |
+| Migrations at deploy        | entrypoint step before app start         | app runs migrations on boot             | Avoids races between replicas; app only _checks_ schema is current                                                                                                                                                                                                                                                                                            |
+| Metrics stack               | OpenTelemetry SDK + Prometheus exporter  | `prom-client` directly                  | Traces and OTLP push add later without rewriting instrumentation call sites ([ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md))                                                                                                                                                            |
+| `/metrics` exposure         | opt-in, token- or bind-guarded           | always on, public                       | Internal metrics must not leak on a public bind by default                                                                                                                                                                                                                                                                                                    |
+| Log shipping                | JSON to stdout, platform collects        | in-process shipper                      | Keeps the process single-purpose; every host platform collects stdout                                                                                                                                                                                                                                                                                         |
 
 ## 14. Consequences
 

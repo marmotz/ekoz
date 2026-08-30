@@ -1,4 +1,5 @@
 import { pino, type Logger, type LoggerOptions } from 'pino';
+import { createPrettyStream } from './pretty-stream.js';
 import { REDACT_CENSOR, REDACT_PATHS } from './redaction.js';
 
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -8,9 +9,10 @@ export interface CreateLoggerOptions {
   /** Minimum level (`observability.log_level`). */
   readonly level?: LogLevel;
   /**
-   * `json` (default) writes one object per line to stdout — the operator's
-   * platform collects it. `pretty` routes through `pino-pretty` and is meant for
-   * local dev only (ADR 0020).
+   * `json` (default) writes one object per line to stdout — the operator's platform collects it.
+   *
+   * `pretty` renders one compact, colourised line per event through
+   * {@link createPrettyStream} and is meant for local dev only (ADR 0020).
    */
   readonly format?: LogFormat;
 }
@@ -31,13 +33,7 @@ export function createLogger(options: CreateLoggerOptions = {}): Logger {
   };
 
   if ((options.format ?? 'json') === 'pretty') {
-    return pino({
-      ...base,
-      transport: {
-        target: 'pino-pretty',
-        options: { colorize: true, translateTime: 'SYS:standard', ignore: 'pid,hostname' },
-      },
-    });
+    return pino(base, createPrettyStream());
   }
 
   return pino(base);

@@ -1,6 +1,7 @@
 import { Writable } from 'node:stream';
 import { pino } from 'pino';
 import { describe, expect, it } from 'vitest';
+import { createLogger } from './logger.js';
 import { REDACT_CENSOR, REDACT_PATHS } from './redaction.js';
 
 /** Build a logger writing to an in-memory buffer, mirroring `createLogger`'s redact config. */
@@ -45,5 +46,40 @@ describe('logger redaction (unit)', () => {
     const { logger, lines } = captureLogger();
     logger.info({ userId: 'u1', route: '/things' }, 'ok');
     expect(lines()[0]).toMatchObject({ userId: 'u1', route: '/things' });
+  });
+});
+
+describe('createLogger format (unit)', () => {
+  /** Capture everything written to stdout while `fn` runs. */
+  function captureStdout(fn: () => void): string {
+    const written: string[] = [];
+    const original = process.stdout.write.bind(process.stdout);
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      written.push(chunk.toString());
+      return true;
+    }) as typeof process.stdout.write;
+    try {
+      fn();
+    } finally {
+      process.stdout.write = original;
+    }
+    return written.join('');
+  }
+
+  it('emits one JSON object per line in json format', () => {
+    const out = captureStdout(() => {
+      createLogger({ level: 'info', format: 'json' }).info({ userId: 'u1' }, 'hello');
+    });
+    const line = JSON.parse(out.trim());
+    expect(line).toMatchObject({ level: 'info', userId: 'u1', msg: 'hello' });
+  });
+
+  it('renders one human-readable line (no JSON, no trailing property block) in pretty format', () => {
+    const out = captureStdout(() => {
+      createLogger({ level: 'info', format: 'pretty' }).info({ context: 'Bootstrap' }, 'listening on :3010');
+    });
+    expect(() => JSON.parse(out.trim())).toThrow();
+    expect(out).toMatch(/INFO \[Bootstrap] listening on :3010/);
+    expect(out.trimEnd()).not.toContain('\n');
   });
 });

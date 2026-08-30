@@ -7,6 +7,13 @@ import { startTracing } from './core/observability/otel.js';
 
 const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+// Run every module's `onModuleInit` now — this is where `ConfigService` loads the layered
+// configuration (`config.toml` + env).
+//
+// `app.listen()` would trigger it too, but the resolved parameters are needed first: the logger format and
+// level, then the bind address. `init()` is idempotent, so the later `app.listen()` does not repeat it.
+await app.init();
+
 const config = app.get(ConfigService);
 const logger = app.get(NestLoggerService);
 logger.reconfigure({

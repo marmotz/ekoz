@@ -8,6 +8,12 @@ that does not touch this file.
 
 ### Fixed
 
+- Bootstrap reads configuration only after `app.init()`, so `config.toml` / env
+  actually apply to the logger, bind address and tracing (they silently fell
+  back to code defaults before).
+- `observability.log_format = "pretty"` renders one line per event
+  (`[time] LEVEL [context] message key=value …`) through an in-house `pino`
+  stream; `pino-pretty` dependency dropped.
 - `PrismaService.onModuleInit` no longer crashes boot with
   `DRIVER.ALREADY_CONNECTED` when another module's init hook (e.g. `ConfigService`
   reading the `settings` table) has already opened the connection pool lazily; a

@@ -16,7 +16,7 @@ to `server-administration` and only consume what this task exposes).
 
 1. `observability/` core module: a `pino` logger factory used as the Nest logger.
    Level from `observability.log_level`, format from `observability.log_format`
-   (`pretty` via `pino-pretty` in dev only, `json` otherwise).
+   (`pretty` = an in-house one-line `pino` renderer, dev only; `json` otherwise).
 2. `redact` path list on the logger covering at least
    `req.headers.authorization`, `req.headers.cookie`, `password`, `token`,
    `*.privateKey`, `email.smtp.pass`, `secret*`. Message bodies and email
