@@ -6,5 +6,7 @@ pre-commit:
   jobs:
     - name: prettier
       glob: '*.{ts,mts,cts,js,mjs,cjs,json,md,yml,yaml}'
+      exclude:
+        - CLAUDE.md
       run: bunx prettier --write --ignore-unknown {staged_files}
       stage_fixed: true

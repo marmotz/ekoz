@@ -11,12 +11,12 @@ escapes this repo.
 
 External doc roots (use these prefixes when linking):
 
-| Doc | URL prefix |
-|-----|-----------|
-| ADRs | `https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/` |
-| Architecture / POC | `https://github.com/ekoz-chat/spec/blob/main/docs/technical/` |
-| Protocol | `https://github.com/ekoz-chat/spec/blob/main/docs/protocol/` |
-| Functional spec | `https://github.com/ekoz-chat/spec/blob/main/docs/functional/` |
+| Doc                | URL prefix                                                        |
+| ------------------ | ----------------------------------------------------------------- |
+| ADRs               | `https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/` |
+| Architecture / POC | `https://github.com/ekoz-chat/spec/blob/main/docs/technical/`     |
+| Protocol           | `https://github.com/ekoz-chat/spec/blob/main/docs/protocol/`      |
+| Functional spec    | `https://github.com/ekoz-chat/spec/blob/main/docs/functional/`    |
 
 ## Structure
 
@@ -32,15 +32,15 @@ External doc roots (use these prefixes when linking):
 Everything in **English**. The `backlog-*` skills use French field names in
 their templates; use the English equivalents:
 
-| skill template | use here |
-|----------------|----------|
-| `**Statut**` / `à faire` / `en cours` / `fait` | `**Status**` / `todo` / `in progress` / `done` |
-| `## Constat vérifié` | `## Verified findings` |
-| `## À faire` | `## To do` |
-| `## Dépendances` | `## Dependencies` |
-| `## Découpage en tâches d'implémentation` | `## Implementation task breakdown` |
-| `Pas encore créées.` | `Not created yet.` |
-| todo columns `Fait` / `Issue` / `Tâche` / `Description` | `Done` / `Issue` / `Task` / `Description` |
+| skill template                                          | use here                                       |
+| ------------------------------------------------------- | ---------------------------------------------- |
+| `**Statut**` / `à faire` / `en cours` / `fait`          | `**Status**` / `todo` / `in progress` / `done` |
+| `## Constat vérifié`                                    | `## Verified findings`                         |
+| `## À faire`                                            | `## To do`                                     |
+| `## Dépendances`                                        | `## Dependencies`                              |
+| `## Découpage en tâches d'implémentation`               | `## Implementation task breakdown`             |
+| `Pas encore créées.`                                    | `Not created yet.`                             |
+| todo columns `Fait` / `Issue` / `Tâche` / `Description` | `Done` / `Issue` / `Task` / `Description`      |
 
 ## Task file / issue body rules
 
@@ -61,11 +61,4 @@ Any design decision or notable change gets an ADR in the `spec` repo
 
 ## CHANGELOG entries
 
-`server/CHANGELOG.md` records **what changed**, not why. One short bullet per
-user-visible change, tagged with its issue (`(#42)`). No paragraphs, no version
-pins (those live in `package.json`), no "notes on the approach".
-
-Rationale, trade-offs, tooling surprises, "an ADR is owed" → the ADR itself and
-the commit/PR body, never the changelog. The only caveats that belong in a
-`### Notes` block are ones a *consumer* must act on right now (e.g. a known bug
-with a workaround).
+See **CHANGELOG entries** in the repo-root `AGENTS.md`.
