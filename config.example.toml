@@ -1,49 +1,206 @@
-# Ekoz server configuration (ADR 0009, backlog/features/server-core/technical.md §2).
+# Ekoz server configuration.
 #
 # Layered precedence, lowest to highest:
-#   code defaults  <  this file  <  settings table (admin)  <  environment
+#   code defaults  <  this file  <  settings table (admin UI)  <  environment
 #
-# `infra` parameters resolve from this file + environment only. `runtime`
-# parameters take this file as their default; the admin overrides them at
-# runtime, and an `EKOZ_<SECTION>__<KEY>` environment variable *locks* them.
+# Two kinds of parameter (see src/core/config/registry.ts):
+#   - infra   : resolved from this file + environment ONLY. Never read from the
+#               settings table. A missing/invalid infra value aborts boot.
+#   - runtime : this file provides the default; an admin can override it live via
+#               the settings table; an `EKOZ_<SECTION>__<KEY>` environment
+#               variable overrides AND locks it (admin sees it read-only).
 #
-# String values support `${ENV_VAR}` interpolation, resolved at load time.
-# Secrets belong in the environment, referenced here — never inline.
+# Every parameter can also be set/overridden from the environment as
+# `EKOZ_<SECTION>__<KEY>`, double underscore = nesting, 12-factor style:
+#   [http] port         -> EKOZ_HTTP__PORT
+#   [storage.local] path -> EKOZ_STORAGE__LOCAL__PATH
+#
+# String values support `${ENV_VAR}` interpolation, resolved at load time; an
+# undefined variable aborts boot. Secrets (marked "secret" below) must NOT be
+# written inline here: reference them as `${ENV_VAR}`, or set the whole
+# parameter from the environment.
+#
+# Point the server at another file with `EKOZ_CONFIG_FILE=/path/to/config.toml`
+# (default: `./config.toml`). Copy this file to `config.toml` to start.
 
+
+# ---------------------------------------------------------------------------
+# [server] — public identity of this instance. All three are infra + required.
+# ---------------------------------------------------------------------------
 [server]
+# Canonical public domain of the instance. Must be a public FQDN, lower-cased;
+# `localhost` and bare IP addresses are rejected. Used for federation identity
+# and as the default host for links.
 domain = "ekoz.example.com"
+# Public base URL clients use to reach the API. May differ from `domain`
+# (subdomain, scheme, port, reverse proxy). No trailing slash.
 api_url = "https://ekoz.example.com"
+# Public base URL of the reference web client. Used to build links placed in
+# outgoing emails (verification, invites, ...). No trailing slash.
 web_url = "https://app.ekoz.example.com"
 
+
+# ---------------------------------------------------------------------------
+# [http] — HTTP listener bind address. Both infra.
+# ---------------------------------------------------------------------------
 [http]
+# Interface to bind. `0.0.0.0` = all IPv4 interfaces (containers, LAN),
+# `127.0.0.1` = loopback only (behind a local reverse proxy). Default: `0.0.0.0`.
 host = "0.0.0.0"
+# TCP port to listen on, 1-65535. Default: `3000`.
 port = 3000
 
+
+# ---------------------------------------------------------------------------
+# [database] — PostgreSQL connection. infra + secret + required.
+# ---------------------------------------------------------------------------
 [database]
+# libpq / PostgreSQL connection string, e.g.
+#   postgresql://user:password@host:5432/dbname?sslmode=require
+# Kept out of this file: set DATABASE_URL in the environment.
 url = "${DATABASE_URL}"
 
+
+# ---------------------------------------------------------------------------
+# [secret] — cryptographic material. infra + secret + required.
+# ---------------------------------------------------------------------------
 [secret]
-# 32 bytes, base64. Generate with: openssl rand -base64 32
+# Key-encryption key for the server secret box (encrypts stored secrets).
+# Exactly 32 bytes, base64-encoded. Generate with: openssl rand -base64 32
+# Rotating it makes previously encrypted values unreadable. Keep it in the env.
 key = "${EKOZ_SECRET_KEY}"
 
+
+# ---------------------------------------------------------------------------
+# [storage] — blob storage backend. All infra.
+# ---------------------------------------------------------------------------
 [storage]
+# Backend driver:
+#   "local" : files on the server filesystem (see [storage.local]). Implemented.
+#   "s3"    : S3-compatible object store (see [storage.s3]). Schema only for now.
+# Default: "local".
 driver = "local"
+
 [storage.local]
+# Root directory for stored blobs when driver = "local". Created if missing.
+# Relative paths are resolved from the process working directory.
+# Default: "./var/blobs".
 path = "./var/blobs"
 
-[email]
-driver = "smtp"
-from = "Ekoz <no-reply@ekoz.example.com>"
-[email.smtp]
-host = "localhost"
-port = 1025
-secure = false
+# [storage.s3] — only used when driver = "s3". All infra + secret; leave unset
+# (or set from the environment) until S3 support lands.
+#[storage.s3]
+# Endpoint URL of the S3-compatible service (omit for AWS S3 itself).
+#endpoint = "${EKOZ_STORAGE__S3__ENDPOINT}"
+# Region identifier, e.g. "us-east-1".
+#region = "${EKOZ_STORAGE__S3__REGION}"
+# Bucket name that holds the blobs.
+#bucket = "${EKOZ_STORAGE__S3__BUCKET}"
+# Access key id / secret access key for the bucket.
+#access_key_id = "${EKOZ_STORAGE__S3__ACCESS_KEY_ID}"
+#secret_access_key = "${EKOZ_STORAGE__S3__SECRET_ACCESS_KEY}"
 
+
+# ---------------------------------------------------------------------------
+# [email] — outbound email. `driver` and `from` are infra; [email.smtp] is
+# infra + secret.
+# ---------------------------------------------------------------------------
+[email]
+# Transport driver. Only "smtp" is supported. Default: "smtp".
+driver = "smtp"
+# `From` header of every outgoing message. RFC 5322 address, display name
+# allowed. Default: "Ekoz <no-reply@localhost>".
+from = "Ekoz <no-reply@ekoz.example.com>"
+
+[email.smtp]
+# SMTP relay hostname. Default: "localhost".
+host = "localhost"
+# SMTP relay port. Common values: 25 (plain), 465 (implicit TLS), 587
+# (STARTTLS), 1025 (Mailpit / dev). Default: 1025.
+port = 1025
+# true  = connect with implicit TLS from the start (typically port 465).
+# false = plain connection, upgraded via STARTTLS when the server offers it
+#         (ports 25 / 587), or no encryption (dev). Default: false.
+secure = false
+# Credentials for an authenticated relay. Both optional; omit for an open relay
+# or a local dev catcher. Keep them in the environment.
+#user = "${EKOZ_EMAIL__SMTP__USER}"
+#pass = "${EKOZ_EMAIL__SMTP__PASS}"
+
+
+# ---------------------------------------------------------------------------
+# [registration] — account creation policy. runtime, hot-reloadable.
+# ---------------------------------------------------------------------------
 [registration]
+# Who may create an account:
+#   "open"   : anyone can self-register.
+#   "invite" : registration requires a valid invitation.
+#   "admin"  : only an administrator creates accounts.
+# Default: "invite".
 mode = "invite"
 
+
+# ---------------------------------------------------------------------------
+# [identity] — identity rules. runtime, hot-reloadable.
+# ---------------------------------------------------------------------------
+[identity]
+# What happens when a user asks to change their username:
+#   "immutable" : usernames cannot be changed after signup.
+#   "available" : change applied immediately if the new name is free.
+#   "approval"  : change goes to an administrator moderation queue.
+# Default: "immutable".
+username_change_policy = "immutable"
+
+
+# ---------------------------------------------------------------------------
+# [profile] — profile constraints. runtime, hot-reloadable.
+# ---------------------------------------------------------------------------
+[profile]
+# Maximum length, in characters, of a user's bio. Integer >= 0; 0 disables the
+# bio field. Default: 500.
+bio_max_length = 500
+
+
+# ---------------------------------------------------------------------------
+# [avatar] — avatar upload constraints. runtime, hot-reloadable.
+# ---------------------------------------------------------------------------
+[avatar]
+# Maximum accepted avatar file size, in bytes. Integer >= 0. Default: 2000000
+# (2 MB).
+max_size_bytes = 2000000
+# Allowed image MIME types for avatar uploads. Non-empty list; an upload whose
+# detected type is not listed is rejected.
+# Default: ["image/png", "image/jpeg", "image/webp", "image/gif"].
+allowed_mime = ["image/png", "image/jpeg", "image/webp", "image/gif"]
+
+
+# ---------------------------------------------------------------------------
+# [observability] — logging, metrics, tracing
+# ---------------------------------------------------------------------------
 [observability]
+# Minimum log level emitted. One of: "trace", "debug", "info", "warn", "error",
+# "fatal" (increasing severity); a level lets through itself and everything more
+# severe. runtime, hot-reloadable. Default: "info".
 log_level = "info"
+# Log output format. infra (restart required).
+#   "json"   : one JSON object per line — for log collectors / production.
+#   "pretty" : human-readable, colourised, single line per event — local dev
+#              only. Requires the dev dependency `pino-pretty`; requesting
+#              "pretty" without it is a hard error.
+# Default: "json".
 log_format = "json"
+# Expose the Prometheus scrape endpoint `GET /metrics`. When false the route
+# returns 404. runtime, hot-reloadable. Default: false.
 metrics_enabled = false
+# Bearer token required on `GET /metrics` (`Authorization: Bearer <token>`).
+# infra + secret. Unset = no token check, and the endpoint is then served only
+# on a loopback / private bind. Set it from the environment.
+#metrics_token = "${EKOZ_OBSERVABILITY__METRICS_TOKEN}"
+# OTLP/HTTP endpoint for trace export, e.g. "http://localhost:4318/v1/traces".
+# infra. Unset = tracing is fully off (no exporter, no auto-instrumentation,
+# zero overhead).
+#otlp_endpoint = "http://localhost:4318/v1/traces"
+# Head-based trace sampling ratio, float 0..1: 0 = sample nothing, 1 = sample
+# every trace, 0.1 = ~10%. Only meaningful when `otlp_endpoint` is set. runtime,
+# hot-reloadable. Default: 0.
 trace_sample_ratio = 0
