@@ -83,3 +83,50 @@ model AuditLog {
   @@index([actorUserId])
   @@map("audit_log")
 }
+
+/// Single-use setup token (technical.md §5, ADR 0010). Present only on a
+/// token-pinned first boot: the plaintext is printed to stdout once, the hash is
+/// stored here. `consumedAt` is set when the first owner is created; the row is
+/// kept for the audit trail. At most one row exists at a time.
+model SetupToken {
+  id         String                     @id @default(ulid())
+  tokenHash  String                     @map("token_hash")
+  createdAt  temporal.createdAtString() @map("created_at")
+  consumedAt TimestamptzString?         @map("consumed_at")
+
+  @@map("setup_token")
+}
+
+/// Content-addressed, deduplicated blob (technical.md §6, ADR 0011). One row per
+/// distinct SHA-256; `refCount` tracks how many features reference it and the GC
+/// sweep drops rows that stayed at zero past the grace period. `sizeBytes` is a
+/// plain `int4` (2 GiB ceiling) — enough for the avatar consumer this increment
+/// ships; message attachments revisit it with per-user quotas.
+model Blob {
+  id          String                     @id @default(ulid())
+  hash        String                     @unique
+  sizeBytes   Int                        @map("size_bytes")
+  contentType String                     @map("content_type")
+  storageKey  String                     @map("storage_key")
+  refCount    Int                        @default(0) @map("ref_count")
+  createdAt   temporal.createdAtString() @map("created_at")
+
+  @@index([refCount])
+  @@map("blob")
+}
+
+/// Outbound email record (technical.md §7). Written before the send attempt;
+/// `sentAt` is stamped on success. `dedupeKey` (when supplied) is unique and
+/// backs the coarse anti-duplication guard until the notifications feature owns
+/// real rate limiting.
+model EmailMessage {
+  id        String                     @id @default(ulid())
+  to        String
+  template  String
+  category  String
+  dedupeKey String?                    @unique @map("dedupe_key")
+  sentAt    TimestamptzString?         @map("sent_at")
+  createdAt temporal.createdAtString() @map("created_at")
+
+  @@map("email_message")
+}

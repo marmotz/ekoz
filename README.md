@@ -1,8 +1,7 @@
 # Ekoz reference server
 
-Reference implementation of the [Ekoz](https://github.com/ekoz-chat/spec) chat
-server. NestJS 12 (ESM) on the Bun runtime, PostgreSQL via Prisma 8 ("Prisma
-Next").
+Reference implementation of the [Ekoz](https://github.com/ekoz-chat/spec) chat server. NestJS 12 (ESM) on the Bun
+runtime, PostgreSQL via Prisma 8 ("Prisma Next").
 
 ## Requirements
 
@@ -14,10 +13,10 @@ Next").
 ```bash
 bun install
 cp .env.example .env
-docker compose up -d          # PostgreSQL 18 (host :5410) + Mailpit (:1010 SMTP, :8010 UI)
+docker compose up -d          # PostgreSQL 18 (host :5432) + Mailpit (:1025 SMTP, :8025 UI)
 bun run db:migrate            # apply migrations to the dev database
 bun run start:dev
-curl localhost:3000/healthz   # {"status":"ok"}
+curl localhost:3010/healthz   # {"status":"ok"}
 ```
 
 ## Layout
@@ -42,17 +41,17 @@ Specs live next to the code they cover: `*.spec.ts` (unit) and `*.e2e-spec.ts`
 
 ## Scripts
 
-| Script                 | What it does                                        |
-| ---------------------- | -------------------------------------------------- |
-| `bun run start:dev`    | watch-mode server                                  |
-| `bun run typecheck`    | `tsc --noEmit`                                      |
-| `bun run lint`         | ESLint                                              |
-| `bun run test`         | unit + integration (Vitest)                         |
-| `bun run test:unit`    | unit only                                           |
-| `bun run db:contract`  | re-emit `generated/` from `contract.prisma`         |
-| `bun run db:plan`      | plan a migration from contract changes              |
-| `bun run db:migrate`   | apply pending migrations                            |
-| `bun run db:verify`    | check the DB marker matches the contract            |
+| Script                | What it does                                |
+| --------------------- | ------------------------------------------- |
+| `bun run start:dev`   | watch-mode server                           |
+| `bun run typecheck`   | `tsc --noEmit`                              |
+| `bun run lint`        | ESLint                                      |
+| `bun run test`        | unit + integration (Vitest)                 |
+| `bun run test:unit`   | unit only                                   |
+| `bun run db:contract` | re-emit `generated/` from `contract.prisma` |
+| `bun run db:plan`     | plan a migration from contract changes      |
+| `bun run db:migrate`  | apply pending migrations                    |
+| `bun run db:verify`   | check the DB marker matches the contract    |
 
 ## Database workflow (Prisma Next)
 

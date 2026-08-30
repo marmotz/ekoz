@@ -10,55 +10,46 @@ that does not touch this file.
 
 - Bootstrap reads configuration after `app.init()`, so `config.toml` / env apply
   to the logger, bind address and tracing. (#4)
-- `observability.log_format = "pretty"` renders one line per event via an
-  in-house `pino` stream; `pino-pretty` dropped. (#38)
-- `PrismaService.onModuleInit` treats a redundant `connect()` as success instead
-  of crashing boot with `DRIVER.ALREADY_CONNECTED`. (#2)
-- Integration specs booting `AppModule` configure infra via an
-  `applyTestInfraConfig` helper instead of an untracked local `config.toml`. (#3)
-- `applyTestInfraConfig` also points `EKOZ_CONFIG_FILE` at a nonexistent path, so
-  a developer's local `config.toml` no longer breaks `AppModule` e2e specs. (#6)
+- `log_format = "pretty"` renders one line per event; `pino-pretty` dropped. (#38)
+- `PrismaService.onModuleInit` no longer crashes boot on a redundant
+  `connect()`. (#2)
+- `AppModule` e2e specs configure their own infra instead of depending on a
+  developer's local `config.toml`. (#3, #6)
 
 ### Added
 
-- Application skeleton: NestJS 12 (ESM) on Bun, `core/` + `modules/` layout,
-  graceful shutdown, `GET /healthz` liveness probe. (#1)
-- Tooling: ESLint flat config with cross-feature import boundaries, Vitest
-  (`unit` / `integration` projects), Testcontainers helper. (#1)
-- Tooling: `lefthook` git hooks; `pre-commit` runs Prettier on staged files.
-- Multi-stage `Dockerfile` (non-root, migrate-on-start) and `compose.yaml`
-  (PostgreSQL 18 + Mailpit). (#1)
+- Application skeleton: NestJS 12 (ESM) on Bun, graceful shutdown, `GET
+/healthz`. (#1)
+- Tooling: ESLint import boundaries, Vitest projects, Testcontainers helper,
+  `lefthook` git hooks. (#1)
+- Multi-stage `Dockerfile` and `compose.yaml` (PostgreSQL + Mailpit). (#1)
 - GitHub Actions CI: typecheck, lint, tests, changelog check. (#1)
-- Database access via Prisma 8: committed data contract, initial migration, and a
-  `PrismaService` that verifies the schema marker on boot. (#2)
-- HTTP conventions: `application/problem+json` (RFC 9457) exception filter with a
-  `DomainError` base class, `ZodValidationPipe` (`422` + `errors`), per-request
-  `AsyncLocalStorage` context with `X-Request-Id` echo, `@Public()` decorator and
-  an allow-all global guard baseline. (#3)
-- Structured JSON logging via `pino` as the Nest logger, with secret redaction
-  and one access-log line per request (excluding `/healthz`, `/readyz`,
-  `/metrics`). (#3, #38)
-- Layered configuration system: TOML file + `${ENV}` interpolation +
-  `EKOZ_<SECTION>__<KEY>` overrides + `settings` table, typed parameter registry,
-  `ConfigService.get` / `.describe`, runtime-key hot-reload, and boot-time
-  validation. `config.example.toml` documents the parameter set. (#4)
-- `ConfigService.describe()` reports and masks secret values; `get()` returns the
-  real value. (#4)
-- Crypto helpers: `SecretBox` (AES-256-GCM seal/open under `secret.key`), SHA-256
-  hashing helpers, and Ed25519 keypair helpers. (#5)
-- `SigningService`: server Ed25519 signing keys in `server_signing_key`, exactly
-  one active, `sign` / `verify`, `rotate()` with a `signing.key_overlap_seconds`
-  window (default 7d) and a retired-key sweep. (#5)
-- `GET /.well-known/ekoz`: public, cacheable server discovery document (server,
-  api, web, `protocol_versions`, `signing_keys`). (#6)
-- Boot guard: `server.domain` is validated as a public FQDN and pinned in
-  `server_identity`; a later change is refused at startup. (#6)
-- Append-only audit log: `audit_log` table, `AuditService.record`, and an
-  `expectAuditEntry` test helper. (#7)
-- Observability module: OpenTelemetry meter provider with a Prometheus reader,
-  `MetricsService` wrapper, baseline process / HTTP / database / email / blob
-  instruments, guarded `GET /metrics` (off unless `observability.metrics_enabled`),
-  and an OTLP tracing bootstrap inert until `observability.otlp_endpoint` is set. (#38)
+- Database access via Prisma 8, with a schema-marker check that refuses to boot
+  on a stale schema. (#2)
+- HTTP conventions: RFC 9457 `problem+json` errors, Zod validation pipe,
+  per-request context with `X-Request-Id` echo, `@Public()` decorator. (#3)
+- Structured JSON logging via `pino` with secret redaction and one access-log
+  line per request. (#3, #38)
+- Layered configuration system (TOML + env + `settings` table) with a typed
+  parameter registry and boot-time validation. (#4)
+- `ConfigService.describe()` reports and masks secret values. (#4)
+- Crypto helpers: `SecretBox` (AES-256-GCM), SHA-256 and Ed25519 helpers. (#5)
+- `SigningService`: server Ed25519 signing keys with rotation and an overlap
+  window. (#5)
+- `GET /.well-known/ekoz`: public server discovery document. (#6)
+- Boot guard: `server.domain` is validated and pinned; a later change is refused
+  at startup. (#6)
+- Append-only audit log: `audit_log` table and `AuditService.record`. (#7)
+- Observability module: Prometheus `GET /metrics` (guarded, off by default) and
+  an OTLP tracing bootstrap inert until an endpoint is configured. (#38)
+- Object storage: content-addressed blob store with refcount GC and a public
+  `GET /blobs/:id`. (#9)
+- Outbound email: SMTP mailer with template rendering, dedupe guard and an
+  in-process retry queue. (#10)
+- Bootstrap: `SetupService` prints a single-use setup token until the first
+  owner exists, then `SetupGuard` returns `410`. (#8)
+- Health: `GET /readyz` checks database, schema, signing key and storage, wired
+  into the Docker `HEALTHCHECK`. (#11)
 
 ### Notes
 

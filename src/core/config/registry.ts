@@ -38,7 +38,7 @@ export const PARAMETER_REGISTRY = {
   'server.api_url': { kind: 'infra', schema: url, hotReloadable: false, secret: false },
   'server.web_url': { kind: 'infra', schema: url, hotReloadable: false, secret: false },
   'http.host': { kind: 'infra', schema: z.string().min(1), default: '0.0.0.0', hotReloadable: false, secret: false },
-  'http.port': { kind: 'infra', schema: port, default: 3000, hotReloadable: false, secret: false },
+  'http.port': { kind: 'infra', schema: port, default: 3010, hotReloadable: false, secret: false },
   'database.url': { kind: 'infra', schema: z.string().min(1), hotReloadable: false, secret: true },
   'secret.key': {
     kind: 'infra',
@@ -60,6 +60,13 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: false,
     secret: false,
   },
+  'storage.gc_grace_seconds': {
+    kind: 'infra',
+    schema: int.pipe(z.number().min(0)),
+    default: 3600,
+    hotReloadable: false,
+    secret: false,
+  },
   'storage.s3.endpoint': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
   'storage.s3.region': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
   'storage.s3.bucket': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
@@ -77,6 +84,13 @@ export const PARAMETER_REGISTRY = {
   'email.smtp.secure': { kind: 'infra', schema: bool, default: false, hotReloadable: false, secret: true },
   'email.smtp.user': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
   'email.smtp.pass': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
+  'email.retry_base_ms': {
+    kind: 'infra',
+    schema: int.pipe(z.number().min(0)),
+    default: 2000,
+    hotReloadable: false,
+    secret: false,
+  },
   'email.from': {
     kind: 'infra',
     schema: z.string().min(1),

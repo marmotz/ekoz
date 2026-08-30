@@ -75,7 +75,7 @@ describe('ConfigService (unit)', () => {
   it('never reads the settings table for an infra key', async () => {
     repo.store.set('http.port' as ParameterKey, 1234);
     const service = await build();
-    expect(service.get('http.port')).toBe(3000);
+    expect(service.get('http.port')).toBe(3010);
   });
 
   it('coerces a comma-separated env list', async () => {
@@ -89,7 +89,7 @@ describe('ConfigService (unit)', () => {
   });
 
   it('aborts init when a required infra parameter is missing', async () => {
-    await expect(build('[http]\nport = 3000\n')).rejects.toThrow(/Invalid or missing infra configuration/);
+    await expect(build('[http]\nport = 3010\n')).rejects.toThrow(/Invalid or missing infra configuration/);
   });
 
   it('aborts init when an infra parameter fails its schema', async () => {

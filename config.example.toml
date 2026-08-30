@@ -47,8 +47,8 @@ web_url = "https://app.ekoz.example.com"
 # Interface to bind. `0.0.0.0` = all IPv4 interfaces (containers, LAN),
 # `127.0.0.1` = loopback only (behind a local reverse proxy). Default: `0.0.0.0`.
 host = "0.0.0.0"
-# TCP port to listen on, 1-65535. Default: `3000`.
-port = 3000
+# TCP port to listen on, 1-65535. Default: `3010`.
+port = 3010
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +80,10 @@ key = "${EKOZ_SECRET_KEY}"
 #   "s3"    : S3-compatible object store (see [storage.s3]). Schema only for now.
 # Default: "local".
 driver = "local"
+# Grace period, in seconds, before the GC sweep deletes a blob that has stayed
+# unreferenced (ref_count = 0). Guards against races with an in-flight upload
+# that has not yet committed its reference. Default: 3600 (1 h).
+gc_grace_seconds = 3600
 
 [storage.local]
 # Root directory for stored blobs when driver = "local". Created if missing.
@@ -111,6 +115,10 @@ driver = "smtp"
 # `From` header of every outgoing message. RFC 5322 address, display name
 # allowed. Default: "Ekoz <no-reply@localhost>".
 from = "Ekoz <no-reply@ekoz.example.com>"
+# Base delay, in milliseconds, for the in-process retry queue. Backoff is
+# exponential (base, base*2, base*4); a message is declared failed after 4
+# attempts and an `email.failed` audit entry is written. Default: 2000.
+retry_base_ms = 2000
 
 [email.smtp]
 # SMTP relay hostname. Default: "localhost".
