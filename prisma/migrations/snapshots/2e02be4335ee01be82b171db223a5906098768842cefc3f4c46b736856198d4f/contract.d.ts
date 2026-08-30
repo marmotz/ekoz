@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'9d069e8b153ec6ab6a3bbab0e4db05ee1207c7e87359885a48b76c363e9a1aed'>;
+  StorageHashBase<'2e02be4335ee01be82b171db223a5906098768842cefc3f4c46b736856198d4f'>;
 export type ExecutionHash =
   ExecutionHashBase<'a18de2bfa551551008f7b943e7fcc10a7d6450dc82784770529e72461882dfd1'>;
 export type ProfileHash =
@@ -251,11 +251,6 @@ export type FieldOutputTypes = {
       readonly targetId: CodecTypes['pg/text@1']['output'] | null;
       readonly metadata: CodecTypes['pg/jsonb@1']['output'];
     };
-    readonly ServerIdentity: {
-      readonly id: CodecTypes['pg/text@1']['output'];
-      readonly domain: CodecTypes['pg/text@1']['output'];
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
-    };
     readonly ServerSigningKey: {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly algorithm: CodecTypes['pg/text@1']['output'];
@@ -284,11 +279,6 @@ export type FieldInputTypes = {
       readonly targetType: CodecTypes['pg/text@1']['input'] | null;
       readonly targetId: CodecTypes['pg/text@1']['input'] | null;
       readonly metadata: CodecTypes['pg/jsonb@1']['input'];
-    };
-    readonly ServerIdentity: {
-      readonly id: CodecTypes['pg/text@1']['input'];
-      readonly domain: CodecTypes['pg/text@1']['input'];
-      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly ServerSigningKey: {
       readonly id: CodecTypes['pg/text@1']['input'];
@@ -319,11 +309,6 @@ export type StorageColumnTypes = {
       readonly target_id: CodecTypes['pg/text@1']['output'] | null;
       readonly target_type: CodecTypes['pg/text@1']['output'] | null;
     };
-    readonly server_identity: {
-      readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly domain: CodecTypes['pg/text@1']['output'];
-      readonly id: CodecTypes['pg/text@1']['output'];
-    };
     readonly server_signing_key: {
       readonly activated_at: CodecTypes['pg/timestamptz-string@1']['output'] | null;
       readonly algorithm: CodecTypes['pg/text@1']['output'];
@@ -352,11 +337,6 @@ export type StorageColumnInputTypes = {
       readonly metadata: CodecTypes['pg/jsonb@1']['input'];
       readonly target_id: CodecTypes['pg/text@1']['input'] | null;
       readonly target_type: CodecTypes['pg/text@1']['input'] | null;
-    };
-    readonly server_identity: {
-      readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly domain: CodecTypes['pg/text@1']['input'];
-      readonly id: CodecTypes['pg/text@1']['input'];
     };
     readonly server_signing_key: {
       readonly activated_at: CodecTypes['pg/timestamptz-string@1']['input'] | null;
@@ -455,30 +435,6 @@ type ContractBase = Omit<
               ];
               foreignKeys: readonly [];
             };
-            readonly server_identity: {
-              columns: {
-                readonly id: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly domain: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                };
-                readonly created_at: {
-                  readonly nativeType: 'timestamptz';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                  readonly nullable: false;
-                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
-                };
-              };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [];
-              foreignKeys: readonly [];
-            };
             readonly server_signing_key: {
               columns: {
                 readonly id: {
@@ -574,10 +530,6 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly settings: { readonly namespace: 'public' & NamespaceId; readonly model: 'Setting' };
-    readonly server_identity: {
-      readonly namespace: 'public' & NamespaceId;
-      readonly model: 'ServerIdentity';
-    };
     readonly server_signing_key: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'ServerSigningKey';
@@ -639,35 +591,6 @@ type ContractBase = Omit<
                 readonly targetType: { readonly column: 'target_type' };
                 readonly targetId: { readonly column: 'target_id' };
                 readonly metadata: { readonly column: 'metadata' };
-              };
-            };
-          };
-          readonly ServerIdentity: {
-            readonly fields: {
-              readonly id: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly domain: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly createdAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-string@1';
-                };
-              };
-            };
-            readonly relations: Record<string, never>;
-            readonly storage: {
-              readonly table: 'server_identity';
-              readonly namespaceId: 'public';
-              readonly fields: {
-                readonly id: { readonly column: 'id' };
-                readonly domain: { readonly column: 'domain' };
-                readonly createdAt: { readonly column: 'created_at' };
               };
             };
           };

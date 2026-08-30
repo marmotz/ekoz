@@ -1,0 +1,80 @@
+[
+  {
+    "id": "table.server_signing_key",
+    "label": "Create table \"server_signing_key\"",
+    "summary": "Creates table \"server_signing_key\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "server_signing_key"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"server_signing_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"server_signing_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"server_signing_key\"",
+        "sql": "CREATE TABLE \"public\".\"server_signing_key\" (\n  \"activated_at\" timestamptz,\n  \"algorithm\" text DEFAULT 'ed25519' NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"private_key_enc\" bytea NOT NULL,\n  \"public_key\" text NOT NULL,\n  \"retired_at\" timestamptz,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"server_signing_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"server_signing_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.server_signing_key.server_signing_key_activated_at_idx_b6f7876e",
+    "label": "Create index \"server_signing_key_activated_at_idx_b6f7876e\" on \"server_signing_key\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "server_signing_key_activated_at_idx_b6f7876e",
+        "table": "server_signing_key"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"server_signing_key_activated_at_idx_b6f7876e\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"server_signing_key_activated_at_idx_b6f7876e\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"server_signing_key_activated_at_idx_b6f7876e\"",
+        "sql": "CREATE INDEX \"server_signing_key_activated_at_idx_b6f7876e\" ON \"public\".\"server_signing_key\" (\"activated_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"server_signing_key_activated_at_idx_b6f7876e\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"server_signing_key_activated_at_idx_b6f7876e\""
+        ]
+      }
+    ]
+  }
+]

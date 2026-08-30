@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuditModule } from './core/audit/audit.module.js';
 import { ConfigModule } from './core/config/config.module.js';
+import { CryptoModule } from './core/crypto/crypto.module.js';
+import { DiscoveryModule } from './core/discovery/discovery.module.js';
 import { HealthModule } from './core/health/health.module.js';
 import { HttpModule } from './core/http/http.module.js';
 import { MetricsModule } from './core/observability/metrics.module.js';
@@ -14,6 +16,16 @@ import { PrismaModule } from './core/prisma/prisma.module.js';
  * importing one another directly (enforced by `eslint-plugin-boundaries`).
  */
 @Module({
-  imports: [ObservabilityModule, HttpModule, PrismaModule, ConfigModule, MetricsModule, AuditModule, HealthModule],
+  imports: [
+    ObservabilityModule,
+    HttpModule,
+    PrismaModule,
+    ConfigModule,
+    CryptoModule,
+    MetricsModule,
+    AuditModule,
+    DiscoveryModule,
+    HealthModule,
+  ],
 })
 export class AppModule {}
