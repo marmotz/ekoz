@@ -20,8 +20,8 @@ each issue body carries `Depends on #N` lines.
 
 | Done | Issue                                                | Task                                                                        | Description                                                        |
 |------|------------------------------------------------------|-----------------------------------------------------------------------------|--------------------------------------------------------------------|
-| ☐   | [#1](https://github.com/ekoz-chat/server/issues/1)   | [1-server-skeleton](tasks/1-server-skeleton.md)                             | NestJS 12 ESM app, Bun, ESLint, Vitest, Docker, CI                 |
-| ☐   | [#2](https://github.com/ekoz-chat/server/issues/2)   | [2-prisma-setup](tasks/2-prisma-setup.md)                                   | Prisma 8-rc, adapter-pg, PrismaService, migrations, testcontainers |
+| ☑   | [#1](https://github.com/ekoz-chat/server/issues/1)   | [1-server-skeleton](tasks/1-server-skeleton.md)                             | NestJS 12 ESM app, Bun, ESLint, Vitest, Docker, CI                 |
+| ☑   | [#2](https://github.com/ekoz-chat/server/issues/2)   | [2-prisma-setup](tasks/2-prisma-setup.md)                                   | Prisma 8 (Prisma Next) contract, PrismaService, migrations, testcontainers |
 | ☐   | [#3](https://github.com/ekoz-chat/server/issues/3)   | [3-http-conventions](tasks/3-http-conventions.md)                           | problem+json, Zod validation, request context, pino                |
 | ☐   | [#4](https://github.com/ekoz-chat/server/issues/4)   | [4-config-system](tasks/4-config-system.md)                                 | TOML loader, registry, settings table, layered resolution          |
 | ☐   | [#5](https://github.com/ekoz-chat/server/issues/5)   | [5-crypto-and-signing-keys](tasks/5-crypto-and-signing-keys.md)             | secret box, Ed25519 keys, SigningService, rotation                 |
@@ -31,6 +31,7 @@ each issue body carries `Depends on #N` lines.
 | ☐   | [#9](https://github.com/ekoz-chat/server/issues/9)   | [9-object-storage](tasks/9-object-storage.md)                               | StorageDriver, local driver, blob dedup, GC, `/blobs/:id`          |
 | ☐   | [#10](https://github.com/ekoz-chat/server/issues/10) | [10-outbound-email](tasks/10-outbound-email.md)                             | Mailer, SMTP driver, templates, retry queue                        |
 | ☐   | [#11](https://github.com/ekoz-chat/server/issues/11) | [11-health-endpoints](tasks/11-health-endpoints.md)                         | `/healthz`, `/readyz`                                              |
+| ☐   | [#38](https://github.com/ekoz-chat/server/issues/38) | [38-observability-module](tasks/38-observability-module.md)                 | pino logs + redaction, OTel + guarded `/metrics`, baseline instruments |
 
 ## Identity and profiles
 

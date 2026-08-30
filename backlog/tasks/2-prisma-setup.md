@@ -1,6 +1,6 @@
 # server — Prisma 8 setup and database access
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#2](https://github.com/ekoz-chat/server/issues/2)
@@ -25,7 +25,7 @@ and [POC](https://github.com/ekoz-chat/spec/blob/main/docs/technical/poc-nestjs1
 6. Testcontainers helper: spin a real PostgreSQL for integration tests, run
    `migrate deploy`, expose a per-test transactional rollback or schema reset.
 7. Conventions: `snake_case` tables/columns via `@@map`/`@map`, `PascalCase`
-   models, UUID v7 ids.
+   models, ULID ids via `@default(ulid())` (dash-free, time-ordered).
 
 ## Dependencies
 

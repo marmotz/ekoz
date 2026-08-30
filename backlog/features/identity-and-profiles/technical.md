@@ -30,7 +30,7 @@ In scope for the first increment:
 
 Depends on server-core: `ConfigService`, `PrismaService`, `SigningService`,
 `BlobService`, `Mailer`, `AuditService`, the `is_owner` bootstrap seed, and the
-problem+json / request-context / UUID v7 conventions.
+problem+json / request-context / ULID id conventions.
 
 Out of scope: MFA, external identity providers, per-room permissions (see
 conversations), the full admin UI (see server administration).
@@ -77,7 +77,7 @@ enum UsernameChangePolicy { immutable available approval }
 enum UsernameChangeStatus { pending approved rejected }
 
 model User {
-  id              String     @id @default(uuid(7))
+  id              String     @id @default(ulid())
   name            String?    @unique            // null once deleted
   email           String?    @unique            // citext; null once deleted
   emailVerifiedAt DateTime?
@@ -108,7 +108,7 @@ model UserProfile {
 }
 
 model Session {
-  id           String    @id @default(uuid(7))
+  id           String    @id @default(ulid())
   userId       String
   deviceName   String
   userAgent    String?
@@ -124,7 +124,7 @@ model Session {
 }
 
 model RefreshToken {
-  id           String    @id @default(uuid(7))
+  id           String    @id @default(ulid())
   sessionId    String
   tokenHash    String    @unique             // sha-256 of the opaque token
   createdAt    DateTime  @default(now())
@@ -137,7 +137,7 @@ model RefreshToken {
 }
 
 model Invitation {
-  id              String    @id @default(uuid(7))
+  id              String    @id @default(ulid())
   email           String?                       // null = link works for any email
   tokenHash       String    @unique
   createdByUserId String
@@ -150,7 +150,7 @@ model Invitation {
 }
 
 model EmailVerification {
-  id         String    @id @default(uuid(7))
+  id         String    @id @default(ulid())
   userId     String
   email      String                            // address being verified
   tokenHash  String    @unique
@@ -162,7 +162,7 @@ model EmailVerification {
 }
 
 model PasswordReset {
-  id           String    @id @default(uuid(7))
+  id           String    @id @default(ulid())
   userId       String
   tokenHash    String    @unique
   requestedIp  String?
@@ -174,7 +174,7 @@ model PasswordReset {
 }
 
 model UsernameChangeRequest {
-  id             String               @id @default(uuid(7))
+  id             String               @id @default(ulid())
   userId         String
   requestedName  String
   status         UsernameChangeStatus @default(pending)

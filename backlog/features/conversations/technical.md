@@ -93,7 +93,7 @@ enum RoomEventType {
 }
 
 model Room {
-  id             String         @id @default(uuid(7))
+  id             String         @id @default(ulid())
   type           RoomType
   parentId       String?
   visibility     RoomVisibility @default(private)
@@ -148,7 +148,7 @@ model RoleDefaultCapability {
 }
 
 model RoomPermissionOverride {
-  id         String         @id @default(uuid(7))
+  id         String         @id @default(ulid())
   nodeId     String                              // a Room id (space or channel)
   role       RoomRole
   capability String
@@ -159,7 +159,7 @@ model RoomPermissionOverride {
 }
 
 model RoomMemberPermission {
-  id         String         @id @default(uuid(7))
+  id         String         @id @default(ulid())
   nodeId     String
   userId     String
   capability String
@@ -170,7 +170,7 @@ model RoomMemberPermission {
 }
 
 model RoomInvitation {
-  id         String    @id @default(uuid(7))
+  id         String    @id @default(ulid())
   roomId     String
   userId     String                              // invited user
   invitedById String
@@ -184,7 +184,7 @@ model RoomInvitation {
 }
 
 model RoomJoinRequest {
-  id         String    @id @default(uuid(7))
+  id         String    @id @default(ulid())
   roomId     String
   userId     String
   createdAt  DateTime  @default(now())
@@ -206,7 +206,7 @@ model RoomBan {
 }
 
 model Message {
-  id          String    @id @default(uuid(7))
+  id          String    @id @default(ulid())
   roomId      String
   seq         BigInt                              // = the creating room_event seq
   authorId    String?                             // null after author hard-deletion is irrelevant; see identity forward contract
