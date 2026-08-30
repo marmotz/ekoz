@@ -16,6 +16,16 @@ function resolveConnectionString(): string {
   return url;
 }
 
+/** The Prisma Next runtime error raised when `connect()` runs on an open pool. */
+function isAlreadyConnectedError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'DRIVER.ALREADY_CONNECTED'
+  );
+}
+
 /**
  * NestJS wrapper around the Prisma Next runtime client.
  *
@@ -64,9 +74,30 @@ export class PrismaService implements OnModuleInit, OnApplicationShutdown {
    * boot here rather than surfacing on the first request.
    */
   async onModuleInit(): Promise<void> {
-    await this.db.connect();
+    await this.openPool();
     await this.healthCheck();
     this.logger.log('Database connection established and schema verified');
+  }
+
+  /**
+   * Opens the connection pool, tolerating a pool another module already opened.
+   *
+   * The Prisma Next client connects lazily: any query issued from another
+   * module's `onModuleInit` (e.g. `ConfigService` reading the `settings` table)
+   * opens the pool before this hook runs, and an explicit `connect()` after that
+   * throws `DRIVER.ALREADY_CONNECTED`. Init-hook ordering is not something we
+   * control, so a redundant connect is treated as success.
+   */
+  private async openPool(): Promise<void> {
+    try {
+      await this.db.connect();
+    } catch (error) {
+      if (isAlreadyConnectedError(error)) {
+        return;
+      }
+
+      throw error;
+    }
   }
 
   async onApplicationShutdown(): Promise<void> {

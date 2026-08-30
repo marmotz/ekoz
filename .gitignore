@@ -3,7 +3,7 @@ dist/
 coverage/
 
 .env
-compose.override.yaml
+compose.override.yml
 config.toml
 
 .agents/

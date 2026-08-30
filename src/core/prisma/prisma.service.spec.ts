@@ -35,4 +35,26 @@ describe('PrismaService (unit)', () => {
 
     expect(moduleRef.get(PrismaService)).toBeInstanceOf(PrismaService);
   });
+
+  it('onModuleInit tolerates a pool opened lazily by another module', async () => {
+    const service = new PrismaService();
+    const db = (service as unknown as { db: { connect: () => Promise<unknown>; raw: { sql: unknown } } }).db;
+
+    db.connect = () =>
+      Promise.reject(
+        Object.assign(new Error('Postgres client already connected'), { code: 'DRIVER.ALREADY_CONNECTED' })
+      );
+    (service as unknown as { healthCheck: () => Promise<void> }).healthCheck = () => Promise.resolve();
+
+    await expect(service.onModuleInit()).resolves.toBeUndefined();
+  });
+
+  it('onModuleInit still rethrows other connection failures', async () => {
+    const service = new PrismaService();
+    const db = (service as unknown as { db: { connect: () => Promise<unknown> } }).db;
+
+    db.connect = () => Promise.reject(new Error('connection refused'));
+
+    await expect(service.onModuleInit()).rejects.toThrow(/connection refused/);
+  });
 });

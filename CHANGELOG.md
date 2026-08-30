@@ -8,6 +8,10 @@ that does not touch this file.
 
 ### Fixed
 
+- `PrismaService.onModuleInit` no longer crashes boot with
+  `DRIVER.ALREADY_CONNECTED` when another module's init hook (e.g. `ConfigService`
+  reading the `settings` table) has already opened the connection pool lazily; a
+  redundant `connect()` is now treated as success.
 - Integration specs that boot the full `AppModule` (`prisma.e2e-spec`,
   `metrics.e2e-spec`) now provide their own infra configuration via a
   `applyTestInfraConfig` test helper, instead of relying on an untracked local
