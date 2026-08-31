@@ -1,6 +1,6 @@
 # server — identity: auth tokens, refresh rotation, guards
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#13](https://github.com/ekoz-chat/server/issues/13)

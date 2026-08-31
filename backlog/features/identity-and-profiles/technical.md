@@ -55,19 +55,19 @@ src/modules/identity/
 
 All `runtime` (see server-core registry):
 
-| key | default | notes |
-|-----|---------|-------|
-| `auth.access_token_ttl` | `15m` | JWT lifetime |
-| `auth.refresh_token_ttl` | `30d` | refresh token lifetime (absolute) |
-| `auth.max_sessions_per_user` | `20` | oldest session evicted past this |
-| `auth.sensitive_throttle` | `{ window: "15m", max: 10 }` | see §14 |
-| `invitation.ttl` | `7d` | invitation validity |
-| `identity.username_release_delay` | `30d` | grace before a freed `name` can be reused |
-| `identity.username_change_cooldown` | `30d` | min delay between self-service changes |
-| `identity.reserved_usernames` | `[]` | never assignable |
-| `profile.bio_max_length` | `500` | (declared in server-core) |
-| `avatar.max_size_bytes` | `2_000_000` | (declared in server-core) |
-| `avatar.allowed_mime` | png/jpeg/webp/gif | (declared in server-core) |
+| key                                 | default                      | notes                                     |
+| ----------------------------------- | ---------------------------- | ----------------------------------------- |
+| `auth.access_token_ttl`             | `15m`                        | JWT lifetime                              |
+| `auth.refresh_token_ttl`            | `30d`                        | refresh token lifetime (absolute)         |
+| `auth.max_sessions_per_user`        | `20`                         | oldest session evicted past this          |
+| `auth.sensitive_throttle`           | `{ window: "15m", max: 10 }` | see §14                                   |
+| `invitation.ttl`                    | `7d`                         | invitation validity                       |
+| `identity.username_release_delay`   | `30d`                        | grace before a freed `name` can be reused |
+| `identity.username_change_cooldown` | `30d`                        | min delay between self-service changes    |
+| `identity.reserved_usernames`       | `[]`                         | never assignable                          |
+| `profile.bio_max_length`            | `500`                        | (declared in server-core)                 |
+| `avatar.max_size_bytes`             | `2_000_000`                  | (declared in server-core)                 |
+| `avatar.allowed_mime`               | png/jpeg/webp/gif            | (declared in server-core)                 |
 
 ## 4. Data model (Prisma slice)
 
@@ -195,8 +195,9 @@ model ReservedUsername {
 }
 ```
 
-`email` uses the `citext` extension for case-insensitive uniqueness; `name` is
-already normalised to lowercase before insert.
+`email` and `name` are both normalised (NFC, trim, lowercase) before insert and
+stored as plain unique `text` — no `citext` extension
+([ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md)).
 
 ## 5. Identifier rules
 
@@ -257,11 +258,11 @@ already normalised to lowercase before insert.
 
 `POST /auth/register`:
 
-| mode | behaviour |
-|------|-----------|
-| `open` | body `{ name, email, password, displayName }` |
-| `invite` | body also `{ invitationToken }`; token must be unconsumed, unexpired, and if email-bound must match `email` |
-| `admin` | endpoint returns `403 identity.registration_closed`; accounts are created via `POST /admin/users` (owner only) |
+| mode     | behaviour                                                                                                      |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| `open`   | body `{ name, email, password, displayName }`                                                                  |
+| `invite` | body also `{ invitationToken }`; token must be unconsumed, unexpired, and if email-bound must match `email`    |
+| `admin`  | endpoint returns `403 identity.registration_closed`; accounts are created via `POST /admin/users` (owner only) |
 
 Common:
 
@@ -403,25 +404,25 @@ increment"; the general policy still comes later.
 
 ## 16. Endpoint summary
 
-| Method & path | Auth | Purpose |
-|---|---|---|
-| `POST /auth/register` | public | create an account (mode-dependent) |
-| `POST /auth/login` | public | issue tokens + session |
-| `POST /auth/refresh` | refresh token | rotate tokens |
-| `POST /auth/logout` | access | revoke current session |
-| `POST /auth/verify-email` / `.../resend` | public | email verification |
-| `POST /auth/password-reset/request` / `.../confirm` | public | password reset |
-| `POST /stream/ticket` | access | SSE stream ticket |
-| `GET /sessions`, `PATCH /sessions/:id`, `DELETE /sessions/:id`, `DELETE /sessions` | access | session management |
-| `GET /me`, `PATCH /me/profile`, `POST /me/email` | access | own account |
-| `PUT /me/avatar`, `DELETE /me/avatar` | access | avatar |
-| `PATCH /me/username` | access | identifier change (policy-driven) |
-| `GET /users/:identifier`, `GET /users/:identifier/avatar` | access | public profile |
-| `POST /invitations`, `GET /invitations`, `DELETE /invitations/:id` | owner | invitations |
-| `POST /admin/users` | owner | create account (`admin` mode) |
-| `POST /admin/users/:id/suspend` / `unsuspend`, `DELETE /admin/users/:id` | owner | account lifecycle |
-| `POST /admin/owners`, `DELETE /admin/owners/:userId` | owner | owner management |
-| `POST /admin/username-requests/:id/approve` / `reject`, `GET /admin/username-requests` | owner | approval-mode username changes |
+| Method & path                                                                          | Auth          | Purpose                            |
+| -------------------------------------------------------------------------------------- | ------------- | ---------------------------------- |
+| `POST /auth/register`                                                                  | public        | create an account (mode-dependent) |
+| `POST /auth/login`                                                                     | public        | issue tokens + session             |
+| `POST /auth/refresh`                                                                   | refresh token | rotate tokens                      |
+| `POST /auth/logout`                                                                    | access        | revoke current session             |
+| `POST /auth/verify-email` / `.../resend`                                               | public        | email verification                 |
+| `POST /auth/password-reset/request` / `.../confirm`                                    | public        | password reset                     |
+| `POST /stream/ticket`                                                                  | access        | SSE stream ticket                  |
+| `GET /sessions`, `PATCH /sessions/:id`, `DELETE /sessions/:id`, `DELETE /sessions`     | access        | session management                 |
+| `GET /me`, `PATCH /me/profile`, `POST /me/email`                                       | access        | own account                        |
+| `PUT /me/avatar`, `DELETE /me/avatar`                                                  | access        | avatar                             |
+| `PATCH /me/username`                                                                   | access        | identifier change (policy-driven)  |
+| `GET /users/:identifier`, `GET /users/:identifier/avatar`                              | access        | public profile                     |
+| `POST /invitations`, `GET /invitations`, `DELETE /invitations/:id`                     | owner         | invitations                        |
+| `POST /admin/users`                                                                    | owner         | create account (`admin` mode)      |
+| `POST /admin/users/:id/suspend` / `unsuspend`, `DELETE /admin/users/:id`               | owner         | account lifecycle                  |
+| `POST /admin/owners`, `DELETE /admin/owners/:userId`                                   | owner         | owner management                   |
+| `POST /admin/username-requests/:id/approve` / `reject`, `GET /admin/username-requests` | owner         | approval-mode username changes     |
 
 The `/admin/*` endpoints here are the minimal owner surface needed by this
 feature; the full admin experience is [server administration](../server-administration/overview.md).
@@ -444,17 +445,17 @@ and `web_url`.
 
 ## 19. Alternatives considered
 
-| Point | Retained | Rejected | Why |
-|---|---|---|---|
-| Access token type | JWT EdDSA (server key) | opaque + DB lookup per request | stateless verification; revocation covered by short TTL + `sid` denylist |
-| Refresh token | opaque, rotating, reuse-detection | JWT refresh; non-rotating | rotation + reuse detection contains token theft; opaque = instantly revocable |
-| Unverified accounts | login blocked until verified (when required) | allow login, gate actions | simpler; matches "email mandatory and verified"; no half-state to reason about |
-| Deleted `name` | freed after `username_release_delay` | kept forever; freed immediately | user choice; grace window avoids immediate impersonation |
-| Invitation issuers (increment 1) | owners only | any member; member + flag | user choice; spaces/roles do not exist yet |
-| Avatar storage | server-core `BlobService` (dedup) | column blob; separate table | ADR 0011; avatars are files like any other |
-| Password hash lib | `@node-rs/argon2` | `argon2` (node-gyp), `bcrypt` | native, Bun-friendly, Argon2id is the OWASP recommendation |
-| Sensitive-endpoint throttle | narrow in-memory guard now | wait for the general rate-limiter | credential endpoints cannot ship unprotected; scope is minimal |
-| Email case-insensitivity | `citext` column | `lower(email)` unique index | simpler model; extension already available |
+| Point                            | Retained                                                                                                                                                           | Rejected                                     | Why                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| Access token type                | JWT EdDSA (server key)                                                                                                                                             | opaque + DB lookup per request               | stateless verification; revocation covered by short TTL + `sid` denylist       |
+| Refresh token                    | opaque, rotating, reuse-detection                                                                                                                                  | JWT refresh; non-rotating                    | rotation + reuse detection contains token theft; opaque = instantly revocable  |
+| Unverified accounts              | login blocked until verified (when required)                                                                                                                       | allow login, gate actions                    | simpler; matches "email mandatory and verified"; no half-state to reason about |
+| Deleted `name`                   | freed after `username_release_delay`                                                                                                                               | kept forever; freed immediately              | user choice; grace window avoids immediate impersonation                       |
+| Invitation issuers (increment 1) | owners only                                                                                                                                                        | any member; member + flag                    | user choice; spaces/roles do not exist yet                                     |
+| Avatar storage                   | server-core `BlobService` (dedup)                                                                                                                                  | column blob; separate table                  | ADR 0011; avatars are files like any other                                     |
+| Password hash lib                | `@node-rs/argon2`                                                                                                                                                  | `argon2` (node-gyp), `bcrypt`                | native, Bun-friendly, Argon2id is the OWASP recommendation                     |
+| Sensitive-endpoint throttle      | narrow in-memory guard now                                                                                                                                         | wait for the general rate-limiter            | credential endpoints cannot ship unprotected; scope is minimal                 |
+| Email case-insensitivity         | normalise-on-write + plain unique `text` ([ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md)) | `citext` column; `lower(email)` unique index | no extension dependency; one rule for `name` and `email`                       |
 
 ## 20. Consequences
 

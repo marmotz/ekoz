@@ -11,6 +11,7 @@ import { MetricsModule } from './core/observability/metrics.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
 import { PrismaModule } from './core/prisma/prisma.module.js';
 import { StorageModule } from './core/storage/storage.module.js';
+import { IdentityModule } from './modules/identity/identity.module.js';
 
 /**
  * Root module. `src/core/*` holds cross-cutting infrastructure; `src/modules/*`
@@ -32,6 +33,7 @@ import { StorageModule } from './core/storage/storage.module.js';
     BootstrapModule,
     DiscoveryModule,
     HealthModule,
+    IdentityModule,
   ],
 })
 export class AppModule {}
