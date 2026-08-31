@@ -1,6 +1,6 @@
 # server — identity: email verification and email change
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#16](https://github.com/ekoz-chat/server/issues/16)

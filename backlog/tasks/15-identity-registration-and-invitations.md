@@ -1,6 +1,6 @@
 # server — identity: registration modes and invitations
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#15](https://github.com/ekoz-chat/server/issues/15)

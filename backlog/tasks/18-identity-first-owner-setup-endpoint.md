@@ -1,6 +1,6 @@
 # server — identity: first-owner setup endpoint
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#18](https://github.com/ekoz-chat/server/issues/18)
