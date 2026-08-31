@@ -11,6 +11,7 @@ import { MetricsModule } from './core/observability/metrics.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
 import { PrismaModule } from './core/prisma/prisma.module.js';
 import { StorageModule } from './core/storage/storage.module.js';
+import { OwnerLookupModule } from './modules/identity/accounts/owner-lookup.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 
 /**
@@ -34,6 +35,7 @@ import { IdentityModule } from './modules/identity/identity.module.js';
     DiscoveryModule,
     HealthModule,
     IdentityModule,
+    OwnerLookupModule,
   ],
 })
 export class AppModule {}

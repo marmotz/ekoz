@@ -1,13 +1,9 @@
-# Revoke one session (technical.md §11, issue #14): DELETE /sessions/:id. The
-# session's `sid` joins the denylist so its access token stops working within
-# the access-token TTL. Needs a valid access token.
+# Revoke one session — happy path (technical.md §11, issue #14): DELETE
+# /sessions/:id. The session's `sid` joins the denylist so its access token
+# stops working within the access-token TTL. 204, no body.
 #
-# Real flow:
-#   DELETE {{base_url}}/sessions/{{session_id}}
-#   Authorization: Bearer {{access_token}}
-#   HTTP 204
-DELETE {{base_url}}/sessions/01000000000000000000000000
-Authorization: Bearer not-a-real-token
-HTTP 401
-[Asserts]
-jsonpath "$.code" == "auth.unauthenticated"
+# Set `access_token` and `session_id`. Revoking your current session logs you
+# out; target another session's id to keep this one alive.
+DELETE {{base_url}}/sessions/{{session_id}}
+Authorization: Bearer {{access_token}}
+HTTP 204

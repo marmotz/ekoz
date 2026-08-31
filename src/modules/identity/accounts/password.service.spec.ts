@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { WeakPasswordError } from '../identity.errors.js';
 import { PasswordService } from './password.service.js';
 
 describe('PasswordService (unit)', () => {
@@ -23,5 +24,19 @@ describe('PasswordService (unit)', () => {
 
   it('dummyVerify resolves without throwing', async () => {
     await expect(service.dummyVerify()).resolves.toBeUndefined();
+  });
+
+  describe('assertAcceptable', () => {
+    it('accepts a password that clears the length floor and is not common', () => {
+      expect(() => service.assertAcceptable('a-decent-passphrase')).not.toThrow();
+    });
+
+    it('rejects a password shorter than 10 characters', () => {
+      expect(() => service.assertAcceptable('short1')).toThrow(WeakPasswordError);
+    });
+
+    it('rejects a common password regardless of case', () => {
+      expect(() => service.assertAcceptable('Password123')).toThrow(WeakPasswordError);
+    });
   });
 });

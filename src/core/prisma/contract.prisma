@@ -231,3 +231,40 @@ model ReservedUsername {
   @@index([reservedUntil])
   @@map("reserved_username")
 }
+
+/// A registration invitation (technical.md §4, §8, issue #15). Only the SHA-256
+/// hash of the opaque token is stored. `email` null = the link works for any
+/// address; when set, registration must present a matching email. `consumedAt`
+/// is stamped both on a successful registration and on an owner revocation
+/// (`consumedByUserId` null in the revoked case).
+model Invitation {
+  id               String                     @id @default(ulid())
+  email            String?
+  tokenHash        String                     @unique @map("token_hash")
+  createdByUserId  String                     @map("created_by_user_id")
+  createdAt        temporal.createdAtString() @map("created_at")
+  expiresAt        TimestamptzString          @map("expires_at")
+  consumedAt       TimestamptzString?         @map("consumed_at")
+  consumedByUserId String?                    @map("consumed_by_user_id")
+  createdBy        User                       @relation(fields: [createdByUserId], references: [id])
+
+  @@index([createdByUserId])
+  @@map("invitation")
+}
+
+/// A pending email-address verification (technical.md §4, §9, issue #16). Used
+/// both for the initial verification after registration and for an email change
+/// (`email` is then the new address, applied to `User.email` only on consume).
+/// Only the SHA-256 hash of the opaque token is stored.
+model EmailVerification {
+  id         String                     @id @default(ulid())
+  userId     String                     @map("user_id")
+  email      String
+  tokenHash  String                     @unique @map("token_hash")
+  createdAt  temporal.createdAtString() @map("created_at")
+  expiresAt  TimestamptzString          @map("expires_at")
+  consumedAt TimestamptzString?         @map("consumed_at")
+
+  @@index([userId])
+  @@map("email_verification")
+}

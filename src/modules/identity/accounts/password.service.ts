@@ -1,5 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { hash, hashSync, verify } from '@node-rs/argon2';
+import { WeakPasswordError } from '../identity.errors.js';
+
+/** Minimum password length (technical.md §8). */
+export const MIN_PASSWORD_LENGTH = 10;
+
+/**
+ * A small denylist of the most common weak passwords (technical.md §8). This is
+ * deliberately tiny — a full breach-corpus check is out of scope; the length
+ * floor does most of the work.
+ */
+export const COMMON_PASSWORDS: ReadonlySet<string> = new Set([
+  'password',
+  'password1',
+  'password123',
+  '1234567890',
+  '12345678901',
+  'qwertyuiop',
+  'letmein123',
+  'iloveyou123',
+  'adminadmin',
+  'welcome123',
+  'changeme123',
+  'passw0rd123',
+]);
 
 /** `@node-rs/argon2` ships `Algorithm` as an ambient const enum (unusable under
  * `isolatedModules`); `2` is `Algorithm.Argon2id`. */
@@ -31,6 +55,21 @@ function getDummyHash(): string {
 
 @Injectable()
 export class PasswordService {
+  /**
+   * Enforce the minimal registration password policy (technical.md §8): at
+   * least {@link MIN_PASSWORD_LENGTH} characters and not one of a small set of
+   * common passwords. Throws {@link WeakPasswordError} otherwise.
+   */
+  assertAcceptable(password: string): void {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      throw new WeakPasswordError(`The password must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
+    }
+
+    if (COMMON_PASSWORDS.has(password.toLowerCase())) {
+      throw new WeakPasswordError('This password is too common; choose a less predictable one.');
+    }
+  }
+
   /** Argon2id PHC hash of `password`. */
   hash(password: string): Promise<string> {
     return hash(password, ARGON2_PARAMS);

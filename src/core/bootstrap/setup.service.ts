@@ -4,7 +4,7 @@ import { AuditService } from '../audit/audit.service.js';
 import { hashesEqual, sha256Hex } from '../crypto/hashing.js';
 import { DomainError } from '../http/domain-error.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { OWNER_LOOKUP, type OwnerLookup } from './owner-lookup.js';
+import { NoOwnerLookup, OWNER_LOOKUP, type OwnerLookup } from './owner-lookup.js';
 
 /**
  * Setup state (technical.md §5, ADR 0010):
@@ -32,7 +32,7 @@ export class SetupService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
-    @Inject(OWNER_LOOKUP) private readonly ownerLookup: OwnerLookup,
+    @Optional() @Inject(OWNER_LOOKUP) private readonly ownerLookup: OwnerLookup = new NoOwnerLookup(),
     @Optional() @Inject(SETUP_ENV) private readonly env: NodeJS.ProcessEnv = process.env
   ) {}
 
