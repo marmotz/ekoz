@@ -6,7 +6,7 @@ coverage/
 /var/
 
 .env
-compose.override.yml
+compose.override.yaml
 config.toml
 http/vars.env
 

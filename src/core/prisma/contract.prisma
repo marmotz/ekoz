@@ -130,3 +130,104 @@ model EmailMessage {
 
   @@map("email_message")
 }
+
+// ── identity: accounts, sessions ─────────────────────────────────────────────
+// Feature `identity-and-profiles` (technical.md §4), ADR 0007 / 0008. Only the
+// slice needed by issues #12–#14 lands here; registration, invitations, email
+// verification, password reset, profiles and the username-change machinery each
+// add their own models on their own task.
+
+/// Account lifecycle (technical.md §4). `suspended` blocks all access but keeps
+/// the identifier held; `deleted` frees `name` / `email` (nulled) and is
+/// terminal.
+enum UserStatus {
+  @@type("pg/text@1")
+  active    = "active"
+  suspended = "suspended"
+  deleted   = "deleted"
+}
+
+/// A local account (technical.md §4-§6, ADR 0007). `name` is the normalised
+/// identifier (lowercase, NFC, `[a-z0-9_.-]`, 1-64) presented to the API as the
+/// full `name/server`; both `name` and `email` are nulled on deletion so the
+/// unique indexes free up. `email` is stored already lower-cased (the account
+/// layer normalises it before insert). `passwordHash` is an Argon2id PHC string.
+model User {
+  id              String                     @id @default(ulid())
+  name            String?                    @unique
+  email           String?                    @unique
+  emailVerifiedAt TimestamptzString?         @map("email_verified_at")
+  passwordHash    String                     @map("password_hash")
+  isOwner         Boolean                    @default(false) @map("is_owner")
+  status          UserStatus                 @default(active)
+  suspendedAt     TimestamptzString?         @map("suspended_at")
+  suspendedReason String?                    @map("suspended_reason")
+  deletedAt       TimestamptzString?         @map("deleted_at")
+  createdAt       temporal.createdAtString() @map("created_at")
+  updatedAt       temporal.updatedAtString() @map("updated_at")
+
+  @@map("user")
+}
+
+/// Public-facing profile, one row per {@link User} (technical.md §4, §13).
+/// `avatarBlobId` references a server-core `Blob` by id (no cross-module FK — the
+/// avatar consumer manages `retain` / `release`). Created alongside the `User`.
+model UserProfile {
+  userId       String                     @id @map("user_id")
+  displayName  String                     @map("display_name")
+  bio          String?
+  avatarBlobId String?                    @map("avatar_blob_id")
+  updatedAt    temporal.updatedAtString() @map("updated_at")
+  user         User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profile")
+}
+
+/// A device-scoped login (technical.md §7, §11, ADR 0008). `revokedAt` set =
+/// every access token carrying this `sid` is rejected (via the in-memory
+/// denylist) and its refresh tokens are dead.
+model Session {
+  id            String                     @id @default(ulid())
+  userId        String                     @map("user_id")
+  deviceName    String                     @map("device_name")
+  userAgent     String?                    @map("user_agent")
+  ip            String?
+  createdAt     temporal.createdAtString() @map("created_at")
+  lastSeenAt    TimestamptzString          @map("last_seen_at")
+  revokedAt     TimestamptzString?         @map("revoked_at")
+  revokedReason String?                    @map("revoked_reason")
+  user          User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+/// A single rotating opaque refresh token (technical.md §7, ADR 0008). Only the
+/// SHA-256 hash is stored; `usedAt` set on rotation, and a second use of the
+/// same hash trips reuse detection (whole session revoked).
+model RefreshToken {
+  id           String                     @id @default(ulid())
+  sessionId    String                     @map("session_id")
+  tokenHash    String                     @unique @map("token_hash")
+  createdAt    temporal.createdAtString() @map("created_at")
+  expiresAt    TimestamptzString          @map("expires_at")
+  usedAt       TimestamptzString?         @map("used_at")
+  replacedById String?                    @map("replaced_by_id")
+  session      Session                    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("refresh_token")
+}
+
+/// A `name` that is temporarily not assignable (technical.md §4-§5). Written
+/// when an account is deleted or an identifier is changed; the availability
+/// check rejects any `name` whose row has `reservedUntil > now()`.
+model ReservedUsername {
+  name          String                     @id
+  reservedUntil TimestamptzString          @map("reserved_until")
+  reason        String
+  createdAt     temporal.createdAtString() @map("created_at")
+
+  @@index([reservedUntil])
+  @@map("reserved_username")
+}

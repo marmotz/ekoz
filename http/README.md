@@ -23,6 +23,15 @@ http/
     not-found.hurl             GET /blobs/:id  (404 until a feature adds a policy)
   setup/
     create-owner.hurl          POST /setup/owner  (404 until identity #18)
+  auth/
+    login.hurl                 POST /auth/login    (401 until an account exists)
+    refresh.hurl               POST /auth/refresh  (401 without a refresh token)
+    logout.hurl                POST /auth/logout   (401 without an access token)
+  sessions/
+    list.hurl                  GET    /sessions              (401 without an access token)
+    rename.hurl                PATCH  /sessions/:id          (401 without an access token)
+    revoke.hurl                DELETE /sessions/:id          (401 without an access token)
+    revoke-all.hurl            DELETE /sessions?all=true     (401 without an access token)
 ```
 
 Every file must pass as-is against a fresh local-dev server. A path needing a non-default config or unmerged work stays

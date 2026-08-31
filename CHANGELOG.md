@@ -50,6 +50,17 @@ that does not touch this file.
   owner exists, then `SetupGuard` returns `410`. (#8)
 - Health: `GET /readyz` checks database, schema, signing key and storage, wired
   into the Docker `HEALTHCHECK`. (#11)
+- Local accounts: `user` / `user_profile` / `reserved_username` tables,
+  identifier normalisation and availability rules, Argon2id password hashing
+  with login-time rehash. (#12)
+- Identity and auth runtime parameters: access / refresh token lifetimes, the
+  per-user session cap, reserved usernames and username-change delays. (#12)
+- Authentication: `POST /auth/login`, `/auth/refresh`, `/auth/logout` issuing an
+  EdDSA access token plus a rotating opaque refresh token with reuse detection. (#13)
+- `AuthGuard` / `OwnerGuard` and an in-memory revoked-session denylist. (#13)
+- Session management: `GET /sessions`, `PATCH /sessions/:id`,
+  `DELETE /sessions/:id`, `DELETE /sessions?all=true`, with device-name
+  derivation from the User-Agent. (#14)
 
 ### Notes
 

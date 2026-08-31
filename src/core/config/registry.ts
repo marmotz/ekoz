@@ -29,6 +29,27 @@ const bool = z.union([z.boolean(), z.enum(['true', 'false']).transform((v) => v 
 const int = z.coerce.number().int();
 const ratio = z.coerce.number().min(0).max(1);
 
+/** Unit multipliers for the compact duration form (`15m`, `30d`, `2h`, `45s`). */
+const DURATION_UNIT_SECONDS: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86_400 };
+
+/**
+ * A duration, resolved to a whole number of seconds. Accepts the compact
+ * `<n><unit>` string (`s` / `m` / `h` / `d`, e.g. `15m`) or a bare number of
+ * seconds (string or number, from env / file).
+ */
+const durationSeconds = z.union([z.number().int().min(0), z.string().trim().min(1)]).transform((value, ctx) => {
+  if (typeof value === 'number') return value;
+  if (/^\d+$/.test(value)) return Number(value);
+
+  const match = /^(\d+)\s*([smhd])$/.exec(value);
+  if (!match) {
+    ctx.addIssue({ code: 'custom', message: 'must be a duration like "15m", "30d" or a number of seconds' });
+    return z.NEVER;
+  }
+
+  return Number(match[1]) * DURATION_UNIT_SECONDS[match[2]!]!;
+});
+
 /**
  * The single typed parameter registry (ADR 0009, technical.md §2). Only
  * server-core parameters live here; each feature adds its own on its own task.
@@ -110,6 +131,49 @@ export const PARAMETER_REGISTRY = {
     kind: 'runtime',
     schema: z.enum(['immutable', 'available', 'approval']),
     default: 'immutable',
+    hotReloadable: true,
+    secret: false,
+  },
+  'identity.reserved_usernames': {
+    kind: 'runtime',
+    schema: z.array(z.string()).default([]),
+    default: [],
+    hotReloadable: true,
+    secret: false,
+    list: true,
+  },
+  'identity.username_release_delay': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '30d',
+    hotReloadable: true,
+    secret: false,
+  },
+  'identity.username_change_cooldown': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '30d',
+    hotReloadable: true,
+    secret: false,
+  },
+  'auth.access_token_ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '15m',
+    hotReloadable: true,
+    secret: false,
+  },
+  'auth.refresh_token_ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '30d',
+    hotReloadable: true,
+    secret: false,
+  },
+  'auth.max_sessions_per_user': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 20,
     hotReloadable: true,
     secret: false,
   },
