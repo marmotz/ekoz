@@ -1,6 +1,6 @@
 # server — outbound email (SMTP driver)
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#10](https://github.com/ekoz-chat/server/issues/10)
@@ -11,9 +11,15 @@ Reference: [../features/server-core/technical.md §7](../features/server-core/te
 
 1. `Mailer` interface: `send({ to, subject, template, vars, category })`.
 2. `smtp` driver on `nodemailer`, configured from `email.smtp.*` / `email.from`.
-3. Template loader: `src/core/mail/templates/<name>.{txt,html}.ts`, English,
-   simple interpolation, shared layout using `server.domain` / `server.web_url`.
-   No template engine.
+3. Templates as `{ subject, text, html }` units of `${var}` format strings
+   (English, no template engine), wrapped by a shared layout using
+   `server.domain` / `server.web_url`. Each is registered by its owning feature
+   via `MailService.registerTemplate(name, template)` — `core/mail` ships the
+   layout + mechanism, not the message content. `MailService` resolves a
+   template through an override seam (owner customization of wording / colours /
+   look) that falls back to the registered default; the persistent override
+   store + admin surface are deferred to server-administration. An ADR is owed
+   for the customization model.
 4. `EmailMessage` Prisma model (`id`, `to`, `template`, `category`, `dedupeKey?`
    unique, `sentAt?`, `createdAt`) with a coarse anti-duplication guard.
 5. In-process retry queue with backoff; after N attempts log + record

@@ -2,9 +2,13 @@ node_modules/
 dist/
 coverage/
 
+# Local blob storage root (infra `storage.local.path` default).
+/var/
+
 .env
 compose.override.yml
 config.toml
+http/vars.env
 
 .agents/
 .claude/

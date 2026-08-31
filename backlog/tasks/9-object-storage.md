@@ -1,6 +1,6 @@
 # server — object storage with deduplication (local driver)
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#9](https://github.com/ekoz-chat/server/issues/9)

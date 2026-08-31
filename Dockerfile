@@ -29,7 +29,14 @@ COPY --from=build /app/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER bun
-EXPOSE 3000
+EXPOSE 3010
+
+# Liveness for the orchestrator. `/readyz` (technical.md §9) also covers the
+# database, schema, signing key and storage driver; the start period absorbs the
+# migrate-on-start step. BusyBox `wget` ships in the alpine base.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget --quiet --spider "http://127.0.0.1:${EKOZ_HTTP__PORT:-3010}/readyz" || exit 1
+
 # `prisma db migrate` runs here as an init step, never inside the app process
 # (technical.md §1: avoids races between replicas; the app only *checks* the
 # schema is current, via `verifyMarker` in db.ts).

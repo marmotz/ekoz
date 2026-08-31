@@ -193,8 +193,11 @@ On start, `BootstrapService`:
 4. Determines **setup state**:
    - if an `owner` user exists → setup closed.
    - else if `EKOZ_INITIAL_OWNER_EMAIL` is set → setup open, _email-pinned_.
-   - else → setup open, _token-pinned_: generate a single-use token, print it to
-     stdout (`level=warn`, once), store its hash in `setup_token`.
+   - else → setup open, _token-pinned_: rotate the single-use token on every
+     boot while setup is open (drop the previous unconsumed one, generate a
+     fresh one, print it to stdout at `level=warn`, store only its hash in
+     `setup_token`). Only the hash is persisted, so a missed log line is
+     recovered by a restart rather than being unrecoverable.
 5. Exposes setup endpoints only while setup is open:
    - `POST /setup/owner` `{ email, password, name, displayName }`
      - email-pinned: `email` must equal `EKOZ_INITIAL_OWNER_EMAIL`.
@@ -231,7 +234,9 @@ interface StorageDriver {
 
 ### Blob model
 
-- Table `blob`: `id`, `hash` (sha-256 hex, **unique**), `size_bytes`,
+- Table `blob`: `id`, `hash` (sha-256 hex, **unique**), `size_bytes` (`int4`;
+  the avatar consumer this increment ships is capped well under the 2 GiB
+  ceiling — message attachments revisit the width alongside per-user quotas),
   `content_type`, `storage_key`, `created_at`, `ref_count` (int, default 0).
 - `BlobService.ingest(stream, { declaredType }) -> Blob`:
   streams to a temp location while hashing, then:
@@ -249,11 +254,25 @@ interface StorageDriver {
 
 ## 7. Outbound email
 
-- `Mailer.send({ to, subject, template, vars, category }) -> Promise<void>`.
-- `smtp` driver on `nodemailer`. Config from `email.smtp.*`, sender `email.from`.
-- Templates in `src/core/mail/templates/<name>.{txt,html}.ts` — English only,
-  simple string interpolation, no external template engine. Shared layout with
-  `server.domain` / `server.web_url`.
+- `Mailer` is the transport port (`send` / `verify`); the `smtp` driver runs on
+  `nodemailer`, config from `email.smtp.*`, sender `email.from`. `MailService`
+  sits above it: template resolution, the `email_message` record and the retry
+  queue.
+- **Templates** are `{ subject, text, html }` units of `${var}` format strings,
+  English, no template engine, wrapped by a shared layout (`render` +
+  `wrapText` / `wrapHtml`, fed `server.domain` / `server.web_url`). Each is
+  **registered by the feature that owns it** (`MailService.registerTemplate`,
+  called from that feature's module) — server-core ships the layout and the
+  mechanism, not the message content (identity registers verification / reset).
+  This keeps `core/mail` free of any domain feature's copy (feature-first
+  boundaries).
+- **Owner customization (deferred)**: owners must be able to change the wording,
+  colours and look of every outbound email. `MailService` resolves a template
+  through an override store consulted _before_ the registered default; the store
+  (a table keyed by template name, plus a branding block for colours / product
+  name / logo feeding the layout) and its admin surface land with
+  [server administration](../server-administration/overview.md). The registered
+  templates are the fallback defaults. An ADR is owed for this model.
 - `email_message` table: `id`, `to`, `template`, `category`, `sent_at`,
   `dedupe_key` (nullable, unique-per-window). Used now for a coarse
   anti-duplication guard; the real rate-limiting policy is
@@ -399,11 +418,12 @@ model SetupToken {
 model Blob {
   id          String   @id @default(ulid())
   hash        String   @unique
-  sizeBytes   BigInt
+  sizeBytes   Int // int4; widened when message attachments land (see §6)
   contentType String
   storageKey  String
   refCount    Int      @default(0)
   createdAt   DateTime @default(now())
+  @@index([refCount])
   @@map("blob")
 }
 

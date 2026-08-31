@@ -34,6 +34,10 @@ referenced by an issue are in `backlog/` here. See `backlog/AGENTS.md`.
 - Full-text search: raw Prisma SQL (`$queryRaw`) over PostgreSQL FTS functions.
 - Feature-first architecture, cohesive NestJS modules, no hidden cross-module
   dependencies between domain modules.
+- **Manual API collection** in [`http/`](http/): one runnable Hurl file per
+  request, one directory per endpoint group, exercised against the local-dev
+  server (`http/README.md`). Hand-run documentation, not part of CI — the
+  automated coverage stays in `src/**/*.e2e-spec.ts`.
 - **Every design decision or notable change → an ADR in the `spec` repo**
   (`docs/technical/adr/`, see
   [ADR 0015](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0015-decisions-are-recorded-as-adrs.md)).
@@ -43,6 +47,10 @@ referenced by an issue are in `backlog/` here. See `backlog/AGENTS.md`.
 
 - An ADR is written in `spec` if a decision was made or changed.
 - Tests created / updated and **green**; typecheck green.
+- Any HTTP endpoint added, changed or removed → the matching `http/<group>/*.hurl`
+  file is created, updated or deleted in the same change (one request per file),
+  its assertions still pass against a locally running server, and
+  `http/README.md`'s layout block is kept in sync.
 - `CHANGELOG.md`: an entry added under `## [Unreleased]` as soon as `src/`
   changes (a CI check enforces it). _Keep a Changelog_ format, SemVer. See
   **CHANGELOG entries** below.
@@ -52,9 +60,23 @@ referenced by an issue are in `backlog/` here. See `backlog/AGENTS.md`.
 
 ## CHANGELOG entries
 
-`CHANGELOG.md` records **what changed**, not why. One short bullet per
-user-visible change, tagged with its issue (`(#42)`). No paragraphs, no version
-pins (those live in `package.json`), no "notes on the approach".
+`CHANGELOG.md` records **what changed**, not why. One bullet per user-visible
+change, **one line** (two at most), tagged with its issue (`(#42)`).
+
+Hard limits on a bullet:
+
+- No paragraphs, no "notes on the approach", no version pins (those live in
+  `package.json`).
+- **No parenthetical dump of identifiers, config keys, defaults or file names.**
+  Name the capability, not its internals. A reader who wants the surface goes to
+  the code, the ADR or the PR.
+- If you need "and" more than once, split the feature into that many bullets or
+  cut the detail.
+
+Good: `- Object storage: content-addressed blob store with refcount GC and a
+public `GET /blobs/:id`. (#9)`
+Bad: `- Object storage: `local` `StorageDriver`(content-addressed,`s3`config-schema only), deduplicating`BlobService.ingest`/`retain`/`release`over a`blob`table, a`refCount = 0` GC sweep (`storage.gc_grace_seconds`,
+default 1 h), and `GET /blobs/:id`with`ETag`/immutable caching …`
 
 Rationale, trade-offs, tooling surprises, "an ADR is owed" → the ADR itself and
 the commit/PR body, never the changelog. The only caveats that belong in a

@@ -1,15 +1,31 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Res } from '@nestjs/common';
+import type { Response } from 'express';
+import { Public } from '../http/public.decorator.js';
+import { ReadinessService, type ReadinessReport } from './readiness.service.js';
 
 /**
- * Liveness probe only: "the process is up", no dependencies checked
- * (technical.md §9). Readiness (`/readyz`) and the per-dependency breakdown are
- * delivered by task #11; this stub exists so the skeleton boots as a real HTTP
- * service and the e2e smoke test has a target.
+ * Health probes. Both are public and excluded from the access log.
+ *
+ * `/healthz` is pure liveness — "the process is up", no dependency checks.
+ *
+ * `/readyz` runs the dependency checks and answers `503` with the failing ones when the server is not ready to serve.
  */
 @Controller()
 export class HealthController {
+  constructor(private readonly readiness: ReadinessService) {}
+
+  @Public()
   @Get('healthz')
   healthz(): { status: 'ok' } {
     return { status: 'ok' };
+  }
+
+  @Public()
+  @Get('readyz')
+  async readyz(@Res({ passthrough: true }) res: Response): Promise<ReadinessReport> {
+    const report = await this.readiness.check();
+    res.status(report.status === 'ready' ? 200 : 503);
+
+    return report;
   }
 }

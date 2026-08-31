@@ -96,6 +96,11 @@ export class SigningService implements OnModuleInit {
     return { id: row.id, algorithm: row.algorithm, publicKey: row.publicKey };
   }
 
+  /** `true` when an active key already exists — read-only, never generates one. */
+  async hasActiveKey(): Promise<boolean> {
+    return (await this.findActiveRow()) !== null;
+  }
+
   /** Every currently published key, active first (technical.md §4 discovery doc). */
   async listPublicKeys(): Promise<PublishedSigningKey[]> {
     const overlapMs = this.config.get('signing.key_overlap_seconds') * 1000;

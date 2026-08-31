@@ -1,6 +1,6 @@
 # server — bootstrap and setup state machine
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#8](https://github.com/ekoz-chat/server/issues/8)
@@ -14,9 +14,11 @@ and [ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/00
    current, ensure a signing key exists (generate otherwise).
 2. Setup state resolution: `closed` if an owner user exists; else `email-pinned`
    if `EKOZ_INITIAL_OWNER_EMAIL` is set; else `token-pinned`.
-3. `token-pinned`: generate a single-use token, print its value to stdout once
-   (`warn`), store its hash in the `SetupToken` model (`tokenHash`, `createdAt`,
-   `consumedAt`).
+3. `token-pinned`: rotate a single-use token on every boot while setup is open
+   (drop the previous unconsumed row, generate a fresh token, print its value to
+   stdout at `warn`), storing only its hash in the `SetupToken` model
+   (`tokenHash`, `createdAt`, `consumedAt`). Only the hash is persisted, so a
+   missed log line is recovered by restarting, not lost.
 4. `SetupGuard` + `SetupService`: expose setup only while open; all `/setup/*`
    routes return `410 Gone` once an owner exists (and forever after).
 5. Emit `server.initialized` to the audit log on successful setup.

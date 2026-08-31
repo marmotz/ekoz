@@ -27,10 +27,10 @@ each issue body carries `Depends on #N` lines.
 | ☑    | [#5](https://github.com/ekoz-chat/server/issues/5)   | [5-crypto-and-signing-keys](tasks/5-crypto-and-signing-keys.md)             | secret box, Ed25519 keys, SigningService, rotation                         |
 | ☑    | [#6](https://github.com/ekoz-chat/server/issues/6)   | [6-server-identity-and-discovery](tasks/6-server-identity-and-discovery.md) | domain validation, `/.well-known/ekoz`                                     |
 | ☑    | [#7](https://github.com/ekoz-chat/server/issues/7)   | [7-audit-log](tasks/7-audit-log.md)                                         | append-only audit_log + AuditService                                       |
-| ☐    | [#8](https://github.com/ekoz-chat/server/issues/8)   | [8-bootstrap-initialization](tasks/8-bootstrap-initialization.md)           | setup state machine, token, SetupGuard                                     |
-| ☐    | [#9](https://github.com/ekoz-chat/server/issues/9)   | [9-object-storage](tasks/9-object-storage.md)                               | StorageDriver, local driver, blob dedup, GC, `/blobs/:id`                  |
-| ☐    | [#10](https://github.com/ekoz-chat/server/issues/10) | [10-outbound-email](tasks/10-outbound-email.md)                             | Mailer, SMTP driver, templates, retry queue                                |
-| ☐    | [#11](https://github.com/ekoz-chat/server/issues/11) | [11-health-endpoints](tasks/11-health-endpoints.md)                         | `/healthz`, `/readyz`                                                      |
+| ☑    | [#8](https://github.com/ekoz-chat/server/issues/8)   | [8-bootstrap-initialization](tasks/8-bootstrap-initialization.md)           | setup state machine, token, SetupGuard                                     |
+| ☑    | [#9](https://github.com/ekoz-chat/server/issues/9)   | [9-object-storage](tasks/9-object-storage.md)                               | StorageDriver, local driver, blob dedup, GC, `/blobs/:id`                  |
+| ☑    | [#10](https://github.com/ekoz-chat/server/issues/10) | [10-outbound-email](tasks/10-outbound-email.md)                             | Mailer, SMTP driver, templates, retry queue                                |
+| ☑    | [#11](https://github.com/ekoz-chat/server/issues/11) | [11-health-endpoints](tasks/11-health-endpoints.md)                         | `/healthz`, `/readyz`                                                      |
 | ☑    | [#38](https://github.com/ekoz-chat/server/issues/38) | [38-observability-module](tasks/38-observability-module.md)                 | pino logs + redaction, OTel + guarded `/metrics`, baseline instruments     |
 
 ## Identity and profiles
