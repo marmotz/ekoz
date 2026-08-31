@@ -1,12 +1,11 @@
-# List the caller's sessions (technical.md §11, issue #14). The current session
-# is flagged with `current: true`. Needs a valid access token.
-#
-# Real flow:
-#   GET {{base_url}}/sessions
-#   Authorization: Bearer {{access_token}}
-#   HTTP 200
+# List the caller's sessions — happy path (technical.md §11, issue #14). The
+# current session is flagged `current: true`. Set `access_token` from a login.
 GET {{base_url}}/sessions
-Authorization: Bearer not-a-real-token
-HTTP 401
+Authorization: Bearer {{access_token}}
+HTTP 200
+[Captures]
+session_id: jsonpath "$[0].id"
 [Asserts]
-jsonpath "$.code" == "auth.unauthenticated"
+jsonpath "$" isCollection
+jsonpath "$[0].id" isString
+jsonpath "$[*].current" includes true

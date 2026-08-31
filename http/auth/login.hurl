@@ -1,19 +1,20 @@
-# Password login (technical.md §11, ADR 0008). `identifier` accepts a bare
-# `name`, the full `name/server`, or the account email.
+# Password login — happy path (technical.md §11, ADR 0008).
 #
-# A fresh local-dev server has no accounts yet (registration is #15, first-owner
-# setup is #18), so this asserts the unknown-credentials 401 + problem+json
-# shape. Once an account exists, expect:
-#   HTTP 200
-#   [Captures]
-#   access_token: jsonpath "$.accessToken"
-#   refresh_token: jsonpath "$.refreshToken"
+# `identifier` accepts a bare `name`, the full `name/server`, or the account
+# email. Needs an existing, active, email-verified account: set `identifier` /
+# `password` (the owner from /setup/owner works).
 POST {{base_url}}/auth/login
 {
-  "identifier": "nobody",
-  "password": "wrong-password"
+  "identifier": "owner",
+  "password": "correct-horse-battery-staple"
 }
-HTTP 401
+HTTP 200
+[Captures]
+access_token: jsonpath "$.accessToken"
+refresh_token: jsonpath "$.refreshToken"
+session_id: jsonpath "$.session.id"
 [Asserts]
-jsonpath "$.code" == "auth.invalid_credentials"
-jsonpath "$.status" == 401
+jsonpath "$.accessToken" matches /^[\w-]+\.[\w-]+\.[\w-]+$/
+jsonpath "$.refreshToken" isString
+jsonpath "$.expiresIn" isInteger
+jsonpath "$.session.current" == true

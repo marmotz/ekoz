@@ -1,12 +1,9 @@
-# Logout (technical.md §7). Revokes the current session: its refresh token dies
-# and its `sid` joins the in-memory denylist. Needs a valid access token.
+# Logout — happy path (technical.md §7). Revokes the current session: its
+# refresh token dies and its `sid` joins the in-memory denylist, so the access
+# token stops working within its TTL. 204, no body.
 #
-# Without one this is 401. Real flow:
-#   POST {{base_url}}/auth/logout
-#   Authorization: Bearer {{access_token}}
-#   HTTP 204
+# Set `access_token` from a login. This consumes that session — re-login for
+# further requests.
 POST {{base_url}}/auth/logout
-Authorization: Bearer not-a-real-token
-HTTP 401
-[Asserts]
-jsonpath "$.code" == "auth.unauthenticated"
+Authorization: Bearer {{access_token}}
+HTTP 204

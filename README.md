@@ -41,17 +41,18 @@ Specs live next to the code they cover: `*.spec.ts` (unit) and `*.e2e-spec.ts`
 
 ## Scripts
 
-| Script                | What it does                                |
-| --------------------- | ------------------------------------------- |
-| `bun run start:dev`   | watch-mode server                           |
-| `bun run typecheck`   | `tsc --noEmit`                              |
-| `bun run lint`        | ESLint                                      |
-| `bun run test`        | unit + integration (Vitest)                 |
-| `bun run test:unit`   | unit only                                   |
-| `bun run db:contract` | re-emit `generated/` from `contract.prisma` |
-| `bun run db:plan`     | plan a migration from contract changes      |
-| `bun run db:migrate`  | apply pending migrations                    |
-| `bun run db:verify`   | check the DB marker matches the contract    |
+| Script                | What it does                                              |
+| --------------------- | --------------------------------------------------------- |
+| `bun run start:dev`   | watch-mode server                                         |
+| `bun run typecheck`   | `tsc --noEmit`                                            |
+| `bun run lint`        | ESLint                                                    |
+| `bun run test`        | unit + integration (Vitest)                               |
+| `bun run test:unit`   | unit only                                                 |
+| `bun run db:contract` | re-emit `generated/` from `contract.prisma`               |
+| `bun run db:plan`     | plan a migration from contract changes                    |
+| `bun run db:migrate`  | apply pending migrations                                  |
+| `bun run db:verify`   | check the DB marker matches the contract                  |
+| `bun run db:reset`    | drop every schema then replay migrations (local dev only) |
 
 ## Database workflow (Prisma Next)
 

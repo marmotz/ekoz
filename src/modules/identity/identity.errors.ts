@@ -65,3 +65,45 @@ export class SessionNotFoundError extends DomainError {
     super('identity.session_not_found', detail, 404, 'Not Found');
   }
 }
+
+export class WeakPasswordError extends DomainError {
+  constructor(detail = 'The password does not meet the minimum policy.') {
+    super('identity.password_too_weak', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class RegistrationClosedError extends DomainError {
+  constructor(detail = 'Self-service registration is disabled on this server.') {
+    super('identity.registration_closed', detail, 403, 'Forbidden');
+  }
+}
+
+export class InvitationInvalidError extends DomainError {
+  constructor(detail = 'The invitation is invalid, expired or already used.') {
+    super('identity.invitation_invalid', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class InvitationNotFoundError extends DomainError {
+  constructor(detail = 'Invitation not found.') {
+    super('identity.invitation_not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class EmailVerificationInvalidError extends DomainError {
+  constructor(detail = 'The verification link is invalid or has expired.') {
+    super('identity.email_verification_invalid', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class EmailAlreadyInUseError extends DomainError {
+  constructor(detail = 'This email address is already in use.') {
+    super('identity.email_taken', detail, 409, 'Conflict');
+  }
+}
+
+export class SetupRejectedError extends DomainError {
+  constructor(detail = 'The setup credentials were rejected.') {
+    super('identity.setup_rejected', detail, 403, 'Forbidden');
+  }
+}

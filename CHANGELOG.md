@@ -61,6 +61,18 @@ that does not touch this file.
 - Session management: `GET /sessions`, `PATCH /sessions/:id`,
   `DELETE /sessions/:id`, `DELETE /sessions?all=true`, with device-name
   derivation from the User-Agent. (#14)
+- Registration: `POST /auth/register` honouring the `open` / `invite` / `admin`
+  `registration.mode`, with a minimal password policy. (#15)
+- Owner account creation for `admin` mode: `POST /admin/users`. (#15)
+- Invitations: `POST /invitations`, `GET /invitations`, `DELETE /invitations/:id`
+  for owners, with hashed single-use tokens. (#15)
+- Email verification: `POST /auth/verify-email` and `/auth/verify-email/resend`,
+  with login blocked until the address is verified. (#16)
+- Email change: `POST /me/email` applies the new address only once verified and
+  notifies the previous one. (#16)
+- First-owner setup: `POST /setup/owner`, email- or token-pinned, creating the
+  initial owner account and session and emitting `server.initialized`. (#18)
+- Runtime parameters `email.verification_ttl` and `invitation.ttl`. (#15, #16)
 
 ### Notes
 

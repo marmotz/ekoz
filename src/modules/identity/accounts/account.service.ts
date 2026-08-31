@@ -18,6 +18,9 @@ export interface UserRecord {
   createdAt: string;
 }
 
+/** The transaction handle passed to {@link CreateAccountInput.afterCreate}. */
+export type AccountTx = Parameters<Parameters<PrismaService['transaction']>[0]>[0];
+
 export interface CreateAccountInput {
   name: string;
   email: string;
@@ -25,6 +28,12 @@ export interface CreateAccountInput {
   displayName: string;
   isOwner?: boolean;
   emailVerified?: boolean;
+  /**
+   * Runs inside the same transaction as the `User` / `UserProfile` insert,
+   * after both exist — used by registration to consume an invitation and by
+   * the first-owner setup to create the initial session atomically.
+   */
+  afterCreate?: (tx: AccountTx, user: UserRecord) => Promise<void>;
 }
 
 /**
@@ -71,10 +80,53 @@ export class AccountService {
         updatedAt: now,
       });
 
+      if (input.afterCreate) {
+        await input.afterCreate(tx, toRecord(created));
+      }
+
       return created;
     })) as UserRow;
 
     return toRecord(user);
+  }
+
+  /** Look up by (already-normalised or raw) email address. */
+  async findByEmail(email: string): Promise<UserRecord | null> {
+    const value = email.normalize('NFC').trim().toLowerCase();
+    const row = (await this.prisma.orm.public.User.where({ email: value }).first()) as UserRow | null;
+
+    return row ? toRecord(row) : null;
+  }
+
+  /** `true` when at least one active owner account exists. */
+  async ownerExists(): Promise<boolean> {
+    const row = (await this.prisma.orm.public.User.where({
+      isOwner: true,
+      status: 'active',
+    }).first()) as { id: string } | null;
+
+    return row !== null;
+  }
+
+  /** Mark `userId`'s current email verified (idempotent). */
+  async markEmailVerified(userId: string): Promise<void> {
+    await this.prisma.orm.public.User.where({ id: userId }).update({
+      emailVerifiedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Apply a verified email change: set the new address and stamp it verified.
+   * The caller has already checked the address is still free.
+   */
+  async applyEmailChange(userId: string, email: string): Promise<void> {
+    const now = new Date().toISOString();
+    await this.prisma.orm.public.User.where({ id: userId }).update({
+      email: email.normalize('NFC').trim().toLowerCase(),
+      emailVerifiedAt: now,
+      updatedAt: now,
+    });
   }
 
   /** Look up by primary key. */

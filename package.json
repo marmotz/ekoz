@@ -25,6 +25,7 @@
     "db:migrate": "prisma db migrate",
     "db:deploy": "prisma db migrate --no-interactive",
     "db:status": "prisma migration status",
+    "db:reset": "bun -e 'await Bun.sql.unsafe(`DROP SCHEMA IF EXISTS public CASCADE`); await Bun.sql.unsafe(`DROP SCHEMA IF EXISTS prisma_contract CASCADE`); await Bun.sql.unsafe(`CREATE SCHEMA public`)' && prisma db migrate --no-interactive",
     "db:verify": "prisma db verify",
     "postinstall": "prisma contract emit && prisma skills sync"
   },

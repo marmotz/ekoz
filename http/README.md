@@ -1,42 +1,106 @@
 # `http/` — manual API collection (Hurl)
 
-Hand-run requests against a locally running server, to _use_ the API while server-core is built (the automated suite
-lives in `src/**/*.e2e-spec.ts`). These `.hurl` files double as living documentation of the current endpoints.
+Hand-run requests to _use_ and explore the API against a locally running server.
+**This is not an automated suite** — that lives in `src/**/*.e2e-spec.ts`. These
+`.hurl` files double as living documentation of the current endpoints.
 
-**One request per file, one directory per endpoint group.** Hurl writes only the last entry's response body to stdout,
-so a multi-request file hides all but the last response. One request per file means running it always shows its
-response.
+**One request per file, one directory per endpoint group.** Hurl writes only the
+last entry's response body to stdout, so a multi-request file hides all but the
+last response. One request per file means running it always shows its response.
+
+**Every endpoint has a file per outcome.** The plain name (`login.hurl`,
+`create.hurl`, …) is the happy path; siblings cover the error outcomes
+(`login-invalid.hurl`, `create-forbidden.hurl`, …).
+
+## State a file needs
+
+A file is only meaningful in a particular server state, called out in its
+header. Three kinds:
+
+- **Any state** — the error-path files that present a bogus token / bad
+  credentials or a malformed body. These pass as-is, always
+  (`*-unauthenticated.hurl`, `login-invalid.hurl`, `refresh-invalid.hurl`,
+  `register-needs-invitation.hurl`, `register-weak-password.hurl`,
+  `verify-email-invalid.hurl`, `verify-email-resend.hurl`).
+- **A captured value** — happy paths and owner/not-found cases that need
+  `access_token`, `refresh_token`, `session_id`, `invite_token`,
+  `invitation_id` or `verify_token`. Run the request that mints the value, copy
+  it into `vars.env`, then run the dependent file. Order: `setup/create-owner`
+  **or** `auth/login` → `invitations/create` → `auth/register` →
+  `auth/verify-email` → the rest.
+- **A specific config or a fresh database** — e.g. `setup/create-owner*` (fresh
+  DB, no owner), `auth/register-closed.hurl` (`registration.mode = admin`),
+  `metrics/scrape.hurl` (`metrics_enabled = true`). The header says which.
+
+Because `setup/owner` is one-shot (a success closes setup for good), the
+`setup/create-owner*` files can never all be green at once: on a fresh DB
+`create-owner` + `create-owner-rejected` pass and `create-owner-closed` fails;
+after setup it is the reverse.
 
 ## Layout
 
 ```
 http/
-  vars.env.example             template — copy to vars.env (gitignored)
+  vars.env.example                    template — copy to vars.env (gitignored)
   health/
-    healthz.hurl               GET /healthz
-    readyz.hurl                GET /readyz
+    healthz.hurl                      GET /healthz
+    readyz.hurl                       GET /readyz
   discovery/
-    well-known.hurl            GET /.well-known/ekoz
+    well-known.hurl                   GET /.well-known/ekoz
   metrics/
-    scrape.hurl                GET /metrics  (404 unless metrics_enabled)
+    scrape.hurl                       GET /metrics                    (404 unless metrics_enabled)
   blobs/
-    not-found.hurl             GET /blobs/:id  (404 until a feature adds a policy)
+    not-found.hurl                    GET /blobs/:id                  (404 until a feature adds a policy)
   setup/
-    create-owner.hurl          POST /setup/owner  (404 until identity #18)
+    create-owner.hurl                 POST /setup/owner               201 · fresh DB + real setup_token
+    create-owner-rejected.hurl        POST /setup/owner               403 · bad token / email
+    create-owner-closed.hurl          POST /setup/owner               410 · owner already exists
   auth/
-    login.hurl                 POST /auth/login    (401 until an account exists)
-    refresh.hurl               POST /auth/refresh  (401 without a refresh token)
-    logout.hurl                POST /auth/logout   (401 without an access token)
+    login.hurl                        POST /auth/login                200 · needs an account
+    login-invalid.hurl                POST /auth/login                401 auth.invalid_credentials
+    login-unverified.hurl             POST /auth/login                403 identity.email_not_verified
+    refresh.hurl                      POST /auth/refresh              200 · needs refresh_token
+    refresh-invalid.hurl              POST /auth/refresh              401 auth.refresh_invalid
+    refresh-reuse.hurl                POST /auth/refresh              401 auth.refresh_reuse
+    logout.hurl                       POST /auth/logout               204 · needs access_token
+    logout-unauthenticated.hurl       POST /auth/logout              401 auth.unauthenticated
+    register.hurl                     POST /auth/register             201 · invite mode + invite_token
+    register-needs-invitation.hurl    POST /auth/register             422 identity.invitation_invalid
+    register-weak-password.hurl       POST /auth/register             422 identity.password_too_weak
+    register-duplicate.hurl           POST /auth/register             409 identity.username_taken
+    register-closed.hurl              POST /auth/register             403 identity.registration_closed
+    verify-email.hurl                 POST /auth/verify-email         200 · needs verify_token
+    verify-email-invalid.hurl         POST /auth/verify-email         422 identity.email_verification_invalid
+    verify-email-resend.hurl          POST /auth/verify-email/resend  202 always
+  me/
+    email.hurl                        POST /me/email                  202 · needs access_token
+    email-unauthenticated.hurl        POST /me/email                  401 auth.unauthenticated
+    email-wrong-password.hurl         POST /me/email                  401 auth.invalid_credentials
+    email-taken.hurl                  POST /me/email                  409 identity.email_taken
+  invitations/
+    create.hurl                       POST   /invitations             201 · needs owner access_token
+    create-unauthenticated.hurl       POST   /invitations             401 auth.unauthenticated
+    create-forbidden.hurl             POST   /invitations             403 auth.forbidden (non-owner)
+    list.hurl                         GET    /invitations             200 · needs owner access_token
+    list-unauthenticated.hurl         GET    /invitations             401 auth.unauthenticated
+    revoke.hurl                       DELETE /invitations/:id          204 · needs owner + invitation_id
+    revoke-unauthenticated.hurl       DELETE /invitations/:id          401 auth.unauthenticated
+    revoke-not-found.hurl             DELETE /invitations/:id          404 identity.invitation_not_found
+  admin/
+    create-user.hurl                  POST /admin/users               201 · needs owner access_token
+    create-user-unauthenticated.hurl  POST /admin/users               401 auth.unauthenticated
+    create-user-forbidden.hurl        POST /admin/users               403 auth.forbidden (non-owner)
   sessions/
-    list.hurl                  GET    /sessions              (401 without an access token)
-    rename.hurl                PATCH  /sessions/:id          (401 without an access token)
-    revoke.hurl                DELETE /sessions/:id          (401 without an access token)
-    revoke-all.hurl            DELETE /sessions?all=true     (401 without an access token)
+    list.hurl                         GET    /sessions                200 · needs access_token
+    list-unauthenticated.hurl         GET    /sessions                401 auth.unauthenticated
+    rename.hurl                       PATCH  /sessions/:id             200 · needs access_token + session_id
+    rename-unauthenticated.hurl       PATCH  /sessions/:id             401 auth.unauthenticated
+    rename-not-found.hurl             PATCH  /sessions/:id             404 identity.session_not_found
+    revoke.hurl                       DELETE /sessions/:id             204 · needs access_token + session_id
+    revoke-unauthenticated.hurl       DELETE /sessions/:id             401 auth.unauthenticated
+    revoke-all.hurl                   DELETE /sessions?all=true        200 · needs access_token
+    revoke-all-unauthenticated.hurl   DELETE /sessions?all=true        401 auth.unauthenticated
 ```
-
-Every file must pass as-is against a fresh local-dev server. A path needing a non-default config or unmerged work stays
-a comment in the closest file (see
-`metrics/scrape.hurl`, `setup/create-owner.hurl`).
 
 ## Prerequisites
 
@@ -57,8 +121,12 @@ hurl --variables-file http/vars.env http/health/readyz.hurl
 # check its assertions
 hurl --variables-file http/vars.env --test http/health/readyz.hurl
 
-# the whole collection
-hurl --variables-file http/vars.env --test --glob 'http/**/*.hurl'
+# the error-path files (green in any state)
+hurl --variables-file http/vars.env --test --glob 'http/**/*-unauthenticated.hurl'
+
+# a happy-path chain, threading captured values back into vars.env by hand
+hurl --variables-file http/vars.env --test http/auth/login.hurl
+hurl --variables-file http/vars.env --test http/sessions/list.hurl
 
 # full request + response (headers and body)
 hurl --variables-file http/vars.env --very-verbose http/discovery/well-known.hurl

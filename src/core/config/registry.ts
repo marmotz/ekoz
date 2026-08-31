@@ -127,6 +127,20 @@ export const PARAMETER_REGISTRY = {
     secret: false,
   },
   'email.verification_required': { kind: 'runtime', schema: bool, default: true, hotReloadable: true, secret: false },
+  'email.verification_ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '24h',
+    hotReloadable: true,
+    secret: false,
+  },
+  'invitation.ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '7d',
+    hotReloadable: true,
+    secret: false,
+  },
   'identity.username_change_policy': {
     kind: 'runtime',
     schema: z.enum(['immutable', 'available', 'approval']),
