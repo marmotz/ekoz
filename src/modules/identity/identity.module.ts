@@ -23,6 +23,9 @@ import { RevokedSessionRegistry } from './auth/revoked-session.registry.js';
 import { SensitiveThrottleGuard } from './auth/sensitive-throttle.guard.js';
 import { SessionService } from './auth/session.service.js';
 import { SessionsController } from './auth/sessions.controller.js';
+import { InProcessStreamTicketStore, STREAM_TICKET_STORE } from './auth/stream-ticket.store.js';
+import { StreamController } from './auth/stream.controller.js';
+import { TicketService } from './auth/ticket.service.js';
 import { TokenService } from './auth/token.service.js';
 import { EmailVerificationController, MeEmailController } from './email-verification/email-verification.controller.js';
 import { EmailVerificationService } from './email-verification/email-verification.service.js';
@@ -39,8 +42,8 @@ import { ProfileService } from './profile/profile.service.js';
  * session management (#14); registration modes and invitations (#15); email
  * verification and email change (#16); first-owner setup (#18); password reset
  * (#17); profile and avatar (#19); policy-driven identifier changes (#20);
- * suspension / deletion / owner management (#21); and the credential-endpoint
- * throttle (#22).
+ * suspension / deletion / owner management (#21); the credential-endpoint
+ * throttle (#22); and the SSE stream ticket (#23).
  *
  * `AuthGuard` / `OwnerGuard` are exported for controllers to opt into with
  * `@UseGuards(...)`; a later task promotes `AuthGuard` to a global guard once
@@ -50,6 +53,7 @@ import { ProfileService } from './profile/profile.service.js';
   controllers: [
     AuthController,
     SessionsController,
+    StreamController,
     RegistrationController,
     AdminUsersController,
     EmailVerificationController,
@@ -72,6 +76,8 @@ import { ProfileService } from './profile/profile.service.js';
     TokenService,
     RevokedSessionRegistry,
     SessionService,
+    TicketService,
+    { provide: STREAM_TICKET_STORE, useClass: InProcessStreamTicketStore },
     RefreshTokenService,
     AuthService,
     RegistrationService,
@@ -92,6 +98,7 @@ import { ProfileService } from './profile/profile.service.js';
     PasswordService,
     TokenService,
     SessionService,
+    TicketService,
     EmailVerificationService,
     InvitationService,
     ProfileService,

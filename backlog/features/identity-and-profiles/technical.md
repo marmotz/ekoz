@@ -61,6 +61,7 @@ All `runtime` (see server-core registry):
 | `auth.refresh_token_ttl`            | `30d`                        | refresh token lifetime (absolute)         |
 | `auth.max_sessions_per_user`        | `20`                         | oldest session evicted past this          |
 | `auth.sensitive_throttle`           | `{ window: "15m", max: 10 }` | see §14                                   |
+| `auth.stream_ticket_ttl`            | `30s`                        | SSE stream ticket validity (§12)          |
 | `invitation.ttl`                    | `7d`                         | invitation validity                       |
 | `identity.username_release_delay`   | `30d`                        | grace before a freed `name` can be reused |
 | `identity.username_change_cooldown` | `30d`                        | min delay between self-service changes    |

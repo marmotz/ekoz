@@ -124,6 +124,9 @@ http/
     revoke-unauthenticated.hurl       DELETE /sessions/:id             401 auth.unauthenticated
     revoke-all.hurl                   DELETE /sessions?all=true        200 · needs access_token
     revoke-all-unauthenticated.hurl   DELETE /sessions?all=true        401 auth.unauthenticated
+  stream/
+    ticket.hurl                       POST   /stream/ticket           200 · needs access_token
+    ticket-unauthenticated.hurl       POST   /stream/ticket           401 auth.unauthenticated
 ```
 
 ## Prerequisites

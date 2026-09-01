@@ -198,6 +198,13 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: true,
     secret: false,
   },
+  'auth.stream_ticket_ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '30s',
+    hotReloadable: true,
+    secret: false,
+  },
   'auth.sensitive_throttle': {
     kind: 'runtime',
     // Accepts the resolved object, or a JSON string from an env override.

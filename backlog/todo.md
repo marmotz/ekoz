@@ -50,7 +50,7 @@ each issue body carries `Depends on #N` lines.
 | ☑    | [#20](https://github.com/ekoz-chat/server/issues/20) | [20-identity-identifier-change](tasks/20-identity-identifier-change.md)                       | immutable/available/approval policies                                |
 | ☑    | [#21](https://github.com/ekoz-chat/server/issues/21) | [21-identity-account-lifecycle](tasks/21-identity-account-lifecycle.md)                       | suspension, deletion + anonymisation, owners                         |
 | ☑    | [#22](https://github.com/ekoz-chat/server/issues/22) | [22-identity-sensitive-endpoint-throttle](tasks/22-identity-sensitive-endpoint-throttle.md)   | narrow throttle on credential endpoints                              |
-| ☐    | [#23](https://github.com/ekoz-chat/server/issues/23) | [23-identity-sse-stream-ticket](tasks/23-identity-sse-stream-ticket.md)                       | `POST /stream/ticket` + ticket store                                 |
+| ☑    | [#23](https://github.com/ekoz-chat/server/issues/23) | [23-identity-sse-stream-ticket](tasks/23-identity-sse-stream-ticket.md)                       | `POST /stream/ticket` + ticket store                                 |
 
 ## Conversations
 
