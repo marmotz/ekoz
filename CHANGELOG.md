@@ -91,6 +91,9 @@ that does not touch this file.
   `/auth/password-reset/request` and `/auth/verify-email/resend` — a deliberate
   minimal exception to deferred general rate limiting. (#22)
 - Runtime parameters `auth.password_reset_ttl` and `auth.sensitive_throttle`. (#17, #22)
+- Authenticated `POST /stream/ticket`: single-use short-lived ticket bound to the
+  caller's session for the SSE stream, behind a swappable store interface. (#23)
+- Runtime parameter `auth.stream_ticket_ttl`. (#23)
 
 ### Notes
 
