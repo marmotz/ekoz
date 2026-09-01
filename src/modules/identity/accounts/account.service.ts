@@ -21,6 +21,21 @@ export interface UserRecord {
 /** The transaction handle passed to {@link CreateAccountInput.afterCreate}. */
 export type AccountTx = Parameters<Parameters<PrismaService['transaction']>[0]>[0];
 
+/** A {@link UserProfile} row as the identity feature consumes it. */
+export interface ProfileRecord {
+  displayName: string;
+  bio: string | null;
+  avatarBlobId: string | null;
+  updatedAt: string;
+}
+
+interface ProfileRow {
+  displayName: string;
+  bio: string | null;
+  avatarBlobId: string | null;
+  updatedAt: string;
+}
+
 export interface CreateAccountInput {
   name: string;
   email: string;
@@ -108,6 +123,24 @@ export class AccountService {
     return row !== null;
   }
 
+  /** Number of active accounts flagged as owners. */
+  async countActiveOwners(): Promise<number> {
+    const rows = (await this.prisma.orm.public.User.where({
+      isOwner: true,
+      status: 'active',
+    }).all()) as Array<{ id: string }>;
+
+    return rows.length;
+  }
+
+  /** Flip the owner flag on an account. */
+  async setOwner(id: string, isOwner: boolean): Promise<void> {
+    await this.prisma.orm.public.User.where({ id }).update({
+      isOwner,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   /** Mark `userId`'s current email verified (idempotent). */
   async markEmailVerified(userId: string): Promise<void> {
     await this.prisma.orm.public.User.where({ id: userId }).update({
@@ -127,6 +160,20 @@ export class AccountService {
       emailVerifiedAt: now,
       updatedAt: now,
     });
+  }
+
+  /** The profile row for `userId` (display name, bio, avatar), or `null`. */
+  async getProfile(userId: string): Promise<ProfileRecord | null> {
+    const row = (await this.prisma.orm.public.UserProfile.first({ userId })) as ProfileRow | null;
+
+    return row
+      ? { displayName: row.displayName, bio: row.bio, avatarBlobId: row.avatarBlobId, updatedAt: row.updatedAt }
+      : null;
+  }
+
+  /** The profile display name for `userId`, or a neutral fallback for emails. */
+  async displayNameOf(userId: string): Promise<string> {
+    return (await this.getProfile(userId))?.displayName ?? 'there';
   }
 
   /** Look up by primary key. */
@@ -162,6 +209,12 @@ export class AccountService {
     const row = (await this.prisma.orm.public.User.where({ name }).first()) as UserRow | null;
 
     return row ? toRecord(row) : null;
+  }
+
+  /** Set the account identifier (`name`). The caller has validated availability. */
+  async updateName(id: string, name: string, tx?: AccountTx): Promise<void> {
+    const orm = tx?.orm ?? this.prisma.orm;
+    await orm.public.User.where({ id }).update({ name, updatedAt: new Date().toISOString() });
   }
 
   /** Replace the stored password hash (login-time rehash on a policy drift). */

@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
+import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
 import { AuthGuard } from '../guards/auth.guard.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
 import type { AccountView } from './account.view.js';
@@ -23,6 +24,7 @@ export class RegistrationController {
 
   @Post()
   @Public()
+  @UseGuards(SensitiveThrottleGuard)
   @HttpCode(201)
   register(@Body(new ZodValidationPipe(RegisterSchema)) body: RegisterBody): Promise<AccountView> {
     return this.registration.register({

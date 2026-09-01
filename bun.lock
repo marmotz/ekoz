@@ -23,6 +23,7 @@
         "@prisma/cli-engine": "0.3.0",
         "@prisma/orm-postgres": "8.0.0-rc.8",
         "dotenv": "17.4.2",
+        "file-type": "^22.0.2",
         "nodemailer": "^9.0.6",
         "pino": "^10.3.1",
         "prisma": "8.0.0-rc.12",

@@ -191,6 +191,23 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: true,
     secret: false,
   },
+  'auth.password_reset_ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '1h',
+    hotReloadable: true,
+    secret: false,
+  },
+  'auth.sensitive_throttle': {
+    kind: 'runtime',
+    // Accepts the resolved object, or a JSON string from an env override.
+    schema: z
+      .union([z.string().transform((s) => JSON.parse(s) as unknown), z.object({}).passthrough()])
+      .pipe(z.object({ window: durationSeconds, max: int.pipe(z.number().min(1)) })),
+    default: { window: '15m', max: 10 },
+    hotReloadable: true,
+    secret: false,
+  },
   'profile.bio_max_length': {
     kind: 'runtime',
     schema: int.pipe(z.number().min(0)),

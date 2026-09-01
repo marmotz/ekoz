@@ -31,6 +31,12 @@ export class ProblemExceptionFilter implements ExceptionFilter {
       );
     }
 
+    if (exception instanceof DomainError && exception.headers) {
+      for (const [name, value] of Object.entries(exception.headers)) {
+        res.setHeader(name, value);
+      }
+    }
+
     res.status(problem.status).type(PROBLEM_JSON_CONTENT_TYPE).send(problem);
   }
 

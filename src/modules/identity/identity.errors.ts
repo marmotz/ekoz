@@ -107,3 +107,83 @@ export class SetupRejectedError extends DomainError {
     super('identity.setup_rejected', detail, 403, 'Forbidden');
   }
 }
+
+export class PasswordResetInvalidError extends DomainError {
+  constructor(detail = 'The password reset link is invalid or has expired.') {
+    super('auth.password_reset_invalid', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class UserNotFoundError extends DomainError {
+  constructor(detail = 'No such user.') {
+    super('identity.user_not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class ProfileNotFoundError extends DomainError {
+  constructor(detail = 'No such profile.') {
+    super('identity.profile_not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class ProfileInvalidError extends DomainError {
+  constructor(detail = 'The profile update is invalid.') {
+    super('identity.profile_invalid', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class AvatarRejectedError extends DomainError {
+  constructor(detail = 'The uploaded file is not an accepted avatar image.') {
+    super('identity.avatar_rejected', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class AvatarTooLargeError extends DomainError {
+  constructor(detail = 'The uploaded file exceeds the maximum avatar size.') {
+    super('identity.avatar_too_large', detail, 413, 'Payload Too Large');
+  }
+}
+
+export class AvatarNotFoundError extends DomainError {
+  constructor(detail = 'This user has no avatar.') {
+    super('identity.avatar_not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class UsernameImmutableError extends DomainError {
+  constructor(detail = 'Identifiers cannot be changed on this server.') {
+    super('identity.username_immutable', detail, 403, 'Forbidden');
+  }
+}
+
+export class UsernameChangeCooldownError extends DomainError {
+  constructor(detail = 'You changed your identifier too recently; try again later.') {
+    super('identity.username_change_cooldown', detail, 409, 'Conflict');
+  }
+}
+
+export class UsernameChangeRequestNotFoundError extends DomainError {
+  constructor(detail = 'No such identifier change request.') {
+    super('identity.username_request_not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class UsernameChangeRequestResolvedError extends DomainError {
+  constructor(detail = 'This identifier change request has already been resolved.') {
+    super('identity.username_request_resolved', detail, 409, 'Conflict');
+  }
+}
+
+export class LastOwnerError extends DomainError {
+  constructor(detail = 'The server must keep at least one owner.') {
+    super('identity.last_owner', detail, 409, 'Conflict');
+  }
+}
+
+export class TooManyRequestsError extends DomainError {
+  constructor(retryAfterSeconds: number, detail = 'Too many requests; slow down and retry later.') {
+    super('auth.too_many_requests', detail, 429, 'Too Many Requests', {
+      'Retry-After': String(Math.max(1, Math.ceil(retryAfterSeconds))),
+    });
+  }
+}

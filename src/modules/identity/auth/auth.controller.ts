@@ -6,6 +6,7 @@ import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { LoginSchema, RefreshSchema, type LoginBody, type RefreshBody } from './auth.dto.js';
 import { AuthService } from './auth.service.js';
+import { SensitiveThrottleGuard } from './sensitive-throttle.guard.js';
 import { toSessionView } from './session.view.js';
 
 /**
@@ -18,6 +19,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
+  @UseGuards(SensitiveThrottleGuard)
   @HttpCode(200)
   async login(@Body(new ZodValidationPipe(LoginSchema)) body: LoginBody, @Req() request: Request) {
     const result = await this.auth.login({

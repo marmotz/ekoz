@@ -268,3 +268,44 @@ model EmailVerification {
   @@index([userId])
   @@map("email_verification")
 }
+
+/// A pending password reset (technical.md §4, §10, issue #17). TTL 1h
+/// (`auth.password_reset_ttl`). Only the SHA-256 hash of the opaque token is
+/// stored; `consumedAt` is stamped once the new password is set.
+model PasswordReset {
+  id          String                     @id @default(ulid())
+  userId      String                     @map("user_id")
+  tokenHash   String                     @unique @map("token_hash")
+  requestedIp String?                    @map("requested_ip")
+  createdAt   temporal.createdAtString() @map("created_at")
+  expiresAt   TimestamptzString          @map("expires_at")
+  consumedAt  TimestamptzString?         @map("consumed_at")
+
+  @@index([userId])
+  @@map("password_reset")
+}
+
+/// Lifecycle of an `approval`-mode identifier change (technical.md §4, §17,
+/// issue #20). `available`-mode changes apply immediately and never create a
+/// row; only the queued-for-owner path does.
+enum UsernameChangeStatus {
+  @@type("pg/text@1")
+  pending  = "pending"
+  approved = "approved"
+  rejected = "rejected"
+}
+
+/// A queued identifier change awaiting an owner decision (technical.md §17,
+/// issue #20).
+model UsernameChangeRequest {
+  id               String                     @id @default(ulid())
+  userId           String                     @map("user_id")
+  requestedName    String                     @map("requested_name")
+  status           UsernameChangeStatus       @default(pending)
+  createdAt        temporal.createdAtString() @map("created_at")
+  resolvedAt       TimestamptzString?         @map("resolved_at")
+  resolvedByUserId String?                    @map("resolved_by_user_id")
+
+  @@index([status])
+  @@map("username_change_request")
+}
