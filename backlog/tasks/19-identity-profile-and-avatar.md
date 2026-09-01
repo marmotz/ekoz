@@ -1,6 +1,6 @@
 # server — identity: profile and avatar
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#19](https://github.com/ekoz-chat/server/issues/19)

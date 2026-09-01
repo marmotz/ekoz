@@ -1,0 +1,200 @@
+[
+  {
+    "id": "table.password_reset",
+    "label": "Create table \"password_reset\"",
+    "summary": "Creates table \"password_reset\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "password_reset"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"password_reset\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"password_reset\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"password_reset\"",
+        "sql": "CREATE TABLE \"public\".\"password_reset\" (\n  \"consumed_at\" timestamptz,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"expires_at\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"requested_ip\" text,\n  \"token_hash\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"password_reset\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"password_reset\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.username_change_request",
+    "label": "Create table \"username_change_request\"",
+    "summary": "Creates table \"username_change_request\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "username_change_request"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"username_change_request\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"username_change_request\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"username_change_request\"",
+        "sql": "CREATE TABLE \"public\".\"username_change_request\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"requested_name\" text NOT NULL,\n  \"resolved_at\" timestamptz,\n  \"resolved_by_user_id\" text,\n  \"status\" text DEFAULT 'pending' NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"username_change_request_status_check_19a2b525\" CHECK (\"status\" IN ('pending', 'approved', 'rejected'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"username_change_request\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"username_change_request\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.password_reset.password_reset_token_hash_key",
+    "label": "Add unique constraint on \"password_reset\" (token_hash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "password_reset_token_hash_key",
+        "table": "password_reset"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"password_reset_token_hash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "password_reset_token_hash_key",
+          "public",
+          "\"public\".\"password_reset\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"password_reset_token_hash_key\"",
+        "sql": "ALTER TABLE \"public\".\"password_reset\" ADD CONSTRAINT \"password_reset_token_hash_key\" UNIQUE (\"token_hash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"password_reset_token_hash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "password_reset_token_hash_key",
+          "public",
+          "\"public\".\"password_reset\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.password_reset.password_reset_user_id_idx_6c952402",
+    "label": "Create index \"password_reset_user_id_idx_6c952402\" on \"password_reset\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "password_reset_user_id_idx_6c952402",
+        "table": "password_reset"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"password_reset_user_id_idx_6c952402\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"password_reset_user_id_idx_6c952402\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"password_reset_user_id_idx_6c952402\"",
+        "sql": "CREATE INDEX \"password_reset_user_id_idx_6c952402\" ON \"public\".\"password_reset\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"password_reset_user_id_idx_6c952402\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"password_reset_user_id_idx_6c952402\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.username_change_request.username_change_request_status_idx_e98638ab",
+    "label": "Create index \"username_change_request_status_idx_e98638ab\" on \"username_change_request\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "username_change_request_status_idx_e98638ab",
+        "table": "username_change_request"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"username_change_request_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"username_change_request_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"username_change_request_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"username_change_request_status_idx_e98638ab\" ON \"public\".\"username_change_request\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"username_change_request_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"username_change_request_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  }
+]

@@ -44,12 +44,12 @@ each issue body carries `Depends on #N` lines.
 | ☑    | [#14](https://github.com/ekoz-chat/server/issues/14) | [14-identity-session-management](tasks/14-identity-session-management.md)                     | list/rename/revoke sessions                                          |
 | ☑    | [#15](https://github.com/ekoz-chat/server/issues/15) | [15-identity-registration-and-invitations](tasks/15-identity-registration-and-invitations.md) | 3 registration modes, invitations (owners)                           |
 | ☑    | [#16](https://github.com/ekoz-chat/server/issues/16) | [16-identity-email-verification](tasks/16-identity-email-verification.md)                     | verification + resend + email change                                 |
-| ☐    | [#17](https://github.com/ekoz-chat/server/issues/17) | [17-identity-password-reset](tasks/17-identity-password-reset.md)                             | request/confirm, revoke all sessions                                 |
+| ☑    | [#17](https://github.com/ekoz-chat/server/issues/17) | [17-identity-password-reset](tasks/17-identity-password-reset.md)                             | request/confirm, revoke all sessions                                 |
 | ☑    | [#18](https://github.com/ekoz-chat/server/issues/18) | [18-identity-first-owner-setup-endpoint](tasks/18-identity-first-owner-setup-endpoint.md)     | `POST /setup/owner`, wires server-core bootstrap                     |
-| ☐    | [#19](https://github.com/ekoz-chat/server/issues/19) | [19-identity-profile-and-avatar](tasks/19-identity-profile-and-avatar.md)                     | profile read/update, avatar via BlobService                          |
-| ☐    | [#20](https://github.com/ekoz-chat/server/issues/20) | [20-identity-identifier-change](tasks/20-identity-identifier-change.md)                       | immutable/available/approval policies                                |
-| ☐    | [#21](https://github.com/ekoz-chat/server/issues/21) | [21-identity-account-lifecycle](tasks/21-identity-account-lifecycle.md)                       | suspension, deletion + anonymisation, owners                         |
-| ☐    | [#22](https://github.com/ekoz-chat/server/issues/22) | [22-identity-sensitive-endpoint-throttle](tasks/22-identity-sensitive-endpoint-throttle.md)   | narrow throttle on credential endpoints                              |
+| ☑    | [#19](https://github.com/ekoz-chat/server/issues/19) | [19-identity-profile-and-avatar](tasks/19-identity-profile-and-avatar.md)                     | profile read/update, avatar via BlobService                          |
+| ☑    | [#20](https://github.com/ekoz-chat/server/issues/20) | [20-identity-identifier-change](tasks/20-identity-identifier-change.md)                       | immutable/available/approval policies                                |
+| ☑    | [#21](https://github.com/ekoz-chat/server/issues/21) | [21-identity-account-lifecycle](tasks/21-identity-account-lifecycle.md)                       | suspension, deletion + anonymisation, owners                         |
+| ☑    | [#22](https://github.com/ekoz-chat/server/issues/22) | [22-identity-sensitive-endpoint-throttle](tasks/22-identity-sensitive-endpoint-throttle.md)   | narrow throttle on credential endpoints                              |
 | ☐    | [#23](https://github.com/ekoz-chat/server/issues/23) | [23-identity-sse-stream-ticket](tasks/23-identity-sse-stream-ticket.md)                       | `POST /stream/ticket` + ticket store                                 |
 
 ## Conversations

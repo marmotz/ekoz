@@ -73,6 +73,24 @@ that does not touch this file.
 - First-owner setup: `POST /setup/owner`, email- or token-pinned, creating the
   initial owner account and session and emitting `server.initialized`. (#18)
 - Runtime parameters `email.verification_ttl` and `invitation.ttl`. (#15, #16)
+- Password reset: `POST /auth/password-reset/request` (always `202`) and
+  `/auth/password-reset/confirm`, which resets the hash and revokes every
+  session. (#17)
+- Profile: `GET /me`, `GET /users/:identifier`, `PATCH /me/profile`. (#19)
+- Avatars: `PUT /me/avatar` (multipart, real-type sniff), `DELETE /me/avatar`,
+  and `GET /users/:identifier/avatar` streamed with a content-addressed `ETag`. (#19)
+- Identifier change: `PATCH /me/username` driven by
+  `identity.username_change_policy`, plus the owner review endpoints under
+  `/admin/username-requests`. (#20)
+- Account lifecycle for owners: `POST /admin/users/:id/suspend` / `unsuspend`,
+  `DELETE /admin/users/:id`, self-service `DELETE /me`, and `/admin/owners`
+  management with a last-owner guard. (#21)
+- A suspended account now gets `403 identity.account_suspended` on any
+  authenticated request. (#21)
+- Narrow in-memory throttle on `POST /auth/login`, `/auth/register`,
+  `/auth/password-reset/request` and `/auth/verify-email/resend` — a deliberate
+  minimal exception to deferred general rate limiting. (#22)
+- Runtime parameters `auth.password_reset_ttl` and `auth.sensitive_throttle`. (#17, #22)
 
 ### Notes
 

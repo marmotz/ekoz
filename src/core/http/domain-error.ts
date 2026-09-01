@@ -18,7 +18,9 @@ export class DomainError extends Error {
     /** HTTP status this error maps to. Defaults to `400`. */
     readonly status: number = 400,
     /** Short human-readable summary; defaults to a title derived from the status. */
-    readonly title?: string
+    readonly title?: string,
+    /** Extra response headers to set alongside the problem body (e.g. `Retry-After`). */
+    readonly headers?: Readonly<Record<string, string>>
   ) {
     super(detail);
 

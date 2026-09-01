@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
+import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import {
@@ -32,6 +33,7 @@ export class EmailVerificationController {
 
   @Post('resend')
   @Public()
+  @UseGuards(SensitiveThrottleGuard)
   @HttpCode(202)
   async resend(
     @Body(new ZodValidationPipe(ResendVerificationSchema)) body: ResendVerificationBody

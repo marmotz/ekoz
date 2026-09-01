@@ -1,6 +1,6 @@
 # server — identity: throttle on credential endpoints
 
-**Status**: todo
+**Status**: done
 **Type**: backend
 **Repo**: ekoz-chat/server
 **Issue**: [#22](https://github.com/ekoz-chat/server/issues/22)

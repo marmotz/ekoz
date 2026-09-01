@@ -72,11 +72,26 @@ http/
     verify-email.hurl                 POST /auth/verify-email         200 · needs verify_token
     verify-email-invalid.hurl         POST /auth/verify-email         422 identity.email_verification_invalid
     verify-email-resend.hurl          POST /auth/verify-email/resend  202 always
+    password-reset-request.hurl       POST /auth/password-reset/request  202 always
+    password-reset-confirm.hurl       POST /auth/password-reset/confirm  204 · needs reset_token
+    password-reset-confirm-invalid.hurl POST /auth/password-reset/confirm 422 auth.password_reset_invalid
+    login-throttled.hurl              POST /auth/login               401 · replay fast for 429 (§14)
   me/
-    email.hurl                        POST /me/email                  202 · needs access_token
-    email-unauthenticated.hurl        POST /me/email                  401 auth.unauthenticated
-    email-wrong-password.hurl         POST /me/email                  401 auth.invalid_credentials
-    email-taken.hurl                  POST /me/email                  409 identity.email_taken
+    email.hurl                        POST   /me/email                202 · needs access_token
+    email-unauthenticated.hurl        POST   /me/email                401 auth.unauthenticated
+    email-wrong-password.hurl         POST   /me/email                401 auth.invalid_credentials
+    email-taken.hurl                  POST   /me/email                409 identity.email_taken
+    get.hurl                          GET    /me                      200 · needs access_token
+    profile.hurl                      PATCH  /me/profile              200 · needs access_token
+    avatar.hurl                       PUT    /me/avatar               200 · multipart, needs access_token
+    avatar-delete.hurl                DELETE /me/avatar               204 · needs access_token
+    username.hurl                     PATCH  /me/username             200/403 · policy-driven
+    delete.hurl                       DELETE /me                      204 · re-auth, throwaway account
+  users/
+    profile.hurl                      GET    /users/:identifier       200 · needs access_token
+    profile-not-found.hurl            GET    /users/:identifier       404 identity.profile_not_found
+    avatar.hurl                       GET    /users/:identifier/avatar 200 · ETag, needs access_token
+    avatar-not-found.hurl             GET    /users/:identifier/avatar 404 identity.avatar_not_found
   invitations/
     create.hurl                       POST   /invitations             201 · needs owner access_token
     create-unauthenticated.hurl       POST   /invitations             401 auth.unauthenticated
@@ -87,9 +102,18 @@ http/
     revoke-unauthenticated.hurl       DELETE /invitations/:id          401 auth.unauthenticated
     revoke-not-found.hurl             DELETE /invitations/:id          404 identity.invitation_not_found
   admin/
-    create-user.hurl                  POST /admin/users               201 · needs owner access_token
-    create-user-unauthenticated.hurl  POST /admin/users               401 auth.unauthenticated
-    create-user-forbidden.hurl        POST /admin/users               403 auth.forbidden (non-owner)
+    create-user.hurl                  POST   /admin/users             201 · needs owner access_token
+    create-user-unauthenticated.hurl  POST   /admin/users             401 auth.unauthenticated
+    create-user-forbidden.hurl        POST   /admin/users             403 auth.forbidden (non-owner)
+    suspend.hurl                      POST   /admin/users/:id/suspend    204 · owner + target_user_id
+    unsuspend.hurl                    POST   /admin/users/:id/unsuspend  204 · owner + target_user_id
+    delete-user.hurl                  DELETE /admin/users/:id         204 · owner, throwaway target
+    add-owner.hurl                    POST   /admin/owners            204 · owner + target_user_id
+    remove-owner.hurl                 DELETE /admin/owners/:userId    204 · owner + target_user_id
+    remove-owner-last.hurl            DELETE /admin/owners/:userId    409 identity.last_owner
+    username-requests-list.hurl       GET    /admin/username-requests 200 · owner, approval mode
+    username-requests-approve.hurl    POST   /admin/username-requests/:id/approve 201 · owner + request_id
+    username-requests-reject.hurl     POST   /admin/username-requests/:id/reject  204 · owner + request_id
   sessions/
     list.hurl                         GET    /sessions                200 · needs access_token
     list-unauthenticated.hurl         GET    /sessions                401 auth.unauthenticated
