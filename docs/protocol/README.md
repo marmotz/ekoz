@@ -22,6 +22,12 @@ with SemVer, independently of the server implementation. See
 - Entity identifiers: ULID (opaque 26-char string; see
   [ADR 0021](../technical/adr/0021-entity-identifier-format.md)). Timestamps:
   UTC ISO-8601.
+- Protocol version: every client request carries an `X-Ekoz-Protocol` header
+  naming the protocol **major** it was built against (currently `0`). A client
+  checks its major against `protocol_versions` in the discovery document
+  ([discovery.md](discovery.md)) before issuing resource calls; a server rejects
+  a request whose major it cannot serve (see
+  [ADR 0025](../technical/adr/0025-sdk-js-packaging-and-protocol-policy.md)).
 
 ## Event model
 

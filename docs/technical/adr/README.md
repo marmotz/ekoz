@@ -34,3 +34,6 @@ obsolescence is visible at the point of use.
 | [0020](0020-observability-and-instrumentation.md) | Observability and instrumentation | accepted |
 | [0021](0021-entity-identifier-format.md) | Entity identifier format | accepted |
 | [0022](0022-server-secret-box-and-signing-keys.md) | Server secret box and signing keys | accepted |
+| [0023](0023-identity-account-and-token-mechanics.md) | Identity account and token mechanics | accepted |
+| [0024](0024-identity-lifecycle-and-abuse-protection.md) | Identity lifecycle and abuse protection | accepted |
+| [0025](0025-sdk-js-packaging-and-protocol-policy.md) | `sdk-js` packaging, distribution and protocol-version policy | accepted |
