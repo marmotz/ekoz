@@ -27,3 +27,4 @@ lines.
 | ☐ | [#8](https://github.com/ekoz-chat/sdk-js/issues/8) | [8-invitations-and-admin-resources](tasks/8-invitations-and-admin-resources.md) | `invitations` and `admin.*` owner bindings |
 | ☐ | [#9](https://github.com/ekoz-chat/sdk-js/issues/9) | [9-integration-test-suite](tasks/9-integration-test-suite.md) | Opt-in integration suite against a running reference server |
 | ☐ | [#10](https://github.com/ekoz-chat/sdk-js/issues/10) | [10-readme-and-usage-guide](tasks/10-readme-and-usage-guide.md) | README and usage guide |
+| ☐ | [#11](https://github.com/ekoz-chat/sdk-js/issues/11) | [11-admin-console-bindings](tasks/11-admin-console-bindings.md) | `setup.state`, `admin.users` reads + `triggerPasswordReset` (server admin console) |
