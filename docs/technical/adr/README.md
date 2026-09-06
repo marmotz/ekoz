@@ -37,3 +37,4 @@ obsolescence is visible at the point of use.
 | [0023](0023-identity-account-and-token-mechanics.md) | Identity account and token mechanics | accepted |
 | [0024](0024-identity-lifecycle-and-abuse-protection.md) | Identity lifecycle and abuse protection | accepted |
 | [0025](0025-sdk-js-packaging-and-protocol-policy.md) | `sdk-js` packaging, distribution and protocol-version policy | accepted |
+| [0026](0026-single-monorepo.md) | Single monorepo for all Ekoz projects | accepted |

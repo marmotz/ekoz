@@ -1,6 +1,8 @@
 # 0019 — The backlog lives in the implementing repository
 
-**Status**: accepted (refines [ADR 0001](0001-repository-layout.md))
+**Status**: accepted (refines [ADR 0001](0001-repository-layout.md); see
+[ADR 0026](0026-single-monorepo.md) — "repository" is now "area under
+`backlog/`", the principle is unchanged)
 
 ## Context
 

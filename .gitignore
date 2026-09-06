@@ -22,3 +22,9 @@ apps/server/http/vars.env
 
 # IDE
 .idea/
+
+# AGENTS.md / CLAUDE.md are tracked in this repo (override global ~/.config/git/ignore)
+!AGENTS.md
+!CLAUDE.md
+!**/AGENTS.md
+!**/CLAUDE.md

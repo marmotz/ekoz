@@ -1,6 +1,6 @@
 # 0001 — Repository layout
 
-**Status**: accepted
+**Status**: accepted (superseded in part by [ADR 0026](0026-single-monorepo.md))
 
 ## Context
 
@@ -10,6 +10,11 @@ a shared contract that the SDK and federation depend on, independently of the
 server implementation.
 
 ## Decision
+
+~~Four separate Git repositories, one per domain:~~
+→ **Superseded by [ADR 0026]**: the four repos below were merged into one Bun
+workspaces monorepo (`marmotz/ekoz`). The domain split survives as workspaces
+(`apps/*`, `packages/*`) and `backlog/` areas. Original decision text kept below.
 
 Four separate Git repositories, one per domain:
 

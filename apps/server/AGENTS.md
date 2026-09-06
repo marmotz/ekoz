@@ -1,84 +1,74 @@
-# AGENTS.md — `server` repository
+# AGENTS.md — `apps/server`
 
-Reference Ekoz server. The global specification, protocol and architecture
-decisions live in the sibling `spec` repository
-([github.com/ekoz-chat/spec](https://github.com/ekoz-chat/spec), on disk at
-`../spec`) — read them before any implementation, in particular
-`../spec/docs/technical/adr/`.
+Reference Ekoz server. Global specification, protocol and architecture decisions
+live in [`docs/`](../../docs/) at the repo root — read them before any
+implementation, in particular [`docs/technical/adr/`](../../docs/technical/adr/).
 
-This repo's **backlog is in [`backlog/`](backlog/)** (per-feature `overview.md`,
+Backlog: [`backlog/server/`](../../backlog/server/) (per-feature `overview.md`,
 `technical.md`, `tasks/`). Run the `backlog-*` skills and `implement-issue` from
-this repository; GitHub issues are in `ekoz-chat/server`. Task/design docs
-referenced by an issue are in `backlog/` here. See `backlog/AGENTS.md`.
+the repo root.
 
 ## Stack
 
-- **Bun** runtime (execution + package management). Types aligned with **Node
-  26.8.1**.
+- **Bun** runtime (execution + package management). Types aligned with Node 26.
 - **NestJS 12** (ESM), **PostgreSQL** (exclusive).
-- **Prisma 8**: start directly on the `8.0.0-rc` line (final release imminent).
-  `prisma-client` generator, `@prisma/adapter-pg` driver adapter, connection
-  through `prisma.config.ts` (no `url` in the schema). Load `.env` explicitly in
-  `prisma.config.ts`.
-- Tests: **Vitest**. Always target the latest versions.
-- Distribution: Docker image.
-- Stack POC done and conclusive: see
-  [poc-nestjs12-prisma-bun.md](https://github.com/ekoz-chat/spec/blob/main/docs/technical/poc-nestjs12-prisma-bun.md).
+- **Prisma 8** (`8.0.0-rc` line): `@prisma/orm-postgres` driver adapter,
+  connection through `prisma.config.ts` (no `url` in the contract). `.env` is
+  loaded explicitly in `prisma.config.ts`.
+- Tests: **Vitest** (`*.spec.ts` unit, `*.e2e-spec.ts` integration via
+  Testcontainers).
+- Distribution: Docker image (`Dockerfile`, built from the **repo root** as
+  context — see the header in that file).
+
+## Commands
+
+From the repo root: `bun run --filter '@ekozhq/server' <script>`, or `bun run
+test:server` for unit + integration. Locally in `apps/server/`: `bun run
+start:dev`, `bun run db:migrate`, etc. `docker compose -f compose.yaml up -d`
+brings up Postgres + Mailpit.
 
 ## Conventions
 
 - Everything in **English**: directories, files, classes, functions, variables,
-  comments, API messages, documentation.
-- Design documentation covers implementation only; anything cross-cutting goes to
-  `spec`.
-- Full-text search: raw Prisma SQL (`$queryRaw`) over PostgreSQL FTS functions.
-- Feature-first architecture, cohesive NestJS modules, no hidden cross-module
-  dependencies between domain modules.
+  comments, API messages.
+- Feature-first architecture, cohesive NestJS modules. **A feature module must
+  not import another feature module directly** — talk through a provider
+  interface or an event. Enforced by `bun run lint:boundaries`
+  (`eslint-plugin-boundaries`; this is the one lint rule not handled by the
+  repo-wide Biome).
+- Formatting + general lint: **Biome**, configured at the repo root
+  (`biome.json`). Do not add a local Biome or Prettier config.
 - **Manual API collection** in [`http/`](http/): one runnable Hurl file per
-  request, one directory per endpoint group, exercised against the local-dev
-  server (`http/README.md`). Hand-run documentation, not part of CI — the
-  automated coverage stays in `src/**/*.e2e-spec.ts`.
-- **Every design decision or notable change → an ADR in the `spec` repo**
-  (`docs/technical/adr/`, see
-  [ADR 0015](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0015-decisions-are-recorded-as-adrs.md)).
-  This repo references ADRs by number/URL, it does not duplicate them.
+  request, one directory per endpoint group (`http/README.md`). Hand-run, not
+  CI; automated coverage stays in `src/**/*.e2e-spec.ts`.
+- **Every design decision or notable change → an ADR** in
+  [`docs/technical/adr/`](../../docs/technical/adr/) (ADR 0015). Reference by
+  number; do not duplicate.
 
 ## Definition of Done
 
-- An ADR is written in `spec` if a decision was made or changed.
+- An ADR is written in `docs/` if a decision was made or changed.
 - Tests created / updated and **green**; typecheck green.
-- Any HTTP endpoint added, changed or removed → the matching `http/<group>/*.hurl`
-  file is created, updated or deleted in the same change (one request per file),
-  its assertions still pass against a locally running server, and
-  `http/README.md`'s layout block is kept in sync.
-- `CHANGELOG.md`: an entry added under `## [Unreleased]` as soon as `src/`
-  changes (a CI check enforces it). _Keep a Changelog_ format, SemVer. See
-  **CHANGELOG entries** below.
-- If the protocol behaviour changes: `../spec/docs/protocol/` and its
-  `CHANGELOG.md` updated in the same effort (commit in the `spec` repo).
+- Any HTTP endpoint added, changed or removed → the matching
+  `http/<group>/*.hurl` file created / updated / deleted in the same change, its
+  assertions still pass against a locally running server, and `http/README.md`'s
+  layout block kept in sync.
+- `CHANGELOG.md`: an entry under `## [Unreleased]` as soon as `src/` changes.
+  _Keep a Changelog_ format, SemVer.
+- If protocol behaviour changes: [`docs/protocol/`](../../docs/protocol/) and its
+  `CHANGELOG.md` updated in the same change.
 - Prisma migrations included where applicable.
 
 ## CHANGELOG entries
 
 `CHANGELOG.md` records **what changed**, not why. One bullet per user-visible
-change, **one line** (two at most), tagged with its issue (`(#42)`).
+change, **one line** (two at most), tagged with its issue.
 
-Hard limits on a bullet:
-
-- No paragraphs, no "notes on the approach", no version pins (those live in
-  `package.json`).
+- No paragraphs, no version pins (those live in `package.json`).
 - **No parenthetical dump of identifiers, config keys, defaults or file names.**
-  Name the capability, not its internals. A reader who wants the surface goes to
-  the code, the ADR or the PR.
-- If you need "and" more than once, split the feature into that many bullets or
-  cut the detail.
+  Name the capability, not its internals.
+- If you need "and" more than once, split into that many bullets or cut detail.
 
-Good: `- Object storage: content-addressed blob store with refcount GC and a
-public `GET /blobs/:id`. (#9)`
-Bad: `- Object storage: `local` `StorageDriver`(content-addressed,`s3`config-schema only), deduplicating`BlobService.ingest`/`retain`/`release`over a`blob`table, a`refCount = 0` GC sweep (`storage.gc_grace_seconds`,
-default 1 h), and `GET /blobs/:id`with`ETag`/immutable caching …`
-
-Rationale, trade-offs, tooling surprises, "an ADR is owed" → the ADR itself and
-the commit/PR body, never the changelog. The only caveats that belong in a
-`### Notes` block are ones a _consumer_ must act on right now (e.g. a known bug
-with a workaround).
+Rationale, trade-offs, "an ADR is owed" → the ADR and the PR body, never the
+changelog. The only caveats that belong in a `### Notes` block are ones a
+_consumer_ must act on now.
