@@ -96,6 +96,20 @@ sub-scopes: [auth](features/auth/overview.md), [profile](features/profile/overvi
 [Federation](features/federation/overview.md) ·
 [Extensibility](features/extensibility/overview.md)
 
+## Server OpenAPI documentation
+
+[Feature](features/server-openapi-doc/overview.md) · [technical design](features/server-openapi-doc/technical.md)
+
+| Done | Issue                                            | Task                                                                       | Description                                        |
+|------|--------------------------------------------------|---------------------------------------------------------------------------|----------------------------------------------------|
+| ☑   | [#43](https://github.com/marmotz/ekoz/issues/43) | [43-openapi-swagger-bootstrap](tasks/43-openapi-swagger-bootstrap.md)       | Swagger bootstrap + `nestjs-zod` bridge            |
+| ☑   | [#44](https://github.com/marmotz/ekoz/issues/44) | [44-openapi-problem-details-dto](tasks/44-openapi-problem-details-dto.md)   | Shared problem+json schema + error decorator       |
+| ☑   | [#45](https://github.com/marmotz/ekoz/issues/45) | [45-openapi-request-dtos](tasks/45-openapi-request-dtos.md)                 | Request DTOs to Zod DTO classes                    |
+| ☑   | [#46](https://github.com/marmotz/ekoz/issues/46) | [46-openapi-response-schemas](tasks/46-openapi-response-schemas.md)         | Response schemas + view refactor                   |
+| ☑   | [#47](https://github.com/marmotz/ekoz/issues/47) | [47-openapi-emit-script](tasks/47-openapi-emit-script.md)                   | Offline emit script + committed `openapi.json`     |
+| ☐   | [#48](https://github.com/marmotz/ekoz/issues/48) | [48-openapi-ci-drift-check](tasks/48-openapi-ci-drift-check.md)             | Drift check via `tako check` in CI                 |
+| ☑   | [#49](https://github.com/marmotz/ekoz/issues/49) | [49-openapi-design-doc-page](tasks/49-openapi-design-doc-page.md)           | Cross-cutting `docs/technical/` page               |
+
 ## Monorepo follow-ups
 
 | Done | Issue                                            | Task                                                        | Description                                |

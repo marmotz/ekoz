@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 /**
@@ -12,9 +13,11 @@ export const RegisterSchema = z.object({
   invitationToken: z.string().min(1).max(512).optional(),
 });
 export type RegisterBody = z.infer<typeof RegisterSchema>;
+export class RegisterDto extends createZodDto(RegisterSchema) {}
 
 /** `POST /admin/users` body (technical.md §8, owner-only account creation). */
 export const AdminCreateUserSchema = RegisterSchema.omit({ invitationToken: true }).extend({
   isOwner: z.boolean().optional(),
 });
 export type AdminCreateUserBody = z.infer<typeof AdminCreateUserSchema>;
+export class AdminCreateUserDto extends createZodDto(AdminCreateUserSchema) {}

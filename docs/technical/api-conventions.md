@@ -33,7 +33,9 @@ email / audit), delivered before `identity-and-profiles`.
 
 ## Consequences
 
-- `sdk-js` implements one error-decoding path for the whole API.
+- `sdk-js` implements one error-decoding path for the whole API. The
+  `application/problem+json` body is described once as a schema in the
+  [OpenAPI description](openapi-description-and-sdk-types.md).
 - The protocol spec documents problem+json and the `code` namespace as part of
   its transport section.
 - Feature-local implementation choices (table shapes, internal services) stay in

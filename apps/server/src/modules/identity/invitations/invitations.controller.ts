@@ -1,10 +1,25 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuditService } from '../../../core/audit/audit.service.js';
+import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
-import { type CreateInvitationBody, CreateInvitationSchema } from './invitation.dto.js';
+import {
+  CreatedInvitationDto,
+  type CreateInvitationBody,
+  CreateInvitationDto,
+  InvitationViewDto,
+} from './invitation.dto.js';
 import {
   type CreatedInvitation,
   InvitationService,
@@ -15,6 +30,8 @@ import {
  * Invitation management (technical.md §8, issue #15). Owners only for this
  * increment.
  */
+@ApiTags('Invitations')
+@ApiBearerAuth('bearer')
 @Controller('invitations')
 @UseGuards(AuthGuard, OwnerGuard)
 export class InvitationsController {
@@ -25,9 +42,13 @@ export class InvitationsController {
 
   @Post()
   @HttpCode(201)
+  @ApiOperation({ summary: 'Create a registration invitation (token returned once).' })
+  @ApiBody({ type: CreateInvitationDto })
+  @ApiCreatedResponse({ type: CreatedInvitationDto })
+  @ApiProblemResponses({ validation: true, statuses: [403] })
   async create(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(CreateInvitationSchema)) body: CreateInvitationBody,
+    @Body(new ZodValidationPipe(CreateInvitationDto)) body: CreateInvitationBody,
   ): Promise<CreatedInvitation> {
     const created = await this.invitations.create(principal.userId, {
       email: body.email ?? null,
@@ -46,12 +67,18 @@ export class InvitationsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'List invitations.' })
+  @ApiOkResponse({ type: InvitationViewDto, isArray: true })
+  @ApiProblemResponses({ statuses: [403] })
   list(): Promise<InvitationView[]> {
     return this.invitations.list();
   }
 
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Revoke an invitation.' })
+  @ApiNoContentResponse()
+  @ApiProblemResponses({ statuses: [403, 404] })
   async revoke(
     @CurrentPrincipal() principal: AuthPrincipal,
     @Param('id') id: string,

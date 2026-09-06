@@ -1,4 +1,5 @@
 import { Controller, Get, Res } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { Public } from '../http/public.decorator.js';
 import { type ReadinessReport, ReadinessService } from './readiness.service.js';
@@ -10,6 +11,7 @@ import { type ReadinessReport, ReadinessService } from './readiness.service.js';
  *
  * `/readyz` runs the dependency checks and answers `503` with the failing ones when the server is not ready to serve.
  */
+@ApiExcludeController()
 @Controller()
 export class HealthController {
   constructor(private readonly readiness: ReadinessService) {}

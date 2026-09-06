@@ -5,6 +5,9 @@ import { sha256Hex } from '../../../core/crypto/hashing.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import type { AccountTx } from '../accounts/account.service.js';
 import { InvitationInvalidError, InvitationNotFoundError } from '../identity.errors.js';
+import type { CreatedInvitation, InvitationStatus, InvitationView } from './invitation.dto.js';
+
+export type { CreatedInvitation, InvitationStatus, InvitationView };
 
 interface InvitationRow {
   id: string;
@@ -15,28 +18,6 @@ interface InvitationRow {
   expiresAt: string;
   consumedAt: string | null;
   consumedByUserId: string | null;
-}
-
-export type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
-
-/** Client-facing invitation shape (never exposes the token hash). */
-export interface InvitationView {
-  id: string;
-  email: string | null;
-  createdByUserId: string;
-  createdAt: string;
-  expiresAt: string;
-  consumedAt: string | null;
-  consumedByUserId: string | null;
-  status: InvitationStatus;
-}
-
-export interface CreatedInvitation {
-  id: string;
-  /** The opaque token — returned once, never stored in the clear. */
-  token: string;
-  /** Ready-to-share registration URL. */
-  url: string;
 }
 
 /**

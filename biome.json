@@ -13,6 +13,8 @@
       "!**/coverage",
       "!**/*.tsbuildinfo",
       "!apps/server/src/core/prisma/generated",
+      "!apps/server/src/generated",
+      "!apps/server/openapi.json",
       "!apps/server/prisma/migrations",
       "!**/CHANGELOG.md"
     ]

@@ -11,10 +11,9 @@ import {
 } from '../identity.errors.js';
 import { AccountService, type AccountTx } from './account.service.js';
 import { IdentifierService } from './identifier.service.js';
+import type { UsernameChangeOutcome } from './username.dto.js';
 
-export type UsernameChangeOutcome =
-  | { status: 'applied'; identifier: string }
-  | { status: 'pending'; requestId: string };
+export type { UsernameChangeOutcome };
 
 interface UsernameChangeRequestRow {
   id: string;

@@ -1,5 +1,14 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiProduces,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
+import { ApiProblemResponses } from '../http/api-problem-responses.decorator.js';
 import { DomainError } from '../http/domain-error.js';
 import { getRequestContext } from '../http/request-context.js';
 import { BlobService } from './blob.service.js';
@@ -13,6 +22,8 @@ import { BlobAccessRegistry } from './blob-access.registry.js';
  * unreferenced blob is `404`. Responses carry `ETag: "<hash>"` and a long
  * immutable cache (content-addressed, so the body never changes for an id).
  */
+@ApiTags('Blobs')
+@ApiBearerAuth('bearer')
 @Controller('blobs')
 export class BlobController {
   constructor(
@@ -21,6 +32,11 @@ export class BlobController {
   ) {}
 
   @Get(':id')
+  @ApiOperation({ summary: 'Download a content-addressed blob (long immutable cache).' })
+  @ApiParam({ name: 'id', description: 'Content hash of the blob.' })
+  @ApiProduces('application/octet-stream')
+  @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
+  @ApiProblemResponses({ statuses: [404] })
   async download(@Param('id') id: string, @Res() res: Response): Promise<void> {
     const blob = await this.blobs.findById(id);
     // Same 404 whether the blob is absent or the caller may not see it: do not

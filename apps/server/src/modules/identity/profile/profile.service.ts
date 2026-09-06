@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import { Injectable, type OnModuleInit } from '@nestjs/common';
+import type { z } from 'zod';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { getRequestContext } from '../../../core/http/request-context.js';
@@ -7,7 +8,7 @@ import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { type Blob, BlobService } from '../../../core/storage/blob.service.js';
 import { BlobAccessRegistry } from '../../../core/storage/blob-access.registry.js';
 import { AccountService } from '../accounts/account.service.js';
-import { type AccountView, toAccountView } from '../accounts/account.view.js';
+import { toAccountView } from '../accounts/account.view.js';
 import {
   AvatarRejectedError,
   AvatarTooLargeError,
@@ -15,20 +16,15 @@ import {
   ProfileNotFoundError,
 } from '../identity.errors.js';
 import { sniffImageMime, type UploadedAvatar } from './avatar.js';
+import type { MeViewSchema, PublicProfileViewSchema } from './profile.dto.js';
 
-/** `GET /me` payload (technical.md §13). */
-export interface MeView extends AccountView {
-  bio: string | null;
-  avatarUrl: string | null;
-}
-
-/** `GET /users/:identifier` payload (technical.md §13). */
-export interface PublicProfileView {
-  identifier: string;
-  displayName: string;
-  bio: string | null;
-  avatarUrl: string | null;
-}
+/**
+ * `GET /me` and `GET /users/:identifier` payloads (technical.md §13). Shapes
+ * defined once as `MeViewSchema` / `PublicProfileViewSchema` in
+ * [`profile.dto.ts`](./profile.dto.ts).
+ */
+export type MeView = z.infer<typeof MeViewSchema>;
+export type PublicProfileView = z.infer<typeof PublicProfileViewSchema>;
 
 /**
  * Profile and avatar (technical.md §13, issue #19). Avatars are stored as

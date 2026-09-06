@@ -1,4 +1,5 @@
 import type { ArgumentMetadata } from '@nestjs/common';
+import { createZodDto } from 'nestjs-zod';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { ValidationFailedError } from './domain-error.js';
@@ -35,5 +36,13 @@ describe('ZodValidationPipe (unit)', () => {
     } catch (error) {
       expect((error as ValidationFailedError).issues[0]?.path).toBe('query.age');
     }
+  });
+
+  it('accepts a createZodDto class and unwraps it to its schema', () => {
+    class ThingDto extends createZodDto(z.object({ name: z.string().min(1) })) {}
+    const dtoPipe = new ZodValidationPipe(ThingDto);
+
+    expect(dtoPipe.transform({ name: 'ok' }, BODY_META)).toEqual({ name: 'ok' });
+    expect(() => dtoPipe.transform({ name: '' }, BODY_META)).toThrow(ValidationFailedError);
   });
 });
