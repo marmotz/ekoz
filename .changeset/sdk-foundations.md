@@ -1,5 +1,5 @@
 ---
-"@ekoz/sdk": minor
+"@ekozhq/sdk": minor
 ---
 
 Bootstrap the package: build/test/lint tooling (tsdown dual ESM+CJS, Vitest,
