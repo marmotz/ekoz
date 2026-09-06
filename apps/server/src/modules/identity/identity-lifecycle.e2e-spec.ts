@@ -1,0 +1,320 @@
+import type { INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { AppModule } from '../../app.module.js';
+import { ConfigService } from '../../core/config/config.service.js';
+import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { MailService } from '../../core/mail/mail.service.js';
+import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
+import { AccountService } from './accounts/account.service.js';
+
+/**
+ * Password reset (#17), profile and avatar (#19), policy-driven identifier
+ * changes (#20), suspension / deletion / owners (#21) and the credential
+ * throttle (#22), end to end against a real database. Mail is stubbed so the
+ * reset token can be read.
+ */
+describe('identity — lifecycle, profile, throttle (integration)', () => {
+  let database: TestDatabase;
+  let app: INestApplication;
+  let restoreConfig: () => void;
+  let config: ConfigService;
+  let accounts: AccountService;
+  let sentMail: Array<{ to: string; template: string; vars: Record<string, string | number> }>;
+
+  const password = 'a-perfectly-fine-passphrase';
+  // 1x1 transparent PNG.
+  const pngBytes = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64'
+  );
+
+  const login = async (identifier: string): Promise<string> => {
+    const res = await request(app.getHttpServer()).post('/auth/login').send({ identifier, password }).expect(200);
+
+    return res.body.accessToken as string;
+  };
+
+  const resetTokenFromLastMail = (): string => {
+    const mail = [...sentMail].reverse().find((m) => m.template === 'password-reset');
+    if (!mail) throw new Error('no password-reset mail was sent');
+
+    return new URL(String(mail.vars['resetUrl'])).searchParams.get('token') ?? '';
+  };
+
+  beforeAll(async () => {
+    database = await startTestDatabase();
+    process.env['DATABASE_URL'] = database.url;
+    restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
+    process.env['EKOZ_EMAIL__VERIFICATION_REQUIRED'] = 'false';
+
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = moduleRef.createNestApplication();
+    app.enableShutdownHooks();
+    await app.init();
+
+    config = app.get(ConfigService);
+    accounts = app.get(AccountService);
+    sentMail = [];
+    vi.spyOn(app.get(MailService), 'send').mockImplementation(async (args) => {
+      sentMail.push({ to: args.to, template: args.template, vars: args.vars });
+    });
+
+    await accounts.createAccount({
+      name: 'owner',
+      email: 'owner@ekoz.example.com',
+      password,
+      displayName: 'The Owner',
+      isOwner: true,
+      emailVerified: true,
+    });
+    await accounts.createAccount({
+      name: 'alice',
+      email: 'alice@ekoz.example.com',
+      password,
+      displayName: 'Alice',
+      emailVerified: true,
+    });
+  }, 180_000);
+
+  afterAll(async () => {
+    delete process.env['EKOZ_EMAIL__VERIFICATION_REQUIRED'];
+    restoreConfig?.();
+    await app?.close();
+    await database?.stop();
+  });
+
+  const server = () => app.getHttpServer();
+
+  // ── #17 password reset ────────────────────────────────────────────────────
+
+  it('resets a password, revoking every session, and answers 202 for an unknown email', async () => {
+    const before = await login('alice');
+    await request(server()).get('/me').set('Authorization', `Bearer ${before}`).expect(200);
+
+    await request(server()).post('/auth/password-reset/request').send({ email: 'nobody@ekoz.example.com' }).expect(202);
+    await request(server()).post('/auth/password-reset/request').send({ email: 'alice@ekoz.example.com' }).expect(202);
+
+    const token = resetTokenFromLastMail();
+    const newPassword = 'another-totally-fine-passphrase';
+    await request(server()).post('/auth/password-reset/confirm').send({ token, newPassword }).expect(204);
+
+    // Old sessions are dead, the new password works.
+    await request(server()).get('/me').set('Authorization', `Bearer ${before}`).expect(401);
+    await request(server()).post('/auth/login').send({ identifier: 'alice', password }).expect(401);
+    await request(server()).post('/auth/login').send({ identifier: 'alice', password: newPassword }).expect(200);
+
+    // Reusing the reset token fails.
+    await request(server())
+      .post('/auth/password-reset/confirm')
+      .send({ token, newPassword: 'yet-another-fine-passphrase' })
+      .expect(422);
+
+    // Restore Alice's canonical password for the later tests.
+    await request(server()).post('/auth/password-reset/request').send({ email: 'alice@ekoz.example.com' }).expect(202);
+    await request(server())
+      .post('/auth/password-reset/confirm')
+      .send({ token: resetTokenFromLastMail(), newPassword: password })
+      .expect(204);
+  });
+
+  // ── #19 profile and avatar ────────────────────────────────────────────────
+
+  it('reads and updates the own profile, and reads a public profile', async () => {
+    const token = await login('alice');
+
+    const me = await request(server()).get('/me').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(me.body).toMatchObject({ identifier: 'alice/ekoz.example.com', isOwner: false, status: 'active' });
+
+    await request(server())
+      .patch('/me/profile')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ displayName: 'Alice A.', bio: 'hi there' })
+      .expect(200);
+
+    const pub = await request(server()).get('/users/alice').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(pub.body).toMatchObject({ identifier: 'alice/ekoz.example.com', displayName: 'Alice A.', bio: 'hi there' });
+
+    await request(server())
+      .patch('/me/profile')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ bio: 'x'.repeat(10_000) })
+      .expect(422);
+  });
+
+  it('rejects a non-image avatar, accepts a PNG, and serves it via the blob path', async () => {
+    const token = await login('alice');
+
+    await request(server())
+      .put('/me/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .attach('file', Buffer.from('not an image'), 'a.png')
+      .expect(422);
+
+    const put = await request(server())
+      .put('/me/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .attach('file', pngBytes, 'a.png')
+      .expect(200);
+    expect(put.body.avatarUrl).toContain('/users/alice/avatar');
+
+    const served = await request(server())
+      .get('/users/alice/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(served.headers['etag']).toBeDefined();
+    expect(served.headers['content-type']).toBe('image/png');
+
+    // The endpoint still requires authentication.
+    await request(server()).get('/users/alice/avatar').expect(401);
+
+    await request(server()).delete('/me/avatar').set('Authorization', `Bearer ${token}`).expect(204);
+    await request(server()).get('/users/alice/avatar').set('Authorization', `Bearer ${token}`).expect(404);
+  });
+
+  // ── #20 identifier change ─────────────────────────────────────────────────
+
+  it('honours the username change policy', async () => {
+    const token = await login('alice');
+
+    // immutable (default)
+    await request(server())
+      .patch('/me/username')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'alice2' })
+      .expect(403);
+
+    // available → applies now and reserves the old name
+    await config.set('identity.username_change_policy', 'available', null);
+    await config.set('identity.username_change_cooldown', 0, null);
+    const applied = await request(server())
+      .patch('/me/username')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'alice-renamed' })
+      .expect(200);
+    expect(applied.body).toEqual({ status: 'applied', identifier: 'alice-renamed/ekoz.example.com' });
+    expect(await accounts.findByIdentifier('alice')).toBeNull();
+    const reservation = await app.get(AccountService).findByIdentifier('alice-renamed');
+    expect(reservation?.name).toBe('alice-renamed');
+
+    // approval → queues a request an owner resolves
+    await config.set('identity.username_change_policy', 'approval', null);
+    const pending = await request(server())
+      .patch('/me/username')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'alice-final' })
+      .expect(200);
+    expect(pending.body.status).toBe('pending');
+
+    const ownerToken = await login('owner');
+    const list = await request(server())
+      .get('/admin/username-requests?status=pending')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(list.body).toHaveLength(1);
+
+    await request(server())
+      .post(`/admin/username-requests/${pending.body.requestId}/approve`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(201);
+    expect((await accounts.findByIdentifier('alice-final'))?.name).toBe('alice-final');
+
+    await config.set('identity.username_change_policy', 'immutable', null);
+  });
+
+  // ── #21 suspension, deletion, owners ──────────────────────────────────────
+
+  it('suspends and unsuspends an account (owner action)', async () => {
+    await accounts.createAccount({
+      name: 'mallory',
+      email: 'mallory@ekoz.example.com',
+      password,
+      displayName: 'Mallory',
+      emailVerified: true,
+    });
+    const mallory = await login('mallory');
+    const ownerToken = await login('owner');
+    const mid = (await accounts.findByIdentifier('mallory'))!.id;
+
+    await request(server())
+      .post(`/admin/users/${mid}/suspend`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ reason: 'spam' })
+      .expect(204);
+
+    await request(server()).get('/me').set('Authorization', `Bearer ${mallory}`).expect(403);
+    await request(server()).post('/auth/login').send({ identifier: 'mallory', password }).expect(403);
+
+    await request(server())
+      .post(`/admin/users/${mid}/unsuspend`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
+    await request(server()).post('/auth/login').send({ identifier: 'mallory', password }).expect(200);
+  });
+
+  it('deletes the own account, scrubbing the profile and freeing nothing yet', async () => {
+    await accounts.createAccount({
+      name: 'trent',
+      email: 'trent@ekoz.example.com',
+      password,
+      displayName: 'Trent',
+      emailVerified: true,
+    });
+    const token = await login('trent');
+
+    await request(server())
+      .delete('/me')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ password: 'wrong' })
+      .expect(401);
+    await request(server()).delete('/me').set('Authorization', `Bearer ${token}`).send({ password }).expect(204);
+
+    await request(server()).post('/auth/login').send({ identifier: 'trent', password }).expect(401);
+    // The freed identifier is reserved, not immediately reusable.
+    const reused = accounts.createAccount({
+      name: 'trent',
+      email: 'trent2@ekoz.example.com',
+      password,
+      displayName: 'Trent 2',
+    });
+    await expect(reused).rejects.toMatchObject({ code: 'identity.username_taken' });
+  });
+
+  it('keeps at least one owner', async () => {
+    const ownerToken = await login('owner');
+    const ownerId = (await accounts.findByIdentifier('owner'))!.id;
+
+    await request(server()).delete(`/admin/owners/${ownerId}`).set('Authorization', `Bearer ${ownerToken}`).expect(409);
+
+    const aliceId = (await accounts.findByIdentifier('alice-final'))!.id;
+    await request(server())
+      .post('/admin/owners')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ userId: aliceId })
+      .expect(204);
+    await request(server()).delete(`/admin/owners/${ownerId}`).set('Authorization', `Bearer ${ownerToken}`).expect(204);
+  });
+
+  // ── #22 throttle ─────────────────────────────────────────────────────────
+
+  it('throttles repeated credential attempts with a 429 + Retry-After', async () => {
+    await config.set('auth.sensitive_throttle', { window: '15m', max: 3 }, null);
+    try {
+      for (let i = 0; i < 3; i += 1) {
+        await request(server())
+          .post('/auth/login')
+          .send({ identifier: 'throttle-probe', password: 'nope' })
+          .expect(401);
+      }
+      const limited = await request(server())
+        .post('/auth/login')
+        .send({ identifier: 'throttle-probe', password: 'nope' })
+        .expect(429);
+      expect(limited.headers['retry-after']).toBeDefined();
+      expect(limited.body.code).toBe('auth.too_many_requests');
+    } finally {
+      await config.set('auth.sensitive_throttle', { window: '15m', max: 10 }, null);
+    }
+  });
+});

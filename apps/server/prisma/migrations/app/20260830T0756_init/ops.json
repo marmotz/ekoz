@@ -1,0 +1,58 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.settings",
+    "label": "Create table \"settings\"",
+    "summary": "Creates table \"settings\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "settings"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"settings\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"settings\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"settings\"",
+        "sql": "CREATE TABLE \"public\".\"settings\" (\n  \"key\" text NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  \"updated_by\" text,\n  \"value\" jsonb NOT NULL,\n  PRIMARY KEY (\"key\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"settings\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"settings\""
+        ]
+      }
+    ]
+  }
+]

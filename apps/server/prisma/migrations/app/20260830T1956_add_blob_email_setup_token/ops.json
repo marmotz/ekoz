@@ -1,0 +1,242 @@
+[
+  {
+    "id": "table.blob",
+    "label": "Create table \"blob\"",
+    "summary": "Creates table \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"blob\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"blob\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"blob\"",
+        "sql": "CREATE TABLE \"public\".\"blob\" (\n  \"content_type\" text NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"hash\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"ref_count\" int4 DEFAULT 0 NOT NULL,\n  \"size_bytes\" int4 NOT NULL,\n  \"storage_key\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"blob\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"blob\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.email_message",
+    "label": "Create table \"email_message\"",
+    "summary": "Creates table \"email_message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "email_message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"email_message\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"email_message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"email_message\"",
+        "sql": "CREATE TABLE \"public\".\"email_message\" (\n  \"category\" text NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"dedupe_key\" text,\n  \"id\" text NOT NULL,\n  \"sent_at\" timestamptz,\n  \"template\" text NOT NULL,\n  \"to\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"email_message\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"email_message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.setup_token",
+    "label": "Create table \"setup_token\"",
+    "summary": "Creates table \"setup_token\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "setup_token"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"setup_token\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"setup_token\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"setup_token\"",
+        "sql": "CREATE TABLE \"public\".\"setup_token\" (\n  \"consumed_at\" timestamptz,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"token_hash\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"setup_token\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"setup_token\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.blob.blob_hash_key",
+    "label": "Add unique constraint on \"blob\" (hash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "blob_hash_key",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"blob_hash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "blob_hash_key",
+          "public",
+          "\"public\".\"blob\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"blob_hash_key\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD CONSTRAINT \"blob_hash_key\" UNIQUE (\"hash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"blob_hash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "blob_hash_key",
+          "public",
+          "\"public\".\"blob\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.email_message.email_message_dedupe_key_key",
+    "label": "Add unique constraint on \"email_message\" (dedupe_key)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "email_message_dedupe_key_key",
+        "table": "email_message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"email_message_dedupe_key_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "email_message_dedupe_key_key",
+          "public",
+          "\"public\".\"email_message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"email_message_dedupe_key_key\"",
+        "sql": "ALTER TABLE \"public\".\"email_message\" ADD CONSTRAINT \"email_message_dedupe_key_key\" UNIQUE (\"dedupe_key\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"email_message_dedupe_key_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "email_message_dedupe_key_key",
+          "public",
+          "\"public\".\"email_message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.blob.blob_ref_count_idx_73a05b87",
+    "label": "Create index \"blob_ref_count_idx_73a05b87\" on \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "blob_ref_count_idx_73a05b87",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"blob_ref_count_idx_73a05b87\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"blob_ref_count_idx_73a05b87\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"blob_ref_count_idx_73a05b87\"",
+        "sql": "CREATE INDEX \"blob_ref_count_idx_73a05b87\" ON \"public\".\"blob\" (\"ref_count\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"blob_ref_count_idx_73a05b87\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"blob_ref_count_idx_73a05b87\""
+        ]
+      }
+    ]
+  }
+]

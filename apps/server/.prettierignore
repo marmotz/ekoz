@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+bun.lock
+src/core/prisma/generated
+prisma/migrations
+.agents
+.claude
+.cursor
+.devin

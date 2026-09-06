@@ -1,0 +1,311 @@
+// use prisma-next
+//
+// Ekoz reference server — Prisma Next data contract.
+//
+// This is NOT a classic `schema.prisma`: Prisma 8 ("Prisma Next") replaced the
+// generator + `PrismaClient` with an emitted *contract* (`generated/contract.json`
+// + `generated/contract.d.ts`, both committed) and a lightweight runtime client
+// (`db.ts`). See the CHANGELOG entry for issue #2 and ADR 0002 (server stack).
+//
+// Conventions (task #2, item 7):
+//   - models are PascalCase, tables/columns snake_case via `@@map` / `@map`;
+//   - generated ids are ULID via `@default(ulid())` — 26-char Crockford base32,
+//     dash-free; ms-prefix gives insert locality, NOT a reliable order
+//     (that is the per-room `seq`, ADR 0004 / 0021);
+//   - timestamps are `timestamptz`, carried as ISO-8601 strings;
+//   - the connection URL lives only in the environment (infra `database.url`),
+//     never here — migrations read it from `prisma.config.ts`, the runtime from
+//     the `url` passed to `postgres()` in `db.ts`.
+//
+// Only the `Setting` model lands here: it is pure infrastructure (the admin
+// override store for the layered configuration system) and gives the migration
+// workflow and the integration tests a real table to exercise. The remaining
+// server-core models (ServerSigningKey, SetupToken, Blob, EmailMessage,
+// AuditLog — technical.md §11) are each introduced by their own task (#4, #5,
+// #7, #8, #9, #10).
+
+/// Layered configuration: admin overrides for `runtime` parameters only.
+model Setting {
+  key       String                     @id
+  // `Jsonb` (not `Json`) → a `jsonb` column, per technical.md §11.
+  value     Jsonb
+  updatedAt temporal.updatedAtString() @map("updated_at")
+  updatedBy String?                    @map("updated_by")
+
+  @@map("settings")
+}
+
+/// Canonical server identity, single row (technical.md §4, ADR 0007). Written
+/// once on the first boot that reaches identity setup; a later `server.domain`
+/// change is refused at boot because it would break every `name/server`
+/// identifier. `id` is the fixed sentinel `"server"`.
+model ServerIdentity {
+  id        String                     @id
+  domain    String
+  createdAt temporal.createdAtString() @map("created_at")
+
+  @@map("server_identity")
+}
+
+/// Server signing keypair (technical.md §4, ADR 0006). Exactly one row is
+/// active at a time (`activatedAt` set, `retiredAt` null); rotation retires the
+/// previous key and a sweep drops keys past the overlap window. `id` is a short
+/// random key id, not a ULID — it is published in the discovery document and
+/// referenced by every signature. The private key is stored sealed by
+/// `SecretBox` (AES-256-GCM under the infra `secret.key`).
+model ServerSigningKey {
+  id            String                     @id
+  algorithm     String                     @default("ed25519")
+  publicKey     String                     @map("public_key")
+  privateKeyEnc Bytes                      @map("private_key_enc")
+  createdAt     temporal.createdAtString() @map("created_at")
+  activatedAt   TimestamptzString?         @map("activated_at")
+  retiredAt     TimestamptzString?         @map("retired_at")
+
+  @@index([activatedAt])
+  @@map("server_signing_key")
+}
+
+/// Append-only audit trail (technical.md §8). Written through `AuditService`
+/// only; there is no update/delete API. `actorUserId` null = system action.
+model AuditLog {
+  id          String                     @id @default(ulid())
+  at          temporal.createdAtString()
+  actorUserId String?                    @map("actor_user_id")
+  actorIp     String?                    @map("actor_ip")
+  action      String
+  targetType  String?                    @map("target_type")
+  targetId    String?                    @map("target_id")
+  // `Jsonb` → a `jsonb` column; the service always supplies an object.
+  metadata    Jsonb
+
+  @@index([at])
+  @@index([actorUserId])
+  @@map("audit_log")
+}
+
+/// Single-use setup token (technical.md §5, ADR 0010). Present only on a
+/// token-pinned first boot: the plaintext is printed to stdout once, the hash is
+/// stored here. `consumedAt` is set when the first owner is created; the row is
+/// kept for the audit trail. At most one row exists at a time.
+model SetupToken {
+  id         String                     @id @default(ulid())
+  tokenHash  String                     @map("token_hash")
+  createdAt  temporal.createdAtString() @map("created_at")
+  consumedAt TimestamptzString?         @map("consumed_at")
+
+  @@map("setup_token")
+}
+
+/// Content-addressed, deduplicated blob (technical.md §6, ADR 0011). One row per
+/// distinct SHA-256; `refCount` tracks how many features reference it and the GC
+/// sweep drops rows that stayed at zero past the grace period. `sizeBytes` is a
+/// plain `int4` (2 GiB ceiling) — enough for the avatar consumer this increment
+/// ships; message attachments revisit it with per-user quotas.
+model Blob {
+  id          String                     @id @default(ulid())
+  hash        String                     @unique
+  sizeBytes   Int                        @map("size_bytes")
+  contentType String                     @map("content_type")
+  storageKey  String                     @map("storage_key")
+  refCount    Int                        @default(0) @map("ref_count")
+  createdAt   temporal.createdAtString() @map("created_at")
+
+  @@index([refCount])
+  @@map("blob")
+}
+
+/// Outbound email record (technical.md §7). Written before the send attempt;
+/// `sentAt` is stamped on success. `dedupeKey` (when supplied) is unique and
+/// backs the coarse anti-duplication guard until the notifications feature owns
+/// real rate limiting.
+model EmailMessage {
+  id        String                     @id @default(ulid())
+  to        String
+  template  String
+  category  String
+  dedupeKey String?                    @unique @map("dedupe_key")
+  sentAt    TimestamptzString?         @map("sent_at")
+  createdAt temporal.createdAtString() @map("created_at")
+
+  @@map("email_message")
+}
+
+// ── identity: accounts, sessions ─────────────────────────────────────────────
+// Feature `identity-and-profiles` (technical.md §4), ADR 0007 / 0008. Only the
+// slice needed by issues #12–#14 lands here; registration, invitations, email
+// verification, password reset, profiles and the username-change machinery each
+// add their own models on their own task.
+
+/// Account lifecycle (technical.md §4). `suspended` blocks all access but keeps
+/// the identifier held; `deleted` frees `name` / `email` (nulled) and is
+/// terminal.
+enum UserStatus {
+  @@type("pg/text@1")
+  active    = "active"
+  suspended = "suspended"
+  deleted   = "deleted"
+}
+
+/// A local account (technical.md §4-§6, ADR 0007). `name` is the normalised
+/// identifier (lowercase, NFC, `[a-z0-9_.-]`, 1-64) presented to the API as the
+/// full `name/server`; both `name` and `email` are nulled on deletion so the
+/// unique indexes free up. `email` is stored already lower-cased (the account
+/// layer normalises it before insert). `passwordHash` is an Argon2id PHC string.
+model User {
+  id              String                     @id @default(ulid())
+  name            String?                    @unique
+  email           String?                    @unique
+  emailVerifiedAt TimestamptzString?         @map("email_verified_at")
+  passwordHash    String                     @map("password_hash")
+  isOwner         Boolean                    @default(false) @map("is_owner")
+  status          UserStatus                 @default(active)
+  suspendedAt     TimestamptzString?         @map("suspended_at")
+  suspendedReason String?                    @map("suspended_reason")
+  deletedAt       TimestamptzString?         @map("deleted_at")
+  createdAt       temporal.createdAtString() @map("created_at")
+  updatedAt       temporal.updatedAtString() @map("updated_at")
+
+  @@map("user")
+}
+
+/// Public-facing profile, one row per {@link User} (technical.md §4, §13).
+/// `avatarBlobId` references a server-core `Blob` by id (no cross-module FK — the
+/// avatar consumer manages `retain` / `release`). Created alongside the `User`.
+model UserProfile {
+  userId       String                     @id @map("user_id")
+  displayName  String                     @map("display_name")
+  bio          String?
+  avatarBlobId String?                    @map("avatar_blob_id")
+  updatedAt    temporal.updatedAtString() @map("updated_at")
+  user         User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profile")
+}
+
+/// A device-scoped login (technical.md §7, §11, ADR 0008). `revokedAt` set =
+/// every access token carrying this `sid` is rejected (via the in-memory
+/// denylist) and its refresh tokens are dead.
+model Session {
+  id            String                     @id @default(ulid())
+  userId        String                     @map("user_id")
+  deviceName    String                     @map("device_name")
+  userAgent     String?                    @map("user_agent")
+  ip            String?
+  createdAt     temporal.createdAtString() @map("created_at")
+  lastSeenAt    TimestamptzString          @map("last_seen_at")
+  revokedAt     TimestamptzString?         @map("revoked_at")
+  revokedReason String?                    @map("revoked_reason")
+  user          User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+/// A single rotating opaque refresh token (technical.md §7, ADR 0008). Only the
+/// SHA-256 hash is stored; `usedAt` set on rotation, and a second use of the
+/// same hash trips reuse detection (whole session revoked).
+model RefreshToken {
+  id           String                     @id @default(ulid())
+  sessionId    String                     @map("session_id")
+  tokenHash    String                     @unique @map("token_hash")
+  createdAt    temporal.createdAtString() @map("created_at")
+  expiresAt    TimestamptzString          @map("expires_at")
+  usedAt       TimestamptzString?         @map("used_at")
+  replacedById String?                    @map("replaced_by_id")
+  session      Session                    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("refresh_token")
+}
+
+/// A `name` that is temporarily not assignable (technical.md §4-§5). Written
+/// when an account is deleted or an identifier is changed; the availability
+/// check rejects any `name` whose row has `reservedUntil > now()`.
+model ReservedUsername {
+  name          String                     @id
+  reservedUntil TimestamptzString          @map("reserved_until")
+  reason        String
+  createdAt     temporal.createdAtString() @map("created_at")
+
+  @@index([reservedUntil])
+  @@map("reserved_username")
+}
+
+/// A registration invitation (technical.md §4, §8, issue #15). Only the SHA-256
+/// hash of the opaque token is stored. `email` null = the link works for any
+/// address; when set, registration must present a matching email. `consumedAt`
+/// is stamped both on a successful registration and on an owner revocation
+/// (`consumedByUserId` null in the revoked case).
+model Invitation {
+  id               String                     @id @default(ulid())
+  email            String?
+  tokenHash        String                     @unique @map("token_hash")
+  createdByUserId  String                     @map("created_by_user_id")
+  createdAt        temporal.createdAtString() @map("created_at")
+  expiresAt        TimestamptzString          @map("expires_at")
+  consumedAt       TimestamptzString?         @map("consumed_at")
+  consumedByUserId String?                    @map("consumed_by_user_id")
+  createdBy        User                       @relation(fields: [createdByUserId], references: [id])
+
+  @@index([createdByUserId])
+  @@map("invitation")
+}
+
+/// A pending email-address verification (technical.md §4, §9, issue #16). Used
+/// both for the initial verification after registration and for an email change
+/// (`email` is then the new address, applied to `User.email` only on consume).
+/// Only the SHA-256 hash of the opaque token is stored.
+model EmailVerification {
+  id         String                     @id @default(ulid())
+  userId     String                     @map("user_id")
+  email      String
+  tokenHash  String                     @unique @map("token_hash")
+  createdAt  temporal.createdAtString() @map("created_at")
+  expiresAt  TimestamptzString          @map("expires_at")
+  consumedAt TimestamptzString?         @map("consumed_at")
+
+  @@index([userId])
+  @@map("email_verification")
+}
+
+/// A pending password reset (technical.md §4, §10, issue #17). TTL 1h
+/// (`auth.password_reset_ttl`). Only the SHA-256 hash of the opaque token is
+/// stored; `consumedAt` is stamped once the new password is set.
+model PasswordReset {
+  id          String                     @id @default(ulid())
+  userId      String                     @map("user_id")
+  tokenHash   String                     @unique @map("token_hash")
+  requestedIp String?                    @map("requested_ip")
+  createdAt   temporal.createdAtString() @map("created_at")
+  expiresAt   TimestamptzString          @map("expires_at")
+  consumedAt  TimestamptzString?         @map("consumed_at")
+
+  @@index([userId])
+  @@map("password_reset")
+}
+
+/// Lifecycle of an `approval`-mode identifier change (technical.md §4, §17,
+/// issue #20). `available`-mode changes apply immediately and never create a
+/// row; only the queued-for-owner path does.
+enum UsernameChangeStatus {
+  @@type("pg/text@1")
+  pending  = "pending"
+  approved = "approved"
+  rejected = "rejected"
+}
+
+/// A queued identifier change awaiting an owner decision (technical.md §17,
+/// issue #20).
+model UsernameChangeRequest {
+  id               String                     @id @default(ulid())
+  userId           String                     @map("user_id")
+  requestedName    String                     @map("requested_name")
+  status           UsernameChangeStatus       @default(pending)
+  createdAt        temporal.createdAtString() @map("created_at")
+  resolvedAt       TimestamptzString?         @map("resolved_at")
+  resolvedByUserId String?                    @map("resolved_by_user_id")
+
+  @@index([status])
+  @@map("username_change_request")
+}

@@ -1,0 +1,119 @@
+[
+  {
+    "id": "table.audit_log",
+    "label": "Create table \"audit_log\"",
+    "summary": "Creates table \"audit_log\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "audit_log"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"audit_log\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"audit_log\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"audit_log\"",
+        "sql": "CREATE TABLE \"public\".\"audit_log\" (\n  \"action\" text NOT NULL,\n  \"actor_ip\" text,\n  \"actor_user_id\" text,\n  \"at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"metadata\" jsonb NOT NULL,\n  \"target_id\" text,\n  \"target_type\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"audit_log\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"audit_log\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.audit_log.audit_log_actor_user_id_idx_c46ca325",
+    "label": "Create index \"audit_log_actor_user_id_idx_c46ca325\" on \"audit_log\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "audit_log_actor_user_id_idx_c46ca325",
+        "table": "audit_log"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"audit_log_actor_user_id_idx_c46ca325\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"audit_log_actor_user_id_idx_c46ca325\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"audit_log_actor_user_id_idx_c46ca325\"",
+        "sql": "CREATE INDEX \"audit_log_actor_user_id_idx_c46ca325\" ON \"public\".\"audit_log\" (\"actor_user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"audit_log_actor_user_id_idx_c46ca325\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"audit_log_actor_user_id_idx_c46ca325\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.audit_log.audit_log_at_idx_a7b89566",
+    "label": "Create index \"audit_log_at_idx_a7b89566\" on \"audit_log\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "audit_log_at_idx_a7b89566",
+        "table": "audit_log"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"audit_log_at_idx_a7b89566\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"audit_log_at_idx_a7b89566\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"audit_log_at_idx_a7b89566\"",
+        "sql": "CREATE INDEX \"audit_log_at_idx_a7b89566\" ON \"public\".\"audit_log\" (\"at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"audit_log_at_idx_a7b89566\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"audit_log_at_idx_a7b89566\""
+        ]
+      }
+    ]
+  }
+]
