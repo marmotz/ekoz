@@ -1,6 +1,6 @@
 # Ekoz reference server
 
-Reference implementation of the [Ekoz](https://github.com/ekoz-chat/spec) chat server. NestJS 12 (ESM) on the Bun
+Reference implementation of the Ekoz chat server. NestJS 12 (ESM) on the Bun
 runtime, PostgreSQL via Prisma 8 ("Prisma Next").
 
 ## Requirements

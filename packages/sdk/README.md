@@ -1,6 +1,6 @@
 # @ekoz/sdk
 
-JavaScript/TypeScript SDK for the [Ekoz](https://github.com/ekoz-chat) protocol. It encapsulates all network access to
+JavaScript/TypeScript SDK for the Ekoz protocol. It encapsulates all network access to
 an Ekoz server so that no client ever has to call `fetch` directly.
 
 > **Status:** early development. Distributed via `bun link` / `npm link` from a
@@ -31,8 +31,8 @@ bun link @ekoz/sdk
 
 ## Contributing
 
-Every visible change needs a changeset (`bun run changeset`). Design decisions are recorded as ADRs in the [
-`spec`](https://github.com/ekoz-chat/spec)
-repository, referenced by number.
+Every visible change needs a changeset (`bunx changeset`). Design decisions are
+written up under [`docs/technical/`](../../docs/technical/); see
+[CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 The full usage guide is added by a later task.
