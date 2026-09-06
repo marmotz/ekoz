@@ -14,7 +14,7 @@ association, company or public administration. It is distributed as a container
 image and stays manageable with few operational dependencies.
 
 > Architecture and technology choices are recorded in the
-> [architecture decision records](../technical/adr/).
+> [technical documentation](../technical/README.md).
 
 ## Product scope
 
@@ -130,7 +130,7 @@ part of the first increment.
 - Configuration follows a layered model: a TOML file at deployment, overrides
   from the admin for `runtime` parameters, with the environment able to lock a
   parameter. The admin never writes to the file. See
-  [ADR 0009](../technical/adr/0009-configuration-model.md).
+  [configuration model](../technical/configuration-model.md).
 - The supervision interface exposes users and their activity, storage usage,
   server health and, when available, federation state.
 
@@ -174,6 +174,6 @@ product decision.
 
 Per-feature product scoping, technical design and tasks live in the `server`
 repository's backlog:
-[github.com/ekoz-chat/server/tree/main/backlog/features](https://github.com/ekoz-chat/server/tree/main/backlog/features)
+[the backlog](../../backlog/features/)
 (`server-core`, `identity-and-profiles`, `conversations`, `content-and-sharing`,
 `notifications`, `server-administration`, `federation`, `extensibility`).

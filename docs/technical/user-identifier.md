@@ -1,6 +1,4 @@
-# 0007 — User identifier format
-
-**Status**: accepted
+# User identifier format
 
 ## Context
 

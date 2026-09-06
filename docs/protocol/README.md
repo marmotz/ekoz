@@ -12,22 +12,22 @@ with SemVer, independently of the server implementation. See
 - Transport: HTTP(S) only. TLS mandatory.
 - Client → server: REST/JSON API.
 - Server → client: one **SSE** stream per client, multiplexing rooms and
-  account-scoped events (see [ADR 0005](../technical/adr/0005-realtime-transport.md)).
+  account-scoped events (see [real-time transport](../technical/realtime-transport.md)).
 - Server → server: signed REST/JSON API (Ed25519), discovery via
   `/.well-known/ekoz` (see [discovery.md](discovery.md) and
-  [ADR 0006](../technical/adr/0006-federation-protocol.md)).
+  [federation protocol](../technical/federation-protocol.md)).
 - Technical error messages in English.
 - Error responses: `application/problem+json` (RFC 9457) with a stable
-  domain-namespaced `code` (see [ADR 0017](../technical/adr/0017-api-conventions.md)).
+  domain-namespaced `code` (see [HTTP API conventions](../technical/api-conventions.md)).
 - Entity identifiers: ULID (opaque 26-char string; see
-  [ADR 0021](../technical/adr/0021-entity-identifier-format.md)). Timestamps:
+  [entity identifier format](../technical/entity-identifier-format.md)). Timestamps:
   UTC ISO-8601.
 - Protocol version: every client request carries an `X-Ekoz-Protocol` header
   naming the protocol **major** it was built against (currently `0`). A client
   checks its major against `protocol_versions` in the discovery document
   ([discovery.md](discovery.md)) before issuing resource calls; a server rejects
   a request whose major it cannot serve (see
-  [ADR 0025](../technical/adr/0025-sdk-js-packaging-and-protocol-policy.md)).
+  [SDK packaging and protocol-version policy](../technical/sdk-packaging-and-protocol-policy.md)).
 
 ## Event model
 
@@ -36,13 +36,13 @@ with SemVer, independently of the server implementation. See
 - The home server of a room is authoritative for assigning `seq` values.
 - Synchronisation: `GET /sync?room=&since=<seq>`. The SSE stream carries the same
   events in real time.
-- See [ADR 0004](../technical/adr/0004-event-log-and-ordering.md).
+- See [event log and ordering](../technical/event-log-and-ordering.md).
 
 ## Core objects (to be specified)
 
-- Identity: `name/server` (see [ADR 0007](../technical/adr/0007-user-identifier.md)).
+- Identity: `name/server` (see [user identifier](../technical/user-identifier.md)).
 - `room` with `type`: `space` | `channel` | `dm` | `group_dm`
-  (see [ADR 0003](../technical/adr/0003-conversation-data-model.md)).
+  (see [conversation data model](../technical/conversation-data-model.md)).
 - `message`, `attachment`, `reaction`, `receipt`, `membership`, presence and
   typing events.
 - Log event types: messages, edits, redactions/tombstones, membership and role

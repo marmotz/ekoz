@@ -1,4 +1,4 @@
-# spec — ADR 0025: SDK packaging, distribution and protocol-version policy
+# spec — the SDK packaging and protocol-version policy design: SDK packaging, distribution and protocol-version policy
 
 **Status**: done
 **Type**: docs
@@ -9,9 +9,9 @@ Reference: [sdk-js SDK foundations technical design §16](https://github.com/eko
 
 ## Verified findings
 
-- `docs/technical/adr/` stops at `0024`; `0025` is the next free number.
-- Repo `AGENTS.md` / [ADR 0015](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0015-decisions-are-recorded-as-adrs.md):
-  every design decision gets an ADR.
+- `docs/technical/` stops at `0024`; `0025` is the next free number.
+- Repo `AGENTS.md` / design records:
+  every design decision gets a `docs/technical/` page.
 
 ## To do
 

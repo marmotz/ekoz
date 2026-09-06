@@ -2,7 +2,7 @@
 
 Reference Ekoz server. Global specification, protocol and architecture decisions
 live in [`docs/`](../../docs/) at the repo root — read them before any
-implementation, in particular [`docs/technical/adr/`](../../docs/technical/adr/).
+implementation, in particular [`docs/technical/`](../../docs/technical/).
 
 Backlog: [`backlog/server/`](../../backlog/server/) (per-feature `overview.md`,
 `technical.md`, `tasks/`). Run the `backlog-*` skills and `implement-issue` from
@@ -41,13 +41,14 @@ brings up Postgres + Mailpit.
 - **Manual API collection** in [`http/`](http/): one runnable Hurl file per
   request, one directory per endpoint group (`http/README.md`). Hand-run, not
   CI; automated coverage stays in `src/**/*.e2e-spec.ts`.
-- **Every design decision or notable change → an ADR** in
-  [`docs/technical/adr/`](../../docs/technical/adr/) (ADR 0015). Reference by
-  number; do not duplicate.
+- **Every design decision or notable change → a page under
+  [`docs/technical/`](../../docs/technical/)** (context, alternatives,
+  consequences). Link it, do not duplicate it. See
+  [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## Definition of Done
 
-- An ADR is written in `docs/` if a decision was made or changed.
+- The relevant `docs/technical/` page is updated if a decision was made or changed.
 - Tests created / updated and **green**; typecheck green.
 - Any HTTP endpoint added, changed or removed → the matching
   `http/<group>/*.hurl` file created / updated / deleted in the same change, its
@@ -69,6 +70,6 @@ change, **one line** (two at most), tagged with its issue.
   Name the capability, not its internals.
 - If you need "and" more than once, split into that many bullets or cut detail.
 
-Rationale, trade-offs, "an ADR is owed" → the ADR and the PR body, never the
+Rationale, trade-offs, "a design page is owed" → the `docs/technical/` page and the PR body, never the
 changelog. The only caveats that belong in a `### Notes` block are ones a
 _consumer_ must act on now.

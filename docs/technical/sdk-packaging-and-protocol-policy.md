@@ -1,23 +1,17 @@
-# 0025 — `sdk-js` packaging, distribution and protocol-version policy
-
-**Status**: accepted
+# SDK packaging, distribution and protocol-version policy
 
 ## Context
 
-`sdk-js` is the first consumer of the REST surface fixed by
-[ADR 0017](0017-api-conventions.md) and the token / session model of
-[ADR 0008](0008-auth-and-sessions.md). Its
-[SDK foundations technical design](https://github.com/ekoz-chat/sdk-js/blob/develop/backlog/features/sdk-foundations/technical.md)
-settles a set of choices that outlive that repo's backlog: they shape the public
-API third-party clients will bind, how the package is built and distributed, and
-how a client and a server negotiate protocol compatibility. Per this repo's
-`AGENTS.md` and [ADR 0015](0015-decisions-are-recorded-as-adrs.md), those
-cross-cutting choices are recorded here. `docs/technical/adr/` stops at `0024`;
-`0025` is the next free number.
+`@ekozhq/sdk` is the first consumer of the REST surface fixed by
+[HTTP API conventions](api-conventions.md) and the token / session model of
+[authentication and sessions](auth-and-sessions.md). Its
+[SDK foundations technical design](../../backlog/features/sdk-foundations/technical.md)
+settles a set of choices that shape the public API third-party clients will
+bind, how the package is built and distributed, and how a client and a server
+negotiate protocol compatibility.
 
-The protocol "Identity and profiles" section is not written yet
-([#3](https://github.com/ekoz-chat/spec/issues/3)); until it is, the SDK sources
-its wire types from the server code.
+The protocol "Identity and profiles" section is not written yet; until it is, the
+SDK sources its wire types from the server code.
 
 ## Decision
 
@@ -30,7 +24,7 @@ its wire types from the server code.
 
 ### Error model
 
-- Every `application/problem+json` response ([ADR 0017](0017-api-conventions.md))
+- Every `application/problem+json` response ([HTTP API conventions](api-conventions.md))
   is mapped to a typed exception class, keyed off the stable `code`. The class
   hierarchy is stable API; the `code` string remains the discriminator so an
   unknown `code` degrades to a base error rather than breaking callers.
@@ -64,16 +58,15 @@ its wire types from the server code.
   [discovery.md](../protocol/discovery.md)) and refuses to operate if its own
   major is not offered, surfacing a typed error before any resource call.
 - The server side gets a **tolerant reader** for `X-Ekoz-Protocol` (accept a
-  compatible major, reject otherwise) under a separate `server` task; this ADR
+  compatible major, reject otherwise) under a separate `server` task; this page
   only fixes the contract.
 
 ### Wire types
 
-- Until the protocol "Identity and profiles" section exists
-  ([#3](https://github.com/ekoz-chat/spec/issues/3)), the SDK's request/response
-  types are sourced from the server code. When that section lands it becomes the
-  authoritative source and any mismatch is reconciled in `spec` first
-  ([ADR 0017](0017-api-conventions.md)).
+- Until the protocol "Identity and profiles" section exists, the SDK's
+  request/response types are sourced from the server code. When that section
+  lands it becomes the authoritative source and any mismatch is reconciled in
+  `docs/protocol/` first (see [HTTP API conventions](api-conventions.md)).
 
 ## Consequences
 

@@ -11,7 +11,7 @@ Simplicity must not reduce the features expected of a modern messaging platform,
 nor prevent future extensions.
 
 The server is distributed as a container image. Technical choices are recorded in
-the [architecture decision records](../technical/adr/).
+the [technical documentation](../technical/README.md).
 
 ## Initial scope
 

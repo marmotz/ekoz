@@ -6,12 +6,12 @@ retention, the per-room event log and local moderation. Builds on
 [identity and profiles](../identity-and-profiles/technical.md). The `server`
 repository is greenfield, so this document defines the initial module.
 
-Related: [ADR 0003](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0003-conversation-data-model.md),
-[0004](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0004-event-log-and-ordering.md),
-[0005](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0005-realtime-transport.md),
-[0012](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0012-retention-and-tombstones.md),
-[0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md),
-[0018](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0018-permission-model.md).
+Related: [conversation data model](../../../../docs/technical/conversation-data-model.md),
+[event-log-and-ordering](../../../docs/technical/event-log-and-ordering.md),
+[realtime-transport](../../../docs/technical/realtime-transport.md),
+[retention-and-tombstones](../../../docs/technical/retention-and-tombstones.md),
+[api-conventions](../../../docs/technical/api-conventions.md),
+[permission-model](../../../docs/technical/permission-model.md).
 
 ## 1. Scope
 
@@ -19,7 +19,7 @@ First increment:
 
 - hierarchy of `space` / `channel` / `dm` / `group_dm` rooms (single `room`
   concept), closure table, configurable soft depth limit;
-- capability-based ACL ([ADR 0018](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0018-permission-model.md)):
+- capability-based ACL ([permission model](../../../../docs/technical/permission-model.md)):
   roles, default capability matrix, per-node and per-user overrides, one resolver;
 - membership: join/leave public rooms, invitations, invite-only join requests,
   kick, ban/unban;
@@ -335,7 +335,7 @@ entirely.
 ### Resolver
 
 `PermissionService.can(userId, roomId, capability)` per
-[ADR 0018](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0018-permission-model.md):
+[permission model](../../../../docs/technical/permission-model.md):
 
 1. server owner → allow.
 2. effective role: `membership.role` on the room, else the role from the nearest
@@ -413,7 +413,7 @@ and upserts; returns the existing room if any.
 - Retention "delete" rewrites the original `message_created` event into a
   tombstone (`type = message_redacted`, `content = { reason: "retention" }`,
   `senderId` kept) — no new `seq`, no gap
-  ([ADR 0012](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0012-retention-and-tombstones.md)).
+  ([retention and tombstones](../../../../docs/technical/retention-and-tombstones.md)).
 - `originServer` on the room and on events is populated with `server.domain` now;
   it becomes meaningful with federation.
 
@@ -484,7 +484,7 @@ and upserts; returns the existing room if any.
 ## 15. Presence and typing
 
 - **Transport**: heartbeats over REST (`POST /presence/heartbeat`), fan-out over
-  the SSE stream ([ADR 0005](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0005-realtime-transport.md)).
+  the SSE stream ([real-time transport](../../../../docs/technical/realtime-transport.md)).
 - **State**: in-process `Map<userId, { lastBeat, status }>` (Redis hash on
   multi-instance). Derived status: `online` if `lastBeat` within
   `presence.away_after`, `away` until `presence.offline_after`, else `offline`.
@@ -550,7 +550,7 @@ delete any message (`room.delete_any`), kick (`room.kick`), ban/unban
 
 | Point | Retained | Rejected | Why |
 |---|---|---|---|
-| Permission model | granular capability ACL from increment 1 | fixed role matrix + a few room flags | user choice; [ADR 0018](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0018-permission-model.md) |
+| Permission model | granular capability ACL from increment 1 | fixed role matrix + a few room flags | user choice; [permission model](../../../../docs/technical/permission-model.md) |
 | Hierarchy storage | closure table | recursive CTE per check, materialized path | ancestor chain + subtree in one indexed query; permission resolution is hot |
 | `seq` allocation | `UPDATE room … RETURNING last_seq` in-txn | per-room Postgres sequence, advisory lock, app-side counter | gap-free, simple, per-room serialisation is acceptable |
 | Message body | restricted Markdown source, validated allowlist | plain text; full Markdown + sanitised HTML | user choice; server-validated allowlist keeps rendering safe and portable |
@@ -559,7 +559,7 @@ delete any message (`room.delete_any`), kick (`room.kick`), ban/unban
 | Presence/typing | ephemeral in-process (Redis upgrade) | rows in the DB | high churn, no durability value, would bloat the event log |
 | Real-time stream | per-account feed projection + SSE, `/sync` as truth | encode the full per-room `seq` vector in `Last-Event-ID`; stream straight from `room_event` | one cursor for the socket, bounded reconnect logic, DB fan-out isolated from the write path |
 | Retention "hide" | terminal | reversible by moderation | user choice |
-| Directory search | PostgreSQL FTS + trigram | external search engine | one data dependency ([ADR 0002](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0002-server-stack.md)) |
+| Directory search | PostgreSQL FTS + trigram | external search engine | one data dependency ([server stack](../../../../docs/technical/server-stack.md)) |
 
 ## 20. Consequences
 

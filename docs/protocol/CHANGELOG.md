@@ -13,10 +13,10 @@ All notable changes to the Ekoz protocol. Format
   sections to write.
 - Transport conventions: `application/problem+json` errors with a stable `code`,
   ULID identifiers, UTC ISO-8601 timestamps, `X-Request-Id` correlation
-  (see ADR 0017).
+  (see the HTTP API conventions design).
 - Transport: `X-Ekoz-Protocol` request header carrying the protocol major, with
   a client-side compatibility gate against the discovery `protocol_versions`
-  (see ADR 0025).
+  (see the SDK packaging and protocol-version policy design).
 - Discovery document at `GET /.well-known/ekoz` fully specified in
   [`discovery.md`](discovery.md): request/caching rules, response fields,
   `KeyEntry` shape (raw base64 Ed25519 `public_key`, `valid_from`,

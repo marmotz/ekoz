@@ -6,7 +6,7 @@
 **Issue**: [#5](https://github.com/ekoz-chat/server/issues/5)
 
 Reference: [../features/server-core/technical.md §4](../features/server-core/technical.md#4-server-identity)
-and [ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md).
+and [federation protocol](../../../docs/technical/federation-protocol.md).
 
 ## To do
 

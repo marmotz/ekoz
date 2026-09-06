@@ -11,7 +11,7 @@ includes the admin console shipped in this monorepo). The sibling
 [`sdk-js`](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/) and
 [`client-web`](https://github.com/ekoz-chat/client-web/blob/main/backlog/)
 repositories carry their own backlogs (per
-[ADR 0019](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0019-backlog-lives-in-the-implementing-repo.md)).
+[backlog conventions](../AGENTS.md)).
 The later features
 (`content-and-sharing`, `notifications`, `federation`, `extensibility`) still
 have only an `overview.md` and will be scoped when their increment starts.
@@ -92,7 +92,7 @@ each issue body carries `Depends on #N` lines.
 
 | Done | Issue                                                      | Task                                                                                                                  | Description                                                                      |
 | ---- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| ☐    | [#46](https://github.com/ekoz-chat/server/issues/46)       | [46-monorepo-restructure](tasks/46-monorepo-restructure.md)                                                           | move server into `apps/backend/`, Bun workspaces layout + combined ADR           |
+| ☐    | [#46](https://github.com/ekoz-chat/server/issues/46)       | [46-monorepo-restructure](tasks/46-monorepo-restructure.md)                                                           | move server into `apps/backend/`, Bun workspaces layout + combined design page           |
 | ☐    | [#47](https://github.com/ekoz-chat/server/issues/47)       | [47-admin-account-endpoints](tasks/47-admin-account-endpoints.md)                                                     | `GET /admin/users`, `GET /admin/users/:id`, owner-triggered password reset       |
 | ☐    | [#48](https://github.com/ekoz-chat/server/issues/48)       | [48-console-reachability](tasks/48-console-reachability.md)                                                           | public `GET /setup` probe + CORS allow-list                                      |
 | ☐    | [sdk-js#11](https://github.com/ekoz-chat/sdk-js/issues/11) | [11-admin-console-bindings](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/tasks/11-admin-console-bindings.md) | SDK bindings: `setup.state`, `admin.users` reads, password reset (repo `sdk-js`) |

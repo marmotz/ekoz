@@ -1,6 +1,4 @@
-# 0003 — Conversation data model
-
-**Status**: accepted
+# Conversation data model
 
 ## Context
 
@@ -38,8 +36,8 @@ shared and ignore the `type`. The differences are rules conditioned on the
 Space hierarchy: `parent_id` + a closure table for ancestor queries (permission
 inheritance) and subtree queries. Cycles forbidden. Depth: configurable soft
 limit, 4 by default. Permission resolution is specified in
-[ADR 0018](0018-permission-model.md) (capability-based ACL, closest node wins) —
-this replaces the informal "most restrictive wins" hint originally in this ADR.
+[permission model](permission-model.md) (capability-based ACL, closest node wins) —
+this replaces the informal "most restrictive wins" hint originally stated here.
 
 The wording "special private room" is dropped in favour of `dm` / `group_dm`.
 

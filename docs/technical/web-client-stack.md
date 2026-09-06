@@ -1,6 +1,4 @@
-# 0016 — Web client stack
-
-**Status**: accepted
+# Web client stack
 
 ## Context
 

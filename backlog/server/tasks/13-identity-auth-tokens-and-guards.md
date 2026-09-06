@@ -6,7 +6,7 @@
 **Issue**: [#13](https://github.com/ekoz-chat/server/issues/13)
 
 Reference: [../features/identity-and-profiles/technical.md §7, §11](../features/identity-and-profiles/technical.md#7-tokens),
-[ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md).
+[authentication and sessions](../../../docs/technical/auth-and-sessions.md).
 
 ## To do
 

@@ -16,7 +16,7 @@ Référence : [../features/web-client-foundations/technical.md §11](../features
    le README.
 4. Check CHANGELOG : si des fichiers `src/**` sont modifiés dans la PR, exiger
    une entrée ajoutée sous `## [Unreleased]` de `CHANGELOG.md`
-   ([ADR 0014](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0014-changelog-discipline.md)).
+   ([changelog discipline](../../../CONTRIBUTING.md)).
 5. Pas de job de déploiement dans cet incrément.
 6. Entrée `CHANGELOG.md`.
 

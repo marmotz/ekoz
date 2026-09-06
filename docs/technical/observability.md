@@ -1,6 +1,4 @@
-# 0020 — Observability and instrumentation
-
-**Status**: accepted
+# Observability and instrumentation
 
 ## Context
 
@@ -18,12 +16,12 @@ Two concerns are often conflated and must be separated:
   skeleton on.
 - **Presenting** it to the operator: the supervision screens (users and activity, storage usage, server health,
   federation state) — a
-  [server administration](https://github.com/ekoz-chat/spec/blob/main/backlog/features/server-administration/overview.md)
-  responsibility, later. That feature consumes what this ADR produces; it does not define new telemetry.
+  [server administration](../../backlog/features/server-administration/overview.md)
+  responsibility, later. That feature consumes what this page defines; it does not define new telemetry.
 
 Constraints: single process in the first increment (see
-[ADR 0005](0005-realtime-transport.md)), Bun runtime (see
-[ADR 0002](0002-server-stack.md)), dependencies kept minimal, nothing that phones home by default.
+[real-time transport](realtime-transport.md)), Bun runtime (see
+[server stack](server-stack.md)), dependencies kept minimal, nothing that phones home by default.
 
 ## Decision
 
@@ -35,7 +33,7 @@ Constraints: single process in the first increment (see
 - A single logger configured once. Level from config (`observability.log_level`, `runtime`, default `info`).
 - Every log line carries `requestId` when emitted within a request, taken from the `AsyncLocalStorage` request context
   (see
-  [ADR 0017](0017-api-conventions.md)). Background jobs use a generated
+  [HTTP API conventions](api-conventions.md)). Background jobs use a generated
   `jobId`.
 - One automatic line per completed HTTP request (method, route, status, duration, `requestId`, `userId` when
   authenticated). Domain events are logged explicitly by the feature that owns them.
@@ -74,12 +72,12 @@ Constraints: single process in the first increment (see
 
 ### Health
 
-- Unchanged from [server core](https://github.com/ekoz-chat/spec/blob/main/backlog/features/server-core/technical.md):
+- Unchanged from [server core](../../backlog/features/server-core/technical.md):
   `GET /healthz` (liveness, no dependencies) and `GET /readyz` (DB, migrations, signing key, storage driver; `503` +
   per-check breakdown on failure).
 - `/metrics`, `/healthz`, `/readyz` are excluded from the per-request access log to avoid drowning it in scrape noise.
 
-### Configuration surface (added to the registry, [ADR 0009](0009-configuration-model.md))
+### Configuration surface (added to the registry, [configuration model](configuration-model.md))
 
 | key                                | kind          | default                         |
 |------------------------------------|---------------|---------------------------------|
@@ -96,7 +94,7 @@ Constraints: single process in the first increment (see
   controller) and the config keys above. Dependencies added: `pino`, `@opentelemetry/sdk-node` and the Prometheus
   exporter.
 - Every feature that adds a subsystem (SSE, event bus, federation, jobs) is responsible for its own domain metrics and
-  domain log events; this ADR is the contract for how.
+  domain log events; this page is the contract for how.
 - `server-administration` builds its supervision screens on `/metrics`,
   `/readyz` and the `audit_log`; it introduces no new telemetry pipeline.
 - No telemetry leaves the process unless the operator sets an OTLP endpoint or scrapes `/metrics`. Nothing phones home.

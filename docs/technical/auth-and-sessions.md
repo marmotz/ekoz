@@ -1,6 +1,4 @@
-# 0008 — Authentication and sessions
-
-**Status**: accepted
+# Authentication and sessions
 
 ## Context
 

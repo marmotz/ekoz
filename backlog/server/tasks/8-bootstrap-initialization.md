@@ -6,7 +6,7 @@
 **Issue**: [#8](https://github.com/ekoz-chat/server/issues/8)
 
 Reference: [../features/server-core/technical.md §5](../features/server-core/technical.md#5-bootstrap--initialization)
-and [ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md).
+and [server initialization](../../../docs/technical/server-initialization.md).
 
 ## To do
 

@@ -1,11 +1,9 @@
-# 0018 — Permission model
-
-**Status**: accepted
+# Permission model
 
 ## Context
 
 The functional spec calls for "fine-grained permissions at every relevant
-level". [ADR 0003](0003-conversation-data-model.md) fixed six named roles
+level". [conversation data model](conversation-data-model.md) fixed six named roles
 inherited from a space down to its rooms, with per-room overrides and a
 "most restrictive wins" hint. The first increment needs a concrete, testable
 model, and the decision was taken to ship a fully granular ACL from the start
@@ -44,14 +42,14 @@ A capability-based ACL layered on named roles.
      entry beats the per-role entry.
   5. absence of any entry → the seeded default; default-absent → `deny`.
 
-This supersedes the informal "most restrictive wins" phrasing of ADR 0003:
-conflicts are resolved by specificity (closest node, then per-user), not by
-picking the most restrictive.
+This replaces the informal "most restrictive wins" phrasing from the
+[conversation data model](conversation-data-model.md): conflicts are resolved by
+specificity (closest node, then per-user), not by picking the most restrictive.
 
 ## Consequences
 
 - One resolver, one code path, exhaustively unit-tested against a fixture tree.
-- The closure table ([ADR 0003](0003-conversation-data-model.md)) supplies the
+- The closure table ([conversation data model](conversation-data-model.md)) supplies the
   ancestor chain in one query; effective permissions for a room are cacheable and
   invalidated on any membership/override change in its subtree.
 - The protocol exposes the capability list and a "my effective capabilities in

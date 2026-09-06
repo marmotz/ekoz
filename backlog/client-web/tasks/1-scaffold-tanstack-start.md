@@ -11,7 +11,7 @@ Référence : [../features/web-client-foundations/technical.md §3](../features/
 
 Dépôt vide : `git ls-files` → `AGENTS.md`, `CHANGELOG.md`, `LICENSE`, `NOTICE`.
 Tout est créé par cet incrément. Stack imposée par
-[ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md) ;
+[web client stack](../../../docs/technical/web-client-stack.md) ;
 socle TanStack Start acté au technical.md §2.
 
 ## À faire

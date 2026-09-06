@@ -6,7 +6,7 @@
 **Issue**: [#24](https://github.com/ekoz-chat/server/issues/24)
 
 Reference: [../features/conversations/technical.md §4-§5, §7](../features/conversations/technical.md#4-data-model-prisma-slice),
-[ADR 0003](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0003-conversation-data-model.md).
+[conversation data model](../../../docs/technical/conversation-data-model.md).
 
 ## To do
 

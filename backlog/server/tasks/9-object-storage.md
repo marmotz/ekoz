@@ -6,7 +6,7 @@
 **Issue**: [#9](https://github.com/ekoz-chat/server/issues/9)
 
 Reference: [../features/server-core/technical.md §6](../features/server-core/technical.md#6-object-storage)
-and [ADR 0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+and [file storage and quotas](../../../docs/technical/file-storage-and-quotas.md).
 
 ## To do
 

@@ -1,4 +1,4 @@
-# Spec — ADR 0026 bootstrap du client web
+# Spec — the repository layout bootstrap du client web
 
 **Statut** : à faire
 **Type** : doc
@@ -21,7 +21,7 @@ Confirmer le numéro à l'écriture (le premier des deux incréments livrés pre
 2. Décisions à acter :
    - **TanStack Start** comme socle (SSR + hydratation, runtime serveur Nitro,
      sortie Node) — évolution d'
-     [ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md)
+     [web client stack](../../../docs/technical/web-client-stack.md)
      qui ne nommait que « Vite ». Assumer le runtime serveur au déploiement.
    - Routing TanStack Router (embarqué), routes file-based.
    - i18n react-i18next, instance par requête, détection `localStorage` +

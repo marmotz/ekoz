@@ -6,7 +6,7 @@
 **Issue**: [#3](https://github.com/ekoz-chat/server/issues/3)
 
 Reference: [../features/server-core/technical.md §10](../features/server-core/technical.md#10-cross-cutting-http-conventions)
-and [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md).
+and [HTTP API conventions](../../../docs/technical/api-conventions.md).
 
 ## To do
 

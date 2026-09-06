@@ -6,7 +6,7 @@
 **Issue**: [#34](https://github.com/ekoz-chat/server/issues/34)
 
 Reference: [../features/conversations/technical.md §16](../features/conversations/technical.md#16-sync-and-real-time-delivery),
-[ADR 0005](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0005-realtime-transport.md).
+[real-time transport](../../../docs/technical/realtime-transport.md).
 
 ## To do
 

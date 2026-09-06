@@ -6,7 +6,7 @@
 **Issue**: [#12](https://github.com/ekoz-chat/server/issues/12)
 
 Reference: [../features/identity-and-profiles/technical.md §4-§6](../features/identity-and-profiles/technical.md#4-data-model-prisma-slice),
-[ADR 0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md).
+[user identifier](../../../docs/technical/user-identifier.md).
 
 ## To do
 

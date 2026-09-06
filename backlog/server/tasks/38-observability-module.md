@@ -6,7 +6,7 @@
 **Issue**: [#38](https://github.com/ekoz-chat/server/issues/38)
 
 Reference: [../features/server-core/technical.md §11](../features/server-core/technical.md#11-observability-and-instrumentation)
-and [ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md).
+and [observability and instrumentation](../../../docs/technical/observability.md).
 
 Ships the **emission** side of observability: structured logs, metrics, traces,
 health wiring. Operator-facing supervision screens are out of scope (they belong
@@ -43,7 +43,7 @@ to `server-administration` and only consume what this task exposes).
    - email: `email_queue_depth`, `email_send_attempts_total`,
      `email_send_failures_total`
    - blob storage: `blob_bytes_total`, `blob_count`, `blob_dedup_ratio`
-8. Add the `observability.*` keys to the config registry (ADR 0009 typing):
+8. Add the `observability.*` keys to the config registry (the configuration model design typing):
    `log_level` (runtime), `log_format` (infra), `metrics_enabled` (runtime),
    `metrics_token` (infra, secret), `otlp_endpoint` (infra),
    `trace_sample_ratio` (runtime).

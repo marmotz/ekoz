@@ -25,7 +25,7 @@ rules and retention.
   the quota is charged to the original uploader and released when the file is no
   longer referenced.
 - Physical storage is modular: local disk, S3-compatible service or other. See
-  [ADR 0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+  [file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md).
 - Profile avatars are files handled by the same system (deduplicated blobs),
   attached to a profile rather than to a message.
 - In a private room, only the current members of the room can download a shared

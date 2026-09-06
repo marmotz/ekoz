@@ -21,7 +21,7 @@ later.
   distinct from the display name. The `name` is lowercase, restricted to the
   characters `[a-z0-9_.-]`, at most 64 characters, unique on its server,
   unrelated to the display name. The `server` is a real domain (no `localhost`).
-  See [ADR 0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md).
+  See [user identifier](../../../../docs/technical/user-identifier.md).
 - The server administrator chooses whether registration is open, invite-only or
   reserved to administrators.
 - A mandatory, verified email address enables account recovery and email
@@ -31,7 +31,7 @@ later.
 - Multi-factor authentication is planned for a later increment.
 - Authentication uses a short-lived JWT access token + an opaque refresh token;
   named multi-device sessions, revocable by the user or by the server
-  (suspension). See [ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md).
+  (suspension). See [authentication and sessions](../../../../docs/technical/auth-and-sessions.md).
 - The public profile contains a display name, an avatar and a short biography.
 - The server owner configures the identifier change policy: immutable identifier,
   free change subject to availability, or change subject to administrative

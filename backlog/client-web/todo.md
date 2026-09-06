@@ -16,4 +16,4 @@ Feature : [features/web-client-foundations/overview.md](features/web-client-foun
 | [ ] | [#7](https://github.com/ekoz-chat/client-web/issues/7) | [7-sdk-session-wiring](tasks/7-sdk-session-wiring.md) | Câblage SDK : createSdkClient, localStorageSessionStore, SdkProvider, useSession, RequireAuth |
 | [ ] | [#8](https://github.com/ekoz-chat/client-web/issues/8) | [8-app-shell-root-routes](tasks/8-app-shell-root-routes.md) | Shell (AppShell, sidebar, topbar, nav-registry) + __root.tsx + routes placeholder |
 | [ ] | [#9](https://github.com/ekoz-chat/client-web/issues/9) | [9-ci-workflow](tasks/9-ci-workflow.md) | CI GitHub Actions : lint, typecheck, test, build, check CHANGELOG |
-| [ ] | [#10](https://github.com/ekoz-chat/client-web/issues/10) | [10-adr-0026-web-client-bootstrap](tasks/10-adr-0026-web-client-bootstrap.md) | ADR 0026 dans ekoz-chat/spec (socle Start, i18n, shell, session) |
+| [ ] | [#10](https://github.com/ekoz-chat/client-web/issues/10) | [10-adr-0026-web-client-bootstrap](tasks/10-adr-0026-web-client-bootstrap.md) | the repository layout dans ekoz-chat/spec (socle Start, i18n, shell, session) |

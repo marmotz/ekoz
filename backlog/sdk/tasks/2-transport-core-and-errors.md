@@ -10,7 +10,7 @@ Reference: [../features/sdk-foundations/technical.md §3](../features/sdk-founda
 
 - Error shape: `application/problem+json` `{ type, title, status, detail, code, errors?, requestId? }`
   ([server problem-details.ts:26](https://github.com/ekoz-chat/server/blob/main/src/core/http/problem-details.ts#L26),
-  [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md)).
+  [HTTP API conventions](../../../docs/technical/api-conventions.md)).
 - `code` is stable and namespaced (`auth.*` / `identity.*`), full list in
   [server identity.errors.ts](https://github.com/ekoz-chat/server/blob/main/src/modules/identity/identity.errors.ts).
 - `429` carries `Retry-After` ([identity.errors.ts:229](https://github.com/ekoz-chat/server/blob/main/src/modules/identity/identity.errors.ts#L229)).
@@ -44,4 +44,4 @@ Reference: [../features/sdk-foundations/technical.md §3](../features/sdk-founda
 
 ## Dependencies
 
-[1-package-skeleton](1-package-skeleton.md), [ADR 0025 (ekoz-chat/spec#2)](https://github.com/ekoz-chat/spec/blob/main/backlog/tasks/2-adr-0025-sdk-packaging.md).
+[1-package-skeleton](1-package-skeleton.md), [the SDK packaging and protocol-version policy design (ekoz-chat/spec#2)](https://github.com/ekoz-chat/spec/blob/main/backlog/tasks/2-adr-0025-sdk-packaging.md).

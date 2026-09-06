@@ -1,11 +1,9 @@
-# 0023 — Identity account and token mechanics
-
-**Status**: accepted
+# Identity account and token mechanics
 
 ## Context
 
-[ADR 0007](0007-user-identifier.md) fixes the `name/server` identifier and
-[ADR 0008](0008-auth-and-sessions.md) fixes the session model (short JWT access
+[user identifier](user-identifier.md) fixes the `name/server` identifier and
+[authentication and sessions](auth-and-sessions.md) fixes the session model (short JWT access
 token + rotating opaque refresh token, `sid` denylist, Argon2id). The
 `identity-and-profiles` technical design then sketched a few mechanics that were
 never pinned centrally and are cheap to get wrong across the later identity
@@ -36,7 +34,7 @@ them and need the choices recorded.
   `{ iss, sub, sid, iat, exp }`, signature over `base64url(header).base64url(payload)`
   produced by the active server Ed25519 key.
 - `kid` carries the signing key id, so verification reuses the existing
-  key-lookup / overlap-window logic ([ADR 0022](0022-server-secret-box-and-signing-keys.md)).
+  key-lookup / overlap-window logic ([server secret box and signing keys](server-secret-box-and-signing-keys.md)).
   `iss` is `server.domain`; verification checks signature, `iss` and `exp`.
   Session revocation and account status are the guard's job, out of band.
 - Rationale: the server already owns the keypair and its rotation; a library

@@ -6,7 +6,7 @@
 **Issue**: [#35](https://github.com/ekoz-chat/server/issues/35)
 
 Reference: [../features/conversations/technical.md §13](../features/conversations/technical.md#13-retention),
-[ADR 0012](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0012-retention-and-tombstones.md).
+[retention and tombstones](../../../docs/technical/retention-and-tombstones.md).
 
 ## To do
 

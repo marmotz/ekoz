@@ -26,30 +26,30 @@ Provide the foundations the first increment builds on:
 
 ## Decisions made
 
-- Stack and layout follow [ADR 0001](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0001-repository-layout.md)
-  and [ADR 0002](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0002-server-stack.md).
+- Stack and layout follow [repository layout](../../../../docs/technical/architecture.md)
+  and [server stack](../../../../docs/technical/server-stack.md).
 - Configuration follows the layered model of
-  [ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md): each
+  [configuration model](../../../../docs/technical/configuration-model.md): each
   parameter is typed `infra` (file/env only) or `runtime` (overridable via a
   `settings` table by the admin), with the environment able to lock a parameter.
 - Server initialization follows
-  [ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md): a fixed
+  [server initialization](../../../../docs/technical/server-initialization.md): a fixed
   `EKOZ_INITIAL_OWNER_EMAIL`, or a single-use setup token printed to the logs;
   the setup endpoint closes permanently once the first owner exists.
 - The server has an Ed25519 signing keypair generated at initialization, published
   through `/.well-known/ekoz`, rotatable with an overlap window
-  ([ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md)). It is
+  ([federation protocol](../../../../docs/technical/federation-protocol.md)). It is
   used to sign tokens until federation exists.
 - The `server` part of the `name/server` identifier is a real domain, validated,
-  no `localhost` ([ADR 0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md)).
+  no `localhost` ([user identifier](../../../../docs/technical/user-identifier.md)).
 - Object storage is modular (`local` and `s3`-like drivers) with a `blob` /
   `attachment` split and content-hash deduplication
-  ([ADR 0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md)). The
+  ([file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md)). The
   first increment ships the `local` driver and the deduplicated schema;
   per-user quotas, MIME filtering and per-message attachments are delivered with
   [content and sharing](../content-and-sharing/overview.md).
 - Outbound email is modular; the first increment ships the SMTP driver only
-  ([ADR 0015 of the functional spec / notifications](../notifications/overview.md)).
+  ([the design records of the functional spec / notifications](../notifications/overview.md)).
   Email templates are in English.
 - Every administration and global moderation action is written to a dated,
   attributed audit log; the storage lives here, writes come from the features.

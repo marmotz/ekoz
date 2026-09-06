@@ -1,10 +1,8 @@
-# 0024 — Identity lifecycle and abuse protection
-
-**Status**: accepted
+# Identity lifecycle and abuse protection
 
 ## Context
 
-[ADR 0023](0023-identity-account-and-token-mechanics.md) pinned the account,
+[identity account and token mechanics](identity-account-and-token-mechanics.md) pinned the account,
 token and guard mechanics for issues #12–#14. The remaining `identity-and-profiles`
 tasks — password reset (#17), profile and avatar (#19), policy-driven identifier
 changes (#20), suspension / deletion / owner management (#21) and a throttle on

@@ -10,8 +10,8 @@ Reference: [../features/sdk-foundations/technical.md §7](../features/sdk-founda
 
 - Token model: short access JWT (~15 min) + rotating single-use opaque refresh;
   reuse of a consumed refresh revokes the whole session
-  ([ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md),
-  [ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md)).
+  ([authentication and sessions](../../../docs/technical/auth-and-sessions.md),
+  [identity account and token mechanics](../../../docs/technical/identity-account-and-token-mechanics.md)).
 - `POST /auth/refresh` body `{ refreshToken }` → `{ accessToken, refreshToken, expiresIn }`
   ([server auth.service.ts](https://github.com/ekoz-chat/server/blob/main/src/modules/identity/auth/auth.service.ts)).
 - `auth.unauthenticated` from the auth guard on an expired/invalid access token;

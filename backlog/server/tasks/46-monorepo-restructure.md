@@ -17,16 +17,16 @@ layout so `apps/admin/` can be added by the next server-administration increment
 
 ## To do
 
-1. **ADR** in `spec` (`docs/technical/adr/`): one combined ADR "Reference server
+1. **ADR** in `spec` (`docs/technical/`): one combined design page "Reference server
    monorepo and admin console" — the repo is a Bun workspaces monorepo
    (`apps/backend`, `apps/admin`, shared config in `packages/`), and the admin
    console is a core app of the reference server deployed on its own origin
    (stack, owner-only access, the server additions listed in
    [../features/server-administration/technical.md §9](../features/server-administration/technical.md#9-adr-to-write-in-spec)).
    Update the ADR index. Note it refines
-   [ADR 0001](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0001-repository-layout.md)
+   [repository layout](../../../docs/technical/architecture.md)
    and relates to
-   [ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md).
+   [web client stack](../../../docs/technical/web-client-stack.md).
    This task does the restructure only; `apps/admin/` itself is a later task.
 2. **Move** with `git mv` into `apps/backend/`: `src/`, `prisma/`, `http/`,
    `var/`, `docker/`, `nest-cli.json`, `tsconfig.build.json`, `prisma.config.ts`,

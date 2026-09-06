@@ -5,10 +5,10 @@ Builds on [server core](../server-core/technical.md); the `server` repository is
 greenfield, so this document defines the initial module rather than referencing
 existing code.
 
-Related: [ADR 0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md),
-[0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md),
-[0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md),
-[0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md).
+Related: [user identifier](../../../../docs/technical/user-identifier.md),
+[auth-and-sessions](../../../docs/technical/auth-and-sessions.md),
+[server-initialization](../../../docs/technical/server-initialization.md),
+[api-conventions](../../../docs/technical/api-conventions.md).
 
 ## 1. Scope and dependencies
 
@@ -198,7 +198,7 @@ model ReservedUsername {
 
 `email` and `name` are both normalised (NFC, trim, lowercase) before insert and
 stored as plain unique `text` — no `citext` extension
-([ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md)).
+([identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md)).
 
 ## 5. Identifier rules
 
@@ -358,7 +358,7 @@ Session management (all scoped to the caller):
 
 ## 14. Abuse protection on sensitive endpoints
 
-General rate limiting is deferred ([functional spec], no ADR change), but the
+General rate limiting is deferred ([functional spec], no protocol change), but the
 credential endpoints are abuse-prone, so this feature ships a **narrow,
 self-contained throttle** — not the general framework:
 
@@ -453,10 +453,10 @@ and `web_url`.
 | Unverified accounts              | login blocked until verified (when required)                                                                                                                       | allow login, gate actions                    | simpler; matches "email mandatory and verified"; no half-state to reason about |
 | Deleted `name`                   | freed after `username_release_delay`                                                                                                                               | kept forever; freed immediately              | user choice; grace window avoids immediate impersonation                       |
 | Invitation issuers (increment 1) | owners only                                                                                                                                                        | any member; member + flag                    | user choice; spaces/roles do not exist yet                                     |
-| Avatar storage                   | server-core `BlobService` (dedup)                                                                                                                                  | column blob; separate table                  | ADR 0011; avatars are files like any other                                     |
+| Avatar storage                   | server-core `BlobService` (dedup)                                                                                                                                  | column blob; separate table                  | the file storage and quotas design; avatars are files like any other                                     |
 | Password hash lib                | `@node-rs/argon2`                                                                                                                                                  | `argon2` (node-gyp), `bcrypt`                | native, Bun-friendly, Argon2id is the OWASP recommendation                     |
 | Sensitive-endpoint throttle      | narrow in-memory guard now                                                                                                                                         | wait for the general rate-limiter            | credential endpoints cannot ship unprotected; scope is minimal                 |
-| Email case-insensitivity         | normalise-on-write + plain unique `text` ([ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md)) | `citext` column; `lower(email)` unique index | no extension dependency; one rule for `name` and `email`                       |
+| Email case-insensitivity         | normalise-on-write + plain unique `text` ([identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md)) | `citext` column; `lower(email)` unique index | no extension dependency; one rule for `name` and `email`                       |
 
 ## 20. Consequences
 

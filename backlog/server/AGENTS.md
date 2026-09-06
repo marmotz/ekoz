@@ -53,11 +53,11 @@ their templates; use the English equivalents:
 - A task whose deliverable is in another repo carries a `**Repo**:` field and its
   issue is created there; it is still tracked here for the delivery order.
 
-## Every decision → an ADR
+## Every decision → a `docs/technical/` page
 
-Any design decision or notable change gets an ADR in the `spec` repo
-(`docs/technical/adr/`), per
-[ADR 0015](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0015-decisions-are-recorded-as-adrs.md).
+Any design decision or notable change gets a page in `docs/technical/`
+(`docs/technical/`), per
+design records.
 
 ## CHANGELOG entries
 

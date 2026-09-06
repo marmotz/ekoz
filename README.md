@@ -2,7 +2,7 @@
 
 Open chat protocol with a reference server, an SDK, a demonstration web client
 and an admin console. One monorepo (Bun workspaces) — see
-[ADR 0026](docs/technical/adr/0026-single-monorepo.md).
+[repository layout](docs/technical/architecture.md).
 
 ## Layout
 
@@ -30,7 +30,7 @@ Per workspace: `bun run --filter '@ekozhq/<name>' <script>`.
 
 ## Contributing
 
-See [AGENTS.md](AGENTS.md) for conventions (English everywhere, ADR per decision,
+See [AGENTS.md](AGENTS.md) for conventions (English everywhere, design docs per decision,
 tests with every change, Biome, Changesets). Each workspace has its own
 `AGENTS.md` with specifics.
 

@@ -1,6 +1,4 @@
-# 0012 — Retention and tombstones
-
-**Status**: accepted
+# Retention and tombstones
 
 ## Context
 

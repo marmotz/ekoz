@@ -1,6 +1,4 @@
-# 0009 — Configuration model
-
-**Status**: accepted
+# Configuration model
 
 ## Context
 

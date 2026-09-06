@@ -6,7 +6,7 @@ surface** for every Ekoz client (`apps/client-web`, `apps/admin`, third parties)
 
 Backlog: [`backlog/sdk/`](../../backlog/sdk/). Protocol contract:
 [`docs/protocol/`](../../docs/protocol/). Packaging policy:
-[ADR 0025](../../docs/technical/adr/0025-sdk-js-packaging-and-protocol-policy.md).
+[SDK packaging and protocol-version policy](../../docs/technical/sdk-packaging-and-protocol-policy.md).
 
 ## Stack
 
@@ -24,7 +24,7 @@ Backlog: [`backlog/sdk/`](../../backlog/sdk/). Protocol contract:
   Changesets, not hand-edited.
 - Wire types track a specific protocol version; a mismatch with
   `docs/protocol/` is fixed in `docs/`, not worked around here.
-- Every design decision or notable change → an ADR in `docs/technical/adr/`.
+- Every design decision or notable change → a page under `docs/technical/`.
 
 ## Definition of Done
 

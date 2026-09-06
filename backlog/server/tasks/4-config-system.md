@@ -6,7 +6,7 @@
 **Issue**: [#4](https://github.com/ekoz-chat/server/issues/4)
 
 Reference: [../features/server-core/technical.md §2](../features/server-core/technical.md#2-configuration-system)
-and [ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md).
+and [configuration model](../../../docs/technical/configuration-model.md).
 
 ## To do
 

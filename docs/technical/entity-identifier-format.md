@@ -1,10 +1,8 @@
-# 0021 — Entity identifier format
-
-**Status**: accepted
+# Entity identifier format
 
 ## Context
 
-[ADR 0017](0017-api-conventions.md) fixed "UUID v7 for all entity ids, generated application-side" as an API convention,
+[HTTP API conventions](api-conventions.md) fixed "UUID v7 for all entity ids, generated application-side" as an API convention,
 in one line, without weighing the alternatives. Identifiers are hard to change later: they appear in URLs, in payloads
 consumed by `sdk-js` and third-party clients, in federation messages between peer servers, in logs, and as primary keys
 with the index-layout consequences that implies. They deserve their own decision record.
@@ -20,7 +18,7 @@ Requirements for a generated entity id:
   or causal order (see the ordering note below); anything that needs one uses an explicit sequence.
 - **Client-generatable** — the application assigns the id before insert, so it can be returned synchronously and used in
   the same transaction.
-- **Interoperable** — peer servers exchanging entity references ([ADR 0006](0006-federation-protocol.md)) must all
+- **Interoperable** — peer servers exchanging entity references ([federation protocol](federation-protocol.md)) must all
   produce and parse the same format. A format that is a single-language library, or that needs a spec of its own, is a
   liability.
 - **Ergonomic** — an id is copied by hand from a URL or a log line often enough that a double-click should select the
@@ -40,7 +38,7 @@ millisecond timestamp followed by random bits:
   their random tails — an arbitrary order, unrelated to causality or even true wall-clock time.
 
 This is fine, because the system already has its authority for order:
-[ADR 0004](0004-event-log-and-ordering.md) gives every room an append-only log with a `seq` that is **monotonic per room
+[event log and ordering](event-log-and-ordering.md) gives every room an append-only log with a `seq` that is **monotonic per room
 and assigned by the room's home server**. Causally related events are ordered by `seq`, never by id. Any other place
 that needs a stable total order (e.g. the per-account fan-in feed cursor)
 carries its own monotonic cursor or orders by an explicit `(created_at, id)`
@@ -50,7 +48,7 @@ is good enough.
 ## Decision
 
 Generated entity ids are **ULID**, assigned application-side, via Prisma's
-`@default(ulid())` (native to the Prisma 8 / "Prisma Next" line the server runs — see [ADR 0002](0002-server-stack.md)).
+`@default(ulid())` (native to the Prisma 8 / "Prisma Next" line the server runs — see [server stack](server-stack.md)).
 
 - 26 characters, Crockford base32 (`0-9A-HJKMNP-TV-Z`, no `-`, no ambiguous
   `I`/`L`/`O`/`U`). Double-click-selectable.
@@ -62,7 +60,7 @@ Generated entity ids are **ULID**, assigned application-side, via Prisma's
 
 Natural keys keep their own scheme where one is already unique and meaningful:
 configuration `settings.key`, content-addressed `blob.hash`, the short random
-`server_signing_key.id`. The `name/server` user identifier ([ADR 0007](0007-user-identifier.md)) is unaffected — it is
+`server_signing_key.id`. The `name/server` user identifier ([user identifier](user-identifier.md)) is unaffected — it is
 not a generated record id.
 
 Federation: the protocol spec documents entity ids as opaque ULID strings; peer servers treat them as such and must not
@@ -70,9 +68,9 @@ parse the timestamp prefix for anything beyond coarse local ordering.
 
 ## Consequences
 
-- [ADR 0017](0017-api-conventions.md) keeps its `accepted` status; its
-  "Identifiers" sentence is struck through in place with a pointer here (the partial-supersession convention, see
-  `adr/README.md`). "UUID v7" in the server-core technical design is replaced by `@default(ulid())` throughout.
+- [HTTP API conventions](api-conventions.md) points here for the identifier
+  format; "UUID v7" in the server-core technical design is replaced by
+  `@default(ulid())` throughout.
 - No new dependency: the `ulid()` generator ships with the Prisma client.
 - Existing implementation is unaffected — no entity with a generated id has been built yet (the first, `settings`, uses
   a natural key). This is settled before

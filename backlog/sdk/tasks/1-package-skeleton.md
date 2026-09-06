@@ -14,7 +14,7 @@ Reference: [../features/sdk-foundations/technical.md §2](../features/sdk-founda
 
 ## To do
 
-1. `package.json`: name (`@ekoz/sdk`, confirm in ADR 0025), `"type": "module"`,
+1. `package.json`: name (`@ekoz/sdk`, confirm in the SDK packaging and protocol-version policy design), `"type": "module"`,
    `exports` map with `import` / `require` / `types`, `"sideEffects": false`,
    `"files": ["dist"]`, `engines` Node >= 20 / Bun. Scripts: `build`, `test`,
    `typecheck`, `lint`.

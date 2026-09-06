@@ -1,44 +1,46 @@
 # Architecture overview
 
-This document summarises the structuring choices. Each choice is detailed in a
-dedicated ADR under [`adr/`](adr/).
+This document summarises the structuring choices. Each one has a dedicated page
+in this directory with the full context, alternatives and consequences.
 
-## Decision process
+## Repository layout
 
-Every design decision or notable change is recorded in an ADR under [`adr/`](adr/),
-at the time it is made. See [ADR 0015](adr/0015-decisions-are-recorded-as-adrs.md).
+One Git repository, `marmotz/ekoz`, a Bun workspaces monorepo:
 
-## Repositories
+- `apps/server` — reference server.
+- `apps/client-web` — React demonstration client (see [web client stack](web-client-stack.md)).
+- `apps/admin` — admin console, deployed with the server.
+- `packages/sdk` — `@ekozhq/sdk`, the protocol SDK (the only npm-published package).
+- `docs/` — this documentation (functional, protocol, technical).
+- `backlog/` — product and technical backlog.
 
-One repository per domain, no global monorepo — see [ADR 0001](adr/0001-repository-layout.md).
-
-- `spec`: everything written here.
-- `server`: reference server.
-- `sdk-js`: protocol SDK.
-- `client-web`: React demonstration client (see [ADR 0016](adr/0016-web-client-stack.md)).
+The four parts were originally separate repositories (`spec`, `server`, `sdk-js`,
+`client-web`); they were merged once it was clear they change together (a
+protocol change touches all three; the admin console needs the server and the
+SDK in one change).
 
 ## Server
 
 - **Bun** runtime (execution and package management), types aligned with
-  **Node 26.8.1**.
-- **NestJS 12** (ESM), **Prisma 8** (starting on the `8.0.0-rc` line, final
-  release imminent), **PostgreSQL** (exclusive), **Vitest** tests.
+  **Node 26**.
+- **NestJS 12** (ESM), **Prisma 8** (starting on the `8.0.0-rc` line),
+  **PostgreSQL** (exclusive), **Vitest** tests.
 - Prisma: `prisma-client` generator, `@prisma/adapter-pg` driver adapter,
   connection through `prisma.config.ts` (no `url` in the schema).
 - Full-text search via PostgreSQL FTS functions, in raw SQL where Prisma is
   limited.
-- See [ADR 0002](adr/0002-server-stack.md). Stack POC done on 2026-08-29,
-  conclusive: [poc-nestjs12-prisma-bun.md](poc-nestjs12-prisma-bun.md).
+- See [server stack](server-stack.md). Stack POC done on 2026-08-29, conclusive:
+  [poc-nestjs12-prisma-bun.md](poc-nestjs12-prisma-bun.md).
 
 ## Web client (demonstration)
 
 - **React** (latest), **Vite**, **TypeScript**, **Tailwind CSS 4**, **shadcn/ui**
   (components copied into the repo).
 - **Bun** runtime/packages, **Vitest** + Testing Library.
-- Network access only through `sdk-js`. Server state via TanStack Query.
+- Network access only through `@ekozhq/sdk`. Server state via TanStack Query.
   Feature-first structure, no cross-feature imports.
 - UI in French + English.
-- See [ADR 0016](adr/0016-web-client-stack.md).
+- See [web client stack](web-client-stack.md).
 
 ## Conversation data model
 
@@ -49,23 +51,23 @@ One repository per domain, no global monorepo — see [ADR 0001](adr/0001-reposi
 - One-to-one and private group conversations are not a separate object: they are
   `room`s of a type that bypasses the space hierarchy, the directory and the
   role hierarchy.
-- See [ADR 0003](adr/0003-conversation-data-model.md).
+- See [conversation data model](conversation-data-model.md) and
+  [permission model](permission-model.md).
 
 ## Events and real time
 
 - Current state in normal relational tables (application reads).
 - **In addition**, an append-only log per room:
   `room_events(room_id, seq, type, sender, content, created_at)`, `seq`
-  monotonic per room. It is the source of truth for **ordering** and, later, for
-  **federation**.
+  monotonic per room. Source of truth for **ordering** and, later, **federation**.
 - The home server of a room is **authoritative for ordering**; no DAG, no state
   resolution.
 - Real-time transport: **SSE** (server→client) + **REST** (client→server). No
   WebSocket.
 - Sync cursor: per-room `seq`. Reconnection = REST `/sync` reconciliation then
   live stream.
-- See [ADR 0004](adr/0004-event-log-and-ordering.md) and
-  [ADR 0005](adr/0005-realtime-transport.md).
+- See [event log and ordering](event-log-and-ordering.md) and
+  [real-time transport](realtime-transport.md).
 
 ## Federation
 
@@ -73,7 +75,7 @@ One repository per domain, no global monorepo — see [ADR 0001](adr/0001-reposi
 - Discovery via `/.well-known/ekoz`, per-server **Ed25519** signing keys, signed
   requests (HTTP Signatures).
 - Generated at server initialization, even without active federation.
-- See [ADR 0006](adr/0006-federation-protocol.md).
+- See [federation protocol](federation-protocol.md).
 
 ## Identity
 
@@ -83,7 +85,9 @@ One repository per domain, no global monorepo — see [ADR 0001](adr/0001-reposi
   display name.
 - `server`: a real domain (no `localhost`; in development, a fake domain via
   `/etc/hosts`).
-- See [ADR 0007](adr/0007-user-identifier.md).
+- See [user identifier](user-identifier.md),
+  [identity account and token mechanics](identity-account-and-token-mechanics.md)
+  and [identity lifecycle and abuse protection](identity-lifecycle-and-abuse-protection.md).
 
 ## Authentication
 
@@ -91,7 +95,15 @@ One repository per domain, no global monorepo — see [ADR 0001](adr/0001-reposi
 - Named multi-device sessions, revocable by the user or the server (suspension).
 - SSE stream authenticated with a **single-use, short-lived ticket** (works when
   the client and the server are on different domains).
-- See [ADR 0008](adr/0008-auth-and-sessions.md).
+- See [authentication and sessions](auth-and-sessions.md).
+
+## Identifiers
+
+- Generated entity ids are **ULID**, assigned application-side
+  (`@default(ulid())`). Not the ordering mechanism — anything that needs order
+  uses the per-room `seq` or an explicit cursor.
+- See [entity identifier format](entity-identifier-format.md) and
+  [HTTP API conventions](api-conventions.md).
 
 ## Configuration
 
@@ -100,58 +112,57 @@ One repository per domain, no global monorepo — see [ADR 0001](adr/0001-reposi
 - Each parameter is typed `infra` (file/env only) or `runtime` (overridable by
   the admin).
 - The admin never writes to the file; it writes to a `settings` table.
-- See [ADR 0009](adr/0009-configuration-model.md).
+- See [configuration model](configuration-model.md).
 
-## Server initialization
+## Server initialization and secrets
 
 - Non-interactive mode: `EKOZ_INITIAL_OWNER_EMAIL` set → only that email can
-  create the first owner.
-- Otherwise: the server prints a **single-use setup token** in the logs,
-  required to register the owner.
-- After the first owner is created, the setup endpoint is closed permanently.
-- See [ADR 0010](adr/0010-server-initialization.md).
+  create the first owner. Otherwise: the server prints a **single-use setup
+  token** in the logs. After the first owner is created, the setup endpoint is
+  closed permanently.
+- Secrets at rest are sealed under the operator-provided `secret.key`
+  (AES-256-GCM). Per-server Ed25519 signing key, generated lazily, rotatable with
+  an overlap window.
+- See [server initialization](server-initialization.md) and
+  [server secret box and signing keys](server-secret-box-and-signing-keys.md).
 
 ## Files
 
 - Modular storage driver: `local` and `s3`-like, extensible.
 - Split between `blob` (physical content, content-hash deduplicated) and
-  `attachment` (reference from a message or a profile).
-- Avatars are files attached to a profile, same system.
+  `attachment` (reference from a message or a profile). Avatars use the same
+  system.
 - Per-user quota, max size per file, global capacity. MIME `allowlist`/`blocklist`
   filtering by magic bytes.
-- An attachment's retention is aligned with its message.
-- See [ADR 0011](adr/0011-file-storage-and-quotas.md).
+- See [file storage and quotas](file-storage-and-quotas.md).
 
 ## Retention
 
-- Default at the server level, overridable per space or room (permissions
-  required).
+- Default at the server level, overridable per space or room.
 - On expiry: **hiding** (removed from the UI, kept in the database) or
-  **deletion** (content erased, *tombstone* in the log).
-- See [ADR 0012](adr/0012-retention-and-tombstones.md).
+  **deletion** (content erased, *tombstone* in the log — no `seq` gap).
+- See [retention and tombstones](retention-and-tombstones.md).
+
+## Observability
+
+- JSON logs on stdout (`pino`), `requestId` on every line, one line per HTTP
+  request. Prometheus `/metrics` (off by default), OpenTelemetry traces (exporter
+  off by default). `/healthz` + `/readyz`.
+- See [observability and instrumentation](observability.md).
 
 ## Email
 
 - Modular driver (same principle as storage). **SMTP** only in the first
-  increment.
-- Configurable "email verification disabled" mode at the server level.
+  increment. Configurable "email verification disabled" mode.
 
 ## Internationalisation
 
 - API technical messages: **English only**.
-- Web client: **French + English**.
-- Emails: **English only** for now.
+- Web client: **French + English**. Emails: **English only** for now.
 
-## Licensing
+## Licensing and process
 
-- **Apache-2.0** for the four repositories. `SPDX-License-Identifier: Apache-2.0`
-  header, `NOTICE` file.
-- See [ADR 0013](adr/0013-licensing.md).
-
-## Changelog
-
-- One `CHANGELOG.md` per repository, *Keep a Changelog* format + SemVer, a
-  `## [Unreleased]` section always at the top.
-- Any task touching `src/` updates the changelog; a CI check enforces it.
-- SDK: *Changesets* tool.
-- See [ADR 0014](adr/0014-changelog-discipline.md).
+- **Apache-2.0** for the whole repository (`LICENSE`, `NOTICE`,
+  `SPDX-License-Identifier` headers).
+- Changelog discipline, contribution conventions and where design decisions live:
+  see [CONTRIBUTING.md](../../CONTRIBUTING.md).

@@ -1,7 +1,7 @@
 # Tasks to do
 
 The `sdk-js` backlog (per
-[ADR 0019](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0019-backlog-lives-in-the-implementing-repo.md)).
+[backlog conventions](../AGENTS.md)).
 Global documentation (functional spec, protocol, ADRs) lives in the sibling
 [`spec`](https://github.com/ekoz-chat/spec) repository, referenced by absolute
 URL. The reference server backlog is in

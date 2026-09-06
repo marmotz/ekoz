@@ -1,6 +1,4 @@
-# 0006 — Federation protocol approach
-
-**Status**: accepted (federation itself is a later increment)
+# Federation protocol approach
 
 ## Context
 
@@ -27,7 +25,7 @@ Three approaches:
 - Signed server↔server requests (HTTP Signatures).
 - The server that creates a federated room manages its structure and assigns the
   ordering (`seq`); other servers are replicas that submit events back to it.
-  Consistent with [ADR 0004](0004-event-log-and-ordering.md).
+  Consistent with [event log and ordering](event-log-and-ordering.md).
 - Severing a relationship: stop emitting and accepting; already-received content
   remains under local retention.
 
@@ -38,5 +36,5 @@ Three approaches:
 - The first-increment log must carry `origin_server` and stable identifiers so
   federation slots in without migration.
 - The Ed25519 keys are generated at server initialization even without active
-  federation (see [ADR 0010](0010-server-initialization.md)); they can be used
+  federation (see [server initialization](server-initialization.md)); they can be used
   to sign tokens in the meantime.

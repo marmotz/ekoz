@@ -1,7 +1,7 @@
 # POC — NestJS 12 + Prisma + Bun
 
 **Date**: 2026-08-29
-**Goal**: validate that the chosen server stack ([ADR 0002](adr/0002-server-stack.md))
+**Goal**: validate that the chosen server stack ([server stack](server-stack.md))
 works, in particular NestJS decorators (`emitDecoratorMetadata`) under the Bun
 runtime and Prisma access to PostgreSQL.
 

@@ -4,7 +4,7 @@ JavaScript/TypeScript SDK for the [Ekoz](https://github.com/ekoz-chat) protocol.
 an Ekoz server so that no client ever has to call `fetch` directly.
 
 > **Status:** early development. Distributed via `bun link` / `npm link` from a
-> neighbouring checkout only; not published to npm yet (ADR 0025).
+> neighbouring checkout only; not published to npm yet (the SDK packaging and protocol-version policy design).
 
 ## Install (local development)
 

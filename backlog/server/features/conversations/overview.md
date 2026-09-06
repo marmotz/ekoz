@@ -19,7 +19,7 @@ Messages must be retained according to configurable retention rules.
   nesting has no hard limit; a soft limit is configurable (4 by default).
 - Technically, spaces and rooms are a single `room` concept with a `type`
   discriminator (`space`, `channel`, `dm`, `group_dm`). See
-  [ADR 0003](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0003-conversation-data-model.md).
+  [conversation data model](../../../../docs/technical/conversation-data-model.md).
 - Rooms can be public, private or invite-only.
 - Public rooms are listed and searchable in a server directory.
 - Any authenticated user can freely join and leave a public room.
@@ -45,7 +45,7 @@ Messages must be retained according to configurable retention rules.
   overridden at the space or room level, subject to the required permissions.
   Each rule chooses between permanent deletion and hiding on expiry. On deletion,
   the actual content is erased and only a contentless audit marker remains. See
-  [ADR 0012](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0012-retention-and-tombstones.md).
+  [retention and tombstones](../../../../docs/technical/retention-and-tombstones.md).
 - Basic interactions include replies to a message, reactions and mentions;
   dedicated threads are not part of the first increment.
 - Read receipts are available from the first increment and visible to the room

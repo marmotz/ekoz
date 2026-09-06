@@ -1,6 +1,4 @@
-# 0022 — Server secret box and signing keys
-
-**Status**: accepted
+# Server secret box and signing keys
 
 ## Context
 
@@ -8,12 +6,12 @@ The server holds secrets at rest (starting with its own Ed25519 signing private
 keys, later OAuth client secrets, SMTP credentials that must round-trip, etc.)
 and needs a stable way to seal them under the operator-provided `secret.key`
 (32 bytes, infra config — see
-[ADR 0009](0009-configuration-model.md)).
+[configuration model](configuration-model.md)).
 
-It also needs a signing identity: [ADR 0006](0006-federation-protocol.md) calls
+It also needs a signing identity: [federation protocol](federation-protocol.md) calls
 for a per-server Ed25519 key, published in `/.well-known/ekoz`, rotatable with an
 overlap window, and usable to sign internal tokens before federation exists.
-[ADR 0007](0007-user-identifier.md) makes `server.domain` part of every user
+[user identifier](user-identifier.md) makes `server.domain` part of every user
 identifier, so it must be immutable for a deployment's life.
 
 Neither the wire format of a sealed blob, the key-id scheme, nor the rotation
@@ -38,7 +36,7 @@ mechanics were pinned anywhere; they are cross-cutting and cheap to get wrong.
   DER, sealed by the secret box), `created_at`, `activated_at`, `retired_at`.
 - **Exactly one active key** (`activated_at` set, `retired_at` null). It is
   generated lazily on first use if none exists, so a fresh server is
-  self-sufficient before the bootstrap flow ([ADR 0010](0010-server-initialization.md))
+  self-sufficient before the bootstrap flow ([server initialization](server-initialization.md))
   runs.
 - **Rotation** inserts a new active key and stamps `retired_at = now` on the
   previous one. A retired key stays published — and accepted for verification —
@@ -47,7 +45,7 @@ mechanics were pinned anywhere; they are cross-cutting and cheap to get wrong.
 - The public form in `/.well-known/ekoz` is `{ public_key, valid_from,
   valid_until }` where `valid_until` is `null` for the active key and
   `retired_at + overlap` for a retired one. Fully specified in
-  [`docs/protocol/discovery.md`](../../protocol/discovery.md).
+  [`docs/protocol/discovery.md`](../protocol/discovery.md).
 
 ### Domain guard
 

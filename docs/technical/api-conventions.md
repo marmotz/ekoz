@@ -1,13 +1,11 @@
-# 0017 — HTTP API conventions
-
-**Status**: accepted
+# HTTP API conventions
 
 ## Context
 
 The REST surface is consumed by `sdk-js` and, later, by third-party clients and
 peer servers. A few conventions must be fixed once, centrally, because they
 affect every endpoint and the SDK's shape. They emerged while writing the
-[server-core technical design](https://github.com/ekoz-chat/server/blob/main/backlog/features/server-core/technical.md).
+[server-core technical design](../../backlog/features/server-core/technical.md).
 
 A dedicated `server-core` backlog feature was also created to hold the
 non-functional foundations (skeleton, config, initialization, shared storage /
@@ -19,12 +17,9 @@ email / audit), delivered before `identity-and-profiles`.
   `{ type, title, status, detail, code }`. `code` is a stable machine-readable
   string namespaced by domain (e.g. `identity.username_taken`). The SDK surfaces
   `code` as a typed error.
-- **Identifiers**: ~~UUID v7 for all entity ids, generated application-side. They
-  are time-ordered and safe to expose in URLs and payloads.~~ No sequential
-  integer ids are exposed.
-  → **Superseded by [ADR 0021](0021-entity-identifier-format.md)**: generated ids
-  are ULID (dash-free; the timestamp prefix buys index locality, not a reliable
-  order).
+- **Identifiers**: generated entity ids are ULID, assigned application-side — see
+  [entity identifier format](entity-identifier-format.md). No sequential integer
+  ids are exposed.
 - **Timestamps**: UTC everywhere, ISO-8601 strings in payloads, `timestamptz` in
   the database.
 - **Request correlation**: every response carries `X-Request-Id`; clients may

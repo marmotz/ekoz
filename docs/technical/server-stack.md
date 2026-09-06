@@ -1,6 +1,4 @@
-# 0002 — Server technology stack
-
-**Status**: accepted
+# Server technology stack
 
 ## Context
 
@@ -32,6 +30,6 @@ spaghetti. The author is proficient with Node.js/TypeScript.
   Bun, `emitDecoratorMetadata` and type-based dependency injection work under
   Bun and under Vitest, Prisma + `@prisma/adapter-pg` runs queries, `db push`
   and `migrate dev` against PostgreSQL 18. Details and pitfalls in
-  [poc-nestjs12-prisma-bun.md](../poc-nestjs12-prisma-bun.md).
+  [poc-nestjs12-prisma-bun.md](poc-nestjs12-prisma-bun.md).
 - PostgreSQL covers the relational model, the JSONB event log and text search: a
   single data dependency.

@@ -10,5 +10,5 @@ changeset for every visible change (`AGENTS.md` requirement):
 bun run changeset
 ```
 
-npm publishing is deferred until the SDK surface stabilises (ADR 0025); until
+npm publishing is deferred until the SDK surface stabilises (the SDK packaging and protocol-version policy design); until
 then changesets only feed `CHANGELOG.md` and the SemVer bump.

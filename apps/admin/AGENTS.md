@@ -7,7 +7,7 @@ features.
 
 Backlog: [`backlog/server/features/server-administration/`](../../backlog/server/features/server-administration/overview.md)
 (the console is part of the server-administration feature). Stack decision:
-[ADR 0016](../../docs/technical/adr/0016-web-client-stack.md).
+[web client stack](../../docs/technical/web-client-stack.md).
 
 ## Stack
 
@@ -22,11 +22,11 @@ Backlog: [`backlog/server/features/server-administration/`](../../backlog/server
 
 - Everything in **English**; UI text through i18n catalogues (French + English).
 - Owner-only access; never assume more than one owner.
-- Every design decision or notable change → an ADR in `docs/technical/adr/`.
+- Every design decision or notable change → a page under `docs/technical/`.
 
 ## Definition of Done
 
-- An ADR is written if a decision was made or changed.
+- The `docs/technical/` page is updated if a decision was made or changed.
 - Tests created / updated and green; `bun run typecheck` + `bun run lint` green.
 - `CHANGELOG.md`: an entry under `## [Unreleased]` as soon as `src/` changes.
 - The matching server admin capability is actually operable from the console.

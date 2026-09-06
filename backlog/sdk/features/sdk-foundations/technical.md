@@ -5,7 +5,7 @@ actées). Ne modifie aucun code pendant cette phase.
 
 ## 1. Périmètre
 
-Premier incrément du paquet `@ekoz/sdk` (nom réel à fixer dans l'ADR) : le cœur
+Premier incrément du paquet `@ekoz/sdk` (nom réel à fixer dans `docs/technical/`) : le cœur
 transport plus les bindings de la surface identité déjà exposée par le serveur
 de référence. Hors périmètre ici : le flux SSE (`GET /events`), le ticket de
 stream (`POST /stream/ticket`), `/sync`, tout binding conversationnel.
@@ -15,17 +15,17 @@ par cet incrément.
 
 ### Références externes
 
-- [ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md)
+- [federation protocol](../../../../docs/technical/federation-protocol.md)
   — découplage identité / hosting, discovery.
-- [ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md)
+- [authentication and sessions](../../../../docs/technical/auth-and-sessions.md)
   — access JWT court + refresh opaque rotatif, denylist `sid`, ticket SSE.
-- [ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md)
+- [web client stack](../../../../docs/technical/web-client-stack.md)
   — aucun client n'appelle `fetch` directement.
-- [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md)
+- [HTTP API conventions](../../../../docs/technical/api-conventions.md)
   — `application/problem+json`, `code` stable namespacé, `X-Request-Id`, `422 validation_failed`.
-- [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md)
+- [entity identifier format](../../../../docs/technical/entity-identifier-format.md)
   — identifiants ULID opaques.
-- [ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md)
+- [identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md)
   — format JWS de l'access token, enregistrement du refresh, détection de réutilisation.
 - [discovery.md](https://github.com/ekoz-chat/spec/blob/main/docs/protocol/discovery.md)
   — `GET /.well-known/ekoz`.
@@ -75,7 +75,7 @@ ressources.
   - `Accept: application/json`
   - `X-Ekoz-Protocol: 0` (cf. §5)
   - `X-Request-Id: <uuid v4>` sauf si l'appelant en fournit un
-    ([ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md)).
+    ([HTTP API conventions](../../../../docs/technical/api-conventions.md)).
   - `Authorization: Bearer <access token>` injecté par le `SessionManager` pour
     les appels authentifiés.
 - Corps : `application/json` sérialisé, sauf `me.setAvatar` qui envoie un
@@ -92,7 +92,7 @@ ressources.
 
 `createClient({ server })` ne reçoit **pas** d'URL d'API (décision overview :
 domaine + résolution discovery, fidèle à
-[ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md)).
+[federation protocol](../../../../docs/technical/federation-protocol.md)).
 
 - Au premier appel réseau, le SDK récupère `GET https://<server>/.well-known/ekoz`
   et lit `api` (base URL REST, sans `/` final), `web`, `protocol_versions`.
@@ -117,7 +117,7 @@ Décision overview : en-tête **plus** garde discovery.
 - Constante `SUPPORTED_PROTOCOL_MAJORS = ['0']` dans le paquet.
 - Chaque requête porte `X-Ekoz-Protocol: 0`. Le serveur ne lit pas encore cet
   en-tête (`grep -rn protocol src/` → seule la discovery expose
-  `protocol_versions`) ; il est donc informatif aujourd'hui. L'ADR (§16) doit
+  `protocol_versions`) ; il est donc informatif aujourd'hui. `docs/technical/` (§16) doit
   aussi acter que le serveur ajoute un lecteur tolérant (ignore l'inconnu, ne
   casse rien) — tâche côté `server`.
 - À la résolution de la discovery, si
@@ -131,7 +131,7 @@ Décision overview : exceptions typées, pas de `Result`.
 
 - Hiérarchie : `EkozError` (base) porte `code`, `status`, `detail`, `title`,
   `requestId`, `retryAfter?`. Le corps `problem+json` est celui d'
-  [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md) :
+  [HTTP API conventions](../../../../docs/technical/api-conventions.md) :
   [problem-details.ts:26](https://github.com/ekoz-chat/server/blob/main/src/core/http/problem-details.ts#L26).
 - Sous-classes transverses : `ValidationError` (`code = validation_failed`,
   expose `issues: {path, message}[]`), `NotFoundError`, `RateLimitError`
@@ -157,15 +157,15 @@ Décision overview : exceptions typées, pas de `Result`.
 - Un `code` inconnu tombe sur `EkozError` générique en conservant `code` brut :
   le SDK ne se casse pas si le serveur ajoute un code avant le SDK.
 - Décodage centralisé : un seul chemin dans `transport/problem.ts`, quel que
-  soit l'endpoint (objectif [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md)).
+  soit l'endpoint (objectif [HTTP API conventions](../../../../docs/technical/api-conventions.md)).
 - `requestId` renseigné depuis `problem.requestId` sinon depuis le
   `X-Request-Id` envoyé, pour la corrélation support.
 
 ## 7. Cycle de vie tokens et sessions — `SessionManager`
 
 Modèle serveur :
-[ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md) +
-[ADR 0023](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0023-identity-account-and-token-mechanics.md).
+[authentication and sessions](../../../../docs/technical/auth-and-sessions.md) +
+[identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md).
 Access JWT ~15 min, refresh opaque rotatif à usage unique, réutilisation d'un
 refresh consommé → révocation de toute la session + `auth.refresh_reuse`.
 
@@ -317,7 +317,7 @@ téléchargement binaire viendra si un consommateur en a besoin),
 - La section « Identity and profiles » de
   [`spec/docs/protocol/`](https://github.com/ekoz-chat/spec/blob/main/docs/protocol/README.md)
   est un squelette. Discipline
-  [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md) /
+  [HTTP API conventions](../../../../docs/technical/api-conventions.md) /
   `AGENTS.md` : cet incrément doit **contribuer** cette section à `spec` (le
   wire contract identité + le namespace de `code`), pas se contenter de la
   déduire du code serveur. Tâche transverse (§17).
@@ -365,7 +365,7 @@ téléchargement binaire viendra si un consommateur en a besoin),
 | Erreurs | Exceptions typées | Retour `Result` discriminé | Idiomatique TS/await ; `try/catch` unique côté consommateur (overview) |
 | Couche HTTP | `fetch` + wrapper maison | `ky` / `axios` | `AGENTS.md` : pas de dépendance runtime lourde ; embeddable |
 | Validation réponses | Types TS seuls | `zod` runtime | Poids ; double source de vérité avec `spec` |
-| Config serveur | `server` + résolution discovery | `apiBaseUrl` explicite ; les deux | Découplage identité/hosting ([ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md)) ; une seule voie à tester |
+| Config serveur | `server` + résolution discovery | `apiBaseUrl` explicite ; les deux | Découplage identité/hosting ([federation protocol](../../../../docs/technical/federation-protocol.md)) ; une seule voie à tester |
 | Version protocole | En-tête `X-Ekoz-Protocol` + garde discovery | Garde discovery seule ; constante non vérifiée | Prépare le serveur sans le bloquer ; échec net si incompatible (overview) |
 | Persistance session | Adaptateur `SessionStore` injecté | SDK possède `localStorage` | Non disponible hors navigateur ; SDK multi-runtime (overview) |
 | Notification rupture | Émetteur d'événements complet | Callback `onSessionInvalid` unique | Plusieurs consommateurs / plusieurs réactions (overview) |
@@ -377,12 +377,12 @@ téléchargement binaire viendra si un consommateur en a besoin),
 ## 15. Conséquences vérifiées
 
 - **Serveur sans lecteur de version** : `X-Ekoz-Protocol` est ignoré
-  aujourd'hui (`grep` protocol → discovery seule). L'ADR doit acter l'ajout
+  aujourd'hui (`grep` protocol → discovery seule). `docs/technical/` doit acter l'ajout
   d'un lecteur tolérant côté `server` ; sans lui l'en-tête reste informatif,
   sans régression.
 - **Section protocole squelette** : les types du SDK sont dérivés du code
   serveur faute de spec détaillée. Obligation de contribuer la section identité
-  à `spec` dans cet incrément (discipline [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md)).
+  à `spec` dans cet incrément (discipline [HTTP API conventions](../../../../docs/technical/api-conventions.md)).
 - **`register` sans tokens** : le flux d'inscription côté consommateur est
   `register` puis `login` (et, selon `registration.mode`, vérification e-mail
   entre les deux). À documenter dans le README du SDK et côté `client-web`
@@ -401,7 +401,7 @@ téléchargement binaire viendra si un consommateur en a besoin),
 - **Changesets** : le `AGENTS.md` impose un changeset par changement visible dès
   maintenant, même sans publication — le `CHANGELOG.md` démarre avec le paquet.
 
-## 16. ADR à écrire (dans `spec`)
+## 16. À documenter dans `docs/technical/`
 
 **0025 — SDK JS : packaging, distribution et politique de version de protocole.**
 Contenu attendu :
@@ -417,14 +417,14 @@ Contenu attendu :
   « Identity and profiles » du protocole n'est pas écrite ; cet incrément la
   rédige.
 
-`0025` est le prochain numéro libre (`docs/technical/adr/` s'arrête à `0024`).
+`0025` est le prochain numéro libre (`docs/technical/` s'arrête à `0024`).
 
 ## 17. Découpage en tâches d'implémentation
 
 Dans l'ordre de dépendance (voir chaque fichier pour ses dépendances) :
 
 1. [1-package-skeleton](../../tasks/1-package-skeleton.md) — squelette du paquet, tsdown, Vitest, ESLint, changesets, CI. `ekoz-chat/sdk-js#1`
-2. [ADR 0025 — packaging, distribution, politique de version de protocole](https://github.com/ekoz-chat/spec/blob/main/backlog/tasks/2-adr-0025-sdk-packaging.md) (task dans `spec`). `ekoz-chat/spec#2`
+2. [the SDK packaging and protocol-version policy design — packaging, distribution, politique de version de protocole](https://github.com/ekoz-chat/spec/blob/main/backlog/tasks/2-adr-0025-sdk-packaging.md) (task dans `spec`). `ekoz-chat/spec#2`
 3. [2-transport-core-and-errors](../../tasks/2-transport-core-and-errors.md) — `HttpClient`, `X-Request-Id`, décodage `problem+json`, hiérarchie d'erreurs typées. `ekoz-chat/sdk-js#2`
 4. [3-discovery-and-protocol-guard](../../tasks/3-discovery-and-protocol-guard.md) — résolution `/.well-known/ekoz`, garde de version de protocole. `ekoz-chat/sdk-js#3`
 5. [4-session-manager-and-store](../../tasks/4-session-manager-and-store.md) — cycle de vie tokens, refresh single-flight, `SessionStore`, émetteur d'événements. `ekoz-chat/sdk-js#4`

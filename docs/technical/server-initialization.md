@@ -1,6 +1,4 @@
-# 0010 — Server initialization and first owner
-
-**Status**: accepted
+# Server initialization and first owner
 
 ## Context
 

@@ -6,7 +6,7 @@
 **Issue**: [#19](https://github.com/ekoz-chat/server/issues/19)
 
 Reference: [../features/identity-and-profiles/technical.md §13](../features/identity-and-profiles/technical.md#13-profile-and-avatar),
-[ADR 0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+[file storage and quotas](../../../docs/technical/file-storage-and-quotas.md).
 
 ## To do
 

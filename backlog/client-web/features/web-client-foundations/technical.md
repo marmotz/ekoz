@@ -22,18 +22,18 @@ Le dépôt est vide : `git ls-files` → `AGENTS.md`, `CHANGELOG.md`, `LICENSE`,
 
 ### Références externes
 
-- [ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md)
+- [web client stack](../../../../docs/technical/web-client-stack.md)
   — stack client web (React, Vite, TS, Tailwind 4, shadcn/ui, Bun, Vitest,
   TanStack Query, structure feature-first, i18n FR/EN). Ne mentionne pas
-  TanStack Start : l'ADR de bootstrap (§14) l'ajoute.
-- [ADR 0015](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0015-decisions-are-recorded-as-adrs.md)
-  — toute décision → un ADR dans `spec`.
-- [ADR 0014](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0014-changelog-discipline.md)
+  TanStack Start : la section bootstrap (§14) l'ajoute.
+- design records
+  — toute décision → une page `docs/technical/`.
+- [changelog discipline](../../../../CONTRIBUTING.md)
   — discipline `CHANGELOG.md`.
-- [ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md)
+- [federation protocol](../../../../docs/technical/federation-protocol.md)
   — découplage identité / hosting : le client vise un **domaine serveur**, l'URL
   d'API vient de la discovery.
-- [ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md)
+- [authentication and sessions](../../../../docs/technical/auth-and-sessions.md)
   — access JWT court + refresh rotatif : le cycle de vie tokens est **interne au
   SDK**, le client n'y touche pas.
 - [SDK foundations — technical.md](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/technical.md)
@@ -43,14 +43,14 @@ Le dépôt est vide : `git ls-files` → `AGENTS.md`, `CHANGELOG.md`, `LICENSE`,
   [discovery.service.ts:14](https://github.com/ekoz-chat/server/blob/main/src/core/discovery/discovery.service.ts#L14)
   (`{ server, api, web, protocol_versions, signing_keys }`).
 
-## 2. Décisions prises dans cette phase (à acter en ADR)
+## 2. Décisions prises dans cette phase (à acter dans `docs/technical/`)
 
 | Sujet | Retenu | Raison |
 | ----- | ------ | ------ |
 | Socle | **TanStack Start** (embarque TanStack Router) | Décision utilisateur. Routing typé bout-en-bout, même écosystème que TanStack Query, `createServerFn` disponible si un besoin serveur émerge (proxy discovery, SSR de pages publiques), scaffold officiel `@tanstack/cli`. |
 | Rendu | SSR + hydratation, streaming des loaders | Fourni par Start ; le shell et les pages publiques sont rendus côté serveur, l'app authentifiée s'hydrate côté client. |
 | Runtime serveur | Nitro (sortie Node par défaut) | Sortie de build Start ; `node .output/server/index.mjs` en prod. Presets de déploiement disponibles mais non retenus dans cet incrément. |
-| i18n | **react-i18next** | Standard de fait, détection de langue, interpolation/pluriels ICU, très documenté (ADR 0016 : « compréhensible par une majorité »). |
+| i18n | **react-i18next** | Standard de fait, détection de langue, interpolation/pluriels ICU, très documenté (the web client stack design : « compréhensible par une majorité »). |
 | Langue par défaut | Détection : `localStorage` puis en-tête `Accept-Language` côté serveur, **fallback `en`** ; choix persisté en `localStorage` (`ekoz.lang`) ; switcher dans la topbar | Client international ; détection SSR pour éviter le flash / mismatch d'hydratation. |
 | Persistance de session | Adaptateur `SessionStore` → `localStorage` (clé `ekoz.session`), fourni par le client au SDK ; **le SDK ne tourne que côté client** | Le SDK est agnostique du stockage ([SDK technical §8](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/technical.md)) ; `localStorage` absent au SSR → cf. §7. |
 | Thème | `light` / `dark` / `system`, persisté `localStorage` (`ekoz.theme`), classe `dark` sur `<html>`, script inline anti-flash dans `<head>` | Convention Tailwind 4 / shadcn ; le script inline évite le flash au SSR. |
@@ -109,7 +109,7 @@ client-web/
   .github/workflows/ci.yml
 ```
 
-Règle feature-first ([ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md)) :
+Règle feature-first ([web client stack](../../../../docs/technical/web-client-stack.md)) :
 `src/features/<domain>/{api,components,hooks,routes}`, imports croisés entre
 features interdits. `src/shared/**` importable par tous ; `src/app/**` et
 `src/server/**` importés seulement par `router.tsx` / les routes.
@@ -206,7 +206,7 @@ vers la déconnexion (§7).
   routes protégées de `profile` envelopperont leur composant dans `RequireAuth`
   (pas de `beforeLoad` serveur, la session vit côté client).
 - Option non retenue ici : proxifier la discovery / porter la session en cookie
-  httpOnly via `createServerFn`. Reléguée à un ADR ultérieur si un besoin réel
+  httpOnly via `createServerFn`. Reléguée à une page `docs/technical/` ultérieure si un besoin réel
   apparaît (le SDK gère aujourd'hui le refresh rotatif en mémoire + store).
 - Distribution SDK : `bun link @ekoz/sdk` depuis le checkout voisin
   ([overview](./overview.md)). `package.json` liste `@ekoz/sdk` sans version
@@ -288,7 +288,7 @@ vers la déconnexion (§7).
 Workflow GitHub Actions (`.github/workflows/ci.yml`) : `bun install`,
 `bun run lint`, `bun run typecheck`, `bun run test`, `bun run build`, et un
 check « entrée CHANGELOG présente si `src/` modifié » (
-[ADR 0014](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0014-changelog-discipline.md)).
+[changelog discipline](../../../../CONTRIBUTING.md)).
 Le SDK n'étant pas publié, la CI le récupère depuis un checkout voisin du dépôt
 `sdk-js` (`actions/checkout` + `bun link`) ou un tarball ; à trancher à
 l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrément.
@@ -297,7 +297,7 @@ l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrémen
 
 | Sujet | Retenu | Écarté | Raison |
 | ----- | ------ | ------ | ------ |
-| Socle | TanStack Start | Vite SPA + TanStack Router nu ; React Router ; Next.js | Décision utilisateur. Même API de routing qu'un Router nu + `createServerFn` disponible ; le surcoût (runtime serveur, hydratation) est accepté et acté en ADR. Vite SPA reste le repli si le runtime serveur pose problème. |
+| Socle | TanStack Start | Vite SPA + TanStack Router nu ; React Router ; Next.js | Décision utilisateur. Même API de routing qu'un Router nu + `createServerFn` disponible ; le surcoût (runtime serveur, hydratation) est accepté et acté dans `docs/technical/`. Vite SPA reste le repli si le runtime serveur pose problème. |
 | Rendu | SSR + hydratation | SPA statique | Vient avec Start ; utile pour les pages publiques et l'anti-flash i18n/thème |
 | Exécution du SDK | Client uniquement | Aussi côté serveur (server functions) | Le SDK stocke la session dans `localStorage` (indispo au SSR) et gère le refresh en mémoire ; le passer au serveur imposerait un modèle cookie httpOnly non requis ici |
 | i18n | react-i18next (instance par requête) | @lingui ; provider maison | Standard répandu, détection + ICU inclus ; instance par requête = SSR-safe |
@@ -306,7 +306,7 @@ l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrémen
 | Persistance session | `localStorage` via adaptateur SDK | `sessionStorage` ; cookie httpOnly | Persistance entre onglets/redémarrages pour une démo ; le SDK ne persiste jamais l'access token |
 | Navigation des features | Registre `registerNav()` alimenté par chaque feature | Liste centralisée éditée à la main | Respecte l'interdiction d'imports croisés entre features |
 | Mock réseau en test | Mock du module `@ekoz/sdk` | MSW | Le client ne fait aucun `fetch` propre ; la frontière utile est l'API SDK |
-| shadcn/ui | Composants copiés dans `shared/ui` | Radix nu ; autre lib | Décision ADR 0016 ; possédés et éditables |
+| shadcn/ui | Composants copiés dans `shared/ui` | Radix nu ; autre lib | Décision the web client stack design ; possédés et éditables |
 
 ## 13. Conséquences vérifiées
 
@@ -315,8 +315,8 @@ l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrémen
   la première tâche touchant `src/`.
 - **Runtime serveur ajouté** : Start produit un serveur Nitro. Le déploiement
   passe d'« hébergement de fichiers statiques » à « process Node à faire
-  tourner » (`node .output/server/index.mjs`). ADR 0016 ne prévoyait pas ce
-  runtime : l'ADR de bootstrap (§14) doit l'acter explicitement.
+  tourner » (`node .output/server/index.mjs`). the web client stack design ne prévoyait pas ce
+  runtime : la section bootstrap (§14) doit l'acter explicitement.
 - **Session côté client seulement** : au SSR, `useSession()` renvoie `unknown`
   et les écrans protégés affichent un skeleton avant hydratation. Pas de
   `beforeLoad` serveur qui lit la session. Conséquence acceptée pour une démo ;
@@ -325,7 +325,7 @@ l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrémen
   ([SDK technical.md](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/technical.md)).
   Le câblage §7 dépend de son API (`createClient`, `SessionStore`, events
   `session:*`) ; si elle bouge, `shared/sdk/**` suit. Une lacune SDK se corrige
-  dans `sdk-js`, jamais contournée ici (ADR 0016). Le SDK devra aussi être
+  dans `sdk-js`, jamais contournée ici (the web client stack design). Le SDK devra aussi être
   compatible du bundling Nitro (pas d'API navigateur-only au niveau module —
   [SDK technical §10](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/technical.md)
   le prévoit).
@@ -344,12 +344,12 @@ l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrémen
   et les bindings identité du SDK ne sont pas livrés
   ([overview](./overview.md)).
 
-## 14. ADR à écrire (dans `spec`)
+## 14. À documenter dans `docs/technical/`
 
 **0026 — Bootstrap du client web : socle TanStack Start, routing, i18n, shell,
 câblage session.**
 
-`0026` est le prochain numéro libre : `docs/technical/adr/` s'arrête à `0024`,
+`0026` est le prochain numéro libre : `docs/technical/` s'arrête à `0024`,
 et `0025` est réservé par
 [SDK foundations](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/technical.md).
 À confirmer à l'écriture (le premier des deux incréments livrés prend `0025`).
@@ -357,7 +357,7 @@ et `0025` est réservé par
 Contenu attendu :
 
 - **TanStack Start** comme socle (SSR + hydratation, runtime serveur Nitro,
-  sortie Node) — précision/évolution d'ADR 0016 qui ne mentionnait que « Vite ».
+  sortie Node) — précision/évolution d'the web client stack design qui ne mentionnait que « Vite ».
   Justifier : routing typé, `createServerFn` disponible, écosystème TanStack
   cohérent ; assumer le runtime serveur pour le déploiement.
 - react-i18next, instance par requête, détection `localStorage` +
@@ -386,4 +386,4 @@ Contenu attendu :
 | 7 | [Câblage SDK et session](../../tasks/7-sdk-session-wiring.md) | [#7](https://github.com/ekoz-chat/client-web/issues/7) | 1, 4 |
 | 8 | [Shell + root route + routes placeholder](../../tasks/8-app-shell-root-routes.md) | [#8](https://github.com/ekoz-chat/client-web/issues/8) | 3, 4, 5, 6, 7 |
 | 9 | [CI GitHub Actions](../../tasks/9-ci-workflow.md) | [#9](https://github.com/ekoz-chat/client-web/issues/9) | 1, 2 |
-| 10 | [ADR 0026 (dans `ekoz-chat/spec`)](../../tasks/10-adr-0026-web-client-bootstrap.md) | [#10](https://github.com/ekoz-chat/client-web/issues/10) | — |
+| 10 | [the repository layout (dans `ekoz-chat/spec`)](../../tasks/10-adr-0026-web-client-bootstrap.md) | [#10](https://github.com/ekoz-chat/client-web/issues/10) | — |

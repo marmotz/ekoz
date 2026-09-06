@@ -36,7 +36,7 @@ its users and its spaces, through a web application deployed with the server.
   either through an email address fixed at deployment (the only one allowed), or
   through a single-use token printed in the logs. The initialization endpoint
   closes permanently afterwards. See
-  [ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md).
+  [server initialization](../../../../docs/technical/server-initialization.md).
 - A server can have several owners.
 - The owner can create accounts, reset passwords, suspend or delete accounts and
   grant or revoke administration roles.
@@ -51,16 +51,16 @@ its users and its spaces, through a web application deployed with the server.
 - Configuration follows a layered model: a TOML file at deployment, overrides
   from the admin for `runtime` parameters, with the environment able to lock a
   parameter. The admin never writes to the file. See
-  [ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md).
+  [configuration model](../../../../docs/technical/configuration-model.md).
 
 ### Admin console application
 
 - The admin console is a core application of the reference server and lives in
   the server repository (monorepo). This implies restructuring the repo into
-  Bun workspaces (server app + admin app + shared config); an ADR records the
+  Bun workspaces (server app + admin app + shared config); a `docs/technical/` page records the
   layout.
 - It is a React single-page application, same stack as the demonstration client
-  ([ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md)):
+  ([web client stack](../../../../docs/technical/web-client-stack.md)):
   React, Vite, TypeScript, Tailwind CSS 4, shadcn/ui, Bun, Vitest.
 - It is deployed separately from the server (its own build and origin); NestJS
   does not serve its assets.
@@ -69,7 +69,7 @@ its users and its spaces, through a web application deployed with the server.
   During bring-up the SDK is consumed via `npm link` (no publish).
 - UI available in French and English (i18n catalogues); code identifiers in
   English.
-- Every design decision or notable change gets an ADR in the `spec` repo.
+- Every design decision or notable change is written up under `docs/technical/`.
 
 ## Increments
 

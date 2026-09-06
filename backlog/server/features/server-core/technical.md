@@ -5,13 +5,13 @@ is greenfield (only `AGENTS.md`, `LICENSE`, `NOTICE`, `CHANGELOG.md` at the time
 of writing), this document establishes the initial structure rather than
 referencing existing code.
 
-Related: [ADR 0002](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0002-server-stack.md),
-[0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md),
-[0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md),
-[0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md),
-[0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md),
-[0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md),
-[0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md).
+Related: [server stack](../../../../docs/technical/server-stack.md),
+[federation-protocol](../../../docs/technical/federation-protocol.md),
+[user-identifier](../../../docs/technical/user-identifier.md),
+[configuration-model](../../../docs/technical/configuration-model.md),
+[server-initialization](../../../docs/technical/server-initialization.md),
+[file-storage-and-quotas](../../../docs/technical/file-storage-and-quotas.md),
+[observability](../../../docs/technical/observability.md).
 
 ## 1. Repository skeleton and tooling
 
@@ -64,7 +64,7 @@ server/
 ## 2. Configuration system
 
 Layered precedence (lowest to highest), per
-[ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md):
+[configuration model](../../../../docs/technical/configuration-model.md):
 
 ```
 code defaults  <  TOML file  <  settings table (admin)  <  environment
@@ -180,7 +180,7 @@ exist.
 
 ## 5. Bootstrap / initialization
 
-Per [ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md).
+Per [server initialization](../../../../docs/technical/server-initialization.md).
 
 On start, `BootstrapService`:
 
@@ -211,7 +211,7 @@ On start, `BootstrapService`:
 
 ## 6. Object storage
 
-Per [ADR 0011](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0011-file-storage-and-quotas.md).
+Per [file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md).
 First increment ships the schema, the `local` driver and deduplication.
 Per-user quota, MIME filtering by magic bytes and message attachments come with
 [content and sharing](../content-and-sharing/overview.md).
@@ -272,7 +272,7 @@ interface StorageDriver {
   (a table keyed by template name, plus a branding block for colours / product
   name / logo feeding the layout) and its admin surface land with
   [server administration](../server-administration/overview.md). The registered
-  templates are the fallback defaults. An ADR is owed for this model.
+  templates are the fallback defaults. A `docs/technical/` page is owed for this model.
 - `email_message` table: `id`, `to`, `template`, `category`, `sent_at`,
   `dedupe_key` (nullable, unique-per-window). Used now for a coarse
   anti-duplication guard; the real rate-limiting policy is
@@ -316,13 +316,13 @@ interface StorageDriver {
   UUID v7) buys insert locality in the PK B-tree and "roughly newest first"
   listings — **not** a reliable order: across instances / under clock skew,
   same-ms ids sort by their random tail. Authoritative ordering is the per-room
-  `seq` ([ADR 0004] / §… event log); feed cursors carry their own monotonic key.
+  `seq` ([the event log and ordering design] / §… event log); feed cursors carry their own monotonic key.
   Natural keys (`settings.key`) and content-addressed keys (`blob.hash`) keep
-  their own scheme. See [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md).
+  their own scheme. See [entity identifier format](../../../../docs/technical/entity-identifier-format.md).
 
 ## 11. Observability and instrumentation
 
-Per [ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md).
+Per [observability and instrumentation](../../../../docs/technical/observability.md).
 Server-core ships the emission side (logs, metrics, traces, health); the
 operator-facing supervision screens belong to
 [server administration](../server-administration/overview.md) and only consume
@@ -461,16 +461,16 @@ model AuditLog {
 
 | Point                       | Retained                                 | Rejected                                | Why                                                                                                                                                                                                                                                                                                                                                           |
 | --------------------------- | ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Config format               | TOML (`smol-toml`)                       | YAML, JSON, env-only                    | Operator-facing, unambiguous types, comments; env-only does not scale to nested structure ([ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md))                                                                                                                                                            |
+| Config format               | TOML (`smol-toml`)                       | YAML, JSON, env-only                    | Operator-facing, unambiguous types, comments; env-only does not scale to nested structure ([configuration model](../../../../docs/technical/configuration-model.md))                                                                                                                                                            |
 | Admin edits config          | `settings` table overriding file         | Rewrite the TOML file                   | File often read-only in containers, comments lost, concurrent writes                                                                                                                                                                                                                                                                                          |
 | Private signing key at rest | AES-256-GCM in DB, KEK from `secret.key` | Plaintext file, KMS                     | Simple, no extra dependency; KMS is a later option                                                                                                                                                                                                                                                                                                            |
 | Blob keys                   | content-addressed (`hash`)               | random UUID key                         | Free deduplication, idempotent writes                                                                                                                                                                                                                                                                                                                         |
 | Blob deletion               | deferred GC sweep at `ref_count = 0`     | immediate delete on release             | Avoids races with concurrent new references                                                                                                                                                                                                                                                                                                                   |
 | Error format                | RFC 9457 problem+json                    | ad-hoc `{error}`                        | Standard, good for third-party SDK consumers                                                                                                                                                                                                                                                                                                                  |
 | Email queue                 | in-process retry queue                   | Redis/BullMQ, external broker           | First increment stays single-process; broker is added only if needed                                                                                                                                                                                                                                                                                          |
-| ID scheme                   | ULID (`@default(ulid())`)                | UUID v7, UUID v4, auto-increment, CUID2 | Non-enumerable + insert locality like UUID v7 but dash-free. Neither v7 nor ULID gives a cross-instance total order (that is `seq`'s job). CUID2 rejected: no timestamp (no locality), non-standard JS-only, slow. v4 rejected: fully random. See [ADR 0021](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0021-entity-identifier-format.md) |
+| ID scheme                   | ULID (`@default(ulid())`)                | UUID v7, UUID v4, auto-increment, CUID2 | Non-enumerable + insert locality like UUID v7 but dash-free. Neither v7 nor ULID gives a cross-instance total order (that is `seq`'s job). CUID2 rejected: no timestamp (no locality), non-standard JS-only, slow. v4 rejected: fully random. See [entity identifier format](../../../../docs/technical/entity-identifier-format.md) |
 | Migrations at deploy        | entrypoint step before app start         | app runs migrations on boot             | Avoids races between replicas; app only _checks_ schema is current                                                                                                                                                                                                                                                                                            |
-| Metrics stack               | OpenTelemetry SDK + Prometheus exporter  | `prom-client` directly                  | Traces and OTLP push add later without rewriting instrumentation call sites ([ADR 0020](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0020-observability-and-instrumentation.md))                                                                                                                                                            |
+| Metrics stack               | OpenTelemetry SDK + Prometheus exporter  | `prom-client` directly                  | Traces and OTLP push add later without rewriting instrumentation call sites ([observability and instrumentation](../../../../docs/technical/observability.md))                                                                                                                                                            |
 | `/metrics` exposure         | opt-in, token- or bind-guarded           | always on, public                       | Internal metrics must not leak on a public bind by default                                                                                                                                                                                                                                                                                                    |
 | Log shipping                | JSON to stdout, platform collects        | in-process shipper                      | Keeps the process single-purpose; every host platform collects stdout                                                                                                                                                                                                                                                                                         |
 

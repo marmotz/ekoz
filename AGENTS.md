@@ -12,15 +12,16 @@ for all of them (Bun workspaces).
 | `apps/server`       | `@ekozhq/server`     | no        | Reference server (NestJS 12, Prisma 8, Bun, Postgres). |
 | `apps/client-web`   | `@ekozhq/client-web` | no        | Demonstration web client (React, Vite, Tailwind 4).   |
 | `apps/admin`        | `@ekozhq/admin`      | no        | Admin console, deployed with the server, its own origin. |
-| `docs/`             | —                    | —         | Specification: functional, protocol, technical + ADRs. |
-| `backlog/`          | —                    | —         | Product/technical backlog, namespaced per area.       |
+| `docs/`             | —                    | —         | Specification: functional, protocol, technical design. |
+| `backlog/`          | —                    | —         | Product/technical backlog, one area per project part.  |
 
 ## Conventions
 
 - **Everything in English**: directories, files, identifiers, comments. UI text
   goes through i18n catalogues (French + English).
-- **Every design decision or notable change → an ADR** in
-  `docs/technical/adr/` (see ADR 0015). Reference by number; do not duplicate.
+- **Every design decision or notable change → a page under
+  [`docs/technical/`](docs/technical/)** (context, alternatives, consequences);
+  link it, do not duplicate it. See [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Network access from clients goes exclusively through `@ekozhq/sdk`** — never
   a direct `fetch`.
 - `CHANGELOG.md` per publishable package, managed by Changesets. Add a changeset

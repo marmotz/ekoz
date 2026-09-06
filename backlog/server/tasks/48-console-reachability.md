@@ -6,7 +6,7 @@
 **Issue**: [#48](https://github.com/ekoz-chat/server/issues/48)
 
 Reference: [../features/server-administration/technical.md §2.4, §2.5](../features/server-administration/technical.md#24-get-setup-public)
-and [ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md).
+and [configuration model](../../../docs/technical/configuration-model.md).
 
 The admin console runs on its own origin and must decide, before anyone signs
 in, whether to show the setup screen or the login screen. Two small pieces of

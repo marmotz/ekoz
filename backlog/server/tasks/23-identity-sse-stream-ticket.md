@@ -6,7 +6,7 @@
 **Issue**: [#23](https://github.com/ekoz-chat/server/issues/23)
 
 Reference: [../features/identity-and-profiles/technical.md §12](../features/identity-and-profiles/technical.md#12-sse-stream-ticket),
-[ADR 0008](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0008-auth-and-sessions.md).
+[authentication and sessions](../../../docs/technical/auth-and-sessions.md).
 
 ## To do
 

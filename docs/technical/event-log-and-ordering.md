@@ -1,6 +1,4 @@
-# 0004 — Event log and ordering
-
-**Status**: accepted
+# Event log and ordering
 
 ## Context
 
@@ -37,5 +35,5 @@ synchronisation backbone.**
 - An edit writes both the `messages` update and a log event; this double write
   must be transactional.
 - The log grows; plan compaction / purge aligned with retention
-  (see [ADR 0012](0012-retention-and-tombstones.md)).
-- Sync cursor = per-room `seq` (see [ADR 0005](0005-realtime-transport.md)).
+  (see [retention and tombstones](retention-and-tombstones.md)).
+- Sync cursor = per-room `seq` (see [real-time transport](realtime-transport.md)).

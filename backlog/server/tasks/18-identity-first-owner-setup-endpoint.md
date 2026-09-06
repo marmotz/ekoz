@@ -7,7 +7,7 @@
 
 Reference: [../features/identity-and-profiles/technical.md §1](../features/identity-and-profiles/technical.md),
 [server-core §5](../features/server-core/technical.md#5-bootstrap--initialization),
-[ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md).
+[server initialization](../../../docs/technical/server-initialization.md).
 
 ## To do
 

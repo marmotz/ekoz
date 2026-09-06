@@ -1,6 +1,4 @@
-# 0005 — Real-time transport (SSE)
-
-**Status**: accepted
+# Real-time transport (SSE)
 
 ## Context
 
@@ -24,7 +22,7 @@ and typing indicators are part of the messaging increment.
 - Reconnection: the SDK runs a `GET /sync?room=&since=<seq>` reconciliation for
   each stale room, then trusts the live stream. The server is not required to
   replay the stream from an arbitrary point.
-- Stream authentication: see [ADR 0008](0008-auth-and-sessions.md) (single-use
+- Stream authentication: see [authentication and sessions](auth-and-sessions.md) (single-use
   ticket).
 
 ## Deployment constraints

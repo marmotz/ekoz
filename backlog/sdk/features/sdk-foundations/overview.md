@@ -5,7 +5,7 @@
 ## Context
 
 The `sdk-js` repository is empty. Per
-[ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md),
+[web client stack](../../../../docs/technical/web-client-stack.md),
 no Ekoz client may call `fetch` directly: every network access goes through this
 SDK. The reference server has shipped its identity layer (registration, login,
 sessions, email verification, password reset, profile, admin account
@@ -44,7 +44,7 @@ publish yet).
   with `spec/docs/protocol/` is fixed in `spec`, not worked around here.
 - Distribution during this increment: consumed via `npm link` / `bun link` from
   a sibling checkout. No npm publish, no changesets release until the surface
-  stabilises. An ADR records the SDK packaging and protocol-version policy.
+  stabilises. A `docs/technical/` page records the SDK packaging and protocol-version policy.
 - Stack per the repo `AGENTS.md`: TypeScript, Bun, Vitest, no heavy runtime
   dependency.
 - Public API shape: a single client instance built by `createClient(config)`,
@@ -63,7 +63,7 @@ publish yet).
   refresh, logout), so a consumer can redirect to login without inspecting
   every call site.
 - Build output: ESM + CJS from this increment on (both current consumers are
-  ESM, CJS is shipped to avoid closing the door). Recorded in the packaging ADR.
+  ESM, CJS is shipped to avoid closing the door). Recorded in the packaging design page.
 
 ## Dependencies
 

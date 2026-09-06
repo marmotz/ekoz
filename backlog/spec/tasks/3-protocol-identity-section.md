@@ -13,7 +13,7 @@ Reference: [sdk-js SDK foundations technical design §11](https://github.com/eko
 - [docs/protocol/README.md](https://github.com/ekoz-chat/spec/blob/main/docs/protocol/README.md)
   lists "Authentication and sessions" and "Identity and profiles" as sections
   still to write; only `discovery.md` exists under `docs/protocol/`.
-- Repo `AGENTS.md` / [ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md):
+- Repo `AGENTS.md` / [HTTP API conventions](../../../docs/technical/api-conventions.md):
   a discrepancy with the protocol is fixed here, not worked around in the SDK —
   so the wire contract the SDK binds must be written down in this repo.
 

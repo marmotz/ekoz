@@ -17,7 +17,7 @@ exchanges without weighing down the operation of a standalone instance.
 - The federation protocol is a minimal custom protocol (neither ActivityPub nor
   the Matrix model): discovery via `/.well-known/ekoz`, per-server Ed25519 keys,
   signed requests, home server authoritative for the room ordering. See
-  [ADR 0006](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0006-federation-protocol.md).
+  [federation protocol](../../../../docs/technical/federation-protocol.md).
 - Two servers establish a federation relationship after mutual approval by their
   owners.
 - The first increment covers shared rooms, private messages, file sharing,

@@ -1,6 +1,4 @@
-# 0011 — File storage and quotas
-
-**Status**: accepted
+# File storage and quotas
 
 ## Context
 
@@ -29,7 +27,7 @@ saturate the server. Avatars are files too.
 - **Access**: authenticated download. Private room → current members only. Public
   room → authentication still required.
 - **Retention**: an attachment follows the retention rule of its message
-  (see [ADR 0012](0012-retention-and-tombstones.md)).
+  (see [retention and tombstones](retention-and-tombstones.md)).
 
 ## Consequences
 

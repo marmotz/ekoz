@@ -10,12 +10,12 @@ Builds on [identity and profiles](../identity-and-profiles/technical.md) and
 [overview.md](./overview.md).
 
 Related:
-[ADR 0009](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0009-configuration-model.md),
-[ADR 0010](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0010-server-initialization.md),
-[ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md),
-[ADR 0017](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0017-api-conventions.md),
-[ADR 0019](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0019-backlog-lives-in-the-implementing-repo.md),
-[ADR 0001](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0001-repository-layout.md).
+[configuration model](../../../../docs/technical/configuration-model.md),
+[server initialization](../../../../docs/technical/server-initialization.md),
+[web client stack](../../../../docs/technical/web-client-stack.md),
+[HTTP API conventions](../../../../docs/technical/api-conventions.md),
+[backlog conventions](../../../AGENTS.md),
+[repository layout](../../../../docs/technical/architecture.md).
 `sdk-js`:
 [SDK foundations technical](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/technical.md).
 `client-web`:
@@ -28,7 +28,7 @@ In scope for this increment:
 
 1. **Repo restructure** into Bun workspaces — already carved out as
    [task #46](../../tasks/46-monorepo-restructure.md); this document only frames
-   the target layout and the ADR (§3, §9).
+   the target layout (§3, §9).
 2. **Server additions** (small, in `apps/backend/` after the move):
    - `GET /admin/users` — list / search / filter (owner-only);
    - `GET /admin/users/:id` — admin-facing account detail (owner-only);
@@ -169,7 +169,7 @@ Target (task #46 owns the mechanics):
 ```
 
 `client-web` and `sdk-js` stay separate repos
-([ADR 0019](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0019-backlog-lives-in-the-implementing-repo.md));
+([backlog conventions](../../../AGENTS.md));
 only the admin console joins this repo, because it ships with the reference
 server. During bring-up `apps/admin/` consumes `@ekoz/sdk` via `bun link` from a
 sibling `sdk-js` checkout — it is **not** a workspace package here.
@@ -319,21 +319,21 @@ The wire types are aligned with the targeted protocol version; a mismatch with
 ([SDK overview](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/features/sdk-foundations/overview.md)).
 Consumed here via `bun link` (no publish).
 
-## 9. ADR to write (in `spec`)
+## 9. to document in `docs/technical/`
 
-**One combined ADR: "Reference server monorepo and admin console".** Supersedes
+**One combined design page: "Reference server monorepo and admin console".** Supersedes
 the standalone monorepo ADR planned in task #46 §1 (that step becomes "write the
-combined ADR").
+combined design page").
 
 Expected content:
 
 - The `server` repo is a Bun-workspaces monorepo: `apps/backend`, `apps/admin`,
   shared config in `packages/`. Refines
-  [ADR 0001](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0001-repository-layout.md).
-  `client-web` and `sdk-js` stay separate (ADR 0019).
+  [repository layout](../../../../docs/technical/architecture.md).
+  `client-web` and `sdk-js` stay separate (the backlog conventions).
 - The admin console is a core app of the reference server, deployed on its own
   origin; NestJS does not serve it.
-- Stack: TanStack Start, mirroring `client-web` (ADR 0016 + its bootstrap ADR);
+- Stack: TanStack Start, mirroring `client-web` (the web client stack design + its bootstrap design page);
   the SSR runtime is accepted for stack consistency even though the console has
   no public pages.
 - Network only through `@ekoz/sdk`; owner-only access (`RequireOwner`,
@@ -350,7 +350,7 @@ lower number.
 
 | Topic                    | Chosen                                     | Rejected                                                                        | Why                                                                                                                                                                      |
 | ------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Console base             | TanStack Start                             | Vite SPA + bare TanStack Router                                                 | User decision. SPA was the natural fit (no public pages, static deploy, ADR 0016 says "Vite"), but one shared stack with `client-web` outweighed the extra Node runtime. |
+| Console base             | TanStack Start                             | Vite SPA + bare TanStack Router                                                 | User decision. SPA was the natural fit (no public pages, static deploy, the web client stack design says "Vite"), but one shared stack with `client-web` outweighed the extra Node runtime. |
 | User administration data | Add `GET /admin/users[/:id]` now           | Keep the console "blind" (operator types ids); or defer the whole user-admin UI | User decision. The list/detail reads are small and unlock the core value of this increment (run account creation in real conditions).                                    |
 | Owner password reset     | New `POST /admin/users/:id/password-reset` | Reuse public `POST /auth/password-reset/request` with the account email         | Owner does not necessarily know the address; the public route is throttled and email-keyed.                                                                              |
 | Setup-state probe        | New public `GET /setup`                    | Let the console POST `/setup/owner` and read a `410`                            | A cheap probe lets the console show the right screen (setup vs login) before any input, and read whether a token is required.                                            |
@@ -406,7 +406,7 @@ lower number.
 GitHub issues in `ekoz-chat/server` unless noted. Dependency order:
 
 1. [#46 — monorepo restructure](../../tasks/46-monorepo-restructure.md) (already
-   tracked) — plus the combined ADR (§9).
+   tracked) — plus the combined design page (§9).
 2. [#47 — admin account read endpoints and owner-triggered password reset](../../tasks/47-admin-account-endpoints.md)
 3. [#48 — public setup-state probe and CORS support](../../tasks/48-console-reachability.md)
 4. [sdk-js#11 — admin console resource bindings](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/tasks/11-admin-console-bindings.md)

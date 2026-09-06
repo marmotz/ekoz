@@ -18,7 +18,7 @@ Reference: [../features/server-core/technical.md §7](../features/server-core/te
    layout + mechanism, not the message content. `MailService` resolves a
    template through an override seam (owner customization of wording / colours /
    look) that falls back to the registered default; the persistent override
-   store + admin surface are deferred to server-administration. An ADR is owed
+   store + admin surface are deferred to server-administration. A `docs/technical/` page is owed
    for the customization model.
 4. `EmailMessage` Prisma model (`id`, `to`, `template`, `category`, `dedupeKey?`
    unique, `sentAt?`, `createdAt`) with a coarse anti-duplication guard.

@@ -6,7 +6,7 @@
 **Issue**: [#25](https://github.com/ekoz-chat/server/issues/25)
 
 Reference: [../features/conversations/technical.md §10](../features/conversations/technical.md#10-event-log-and-seq-allocation),
-[ADR 0004](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0004-event-log-and-ordering.md).
+[event log and ordering](../../../docs/technical/event-log-and-ordering.md).
 
 ## To do
 

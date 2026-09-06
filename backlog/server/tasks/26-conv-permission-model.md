@@ -6,7 +6,7 @@
 **Issue**: [#26](https://github.com/ekoz-chat/server/issues/26)
 
 Reference: [../features/conversations/technical.md §6](../features/conversations/technical.md#6-roles-capabilities-resolver),
-[ADR 0018](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0018-permission-model.md).
+[permission model](../../../docs/technical/permission-model.md).
 
 ## To do
 
@@ -14,7 +14,7 @@ Reference: [../features/conversations/technical.md §6](../features/conversation
    `RoomMemberPermission`. `RoomRole` / `OverrideEffect` enums.
 2. Capability constant list (closed, protocol-versioned).
 3. Seed `role_default_capability` from the §6 matrix (migration + seed).
-4. `PermissionService.can(userId, roomId, capability)` per ADR 0018: owner
+4. `PermissionService.can(userId, roomId, capability)` per the permission model design: owner
    bypass → effective role (membership or nearest ancestor space) → seeded
    default → ancestor-chain overrides (role then user, closest wins).
 5. Effective-capability cache keyed `(roomId, userId)`, invalidated on

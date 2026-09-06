@@ -6,7 +6,7 @@
 **Issue**: [#6](https://github.com/ekoz-chat/server/issues/6)
 
 Reference: [../features/server-core/technical.md §4](../features/server-core/technical.md#4-server-identity)
-and [ADR 0007](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0007-user-identifier.md).
+and [user identifier](../../../docs/technical/user-identifier.md).
 
 ## To do
 

@@ -6,7 +6,7 @@
 
 The `client-web` repository is empty. It is the Ekoz **demonstration** web
 client (see the repo `AGENTS.md` and
-[ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md)):
+[web client stack](../../../../docs/technical/web-client-stack.md)):
 not a finished product, but good-looking and complete enough to exercise every
 server feature as it ships. The reference server has shipped its identity layer,
 so a real UI needs to exist before any identity flow can be exercised.
@@ -28,7 +28,7 @@ running reference server, with no domain feature implemented yet.
 ## Decisions made
 
 - Stack per
-  [ADR 0016](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0016-web-client-stack.md):
+  [web client stack](../../../../docs/technical/web-client-stack.md):
   React, Vite, TypeScript, Tailwind CSS 4, shadcn/ui (components copied in),
   Bun, Vitest + Testing Library, TanStack Query for server state, feature-first
   structure (`src/features/<domain>/{api,components,hooks,routes}`) with
@@ -43,7 +43,7 @@ running reference server, with no domain feature implemented yet.
 - Application shell: persistent sidebar navigation plus a topbar, with light and
   dark theme support delivered from the bootstrap (not deferred).
 - Rendering base: **TanStack Start** (SSR + hydration, Nitro server runtime) on
-  top of the ADR 0016 stack — this extends ADR 0016, which only named Vite.
+  top of the the web client stack design stack — this extends the web client stack design, which only named Vite.
   Routing is TanStack Router (bundled with Start). The SDK runs client-side
   only.
 - i18n via react-i18next; language detected from `localStorage` then the
@@ -55,7 +55,7 @@ running reference server, with no domain feature implemented yet.
 - Out of scope: all domain features (`auth`, `profile`, and later conversations,
   presence, notifications, content sharing). Added feature by feature as the
   server ships them.
-- Every design decision or notable change gets an ADR in the `spec` repo.
+- Every design decision or notable change is written up under `docs/technical/`.
 
 ## Dependencies
 
