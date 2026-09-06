@@ -39,6 +39,11 @@ COPY --from=build /app/apps/server/docker/entrypoint.sh /usr/local/bin/entrypoin
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /app/apps/server
+# Local blob storage default (`storage.local.path = ./var/blobs`) resolves from
+# this WORKDIR; create it writable by the runtime user and mark it a volume so a
+# stock `docker run` reaches a ready state without an explicit mount.
+RUN mkdir -p var/blobs && chown -R bun:bun var
+VOLUME /app/apps/server/var
 USER bun
 EXPOSE 3010
 

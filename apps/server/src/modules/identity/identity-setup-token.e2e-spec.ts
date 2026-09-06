@@ -22,8 +22,8 @@ describe('identity — first-owner setup, token-pinned (integration)', () => {
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
-    delete process.env['EKOZ_INITIAL_OWNER_EMAIL'];
+    process.env.DATABASE_URL = database.url;
+    delete process.env.EKOZ_INITIAL_OWNER_EMAIL;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
 
     // The token only ever exists in the boot log line; capture it there.

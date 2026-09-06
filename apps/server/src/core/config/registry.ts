@@ -30,7 +30,12 @@ const int = z.coerce.number().int();
 const ratio = z.coerce.number().min(0).max(1);
 
 /** Unit multipliers for the compact duration form (`15m`, `30d`, `2h`, `45s`). */
-const DURATION_UNIT_SECONDS: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86_400 };
+const DURATION_UNIT_SECONDS: Record<'s' | 'm' | 'h' | 'd', number> = {
+  s: 1,
+  m: 60,
+  h: 3600,
+  d: 86_400,
+};
 
 /**
  * A duration, resolved to a whole number of seconds. Accepts the compact
@@ -52,7 +57,8 @@ const durationSeconds = z
       return z.NEVER;
     }
 
-    return Number(match[1]) * DURATION_UNIT_SECONDS[match[2]!]!;
+    const unit = match[2] as keyof typeof DURATION_UNIT_SECONDS;
+    return Number(match[1]) * DURATION_UNIT_SECONDS[unit];
   });
 
 /**

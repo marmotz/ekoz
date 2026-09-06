@@ -103,7 +103,7 @@ export class AuthService {
     }
 
     const user = await this.accounts.findById(session.userId);
-    if (!user || user.status !== 'active') {
+    if (user?.status !== 'active') {
       throw new RefreshInvalidError();
     }
 

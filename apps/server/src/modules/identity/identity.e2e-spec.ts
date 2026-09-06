@@ -17,9 +17,9 @@ describe('identity — accounts, auth, sessions (integration)', () => {
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
+    process.env.DATABASE_URL = database.url;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
-    process.env['EKOZ_EMAIL__VERIFICATION_REQUIRED'] = 'false';
+    process.env.EKOZ_EMAIL__VERIFICATION_REQUIRED = 'false';
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
@@ -36,7 +36,7 @@ describe('identity — accounts, auth, sessions (integration)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    delete process.env['EKOZ_EMAIL__VERIFICATION_REQUIRED'];
+    delete process.env.EKOZ_EMAIL__VERIFICATION_REQUIRED;
     restoreConfig?.();
     await app?.close();
     await database?.stop();

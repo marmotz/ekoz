@@ -15,7 +15,7 @@ describe('health endpoints (e2e)', () => {
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
+    process.env.DATABASE_URL = database.url;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();

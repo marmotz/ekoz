@@ -9,7 +9,7 @@ import { createDb, type Db } from './db.js';
  * environment for now — same stopgap as `main.ts` for `http.host` / `http.port`.
  */
 function resolveConnectionString(): string {
-  const url = process.env['DATABASE_URL'];
+  const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
       'DATABASE_URL is not set. Copy .env.example to .env (local dev) or set it in the environment.',

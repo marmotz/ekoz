@@ -40,7 +40,7 @@ export class SetupService {
 
   /** The address pinned by `EKOZ_INITIAL_OWNER_EMAIL`, lower-cased, or `null`. */
   pinnedOwnerEmail(): string | null {
-    const raw = this.env['EKOZ_INITIAL_OWNER_EMAIL']?.trim().toLowerCase();
+    const raw = this.env.EKOZ_INITIAL_OWNER_EMAIL?.trim().toLowerCase();
 
     return raw ? raw : null;
   }

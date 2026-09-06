@@ -18,7 +18,7 @@ describe('GET /blobs/:id (integration)', () => {
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
+    process.env.DATABASE_URL = database.url;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
@@ -50,7 +50,7 @@ describe('GET /blobs/:id (integration)', () => {
     app.get(BlobAccessRegistry).register((blob) => blob.id === blobId);
 
     const res = await request(app.getHttpServer()).get(`/blobs/${blobId}`).expect(200);
-    expect(res.headers['etag']).toBe(`"${blobHash}"`);
+    expect(res.headers.etag).toBe(`"${blobHash}"`);
     expect(res.headers['cache-control']).toContain('immutable');
     expect(res.headers['content-type']).toContain('image/png');
     expect(res.headers['content-length']).toBe('7');

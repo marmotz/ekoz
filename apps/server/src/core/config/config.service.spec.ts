@@ -63,13 +63,13 @@ describe('ConfigService (unit)', () => {
   });
 
   it('lets the TOML file override the default', async () => {
-    const service = await build(BASE_TOML + '\n[registration]\nmode = "open"\n');
+    const service = await build(`${BASE_TOML}\n[registration]\nmode = "open"\n`);
     expect(service.describe('registration.mode')).toMatchObject({ value: 'open', source: 'file' });
   });
 
   it('lets the settings table override the file for a runtime key', async () => {
     repo.store.set('registration.mode', 'admin');
-    const service = await build(BASE_TOML + '\n[registration]\nmode = "open"\n');
+    const service = await build(`${BASE_TOML}\n[registration]\nmode = "open"\n`);
     expect(service.describe('registration.mode')).toMatchObject({
       value: 'admin',
       source: 'settings',

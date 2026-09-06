@@ -97,7 +97,7 @@ export class EmailVerificationService implements OnModuleInit {
     }
 
     const user = await this.accounts.findById(row.userId);
-    if (!user || user.status !== 'active') {
+    if (user?.status !== 'active') {
       throw new EmailVerificationInvalidError();
     }
 
@@ -136,7 +136,7 @@ export class EmailVerificationService implements OnModuleInit {
    */
   async resend(email: string): Promise<void> {
     const user = await this.accounts.findByEmail(email);
-    if (!user || user.status !== 'active' || user.emailVerifiedAt !== null || user.email === null) {
+    if (user?.status !== 'active' || user.emailVerifiedAt !== null || user.email === null) {
       return;
     }
 

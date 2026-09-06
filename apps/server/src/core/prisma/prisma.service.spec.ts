@@ -5,15 +5,15 @@ import { PrismaService } from './prisma.service.js';
 const DUMMY_URL = 'postgresql://user:pass@localhost:5432/db';
 
 describe('PrismaService (unit)', () => {
-  const original = process.env['DATABASE_URL'];
+  const original = process.env.DATABASE_URL;
 
   beforeEach(() => {
-    process.env['DATABASE_URL'] = DUMMY_URL;
+    process.env.DATABASE_URL = DUMMY_URL;
   });
 
   afterEach(() => {
-    if (original === undefined) delete process.env['DATABASE_URL'];
-    else process.env['DATABASE_URL'] = original;
+    if (original === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = original;
   });
 
   it('exposes the query surfaces without opening a connection (lazy connect)', () => {
@@ -25,7 +25,7 @@ describe('PrismaService (unit)', () => {
   });
 
   it('throws a clear error when DATABASE_URL is missing', () => {
-    delete process.env['DATABASE_URL'];
+    delete process.env.DATABASE_URL;
 
     expect(() => new PrismaService()).toThrow(/DATABASE_URL is not set/);
   });
