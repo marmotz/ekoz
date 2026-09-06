@@ -61,7 +61,7 @@ export class ConfigService implements OnModuleInit {
   /** Load file + env, refresh the settings cache, and validate every infra key. */
   async init(): Promise<void> {
     const env = this.options.env ?? process.env;
-    const tomlPath = this.options.tomlPath ?? env['EKOZ_CONFIG_FILE'] ?? './config.toml';
+    const tomlPath = this.options.tomlPath ?? env.EKOZ_CONFIG_FILE ?? './config.toml';
     this.toml = loadTomlConfig(tomlPath, env);
     this.envOverrides = readEnvOverrides(env);
     await this.refreshSettings(true);

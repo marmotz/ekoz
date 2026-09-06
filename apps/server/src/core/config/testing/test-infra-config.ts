@@ -26,7 +26,7 @@ export interface TestInfraConfigOptions {
 
 export function applyTestInfraConfig(options: TestInfraConfigOptions = {}): () => void {
   const env = options.env ?? process.env;
-  const databaseUrl = options.databaseUrl ?? env['DATABASE_URL'];
+  const databaseUrl = options.databaseUrl ?? env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('applyTestInfraConfig: no databaseUrl and DATABASE_URL is not set');
   }

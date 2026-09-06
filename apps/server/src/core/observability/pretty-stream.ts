@@ -30,7 +30,7 @@ const LEVELS: Record<string, { label: string; color: string }> = {
 /** Keys rendered in dedicated positions or pure noise — never in the tail. */
 const OMITTED_KEYS = new Set(['level', 'time', 'msg', 'context', 'pid', 'hostname', 'stack', 'v']);
 
-const useColor = Boolean(process.stdout.isTTY) && !process.env['NO_COLOR'];
+const useColor = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
 
 function paint(code: string, text: string): string {
   return useColor ? `[${code}m${text}[0m` : text;
@@ -71,19 +71,19 @@ function formatExtras(log: Record<string, unknown>): string {
 
 /** Format a single parsed log record into its final display line(s). */
 export function formatLine(log: Record<string, unknown>): string {
-  const level = LEVELS[String(log['level'])] ?? {
-    label: String(log['level'] ?? '?').toUpperCase(),
+  const level = LEVELS[String(log.level)] ?? {
+    label: String(log.level ?? '?').toUpperCase(),
     color: '37',
   };
-  const time = paint('90', `[${formatTime(log['time'])}]`);
+  const time = paint('90', `[${formatTime(log.time)}]`);
   const label = paint(level.color, level.label);
-  const context = log['context'] ? ` ${paint('36', `[${String(log['context'])}]`)}` : '';
-  const message = log['msg'] === undefined ? '' : ` ${String(log['msg'])}`;
+  const context = log.context ? ` ${paint('36', `[${String(log.context)}]`)}` : '';
+  const message = log.msg === undefined ? '' : ` ${String(log.msg)}`;
 
   let line = `${time} ${label}${context}${message}${formatExtras(log)}`;
 
-  if (typeof log['stack'] === 'string') {
-    line += `\n${(log['stack'] as string).replace(/^/gm, '    ')}`;
+  if (typeof log.stack === 'string') {
+    line += `\n${(log.stack as string).replace(/^/gm, '    ')}`;
   }
 
   return line;

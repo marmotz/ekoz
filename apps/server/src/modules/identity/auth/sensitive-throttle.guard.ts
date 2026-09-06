@@ -57,7 +57,7 @@ export class SensitiveThrottleGuard implements CanActivate {
     // across all four throttled endpoints, so hammering the same account from
     // `/auth/login` and `/auth/register` cannot double the budget.
     const body = (request.body ?? {}) as Record<string, unknown>;
-    const rawTarget = body['identifier'] ?? body['email'] ?? '';
+    const rawTarget = body.identifier ?? body.email ?? '';
     const target = String(rawTarget).normalize('NFC').trim().toLowerCase();
 
     return `${request.ip ?? 'unknown'} ${target}`;

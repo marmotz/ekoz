@@ -37,9 +37,9 @@ describe('logger redaction (unit)', () => {
     const { logger, lines } = captureLogger();
     logger.info({ password: 'hunter2', token: 'abc', nested: { password: 'x' } }, 'login attempt');
     const line = lines()[0]!;
-    expect(line['password']).toBe(REDACT_CENSOR);
-    expect(line['token']).toBe(REDACT_CENSOR);
-    expect((line['nested'] as Record<string, unknown>)['password']).toBe(REDACT_CENSOR);
+    expect(line.password).toBe(REDACT_CENSOR);
+    expect(line.token).toBe(REDACT_CENSOR);
+    expect((line.nested as Record<string, unknown>).password).toBe(REDACT_CENSOR);
   });
 
   it('leaves non-secret fields intact', () => {

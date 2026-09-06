@@ -15,6 +15,8 @@ that does not touch this file.
   `connect()`. (#2)
 - `AppModule` e2e specs configure their own infra instead of depending on a
   developer's local `config.toml`. (#3, #6)
+- `setAvatar` rejects an account with no display name instead of returning a
+  broken avatar URL. (#40)
 
 ### Added
 

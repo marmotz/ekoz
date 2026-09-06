@@ -22,8 +22,8 @@ export class NestLoggerService implements LoggerService {
     // `bufferLogs`, only if that call never happens). `OBSERVABILITY_LOG_LEVEL` /
     // `OBSERVABILITY_LOG_FORMAT` give a last-resort override for that window.
     this.logger = createLogger({
-      level: (process.env['OBSERVABILITY_LOG_LEVEL'] as LogLevel | undefined) ?? 'info',
-      format: (process.env['OBSERVABILITY_LOG_FORMAT'] as LogFormat | undefined) ?? 'json',
+      level: (process.env.OBSERVABILITY_LOG_LEVEL as LogLevel | undefined) ?? 'info',
+      format: (process.env.OBSERVABILITY_LOG_FORMAT as LogFormat | undefined) ?? 'json',
     });
   }
 
@@ -41,17 +41,17 @@ export class NestLoggerService implements LoggerService {
     const ctx = getRequestContext();
     const fields: Record<string, unknown> = {};
     if (context) {
-      fields['context'] = context;
+      fields.context = context;
     }
 
     if (ctx?.jobId) {
-      fields['jobId'] = ctx.jobId;
+      fields.jobId = ctx.jobId;
     } else if (ctx?.requestId) {
-      fields['requestId'] = ctx.requestId;
+      fields.requestId = ctx.requestId;
     }
 
     if (ctx?.userId) {
-      fields['userId'] = ctx.userId;
+      fields.userId = ctx.userId;
     }
 
     return fields;

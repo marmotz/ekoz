@@ -43,14 +43,14 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
     const mail = [...sentMail].reverse().find((m) => m.template === 'password-reset');
     if (!mail) throw new Error('no password-reset mail was sent');
 
-    return new URL(String(mail.vars['resetUrl'])).searchParams.get('token') ?? '';
+    return new URL(String(mail.vars.resetUrl)).searchParams.get('token') ?? '';
   };
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
+    process.env.DATABASE_URL = database.url;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
-    process.env['EKOZ_EMAIL__VERIFICATION_REQUIRED'] = 'false';
+    process.env.EKOZ_EMAIL__VERIFICATION_REQUIRED = 'false';
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
@@ -82,7 +82,7 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    delete process.env['EKOZ_EMAIL__VERIFICATION_REQUIRED'];
+    delete process.env.EKOZ_EMAIL__VERIFICATION_REQUIRED;
     restoreConfig?.();
     await app?.close();
     await database?.stop();
@@ -195,7 +195,7 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .get('/users/alice/avatar')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(served.headers['etag']).toBeDefined();
+    expect(served.headers.etag).toBeDefined();
     expect(served.headers['content-type']).toBe('image/png');
 
     // The endpoint still requires authentication.

@@ -153,8 +153,8 @@ export class SessionService {
       .all()) as SessionRow[];
 
     const overflow = active.length - (max - 1);
-    for (let i = 0; i < overflow; i += 1) {
-      await this.revoke(active[i]!.id, 'max_sessions_exceeded');
+    for (const session of active.slice(0, Math.max(0, overflow))) {
+      await this.revoke(session.id, 'max_sessions_exceeded');
     }
   }
 }

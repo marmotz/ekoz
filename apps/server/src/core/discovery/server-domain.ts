@@ -33,7 +33,7 @@ export function isValidServerDomain(value: string): boolean {
     return false;
   }
 
-  const tld = labels[labels.length - 1]!;
+  const tld = labels.at(-1) ?? '';
 
   return /^[a-z]{2,}$/.test(tld);
 }

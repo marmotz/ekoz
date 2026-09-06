@@ -44,6 +44,14 @@
   },
   "overrides": [
     {
+      "includes": ["apps/server/src/**/templates.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noTemplateCurlyInString": "off" }
+        }
+      }
+    },
+    {
       "includes": [
         "**/*.spec.ts",
         "**/*.e2e-spec.ts",

@@ -30,14 +30,14 @@ describe('identity — registration, verification, setup (integration)', () => {
   const tokenFromLastMail = (template: string): string => {
     const mail = [...sentMail].reverse().find((m) => m.template === template);
     if (!mail) throw new Error(`no ${template} mail was sent`);
-    return new URL(String(mail.vars['verifyUrl'])).searchParams.get('token') ?? '';
+    return new URL(String(mail.vars.verifyUrl)).searchParams.get('token') ?? '';
   };
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
+    process.env.DATABASE_URL = database.url;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
-    process.env['EKOZ_INITIAL_OWNER_EMAIL'] = ownerEmail;
+    process.env.EKOZ_INITIAL_OWNER_EMAIL = ownerEmail;
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
@@ -52,7 +52,7 @@ describe('identity — registration, verification, setup (integration)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    delete process.env['EKOZ_INITIAL_OWNER_EMAIL'];
+    delete process.env.EKOZ_INITIAL_OWNER_EMAIL;
     restoreConfig?.();
     await app?.close();
     await database?.stop();

@@ -17,9 +17,9 @@ describe('GET /metrics (integration)', () => {
 
   beforeAll(async () => {
     database = await startTestDatabase();
-    process.env['DATABASE_URL'] = database.url;
+    process.env.DATABASE_URL = database.url;
     restoreConfig = applyTestInfraConfig({ databaseUrl: database.url });
-    process.env['EKOZ_OBSERVABILITY__METRICS_TOKEN'] = TOKEN;
+    process.env.EKOZ_OBSERVABILITY__METRICS_TOKEN = TOKEN;
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
     app.enableShutdownHooks();
@@ -28,7 +28,7 @@ describe('GET /metrics (integration)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    delete process.env['EKOZ_OBSERVABILITY__METRICS_TOKEN'];
+    delete process.env.EKOZ_OBSERVABILITY__METRICS_TOKEN;
     restoreConfig?.();
     await app?.close();
     await database?.stop();

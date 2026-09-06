@@ -1,6 +1,6 @@
 # monorepo — verify the server Docker build
 
-**Status**: todo
+**Status**: done
 **Type**: chore
 **Issue**: [#41](https://github.com/marmotz/ekoz/issues/41)
 `apps/server/Dockerfile` was rewritten for a monorepo build context (repo root)

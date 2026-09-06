@@ -51,7 +51,7 @@ export class PasswordResetService implements OnModuleInit {
    */
   async request(email: string, requestedIp: string | null): Promise<void> {
     const user = await this.accounts.findByEmail(email);
-    if (!user || user.status !== 'active' || user.email === null) {
+    if (user?.status !== 'active' || user.email === null) {
       return;
     }
 
@@ -96,7 +96,7 @@ export class PasswordResetService implements OnModuleInit {
     }
 
     const user = await this.accounts.findById(row.userId);
-    if (!user || user.status !== 'active') {
+    if (user?.status !== 'active') {
       throw new PasswordResetInvalidError();
     }
 

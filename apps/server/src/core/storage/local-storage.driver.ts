@@ -18,7 +18,7 @@ export class LocalStorageDriver implements StorageDriver {
     // resolve-and-check anyway so a future caller cannot escape the root.
     const base = resolve(this.root);
     const full = resolve(base, key);
-    if (full !== base && !full.startsWith(base + '/')) {
+    if (full !== base && !full.startsWith(`${base}/`)) {
       throw new Error(`storage key "${key}" escapes the storage root`);
     }
 

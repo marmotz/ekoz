@@ -28,10 +28,18 @@ jobs:
       - run: bun run test
       - run: bun run test:server
 
-  docs:
+  docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check ADR index is in sync
-        run: |
-          test -f docs/technical/adr/README.md
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the server image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: false
+          load: true
+          tags: ekoz-server:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

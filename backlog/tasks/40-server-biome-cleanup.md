@@ -1,6 +1,6 @@
 # monorepo — clear server Biome warnings
 
-**Status**: todo
+**Status**: done
 **Type**: chore
 **Issue**: [#40](https://github.com/marmotz/ekoz/issues/40)
 `bun run lint` is green (exit 0) but `apps/server/src` carries ~23 advisory

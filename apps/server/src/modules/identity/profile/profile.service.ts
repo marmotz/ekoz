@@ -170,14 +170,18 @@ export class ProfileService implements OnModuleInit {
     });
 
     const user = await this.accounts.findById(userId);
+    const avatarUrl = this.avatarUrl(user?.name ?? null, blob.id);
+    if (!avatarUrl) {
+      throw new ProfileNotFoundError();
+    }
 
-    return { avatarUrl: this.avatarUrl(user?.name ?? null, blob.id)! };
+    return { avatarUrl };
   }
 
   /** Remove the current avatar (technical.md §13). Idempotent. */
   async deleteAvatar(userId: string): Promise<void> {
     const profile = await this.accounts.getProfile(userId);
-    if (!profile || !profile.avatarBlobId) {
+    if (!profile?.avatarBlobId) {
       return;
     }
 
