@@ -4,8 +4,7 @@ Reference Ekoz server. Global specification, protocol and architecture decisions
 live in [`docs/`](../../docs/) at the repo root — read them before any
 implementation, in particular [`docs/technical/`](../../docs/technical/).
 
-Backlog: [`backlog/server/`](../../backlog/server/) (per-feature `overview.md`,
-`technical.md`, `tasks/`). Run the `backlog-*` skills and `implement-issue` from
+Backlog: [`backlog/`](../../backlog/). Run the `backlog-*` skills and `implement-issue` from
 the repo root.
 
 ## Stack

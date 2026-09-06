@@ -5,7 +5,7 @@ application of the server, deployed on **its own origin** (the server does not
 serve its assets). Distinct from `apps/client-web`, which exercises end-user
 features.
 
-Backlog: [`backlog/server/features/server-administration/`](../../backlog/server/features/server-administration/overview.md)
+Backlog: [`backlog/features/server-administration/`](../../backlog/features/server-administration/overview.md)
 (the console is part of the server-administration feature). Stack decision:
 [web client stack](../../docs/technical/web-client-stack.md).
 

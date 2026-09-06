@@ -4,7 +4,7 @@ The JavaScript/TypeScript SDK for the Ekoz protocol. **The only integration
 surface** for every Ekoz client (`apps/client-web`, `apps/admin`, third parties)
 — clients never call `fetch` directly.
 
-Backlog: [`backlog/sdk/`](../../backlog/sdk/). Protocol contract:
+Backlog: [`backlog/`](../../backlog/) (SDK tasks under `sdk-foundations`). Protocol contract:
 [`docs/protocol/`](../../docs/protocol/). Packaging policy:
 [SDK packaging and protocol-version policy](../../docs/technical/sdk-packaging-and-protocol-policy.md).
 

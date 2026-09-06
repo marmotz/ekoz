@@ -12,7 +12,7 @@ and an admin console. One monorepo (Bun workspaces) — see
 | `apps/server`     | `@ekozhq/server`     | —         | Reference server (NestJS 12, Prisma 8, Bun).  |
 | `apps/client-web` | `@ekozhq/client-web` | —         | Demonstration web client (React, Vite).      |
 | `apps/admin`      | `@ekozhq/admin`      | —         | Admin console, deployed with the server.      |
-| `docs/`           | —                    | —         | Functional spec, protocol, technical + ADRs.  |
+| `docs/`           | —                    | —         | Functional spec, protocol, technical design.  |
 | `backlog/`        | —                    | —         | Product/technical backlog, one area per part. |
 
 ## Getting started

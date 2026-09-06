@@ -17,6 +17,9 @@ for all of them (Bun workspaces).
 
 ## Conventions
 
+- **NEVER run `git commit`, `git push`, `git merge`, `git rebase` or any other
+  history-changing git command.** Stage nothing, commit nothing. Leave the
+  working tree with the changes made and let the user review and commit.
 - **Everything in English**: directories, files, identifiers, comments. UI text
   goes through i18n catalogues (French + English).
 - **Every design decision or notable change → a page under

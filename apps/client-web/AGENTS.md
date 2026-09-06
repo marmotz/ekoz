@@ -4,7 +4,7 @@ Ekoz **demonstration** web client. Not a finished product: good-looking and
 complete enough to exercise every server feature as it ships, no more. A feature
 shipped in `apps/server` has its testable counterpart here.
 
-Backlog: [`backlog/client-web/`](../../backlog/client-web/). Stack decision:
+Backlog: [`backlog/`](../../backlog/) (client tasks under `web-client-foundations`). Stack decision:
 [web client stack](../../docs/technical/web-client-stack.md).
 
 ## Stack
