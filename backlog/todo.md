@@ -6,10 +6,15 @@ The first increment is **core + messaging** (see the
 presence, retention, local moderation, demonstration client.
 
 First-increment features (`server-core`, `identity-and-profiles`, `conversations`)
-have a technical design and tasks below. The later features
-(`content-and-sharing`, `notifications`, `server-administration`, `federation`,
-`extensibility`) still have only an `overview.md` and will be scoped when their
-increment starts.
+have a technical design and tasks below, as does `server-administration` (which
+includes the admin console shipped in this monorepo). The sibling
+[`sdk-js`](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/) and
+[`client-web`](https://github.com/ekoz-chat/client-web/blob/main/backlog/)
+repositories carry their own backlogs (per
+[ADR 0019](https://github.com/ekoz-chat/spec/blob/main/docs/technical/adr/0019-backlog-lives-in-the-implementing-repo.md)).
+The later features
+(`content-and-sharing`, `notifications`, `federation`, `extensibility`) still
+have only an `overview.md` and will be scoped when their increment starts.
 
 Implement in dependency order; each task file has a `## Dependencies` section and
 each issue body carries `Depends on #N` lines.
@@ -83,7 +88,18 @@ each issue body carries `Depends on #N` lines.
 
 ## Server administration
 
-[Feature in discussion](features/server-administration/overview.md)
+[Technical design](features/server-administration/technical.md) — first increment: repo restructure, a few server endpoints, then the admin console app (`apps/admin/`). SDK bindings tracked in [`sdk-js`](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/).
+
+| Done | Issue                                                      | Task                                                                                                                  | Description                                                                      |
+| ---- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| ☐    | [#46](https://github.com/ekoz-chat/server/issues/46)       | [46-monorepo-restructure](tasks/46-monorepo-restructure.md)                                                           | move server into `apps/backend/`, Bun workspaces layout + combined ADR           |
+| ☐    | [#47](https://github.com/ekoz-chat/server/issues/47)       | [47-admin-account-endpoints](tasks/47-admin-account-endpoints.md)                                                     | `GET /admin/users`, `GET /admin/users/:id`, owner-triggered password reset       |
+| ☐    | [#48](https://github.com/ekoz-chat/server/issues/48)       | [48-console-reachability](tasks/48-console-reachability.md)                                                           | public `GET /setup` probe + CORS allow-list                                      |
+| ☐    | [sdk-js#11](https://github.com/ekoz-chat/sdk-js/issues/11) | [11-admin-console-bindings](https://github.com/ekoz-chat/sdk-js/blob/main/backlog/tasks/11-admin-console-bindings.md) | SDK bindings: `setup.state`, `admin.users` reads, password reset (repo `sdk-js`) |
+| ☐    | [#49](https://github.com/ekoz-chat/server/issues/49)       | [49-admin-console-bootstrap](tasks/49-admin-console-bootstrap.md)                                                     | `apps/admin/` skeleton: Start, i18n, theme, shell, SDK + owner gate, CI          |
+| ☐    | [#50](https://github.com/ekoz-chat/server/issues/50)       | [50-admin-console-setup-and-auth](tasks/50-admin-console-setup-and-auth.md)                                           | console: server initialization + owner sign-in / out                             |
+| ☐    | [#51](https://github.com/ekoz-chat/server/issues/51)       | [51-admin-console-accounts](tasks/51-admin-console-accounts.md)                                                       | console: account list, detail + lifecycle actions, creation                      |
+| ☐    | [#52](https://github.com/ekoz-chat/server/issues/52)       | [52-admin-console-invitations-and-usernames](tasks/52-admin-console-invitations-and-usernames.md)                     | console: invitations + username-change request review                            |
 
 ## Federation
 
