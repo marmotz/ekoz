@@ -7,6 +7,7 @@ has its own page with full context, alternatives and consequences:
 - [Web client stack](web-client-stack.md) — React, Vite, Tailwind 4, shadcn/ui.
 - [SDK packaging and protocol-version policy](sdk-packaging-and-protocol-policy.md).
 - [HTTP API conventions](api-conventions.md) — problem+json, correlation, validation.
+- [OpenAPI description and SDK types](openapi-description-and-sdk-types.md) — Zod-first spec, `/docs`, committed `openapi.json`.
 - [Entity identifier format](entity-identifier-format.md) — ULID.
 - [Conversation data model](conversation-data-model.md) — the single `room` concept.
 - [Permission model](permission-model.md) — capability-based ACL.

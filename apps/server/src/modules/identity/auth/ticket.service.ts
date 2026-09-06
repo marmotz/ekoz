@@ -2,18 +2,19 @@ import { randomBytes } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { sha256Hex } from '../../../core/crypto/hashing.js';
+import type { StreamTicketResponse } from './stream.dto.js';
 import {
   STREAM_TICKET_STORE,
   type StreamTicketBinding,
   type StreamTicketStore,
 } from './stream-ticket.store.js';
 
-/** Result of {@link TicketService.issue}: the plaintext ticket and its TTL. */
-export interface IssuedStreamTicket {
-  ticket: string;
-  /** Seconds until the ticket expires. */
-  expiresIn: number;
-}
+/**
+ * Result of {@link TicketService.issue}: the plaintext ticket and its TTL.
+ * Shape defined once as `StreamTicketResponseSchema` in
+ * [`stream.dto.ts`](./stream.dto.ts).
+ */
+export type IssuedStreamTicket = StreamTicketResponse;
 
 /**
  * SSE stream tickets (technical.md §12, ADR 0008).

@@ -1,15 +1,17 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
 import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
 import { AuthGuard } from '../guards/auth.guard.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
-import type { AccountView } from './account.view.js';
+import { type AccountView, AccountViewDto } from './account.view.js';
 import {
   type AdminCreateUserBody,
-  AdminCreateUserSchema,
+  AdminCreateUserDto,
   type RegisterBody,
-  RegisterSchema,
+  RegisterDto,
 } from './registration.dto.js';
 import { RegistrationService } from './registration.service.js';
 
@@ -18,6 +20,7 @@ import { RegistrationService } from './registration.service.js';
  * `registration.mode`: `open`, `invite` (needs `invitationToken`), or `admin`
  * (`403 identity.registration_closed`).
  */
+@ApiTags('Registration')
 @Controller('auth/register')
 export class RegistrationController {
   constructor(private readonly registration: RegistrationService) {}
@@ -26,7 +29,11 @@ export class RegistrationController {
   @Public()
   @UseGuards(SensitiveThrottleGuard)
   @HttpCode(201)
-  register(@Body(new ZodValidationPipe(RegisterSchema)) body: RegisterBody): Promise<AccountView> {
+  @ApiOperation({ summary: 'Register a new account.' })
+  @ApiBody({ type: RegisterDto })
+  @ApiCreatedResponse({ type: AccountViewDto })
+  @ApiProblemResponses({ auth: false, validation: true, statuses: [403, 409, 429] })
+  register(@Body(new ZodValidationPipe(RegisterDto)) body: RegisterBody): Promise<AccountView> {
     return this.registration.register({
       name: body.name,
       email: body.email,
@@ -41,6 +48,8 @@ export class RegistrationController {
  * Owner-only account creation, used when `registration.mode = admin`
  * (technical.md §8, §16).
  */
+@ApiTags('Registration')
+@ApiBearerAuth('bearer')
 @Controller('admin/users')
 @UseGuards(AuthGuard, OwnerGuard)
 export class AdminUsersController {
@@ -48,8 +57,12 @@ export class AdminUsersController {
 
   @Post()
   @HttpCode(201)
+  @ApiOperation({ summary: 'Owner-created account (admin registration mode).' })
+  @ApiBody({ type: AdminCreateUserDto })
+  @ApiCreatedResponse({ type: AccountViewDto })
+  @ApiProblemResponses({ validation: true, statuses: [403, 409] })
   create(
-    @Body(new ZodValidationPipe(AdminCreateUserSchema)) body: AdminCreateUserBody,
+    @Body(new ZodValidationPipe(AdminCreateUserDto)) body: AdminCreateUserBody,
   ): Promise<AccountView> {
     return this.registration.adminCreate(body);
   }

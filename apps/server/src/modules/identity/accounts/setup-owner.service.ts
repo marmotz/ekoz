@@ -3,26 +3,24 @@ import { SetupService } from '../../../core/bootstrap/setup.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { RefreshTokenService } from '../auth/refresh-token.service.js';
 import { SessionService } from '../auth/session.service.js';
-import { type SessionView, toSessionView } from '../auth/session.view.js';
+import { toSessionView } from '../auth/session.view.js';
 import { TokenService } from '../auth/token.service.js';
 import { SetupRejectedError } from '../identity.errors.js';
 import { AccountService } from './account.service.js';
-import { type AccountView, toAccountView } from './account.view.js';
+import { toAccountView } from './account.view.js';
 import { PasswordService } from './password.service.js';
-import type { SetupOwnerBody } from './setup.dto.js';
+import type { SetupOwnerBody, SetupOwnerResponse } from './setup.dto.js';
 
 export interface SetupOwnerContext {
   userAgent?: string | null;
   ip?: string | null;
 }
 
-export interface SetupOwnerResult {
-  user: AccountView;
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  session: SessionView;
-}
+/**
+ * Shape defined once as `SetupOwnerResponseSchema` in
+ * [`setup.dto.ts`](./setup.dto.ts).
+ */
+export type SetupOwnerResult = SetupOwnerResponse;
 
 /**
  * First-owner setup (technical.md §1, ADR 0010, issue #18). Reachable only while

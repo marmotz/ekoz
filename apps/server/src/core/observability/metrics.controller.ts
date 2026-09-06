@@ -7,6 +7,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { ConfigService } from '../config/config.service.js';
 import { Public } from '../http/public.decorator.js';
@@ -19,6 +20,7 @@ import { MetricsService } from './metrics.service.js';
  * - With `observability.metrics_token` set: requires `Authorization: Bearer <token>`.
  * - Without a token: served only to loopback / private-range clients.
  */
+@ApiExcludeController()
 @Controller('metrics')
 export class MetricsController {
   constructor(

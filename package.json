@@ -16,6 +16,7 @@
     "typecheck": "bun run --filter '*' typecheck",
     "test": "vitest run",
     "test:server": "bun run --filter '@ekozhq/server' test",
+    "openapi:emit": "bun run --filter '@ekozhq/server' openapi:emit",
     "lint": "biome check .",
     "lint:boundaries": "bun run --filter '@ekozhq/server' lint:boundaries",
     "format": "biome format --write .",
@@ -27,8 +28,11 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.12",
     "@changesets/cli": "3.0.2",
+    "@kurotako/gen-zod": "^0.1.0",
+    "@kurotako/parser-prisma": "^0.1.0",
     "@types/node": "^26.4.0",
     "@vitest/coverage-v8": "^4.1.11",
+    "kurotako": "^0.1.0",
     "lefthook": "^2.1.12",
     "typescript": "6.0.3",
     "vitest": "^4.1.11"

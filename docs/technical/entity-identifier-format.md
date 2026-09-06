@@ -77,7 +77,7 @@ parse the timestamp prefix for anything beyond coarse local ordering.
   `identity-and-profiles` introduces `User` / `Session`.
 - Features that need real ordering must use `seq` or a dedicated cursor, not the id — restated here so it is not
   re-derived per feature.
-- `sdk-js` and the OpenAPI description type entity ids as a 26-char base32 string pattern, not as `format: uuid`.
+- `sdk-js` and the [OpenAPI description](openapi-description-and-sdk-types.md) type entity ids as a 26-char base32 string pattern, not as `format: uuid` (enforced by a shared `entityIdSchema`).
 
 ## Alternatives considered
 

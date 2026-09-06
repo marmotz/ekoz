@@ -20,6 +20,12 @@ that does not touch this file.
 
 ### Added
 
+- OpenAPI description of the HTTP API, with a Swagger UI at `/docs` and the JSON
+  at `/docs/json`. (#43)
+- Shared `problem+json` response schema and an error-response decorator for
+  controllers. (#44)
+- Committed `openapi.json`, regenerated offline by `bun run openapi:emit`. (#47)
+- Cross-cutting design page for the OpenAPI description and SDK type generation. (#49)
 - Application skeleton: NestJS 12 (ESM) on Bun, graceful shutdown, `GET
 /healthz`. (#1)
 - Tooling: ESLint import boundaries, Vitest projects, Testcontainers helper,

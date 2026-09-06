@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import { AppModule } from './app.module.js';
 import { ConfigService } from './core/config/config.service.js';
 import { NestLoggerService } from './core/observability/nest-logger.service.js';
 import { startTracing } from './core/observability/otel.js';
+import { buildOpenApiDocument } from './openapi/document.js';
 
 const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
@@ -28,6 +30,11 @@ const tracing = startTracing({
 });
 
 app.enableShutdownHooks();
+
+// OpenAPI description: UI at `/docs`, JSON at `/docs/json`. Served in every
+// environment — the API targets third-party clients and peer servers, so the
+// spec is public by design (like `GET /.well-known/ekoz`).
+SwaggerModule.setup('docs', app, buildOpenApiDocument(app), { jsonDocumentUrl: 'docs/json' });
 
 const host = config.get('http.host');
 const port = config.get('http.port');
