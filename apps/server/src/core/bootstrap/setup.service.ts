@@ -1,5 +1,5 @@
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service.js';
 import { hashesEqual, sha256Hex } from '../crypto/hashing.js';
 import { DomainError } from '../http/domain-error.js';
@@ -32,8 +32,10 @@ export class SetupService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
-    @Optional() @Inject(OWNER_LOOKUP) private readonly ownerLookup: OwnerLookup = new NoOwnerLookup(),
-    @Optional() @Inject(SETUP_ENV) private readonly env: NodeJS.ProcessEnv = process.env
+    @Optional()
+    @Inject(OWNER_LOOKUP)
+    private readonly ownerLookup: OwnerLookup = new NoOwnerLookup(),
+    @Optional() @Inject(SETUP_ENV) private readonly env: NodeJS.ProcessEnv = process.env,
   ) {}
 
   /** The address pinned by `EKOZ_INITIAL_OWNER_EMAIL`, lower-cased, or `null`. */
@@ -64,18 +66,21 @@ export class SetupService {
     }
 
     const superseded = (await this.prisma.orm.public.SetupToken.where((t) =>
-      t.consumedAt.isNull()
+      t.consumedAt.isNull(),
     ).all()) as SetupTokenRow[];
     for (const row of superseded) {
       await this.prisma.orm.public.SetupToken.where({ id: row.id }).delete();
     }
 
     const token = randomBytes(32).toString('base64url');
-    await this.prisma.orm.public.SetupToken.create({ tokenHash: sha256Hex(token), consumedAt: null });
+    await this.prisma.orm.public.SetupToken.create({
+      tokenHash: sha256Hex(token),
+      consumedAt: null,
+    });
     this.logger.warn(
       `Setup is open. Create the first owner with this single-use token:\n\n    ${token}\n\n` +
         'A fresh token is printed on every restart until the first owner exists. ' +
-        'Set EKOZ_INITIAL_OWNER_EMAIL to use email pinning instead.'
+        'Set EKOZ_INITIAL_OWNER_EMAIL to use email pinning instead.',
     );
   }
 
@@ -111,7 +116,10 @@ export class SetupService {
       actorUserId: params.ownerUserId,
       targetType: 'user',
       targetId: params.ownerUserId,
-      metadata: { ownerEmail: params.ownerEmail, pinning: this.pinnedOwnerEmail() ? 'email' : 'token' },
+      metadata: {
+        ownerEmail: params.ownerEmail,
+        pinning: this.pinnedOwnerEmail() ? 'email' : 'token',
+      },
     });
     this.logger.log(`Server initialized: first owner ${params.ownerEmail} created`);
   }

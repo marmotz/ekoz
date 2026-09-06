@@ -1,10 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { blobStorageKey, STORAGE_DRIVER, type StorageDriver } from './storage-driver.js';
 
@@ -41,7 +41,7 @@ export class BlobService {
 
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(STORAGE_DRIVER) private readonly driver: StorageDriver
+    @Inject(STORAGE_DRIVER) private readonly driver: StorageDriver,
   ) {}
 
   async ingest(stream: NodeJS.ReadableStream, options: IngestOptions): Promise<Blob> {

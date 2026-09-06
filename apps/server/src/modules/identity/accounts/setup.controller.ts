@@ -3,8 +3,8 @@ import type { Request } from 'express';
 import { SetupGuard } from '../../../core/bootstrap/setup.guard.js';
 import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
-import { SetupOwnerService, type SetupOwnerResult } from './setup-owner.service.js';
-import { SetupOwnerSchema, type SetupOwnerBody } from './setup.dto.js';
+import { type SetupOwnerBody, SetupOwnerSchema } from './setup.dto.js';
+import { type SetupOwnerResult, SetupOwnerService } from './setup-owner.service.js';
 
 /**
  * First-owner setup endpoint (technical.md §1, ADR 0010, issue #18). Guarded by
@@ -21,7 +21,7 @@ export class SetupController {
   @HttpCode(201)
   createOwner(
     @Body(new ZodValidationPipe(SetupOwnerSchema)) body: SetupOwnerBody,
-    @Req() request: Request
+    @Req() request: Request,
   ): Promise<SetupOwnerResult> {
     return this.setupOwner.createFirstOwner(body, {
       userAgent: request.get('user-agent') ?? null,

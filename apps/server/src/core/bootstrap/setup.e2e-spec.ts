@@ -29,7 +29,10 @@ describe('SetupService (integration)', () => {
     const service = new SetupService(prisma, audit, new NoOwnerLookup(), {});
 
     await service.ensureSetupToken();
-    const first = (await database.db.orm.public.SetupToken.all()) as Array<{ id: string; tokenHash: string }>;
+    const first = (await database.db.orm.public.SetupToken.all()) as Array<{
+      id: string;
+      tokenHash: string;
+    }>;
     await service.ensureSetupToken();
     const second = (await database.db.orm.public.SetupToken.all()) as Array<{
       id: string;
@@ -47,11 +50,18 @@ describe('SetupService (integration)', () => {
     const service = new SetupService(prisma, audit, new NoOwnerLookup(), {});
     await service.ensureSetupToken();
 
-    await service.completeSetup({ ownerUserId: 'user-owner', ownerEmail: 'owner@ekoz.example.com' });
+    await service.completeSetup({
+      ownerUserId: 'user-owner',
+      ownerEmail: 'owner@ekoz.example.com',
+    });
 
-    const rows = (await database.db.orm.public.SetupToken.all()) as Array<{ consumedAt: string | null }>;
+    const rows = (await database.db.orm.public.SetupToken.all()) as Array<{
+      consumedAt: string | null;
+    }>;
     expect(rows.every((r) => r.consumedAt !== null)).toBe(true);
-    await expectAuditEntry({ orm: database.db.orm }, 'server.initialized', { actorUserId: 'user-owner' });
+    await expectAuditEntry({ orm: database.db.orm }, 'server.initialized', {
+      actorUserId: 'user-owner',
+    });
   });
 
   it('stays open with the default NoOwnerLookup', async () => {

@@ -1,4 +1,10 @@
-import { Injectable, Optional, type CallHandler, type ExecutionContext, type NestInterceptor } from '@nestjs/common';
+import {
+  type CallHandler,
+  type ExecutionContext,
+  Injectable,
+  type NestInterceptor,
+  Optional,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { Observable } from 'rxjs';
 import { getRequestContext } from '../http/request-context.js';
@@ -21,7 +27,7 @@ const EXCLUDED_PATHS = new Set(['/healthz', '/readyz', '/metrics']);
 export class AccessLogInterceptor implements NestInterceptor {
   constructor(
     private readonly logger: NestLoggerService,
-    @Optional() private readonly metrics: MetricsService | null = null
+    @Optional() private readonly metrics: MetricsService | null = null,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
@@ -54,7 +60,7 @@ export class AccessLogInterceptor implements NestInterceptor {
           requestId: ctx?.requestId,
           userId: ctx?.userId,
         },
-        `${req.method} ${route} ${res.statusCode}`
+        `${req.method} ${route} ${res.statusCode}`,
       );
 
       this.metrics?.recordHttpRequest({ route, status_class: statusClass }, durationSeconds);

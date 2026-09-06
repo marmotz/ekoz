@@ -6,10 +6,10 @@ import { AuthGuard } from '../guards/auth.guard.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
 import type { AccountView } from './account.view.js';
 import {
-  AdminCreateUserSchema,
-  RegisterSchema,
   type AdminCreateUserBody,
+  AdminCreateUserSchema,
   type RegisterBody,
+  RegisterSchema,
 } from './registration.dto.js';
 import { RegistrationService } from './registration.service.js';
 
@@ -48,7 +48,9 @@ export class AdminUsersController {
 
   @Post()
   @HttpCode(201)
-  create(@Body(new ZodValidationPipe(AdminCreateUserSchema)) body: AdminCreateUserBody): Promise<AccountView> {
+  create(
+    @Body(new ZodValidationPipe(AdminCreateUserSchema)) body: AdminCreateUserBody,
+  ): Promise<AccountView> {
     return this.registration.adminCreate(body);
   }
 }

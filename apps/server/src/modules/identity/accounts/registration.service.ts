@@ -5,7 +5,7 @@ import { EmailVerificationService } from '../email-verification/email-verificati
 import { RegistrationClosedError } from '../identity.errors.js';
 import { InvitationService } from '../invitations/invitation.service.js';
 import { AccountService, type CreateAccountInput, type UserRecord } from './account.service.js';
-import { toAccountView, type AccountView } from './account.view.js';
+import { type AccountView, toAccountView } from './account.view.js';
 import { PasswordService } from './password.service.js';
 
 export interface RegisterInput {
@@ -37,7 +37,7 @@ export class RegistrationService {
     private readonly passwords: PasswordService,
     private readonly invitations: InvitationService,
     private readonly emailVerification: EmailVerificationService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   /** Public self-service registration. */
@@ -97,7 +97,10 @@ export class RegistrationService {
     return toAccountView(account, input.displayName, this.config.get('server.domain'));
   }
 
-  private async afterAccountCreated(account: UserRecord, context: { invitationId: string | null }): Promise<void> {
+  private async afterAccountCreated(
+    account: UserRecord,
+    context: { invitationId: string | null },
+  ): Promise<void> {
     if (this.verificationRequired() && account.email) {
       await this.emailVerification.startVerification(account.id, account.email);
     }

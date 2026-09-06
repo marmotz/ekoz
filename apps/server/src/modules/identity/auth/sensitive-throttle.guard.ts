@@ -1,4 +1,4 @@
-import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { TooManyRequestsError } from '../identity.errors.js';

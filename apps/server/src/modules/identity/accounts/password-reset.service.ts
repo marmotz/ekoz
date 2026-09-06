@@ -1,5 +1,5 @@
-import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { sha256Hex } from '../../../core/crypto/hashing.js';
@@ -37,7 +37,7 @@ export class PasswordResetService implements OnModuleInit {
     private readonly sessions: SessionService,
     private readonly refreshTokens: RefreshTokenService,
     private readonly mail: MailService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   onModuleInit(): void {

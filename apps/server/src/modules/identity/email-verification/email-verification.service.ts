@@ -1,5 +1,5 @@
-import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { sha256Hex } from '../../../core/crypto/hashing.js';
@@ -7,7 +7,11 @@ import { MailService } from '../../../core/mail/mail.service.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { AccountService } from '../accounts/account.service.js';
 import { PasswordService } from '../accounts/password.service.js';
-import { EmailAlreadyInUseError, EmailVerificationInvalidError, InvalidCredentialsError } from '../identity.errors.js';
+import {
+  EmailAlreadyInUseError,
+  EmailVerificationInvalidError,
+  InvalidCredentialsError,
+} from '../identity.errors.js';
 import { EMAIL_CHANGED_NOTICE_TEMPLATE, EMAIL_VERIFICATION_TEMPLATE } from './templates.js';
 
 interface EmailVerificationRow {
@@ -41,7 +45,7 @@ export class EmailVerificationService implements OnModuleInit {
     private readonly accounts: AccountService,
     private readonly passwords: PasswordService,
     private readonly mail: MailService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   onModuleInit(): void {
@@ -191,7 +195,9 @@ export class EmailVerificationService implements OnModuleInit {
   }
 
   private async displayName(userId: string): Promise<string> {
-    const profile = (await this.prisma.orm.public.UserProfile.first({ userId })) as { displayName: string } | null;
+    const profile = (await this.prisma.orm.public.UserProfile.first({ userId })) as {
+      displayName: string;
+    } | null;
 
     return profile?.displayName ?? 'there';
   }

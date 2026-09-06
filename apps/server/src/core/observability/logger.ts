@@ -1,4 +1,4 @@
-import { pino, type Logger, type LoggerOptions } from 'pino';
+import { type Logger, type LoggerOptions, pino } from 'pino';
 import { createPrettyStream } from './pretty-stream.js';
 import { REDACT_CENSOR, REDACT_PATHS } from './redaction.js';
 

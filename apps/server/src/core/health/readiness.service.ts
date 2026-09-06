@@ -25,7 +25,7 @@ export class ReadinessService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly signing: SigningService,
-    @Inject(STORAGE_DRIVER) private readonly storage: StorageDriver
+    @Inject(STORAGE_DRIVER) private readonly storage: StorageDriver,
   ) {}
 
   async check(): Promise<ReadinessReport> {

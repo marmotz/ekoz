@@ -15,7 +15,9 @@ export class StreamController {
 
   @Post('ticket')
   @HttpCode(200)
-  async issue(@CurrentPrincipal() principal: AuthPrincipal): Promise<{ ticket: string; expiresIn: number }> {
+  async issue(
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<{ ticket: string; expiresIn: number }> {
     return this.tickets.issue({ userId: principal.userId, sessionId: principal.sessionId });
   }
 }

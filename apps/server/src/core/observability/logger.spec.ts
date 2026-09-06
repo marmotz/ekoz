@@ -76,7 +76,10 @@ describe('createLogger format (unit)', () => {
 
   it('renders one human-readable line (no JSON, no trailing property block) in pretty format', () => {
     const out = captureStdout(() => {
-      createLogger({ level: 'info', format: 'pretty' }).info({ context: 'Bootstrap' }, 'listening on :3010');
+      createLogger({ level: 'info', format: 'pretty' }).info(
+        { context: 'Bootstrap' },
+        'listening on :3010',
+      );
     });
     expect(() => JSON.parse(out.trim())).toThrow();
     expect(out).toMatch(/INFO \[Bootstrap] listening on :3010/);

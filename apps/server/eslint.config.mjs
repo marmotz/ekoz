@@ -1,37 +1,19 @@
-import eslint from '@eslint/js';
 import boundaries from 'eslint-plugin-boundaries';
-import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+// ESLint here has a single job: enforce the module-boundary rule that Biome
+// cannot express. Formatting and general linting are Biome's (see root
+// biome.json). Run via `bun run --filter '@ekozhq/server' lint:boundaries`.
 export default tseslint.config(
   {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      'src/core/prisma/generated/**',
-      'prisma/migrations/**',
-      'coverage/**',
-      '.agents/**',
-      '.claude/**',
-      '.cursor/**',
-      '.devin/**',
-    ],
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    languageOptions: {
-      globals: { ...globals.node },
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: ['eslint.config.mjs'],
-        },
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
+    ignores: ['node_modules/**', 'dist/**', 'src/core/prisma/generated/**', 'coverage/**'],
   },
   {
     files: ['src/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: { sourceType: 'module' },
+    },
     plugins: { boundaries },
     settings: {
       'boundaries/include': ['src/**/*'],
@@ -42,7 +24,7 @@ export default tseslint.config(
     },
     rules: {
       // A functional feature must not import another feature directly: they talk
-      // through explicit provider interfaces or events (technical.md §1).
+      // through explicit provider interfaces or events (server-core technical.md §1).
       'boundaries/dependencies': [
         'error',
         {
@@ -59,10 +41,4 @@ export default tseslint.config(
       ],
     },
   },
-  {
-    files: ['**/*.spec.ts', '**/*.e2e-spec.ts', 'src/**/testing/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-non-null-assertion': 'off',
-    },
-  }
 );

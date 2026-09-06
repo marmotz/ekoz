@@ -5,12 +5,12 @@ import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import {
-  ChangeEmailSchema,
-  ResendVerificationSchema,
-  VerifyEmailSchema,
   type ChangeEmailBody,
+  ChangeEmailSchema,
   type ResendVerificationBody,
+  ResendVerificationSchema,
   type VerifyEmailBody,
+  VerifyEmailSchema,
 } from './email-verification.dto.js';
 import { EmailVerificationService } from './email-verification.service.js';
 
@@ -25,7 +25,9 @@ export class EmailVerificationController {
   @Post()
   @Public()
   @HttpCode(200)
-  async verify(@Body(new ZodValidationPipe(VerifyEmailSchema)) body: VerifyEmailBody): Promise<{ verified: true }> {
+  async verify(
+    @Body(new ZodValidationPipe(VerifyEmailSchema)) body: VerifyEmailBody,
+  ): Promise<{ verified: true }> {
     await this.verification.verify(body.token);
 
     return { verified: true };
@@ -36,7 +38,7 @@ export class EmailVerificationController {
   @UseGuards(SensitiveThrottleGuard)
   @HttpCode(202)
   async resend(
-    @Body(new ZodValidationPipe(ResendVerificationSchema)) body: ResendVerificationBody
+    @Body(new ZodValidationPipe(ResendVerificationSchema)) body: ResendVerificationBody,
   ): Promise<{ accepted: true }> {
     await this.verification.resend(body.email);
 
@@ -57,7 +59,7 @@ export class MeEmailController {
   @HttpCode(202)
   async change(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(ChangeEmailSchema)) body: ChangeEmailBody
+    @Body(new ZodValidationPipe(ChangeEmailSchema)) body: ChangeEmailBody,
   ): Promise<{ accepted: true }> {
     await this.verification.requestEmailChange(principal.userId, body.newEmail, body.password);
 

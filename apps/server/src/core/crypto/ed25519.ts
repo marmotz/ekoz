@@ -2,9 +2,9 @@ import {
   createPrivateKey,
   createPublicKey,
   generateKeyPairSync,
+  type KeyObject,
   sign as nodeSign,
   verify as nodeVerify,
-  type KeyObject,
 } from 'node:crypto';
 
 /**
@@ -60,6 +60,10 @@ export function ed25519Sign(privateKey: KeyObject, message: Uint8Array): Buffer 
   return nodeSign(null, Buffer.from(message), privateKey);
 }
 
-export function ed25519Verify(publicKey: KeyObject, message: Uint8Array, signature: Uint8Array): boolean {
+export function ed25519Verify(
+  publicKey: KeyObject,
+  message: Uint8Array,
+  signature: Uint8Array,
+): boolean {
   return nodeVerify(null, Buffer.from(message), publicKey, Buffer.from(signature));
 }

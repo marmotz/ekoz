@@ -24,7 +24,7 @@ export class LifecycleService {
     private readonly sessions: SessionService,
     private readonly refreshTokens: RefreshTokenService,
     private readonly blobs: BlobService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   async suspend(targetId: string, reason: string, actorUserId: string): Promise<void> {
@@ -129,7 +129,7 @@ export class LifecycleService {
     userId: string,
     name: string | null,
     isOwner: boolean,
-    actorUserId: string
+    actorUserId: string,
   ): Promise<void> {
     await this.assertNotLastOwner(isOwner);
 

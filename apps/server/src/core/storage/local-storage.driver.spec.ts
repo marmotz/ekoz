@@ -65,7 +65,9 @@ describe('LocalStorageDriver (unit)', () => {
 
   it('rejects a key that escapes the storage root', async () => {
     const driver = new LocalStorageDriver(freshRoot());
-    await expect(driver.put('../evil', Readable.from([Buffer.from('x')]))).rejects.toThrow(/escapes/);
+    await expect(driver.put('../evil', Readable.from([Buffer.from('x')]))).rejects.toThrow(
+      /escapes/,
+    );
   });
 
   it('healthCheck succeeds against a writable root', async () => {

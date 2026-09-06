@@ -1,13 +1,13 @@
+import { Readable } from 'node:stream';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { Readable } from 'node:stream';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
 import { applyTestInfraConfig } from '../config/testing/test-infra-config.js';
 import { startTestDatabase, type TestDatabase } from '../prisma/testing/test-database.js';
-import { BlobAccessRegistry } from './blob-access.registry.js';
 import { BlobService } from './blob.service.js';
+import { BlobAccessRegistry } from './blob-access.registry.js';
 
 describe('GET /blobs/:id (integration)', () => {
   let database: TestDatabase;
@@ -55,6 +55,9 @@ describe('GET /blobs/:id (integration)', () => {
     expect(res.headers['content-type']).toContain('image/png');
     expect(res.headers['content-length']).toBe('7');
 
-    await request(app.getHttpServer()).get(`/blobs/${blobId}`).set('If-None-Match', `"${blobHash}"`).expect(304);
+    await request(app.getHttpServer())
+      .get(`/blobs/${blobId}`)
+      .set('If-None-Match', `"${blobHash}"`)
+      .expect(304);
   });
 });

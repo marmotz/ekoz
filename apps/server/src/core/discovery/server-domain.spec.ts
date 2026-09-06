@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { assertValidServerDomain, isValidServerDomain } from './server-domain.js';
 
 describe('server domain validation (unit)', () => {
-  it.each(['chat.example', 'ekoz.example.com', 'my-server.co.uk', 'a.io'])('accepts %s', (domain) => {
-    expect(isValidServerDomain(domain)).toBe(true);
-  });
+  it.each(['chat.example', 'ekoz.example.com', 'my-server.co.uk', 'a.io'])(
+    'accepts %s',
+    (domain) => {
+      expect(isValidServerDomain(domain)).toBe(true);
+    },
+  );
 
   it.each([
     'localhost',

@@ -23,7 +23,7 @@ describe('SigningService (integration)', () => {
     service = new SigningService(
       { orm: database.db.orm } as unknown as PrismaService,
       config,
-      new SecretBox(randomBytes(32))
+      new SecretBox(randomBytes(32)),
     );
   }, 180_000);
 

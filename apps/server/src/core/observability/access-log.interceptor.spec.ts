@@ -1,5 +1,5 @@
-import type { CallHandler, ExecutionContext } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
+import type { CallHandler, ExecutionContext } from '@nestjs/common';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { runWithRequestContext } from '../http/request-context.js';
@@ -9,7 +9,7 @@ import type { NestLoggerService } from './nest-logger.service.js';
 
 function ctxFor(
   path: string,
-  route?: string
+  route?: string,
 ): { context: ExecutionContext; res: EventEmitter & { statusCode: number } } {
   const res = Object.assign(new EventEmitter(), { statusCode: 200 });
   const req = { method: 'GET', path, route: route ? { path: route } : undefined };
@@ -46,10 +46,12 @@ describe('AccessLogInterceptor (unit)', () => {
       requestId: 'req-1',
       userId: 'u1',
     });
-    expect((metrics.recordHttpRequest as ReturnType<typeof vi.fn>).mock.calls[0]![0]).toMatchObject({
-      route: '/things/:id',
-      status_class: '4xx',
-    });
+    expect((metrics.recordHttpRequest as ReturnType<typeof vi.fn>).mock.calls[0]![0]).toMatchObject(
+      {
+        route: '/things/:id',
+        status_class: '4xx',
+      },
+    );
   });
 
   it.each(['/healthz', '/readyz', '/metrics'])('skips the probe/scrape path %s', (path) => {

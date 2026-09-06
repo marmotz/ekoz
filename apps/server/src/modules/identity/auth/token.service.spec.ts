@@ -16,8 +16,16 @@ const privateKey = privateKeyFromDer(keyPair.privateKeyDer);
 const publicKey = publicKeyFromBase64(keyPair.publicKeyBase64);
 
 const signing = {
-  getActiveKey: async () => ({ id: 'k1', algorithm: 'ed25519', publicKey: keyPair.publicKeyBase64 }),
-  sign: async (bytes: Uint8Array) => ({ keyId: 'k1', algorithm: 'ed25519', signature: ed25519Sign(privateKey, bytes) }),
+  getActiveKey: async () => ({
+    id: 'k1',
+    algorithm: 'ed25519',
+    publicKey: keyPair.publicKeyBase64,
+  }),
+  sign: async (bytes: Uint8Array) => ({
+    keyId: 'k1',
+    algorithm: 'ed25519',
+    signature: ed25519Sign(privateKey, bytes),
+  }),
   verify: async (keyId: string, bytes: Uint8Array, sig: Uint8Array) =>
     keyId === 'k1' && ed25519Verify(publicKey, bytes, sig),
 } as unknown as SigningService;
@@ -52,7 +60,10 @@ describe('TokenService (unit)', () => {
     const shortConfig = {
       get: (key: string) => (key === 'auth.access_token_ttl' ? -1 : 'ekoz.example.com'),
     } as unknown as ConfigService;
-    const { token } = await new TokenService(signing, shortConfig).issueAccessToken({ userId: 'u1', sessionId: 's1' });
+    const { token } = await new TokenService(signing, shortConfig).issueAccessToken({
+      userId: 'u1',
+      sessionId: 's1',
+    });
     await expect(service.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthenticatedError);
   });
 });

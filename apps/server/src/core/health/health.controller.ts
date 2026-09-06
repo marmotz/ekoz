@@ -1,7 +1,7 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { Public } from '../http/public.decorator.js';
-import { ReadinessService, type ReadinessReport } from './readiness.service.js';
+import { type ReadinessReport, ReadinessService } from './readiness.service.js';
 
 /**
  * Health probes. Both are public and excluded from the access log.

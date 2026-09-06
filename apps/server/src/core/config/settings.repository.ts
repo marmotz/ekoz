@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DomainError } from '../http/domain-error.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { isParameterKey, parameterSpec, type ParameterKey } from './registry.js';
+import { isParameterKey, type ParameterKey, parameterSpec } from './registry.js';
 
 /**
  * Read/write access to the `settings` table (ADR 0009, technical.md §2). Only
@@ -18,7 +18,10 @@ export class SettingsRepository {
 
   /** All admin overrides, as a `key -> unwrapped value` map. */
   async loadAll(): Promise<Map<ParameterKey, unknown>> {
-    const rows = (await this.prisma.orm.public.Setting.all()) as Array<{ key: string; value: unknown }>;
+    const rows = (await this.prisma.orm.public.Setting.all()) as Array<{
+      key: string;
+      value: unknown;
+    }>;
     const out = new Map<ParameterKey, unknown>();
 
     for (const row of rows) {
@@ -39,7 +42,7 @@ export class SettingsRepository {
       throw new DomainError(
         'config.not_runtime',
         `"${key}" is an infra parameter and cannot be set from the admin.`,
-        422
+        422,
       );
     }
 
@@ -48,7 +51,7 @@ export class SettingsRepository {
       throw new DomainError(
         'config.invalid_value',
         `Invalid value for "${key}": ${parsed.error.issues[0]?.message}`,
-        422
+        422,
       );
     }
 

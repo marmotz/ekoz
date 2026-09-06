@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { SigningService } from '../../../core/crypto/signing.service.js';
 import { UnauthenticatedError } from '../identity.errors.js';
-import { assembleToken, parseToken, signingInput, type AccessTokenClaims, type JwtHeader } from './jwt.js';
+import {
+  type AccessTokenClaims,
+  assembleToken,
+  type JwtHeader,
+  parseToken,
+  signingInput,
+} from './jwt.js';
 
 export interface IssuedAccessToken {
   token: string;
@@ -20,10 +26,13 @@ export interface IssuedAccessToken {
 export class TokenService {
   constructor(
     private readonly signing: SigningService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {}
 
-  async issueAccessToken(params: { userId: string; sessionId: string }): Promise<IssuedAccessToken> {
+  async issueAccessToken(params: {
+    userId: string;
+    sessionId: string;
+  }): Promise<IssuedAccessToken> {
     const ttl = this.config.get('auth.access_token_ttl');
     const now = Math.floor(Date.now() / 1000);
     const active = await this.signing.getActiveKey();
@@ -62,7 +71,11 @@ export class TokenService {
       throw new UnauthenticatedError('The access token has expired.');
     }
 
-    const ok = await this.signing.verify(parsed.header.kid, Buffer.from(parsed.signingInput, 'utf8'), parsed.signature);
+    const ok = await this.signing.verify(
+      parsed.header.kid,
+      Buffer.from(parsed.signingInput, 'utf8'),
+      parsed.signature,
+    );
     if (!ok) {
       throw new UnauthenticatedError('Invalid access token signature.');
     }

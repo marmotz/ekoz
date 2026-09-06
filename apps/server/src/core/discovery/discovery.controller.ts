@@ -1,6 +1,6 @@
 import { Controller, Get, Header } from '@nestjs/common';
 import { Public } from '../http/public.decorator.js';
-import { DiscoveryService, type DiscoveryDocument } from './discovery.service.js';
+import { type DiscoveryDocument, DiscoveryService } from './discovery.service.js';
 
 /**
  * `GET /.well-known/ekoz` — unauthenticated, cacheable server discovery

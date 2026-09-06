@@ -3,11 +3,11 @@ import { SetupService } from '../../../core/bootstrap/setup.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { RefreshTokenService } from '../auth/refresh-token.service.js';
 import { SessionService } from '../auth/session.service.js';
-import { toSessionView, type SessionView } from '../auth/session.view.js';
+import { type SessionView, toSessionView } from '../auth/session.view.js';
 import { TokenService } from '../auth/token.service.js';
 import { SetupRejectedError } from '../identity.errors.js';
 import { AccountService } from './account.service.js';
-import { toAccountView, type AccountView } from './account.view.js';
+import { type AccountView, toAccountView } from './account.view.js';
 import { PasswordService } from './password.service.js';
 import type { SetupOwnerBody } from './setup.dto.js';
 
@@ -41,10 +41,13 @@ export class SetupOwnerService {
     private readonly passwords: PasswordService,
     private readonly sessions: SessionService,
     private readonly tokens: TokenService,
-    private readonly refreshTokens: RefreshTokenService
+    private readonly refreshTokens: RefreshTokenService,
   ) {}
 
-  async createFirstOwner(body: SetupOwnerBody, context: SetupOwnerContext = {}): Promise<SetupOwnerResult> {
+  async createFirstOwner(
+    body: SetupOwnerBody,
+    context: SetupOwnerContext = {},
+  ): Promise<SetupOwnerResult> {
     const email = body.email.normalize('NFC').trim().toLowerCase();
     await this.assertPinning(email, body.token);
     this.passwords.assertAcceptable(body.password);
@@ -64,7 +67,10 @@ export class SetupOwnerService {
       userAgent: context.userAgent ?? null,
       ip: context.ip ?? null,
     });
-    const access = await this.tokens.issueAccessToken({ userId: account.id, sessionId: session.id });
+    const access = await this.tokens.issueAccessToken({
+      userId: account.id,
+      sessionId: session.id,
+    });
     const refreshToken = await this.refreshTokens.issue(session.id);
 
     await this.setup.completeSetup({ ownerUserId: account.id, ownerEmail: email });

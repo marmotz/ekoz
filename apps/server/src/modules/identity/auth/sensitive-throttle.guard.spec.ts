@@ -27,7 +27,9 @@ describe('SensitiveThrottleGuard', () => {
       expect.unreachable('the 4th attempt must be throttled');
     } catch (error) {
       expect((error as { status: number }).status).toBe(429);
-      expect((error as { headers: Record<string, string> }).headers['Retry-After']).toMatch(/^\d+$/);
+      expect((error as { headers: Record<string, string> }).headers['Retry-After']).toMatch(
+        /^\d+$/,
+      );
     }
   });
 

@@ -27,11 +27,14 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
   // 1x1 transparent PNG.
   const pngBytes = Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
-    'base64'
+    'base64',
   );
 
   const login = async (identifier: string): Promise<string> => {
-    const res = await request(app.getHttpServer()).post('/auth/login').send({ identifier, password }).expect(200);
+    const res = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ identifier, password })
+      .expect(200);
 
     return res.body.accessToken as string;
   };
@@ -93,17 +96,29 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
     const before = await login('alice');
     await request(server()).get('/me').set('Authorization', `Bearer ${before}`).expect(200);
 
-    await request(server()).post('/auth/password-reset/request').send({ email: 'nobody@ekoz.example.com' }).expect(202);
-    await request(server()).post('/auth/password-reset/request').send({ email: 'alice@ekoz.example.com' }).expect(202);
+    await request(server())
+      .post('/auth/password-reset/request')
+      .send({ email: 'nobody@ekoz.example.com' })
+      .expect(202);
+    await request(server())
+      .post('/auth/password-reset/request')
+      .send({ email: 'alice@ekoz.example.com' })
+      .expect(202);
 
     const token = resetTokenFromLastMail();
     const newPassword = 'another-totally-fine-passphrase';
-    await request(server()).post('/auth/password-reset/confirm').send({ token, newPassword }).expect(204);
+    await request(server())
+      .post('/auth/password-reset/confirm')
+      .send({ token, newPassword })
+      .expect(204);
 
     // Old sessions are dead, the new password works.
     await request(server()).get('/me').set('Authorization', `Bearer ${before}`).expect(401);
     await request(server()).post('/auth/login').send({ identifier: 'alice', password }).expect(401);
-    await request(server()).post('/auth/login').send({ identifier: 'alice', password: newPassword }).expect(200);
+    await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'alice', password: newPassword })
+      .expect(200);
 
     // Reusing the reset token fails.
     await request(server())
@@ -112,7 +127,10 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .expect(422);
 
     // Restore Alice's canonical password for the later tests.
-    await request(server()).post('/auth/password-reset/request').send({ email: 'alice@ekoz.example.com' }).expect(202);
+    await request(server())
+      .post('/auth/password-reset/request')
+      .send({ email: 'alice@ekoz.example.com' })
+      .expect(202);
     await request(server())
       .post('/auth/password-reset/confirm')
       .send({ token: resetTokenFromLastMail(), newPassword: password })
@@ -124,8 +142,15 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
   it('reads and updates the own profile, and reads a public profile', async () => {
     const token = await login('alice');
 
-    const me = await request(server()).get('/me').set('Authorization', `Bearer ${token}`).expect(200);
-    expect(me.body).toMatchObject({ identifier: 'alice/ekoz.example.com', isOwner: false, status: 'active' });
+    const me = await request(server())
+      .get('/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(me.body).toMatchObject({
+      identifier: 'alice/ekoz.example.com',
+      isOwner: false,
+      status: 'active',
+    });
 
     await request(server())
       .patch('/me/profile')
@@ -133,8 +158,15 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .send({ displayName: 'Alice A.', bio: 'hi there' })
       .expect(200);
 
-    const pub = await request(server()).get('/users/alice').set('Authorization', `Bearer ${token}`).expect(200);
-    expect(pub.body).toMatchObject({ identifier: 'alice/ekoz.example.com', displayName: 'Alice A.', bio: 'hi there' });
+    const pub = await request(server())
+      .get('/users/alice')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(pub.body).toMatchObject({
+      identifier: 'alice/ekoz.example.com',
+      displayName: 'Alice A.',
+      bio: 'hi there',
+    });
 
     await request(server())
       .patch('/me/profile')
@@ -169,8 +201,14 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
     // The endpoint still requires authentication.
     await request(server()).get('/users/alice/avatar').expect(401);
 
-    await request(server()).delete('/me/avatar').set('Authorization', `Bearer ${token}`).expect(204);
-    await request(server()).get('/users/alice/avatar').set('Authorization', `Bearer ${token}`).expect(404);
+    await request(server())
+      .delete('/me/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204);
+    await request(server())
+      .get('/users/alice/avatar')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404);
   });
 
   // ── #20 identifier change ─────────────────────────────────────────────────
@@ -193,7 +231,10 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'alice-renamed' })
       .expect(200);
-    expect(applied.body).toEqual({ status: 'applied', identifier: 'alice-renamed/ekoz.example.com' });
+    expect(applied.body).toEqual({
+      status: 'applied',
+      identifier: 'alice-renamed/ekoz.example.com',
+    });
     expect(await accounts.findByIdentifier('alice')).toBeNull();
     const reservation = await app.get(AccountService).findByIdentifier('alice-renamed');
     expect(reservation?.name).toBe('alice-renamed');
@@ -244,13 +285,19 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .expect(204);
 
     await request(server()).get('/me').set('Authorization', `Bearer ${mallory}`).expect(403);
-    await request(server()).post('/auth/login').send({ identifier: 'mallory', password }).expect(403);
+    await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'mallory', password })
+      .expect(403);
 
     await request(server())
       .post(`/admin/users/${mid}/unsuspend`)
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(204);
-    await request(server()).post('/auth/login').send({ identifier: 'mallory', password }).expect(200);
+    await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'mallory', password })
+      .expect(200);
   });
 
   it('deletes the own account, scrubbing the profile and freeing nothing yet', async () => {
@@ -268,7 +315,11 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ password: 'wrong' })
       .expect(401);
-    await request(server()).delete('/me').set('Authorization', `Bearer ${token}`).send({ password }).expect(204);
+    await request(server())
+      .delete('/me')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ password })
+      .expect(204);
 
     await request(server()).post('/auth/login').send({ identifier: 'trent', password }).expect(401);
     // The freed identifier is reserved, not immediately reusable.
@@ -285,7 +336,10 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
     const ownerToken = await login('owner');
     const ownerId = (await accounts.findByIdentifier('owner'))!.id;
 
-    await request(server()).delete(`/admin/owners/${ownerId}`).set('Authorization', `Bearer ${ownerToken}`).expect(409);
+    await request(server())
+      .delete(`/admin/owners/${ownerId}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(409);
 
     const aliceId = (await accounts.findByIdentifier('alice-final'))!.id;
     await request(server())
@@ -293,7 +347,10 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .set('Authorization', `Bearer ${ownerToken}`)
       .send({ userId: aliceId })
       .expect(204);
-    await request(server()).delete(`/admin/owners/${ownerId}`).set('Authorization', `Bearer ${ownerToken}`).expect(204);
+    await request(server())
+      .delete(`/admin/owners/${ownerId}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
   });
 
   // ── #22 throttle ─────────────────────────────────────────────────────────

@@ -46,7 +46,10 @@ describe('ConfigService + settings table (integration)', () => {
   it('persists a runtime override and reflects it after invalidation', async () => {
     await config.set('registration.mode', 'open', 'admin-7');
     expect(config.get('registration.mode')).toBe('open');
-    expect(config.describe('registration.mode')).toMatchObject({ source: 'settings', locked: false });
+    expect(config.describe('registration.mode')).toMatchObject({
+      source: 'settings',
+      locked: false,
+    });
 
     const row = await database.db.orm.public.Setting.where({ key: 'registration.mode' }).first();
     expect(row?.value).toEqual({ value: 'open' });
@@ -54,7 +57,9 @@ describe('ConfigService + settings table (integration)', () => {
   });
 
   it('validates the value against the registry on write', async () => {
-    await expect(repo.set('profile.bio_max_length', -5, null)).rejects.toThrow(/invalid_value|Invalid value/i);
+    await expect(repo.set('profile.bio_max_length', -5, null)).rejects.toThrow(
+      /invalid_value|Invalid value/i,
+    );
   });
 
   it('refuses to write an infra key to the settings table', async () => {

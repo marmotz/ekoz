@@ -9,10 +9,10 @@
  * No automatic network retry in this increment.
  */
 
-import { decodeProblem, toNetworkError } from "./problem.js";
-import { newRequestId, REQUEST_ID_HEADER } from "./request-context.js";
+import { decodeProblem, toNetworkError } from './problem.js';
+import { newRequestId, REQUEST_ID_HEADER } from './request-context.js';
 
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export type QueryValue = string | number | boolean | null | undefined;
 
@@ -42,8 +42,8 @@ export interface HttpClientOptions {
   getAuthToken?: () => string | undefined;
 }
 
-export const PROTOCOL_HEADER = "X-Ekoz-Protocol";
-export const DEFAULT_PROTOCOL_VERSION = "0";
+export const PROTOCOL_HEADER = 'X-Ekoz-Protocol';
+export const DEFAULT_PROTOCOL_VERSION = '0';
 
 export class HttpClient {
   readonly #baseUrl: string;
@@ -52,12 +52,10 @@ export class HttpClient {
   readonly #getAuthToken: (() => string | undefined) | undefined;
 
   constructor(options: HttpClientOptions) {
-    this.#baseUrl = options.baseUrl.replace(/\/+$/, "");
+    this.#baseUrl = options.baseUrl.replace(/\/+$/, '');
     const fetchImpl = options.fetch ?? globalThis.fetch;
-    if (typeof fetchImpl !== "function") {
-      throw new TypeError(
-        "global fetch is unavailable; pass options.fetch explicitly",
-      );
+    if (typeof fetchImpl !== 'function') {
+      throw new TypeError('global fetch is unavailable; pass options.fetch explicitly');
     }
     // Bind to avoid `Illegal invocation` when the global is passed by reference.
     this.#fetch = (input, init) => fetchImpl(input, init);
@@ -78,14 +76,14 @@ export class HttpClient {
     const requestId = options.requestId ?? newRequestId();
 
     const headers = new Headers(options.headers);
-    headers.set("Accept", "application/json");
+    headers.set('Accept', 'application/json');
     headers.set(PROTOCOL_HEADER, this.#protocolVersion);
     if (!headers.has(REQUEST_ID_HEADER)) {
       headers.set(REQUEST_ID_HEADER, requestId);
     }
     const token = this.#getAuthToken?.();
-    if (token && !headers.has("Authorization")) {
-      headers.set("Authorization", `Bearer ${token}`);
+    if (token && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${token}`);
     }
 
     const init: RequestInit = { method, headers };
@@ -94,7 +92,7 @@ export class HttpClient {
     if (options.formData !== undefined) {
       init.body = options.formData;
     } else if (options.body !== undefined) {
-      headers.set("Content-Type", "application/json");
+      headers.set('Content-Type', 'application/json');
       init.body = JSON.stringify(options.body);
     }
 
@@ -102,7 +100,7 @@ export class HttpClient {
     try {
       response = await this.#fetch(url, init);
     } catch (cause) {
-      if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
+      if (cause instanceof DOMException && cause.name === 'AbortError') throw cause;
       throw toNetworkError(cause, headers.get(REQUEST_ID_HEADER) ?? requestId);
     }
 
@@ -117,7 +115,7 @@ export class HttpClient {
   }
 
   #buildUrl(path: string, query?: Record<string, QueryValue>): string {
-    const normalisedPath = path.startsWith("/") ? path : `/${path}`;
+    const normalisedPath = path.startsWith('/') ? path : `/${path}`;
     let url = `${this.#baseUrl}${normalisedPath}`;
     if (query) {
       const search = new URLSearchParams();

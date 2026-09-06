@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '../config/config.service.js';
-import { BlobAccessRegistry } from './blob-access.registry.js';
-import { BlobGcService } from './blob-gc.service.js';
 import { BlobController } from './blob.controller.js';
 import { BlobService } from './blob.service.js';
+import { BlobAccessRegistry } from './blob-access.registry.js';
+import { BlobGcService } from './blob-gc.service.js';
 import { LocalStorageDriver } from './local-storage.driver.js';
 import { STORAGE_DRIVER, type StorageDriver } from './storage-driver.js';
 
@@ -26,7 +26,9 @@ import { STORAGE_DRIVER, type StorageDriver } from './storage-driver.js';
       useFactory: (config: ConfigService): StorageDriver => {
         const driver = config.get('storage.driver');
         if (driver === 's3') {
-          throw new Error('storage.driver = "s3" is not implemented yet (technical.md §6); use "local"');
+          throw new Error(
+            'storage.driver = "s3" is not implemented yet (technical.md §6); use "local"',
+          );
         }
 
         return new LocalStorageDriver(config.get('storage.local.path'));

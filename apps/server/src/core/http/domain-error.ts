@@ -20,7 +20,7 @@ export class DomainError extends Error {
     /** Short human-readable summary; defaults to a title derived from the status. */
     readonly title?: string,
     /** Extra response headers to set alongside the problem body (e.g. `Retry-After`). */
-    readonly headers?: Readonly<Record<string, string>>
+    readonly headers?: Readonly<Record<string, string>>,
   ) {
     super(detail);
 
@@ -34,6 +34,11 @@ export class DomainError extends Error {
  */
 export class ValidationFailedError extends DomainError {
   constructor(readonly issues: ValidationIssue[]) {
-    super('validation_failed', 'The request payload failed validation.', 422, 'Unprocessable Entity');
+    super(
+      'validation_failed',
+      'The request payload failed validation.',
+      422,
+      'Unprocessable Entity',
+    );
   }
 }

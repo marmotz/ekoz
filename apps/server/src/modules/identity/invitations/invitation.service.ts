@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { sha256Hex } from '../../../core/crypto/hashing.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
@@ -48,16 +48,19 @@ export interface CreatedInvitation {
 export class InvitationService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {}
 
   async create(
     createdByUserId: string,
-    input: { email?: string | null; expiresInDays?: number | null }
+    input: { email?: string | null; expiresInDays?: number | null },
   ): Promise<CreatedInvitation> {
     const token = randomBytes(32).toString('base64url');
     const email = input.email ? input.email.normalize('NFC').trim().toLowerCase() : null;
-    const ttlSeconds = input.expiresInDays != null ? input.expiresInDays * 86_400 : this.config.get('invitation.ttl');
+    const ttlSeconds =
+      input.expiresInDays != null
+        ? input.expiresInDays * 86_400
+        : this.config.get('invitation.ttl');
 
     const row = (await this.prisma.orm.public.Invitation.create({
       email,

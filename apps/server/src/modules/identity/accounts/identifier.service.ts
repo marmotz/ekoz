@@ -17,7 +17,7 @@ export class IdentifierService {
 
   constructor(
     private readonly config: ConfigService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   /** Trim, NFC, lowercase. Pure — no validation. */

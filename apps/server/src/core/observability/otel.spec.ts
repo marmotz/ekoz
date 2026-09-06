@@ -15,7 +15,10 @@ describe('OpenTelemetry bootstrap (unit)', () => {
   });
 
   it('accepts an OTLP endpoint without opening it eagerly', () => {
-    const tracing = startTracing({ otlpEndpoint: 'http://localhost:4318/v1/traces', sampleRatio: 0.5 });
+    const tracing = startTracing({
+      otlpEndpoint: 'http://localhost:4318/v1/traces',
+      sampleRatio: 0.5,
+    });
     cleanups.push(tracing.shutdown);
     expect(tracing.shutdown).toBeTypeOf('function');
   });

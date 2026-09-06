@@ -70,7 +70,11 @@ export function parseToken(token: string): ParsedToken | null {
       return null;
     }
 
-    if (typeof claims.sub !== 'string' || typeof claims.sid !== 'string' || typeof claims.exp !== 'number') {
+    if (
+      typeof claims.sub !== 'string' ||
+      typeof claims.sid !== 'string' ||
+      typeof claims.exp !== 'number'
+    ) {
       return null;
     }
 

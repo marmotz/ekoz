@@ -1,0 +1,24 @@
+node_modules
+dist
+build
+*.tsbuildinfo
+coverage
+*.log
+.DS_Store
+
+# tsc -b cache
+node_modules/.cache
+
+# server (apps/server) local-only files
+apps/server/var/
+apps/server/.env
+apps/server/compose.override.yaml
+apps/server/config.toml
+apps/server/http/vars.env
+
+# agent tooling scratch
+.agents/
+.serena/
+
+# IDE
+.idea/

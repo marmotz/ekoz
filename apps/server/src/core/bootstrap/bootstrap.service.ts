@@ -19,7 +19,7 @@ export class BootstrapService implements OnApplicationBootstrap {
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
     private readonly signing: SigningService,
-    private readonly setup: SetupService
+    private readonly setup: SetupService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -29,7 +29,8 @@ export class BootstrapService implements OnApplicationBootstrap {
     const state = await this.setup.resolveState();
 
     this.logger.log(
-      `Bootstrap complete for "${this.config.get('server.domain')}" ` + `(signing key ${key.id}, setup state: ${state})`
+      `Bootstrap complete for "${this.config.get('server.domain')}" ` +
+        `(signing key ${key.id}, setup state: ${state})`,
     );
   }
 }

@@ -23,7 +23,7 @@ import { MetricsService } from './metrics.service.js';
 export class MetricsController {
   constructor(
     private readonly config: ConfigService,
-    private readonly metrics: MetricsService
+    private readonly metrics: MetricsService,
   ) {}
 
   @Get()
@@ -42,7 +42,9 @@ export class MetricsController {
         throw new UnauthorizedException('A valid bearer token is required for /metrics');
       }
     } else if (!isPrivateClient(req.ip ?? req.socket.remoteAddress ?? '')) {
-      throw new ForbiddenException('/metrics is only served on a private interface unless a token is configured');
+      throw new ForbiddenException(
+        '/metrics is only served on a private interface unless a token is configured',
+      );
     }
 
     return this.metrics.collect();

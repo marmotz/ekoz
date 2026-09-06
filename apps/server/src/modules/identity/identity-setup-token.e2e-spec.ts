@@ -1,4 +1,4 @@
-import { Logger, type INestApplication } from '@nestjs/common';
+import { type INestApplication, Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -36,7 +36,9 @@ describe('identity — first-owner setup, token-pinned (integration)', () => {
 
     vi.spyOn(app.get(MailService), 'send').mockResolvedValue(undefined);
 
-    const line = warn.mock.calls.map((c) => String(c[0])).find((m) => m.includes('single-use token'));
+    const line = warn.mock.calls
+      .map((c) => String(c[0]))
+      .find((m) => m.includes('single-use token'));
     setupToken = /\n {4}([A-Za-z0-9_-]+)\n/.exec(line ?? '')?.[1] ?? '';
     expect(setupToken).not.toBe('');
   }, 180_000);
@@ -52,7 +54,13 @@ describe('identity — first-owner setup, token-pinned (integration)', () => {
   it('rejects a wrong token', async () => {
     const res = await request(server())
       .post('/setup/owner')
-      .send({ token: 'not-the-token', email: 'owner@ekoz.example.com', password, name: 'owner', displayName: 'Owner' })
+      .send({
+        token: 'not-the-token',
+        email: 'owner@ekoz.example.com',
+        password,
+        name: 'owner',
+        displayName: 'Owner',
+      })
       .expect(403);
     expect(res.body.code).toBe('identity.setup_rejected');
   });
@@ -60,14 +68,26 @@ describe('identity — first-owner setup, token-pinned (integration)', () => {
   it('creates the owner with the printed token, then closes /setup', async () => {
     const res = await request(server())
       .post('/setup/owner')
-      .send({ token: setupToken, email: 'owner@ekoz.example.com', password, name: 'owner', displayName: 'Owner' })
+      .send({
+        token: setupToken,
+        email: 'owner@ekoz.example.com',
+        password,
+        name: 'owner',
+        displayName: 'Owner',
+      })
       .expect(201);
     expect(res.body.user).toMatchObject({ isOwner: true, emailVerified: true });
     expect(res.body.accessToken).toBeTypeOf('string');
 
     await request(server())
       .post('/setup/owner')
-      .send({ token: setupToken, email: 'owner@ekoz.example.com', password, name: 'owner2', displayName: 'x' })
+      .send({
+        token: setupToken,
+        email: 'owner@ekoz.example.com',
+        password,
+        name: 'owner2',
+        displayName: 'x',
+      })
       .expect(410);
   });
 });

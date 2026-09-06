@@ -100,10 +100,10 @@ export class ProtocolMismatchError extends EkozError {
     requestId?: string;
   }) {
     super({
-      code: "protocol.mismatch",
+      code: 'protocol.mismatch',
       status: 0,
-      title: "Protocol version mismatch",
-      detail: `SDK supports protocol major(s) [${init.supported.join(", ")}]; server advertises [${init.advertised.join(", ")}].`,
+      title: 'Protocol version mismatch',
+      detail: `SDK supports protocol major(s) [${init.supported.join(', ')}]; server advertises [${init.advertised.join(', ')}].`,
       requestId: init.requestId,
     });
     this.supported = init.supported;

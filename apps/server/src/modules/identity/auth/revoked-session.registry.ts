@@ -20,7 +20,7 @@ export class RevokedSessionRegistry implements OnModuleInit {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {}
 
   /** Warm the set from sessions revoked within the retention window. */

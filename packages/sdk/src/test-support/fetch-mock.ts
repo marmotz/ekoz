@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 export interface MockResponseInit {
   status?: number;
@@ -17,14 +17,11 @@ export function jsonResponse(init: MockResponseInit = {}): Response {
   if (init.raw !== undefined) {
     payload = init.raw;
   } else if (init.body === undefined) {
-    payload = status === 204 ? null : "";
+    payload = status === 204 ? null : '';
   } else {
     payload = JSON.stringify(init.body);
-    if (!headers.has("Content-Type")) {
-      headers.set(
-        "Content-Type",
-        status >= 400 ? "application/problem+json" : "application/json",
-      );
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', status >= 400 ? 'application/problem+json' : 'application/json');
     }
   }
 
@@ -38,23 +35,22 @@ export function createFetchMock(
   const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
   let index = 0;
 
-  const fn = vi.fn(async (
-    input: Parameters<typeof fetch>[0],
-    reqInit?: Parameters<typeof fetch>[1],
-  ) => {
-    calls.push({ url: String(input), init: reqInit });
-    const outcome = outcomes[Math.min(index, outcomes.length - 1)];
-    index += 1;
-    if (outcome instanceof Error) throw outcome;
-    if (typeof outcome === "function") return outcome();
-    return outcome;
-  });
+  const fn = vi.fn(
+    async (input: Parameters<typeof fetch>[0], reqInit?: Parameters<typeof fetch>[1]) => {
+      calls.push({ url: String(input), init: reqInit });
+      const outcome = outcomes[Math.min(index, outcomes.length - 1)];
+      index += 1;
+      if (outcome instanceof Error) throw outcome;
+      if (typeof outcome === 'function') return outcome();
+      return outcome;
+    },
+  );
 
   const mock = fn as unknown as typeof fetch & {
     calls: typeof calls;
     readonly callCount: number;
   };
-  Object.defineProperty(mock, "calls", { value: calls });
-  Object.defineProperty(mock, "callCount", { get: () => calls.length });
+  Object.defineProperty(mock, 'calls', { value: calls });
+  Object.defineProperty(mock, 'callCount', { get: () => calls.length });
   return mock;
 }

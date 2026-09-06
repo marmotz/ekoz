@@ -1,13 +1,13 @@
-import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { Readable } from 'node:stream';
+import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { getRequestContext } from '../../../core/http/request-context.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
+import { type Blob, BlobService } from '../../../core/storage/blob.service.js';
 import { BlobAccessRegistry } from '../../../core/storage/blob-access.registry.js';
-import { BlobService, type Blob } from '../../../core/storage/blob.service.js';
 import { AccountService } from '../accounts/account.service.js';
-import { toAccountView, type AccountView } from '../accounts/account.view.js';
+import { type AccountView, toAccountView } from '../accounts/account.view.js';
 import {
   AvatarRejectedError,
   AvatarTooLargeError,
@@ -44,7 +44,7 @@ export class ProfileService implements OnModuleInit {
     private readonly accounts: AccountService,
     private readonly blobs: BlobService,
     private readonly blobAccess: BlobAccessRegistry,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   onModuleInit(): void {
@@ -72,7 +72,11 @@ export class ProfileService implements OnModuleInit {
 
     const view = toAccountView(user, profile.displayName, this.config.get('server.domain'));
 
-    return { ...view, bio: profile.bio, avatarUrl: this.avatarUrl(user.name, profile.avatarBlobId) };
+    return {
+      ...view,
+      bio: profile.bio,
+      avatarUrl: this.avatarUrl(user.name, profile.avatarBlobId),
+    };
   }
 
   async getPublicProfile(identifier: string): Promise<PublicProfileView> {
@@ -94,7 +98,10 @@ export class ProfileService implements OnModuleInit {
     };
   }
 
-  async updateProfile(userId: string, patch: { displayName?: string; bio?: string | null }): Promise<MeView> {
+  async updateProfile(
+    userId: string,
+    patch: { displayName?: string; bio?: string | null },
+  ): Promise<MeView> {
     const profile = await this.accounts.getProfile(userId);
     if (!profile) {
       throw new ProfileNotFoundError();
@@ -112,7 +119,7 @@ export class ProfileService implements OnModuleInit {
       const bio = patch.bio?.trim() ?? null;
       if (bio !== null && bio.length > this.config.get('profile.bio_max_length')) {
         throw new ProfileInvalidError(
-          `The bio must be at most ${this.config.get('profile.bio_max_length')} characters.`
+          `The bio must be at most ${this.config.get('profile.bio_max_length')} characters.`,
         );
       }
       update.bio = bio && bio.length > 0 ? bio : null;

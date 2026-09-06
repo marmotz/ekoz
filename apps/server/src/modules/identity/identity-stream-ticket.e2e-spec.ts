@@ -50,7 +50,10 @@ describe('identity — SSE stream ticket (integration)', () => {
   const server = () => app.getHttpServer();
 
   async function login(): Promise<{ accessToken: string; sessionId: string }> {
-    const res = await request(server()).post('/auth/login').send({ identifier: 'alice', password }).expect(200);
+    const res = await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'alice', password })
+      .expect(200);
 
     return { accessToken: res.body.accessToken, sessionId: res.body.session.id };
   }

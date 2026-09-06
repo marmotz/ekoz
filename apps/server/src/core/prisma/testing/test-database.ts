@@ -1,8 +1,8 @@
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { createDb, type Db } from '../db.js';
 
 const execFileAsync = promisify(execFile);
@@ -29,14 +29,20 @@ const ROLLBACK = Symbol('rollback');
  * in integration tests (technical.md §1).
  */
 export async function startTestDatabase(): Promise<TestDatabase> {
-  const container: StartedPostgreSqlContainer = await new PostgreSqlContainer('postgres:18').start();
+  const container: StartedPostgreSqlContainer = await new PostgreSqlContainer(
+    'postgres:18',
+  ).start();
   const url = container.getConnectionUri();
   const database = container.getDatabase();
 
-  await execFileAsync('bunx', ['prisma', 'db', 'migrate', '--no-interactive', '--confirm', database], {
-    cwd: repoRoot,
-    env: { ...process.env, DATABASE_URL: url },
-  });
+  await execFileAsync(
+    'bunx',
+    ['prisma', 'db', 'migrate', '--no-interactive', '--confirm', database],
+    {
+      cwd: repoRoot,
+      env: { ...process.env, DATABASE_URL: url },
+    },
+  );
 
   const db = createDb({ url });
   await db.connect();

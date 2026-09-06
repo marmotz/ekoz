@@ -45,14 +45,21 @@ describe('ConfigService (unit)', () => {
   });
 
   async function build(toml = BASE_TOML, env: NodeJS.ProcessEnv = {}): Promise<ConfigService> {
-    const service = new ConfigService(repo as unknown as SettingsRepository, { tomlPath: writeToml(toml), env });
+    const service = new ConfigService(repo as unknown as SettingsRepository, {
+      tomlPath: writeToml(toml),
+      env,
+    });
     await service.init();
     return service;
   }
 
   it('falls back to the code default when nothing else provides a value', async () => {
     const service = await build();
-    expect(service.describe('registration.mode')).toMatchObject({ value: 'invite', source: 'default', locked: false });
+    expect(service.describe('registration.mode')).toMatchObject({
+      value: 'invite',
+      source: 'default',
+      locked: false,
+    });
   });
 
   it('lets the TOML file override the default', async () => {
@@ -63,13 +70,20 @@ describe('ConfigService (unit)', () => {
   it('lets the settings table override the file for a runtime key', async () => {
     repo.store.set('registration.mode', 'admin');
     const service = await build(BASE_TOML + '\n[registration]\nmode = "open"\n');
-    expect(service.describe('registration.mode')).toMatchObject({ value: 'admin', source: 'settings' });
+    expect(service.describe('registration.mode')).toMatchObject({
+      value: 'admin',
+      source: 'settings',
+    });
   });
 
   it('lets an env override win and locks the runtime key', async () => {
     repo.store.set('registration.mode', 'admin');
     const service = await build(BASE_TOML, { EKOZ_REGISTRATION__MODE: 'open' });
-    expect(service.describe('registration.mode')).toMatchObject({ value: 'open', source: 'env', locked: true });
+    expect(service.describe('registration.mode')).toMatchObject({
+      value: 'open',
+      source: 'env',
+      locked: true,
+    });
   });
 
   it('never reads the settings table for an infra key', async () => {
@@ -89,11 +103,15 @@ describe('ConfigService (unit)', () => {
   });
 
   it('aborts init when a required infra parameter is missing', async () => {
-    await expect(build('[http]\nport = 3010\n')).rejects.toThrow(/Invalid or missing infra configuration/);
+    await expect(build('[http]\nport = 3010\n')).rejects.toThrow(
+      /Invalid or missing infra configuration/,
+    );
   });
 
   it('aborts init when an infra parameter fails its schema', async () => {
-    await expect(build(BASE_TOML.replace('ekoz.example.com', 'localhost'))).rejects.toThrow(/server\.domain/);
+    await expect(build(BASE_TOML.replace('ekoz.example.com', 'localhost'))).rejects.toThrow(
+      /server\.domain/,
+    );
   });
 
   it('set() writes through the repo and is visible immediately', async () => {

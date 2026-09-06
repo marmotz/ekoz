@@ -28,7 +28,7 @@ describe('IdentifierService (unit)', () => {
     'rejects %s',
     (name) => {
       expect(() => service.validate(name)).toThrow(IdentifierInvalidError);
-    }
+    },
   );
 
   it('rejects a reserved name (case / space insensitive)', () => {

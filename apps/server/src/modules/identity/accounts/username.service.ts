@@ -3,17 +3,18 @@ import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import {
+  UserNotFoundError,
   UsernameChangeCooldownError,
   UsernameChangeRequestNotFoundError,
   UsernameChangeRequestResolvedError,
   UsernameImmutableError,
-  UserNotFoundError,
 } from '../identity.errors.js';
 import { AccountService, type AccountTx } from './account.service.js';
 import { IdentifierService } from './identifier.service.js';
 
 export type UsernameChangeOutcome =
-  { status: 'applied'; identifier: string } | { status: 'pending'; requestId: string };
+  | { status: 'applied'; identifier: string }
+  | { status: 'pending'; requestId: string };
 
 interface UsernameChangeRequestRow {
   id: string;
@@ -40,7 +41,7 @@ export class UsernameService {
     private readonly config: ConfigService,
     private readonly accounts: AccountService,
     private readonly identifiers: IdentifierService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   async changeOwn(userId: string, rawName: string): Promise<UsernameChangeOutcome> {
@@ -85,7 +86,9 @@ export class UsernameService {
     return { status: 'applied', identifier: this.identifierOf(name) };
   }
 
-  async listRequests(status?: 'pending' | 'approved' | 'rejected'): Promise<UsernameChangeRequestRow[]> {
+  async listRequests(
+    status?: 'pending' | 'approved' | 'rejected',
+  ): Promise<UsernameChangeRequestRow[]> {
     const rows = (
       status
         ? await this.prisma.orm.public.UsernameChangeRequest.where({ status }).all()
@@ -179,7 +182,11 @@ export class UsernameService {
     return row;
   }
 
-  private async resolve(requestId: string, status: 'approved' | 'rejected', ownerId: string): Promise<void> {
+  private async resolve(
+    requestId: string,
+    status: 'approved' | 'rejected',
+    ownerId: string,
+  ): Promise<void> {
     await this.prisma.orm.public.UsernameChangeRequest.where({ id: requestId }).update({
       status,
       resolvedAt: new Date().toISOString(),

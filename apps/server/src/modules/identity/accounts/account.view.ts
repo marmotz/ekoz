@@ -12,7 +12,11 @@ export interface AccountView {
   status: UserRecord['status'];
 }
 
-export function toAccountView(user: UserRecord, displayName: string, serverDomain: string): AccountView {
+export function toAccountView(
+  user: UserRecord,
+  displayName: string,
+  serverDomain: string,
+): AccountView {
   return {
     id: user.id,
     identifier: user.name ? `${user.name}/${serverDomain}` : null,

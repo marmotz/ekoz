@@ -28,7 +28,7 @@ export interface DiscoveryDocument {
 export class DiscoveryService {
   constructor(
     private readonly config: ConfigService,
-    private readonly signing: SigningService
+    private readonly signing: SigningService,
   ) {}
 
   async getDocument(): Promise<DiscoveryDocument> {

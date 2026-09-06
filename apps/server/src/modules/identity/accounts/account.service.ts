@@ -63,7 +63,7 @@ export class AccountService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly identifiers: IdentifierService,
-    private readonly passwords: PasswordService
+    private readonly passwords: PasswordService,
   ) {}
 
   /**
@@ -108,7 +108,9 @@ export class AccountService {
   /** Look up by (already-normalised or raw) email address. */
   async findByEmail(email: string): Promise<UserRecord | null> {
     const value = email.normalize('NFC').trim().toLowerCase();
-    const row = (await this.prisma.orm.public.User.where({ email: value }).first()) as UserRow | null;
+    const row = (await this.prisma.orm.public.User.where({
+      email: value,
+    }).first()) as UserRow | null;
 
     return row ? toRecord(row) : null;
   }
@@ -167,7 +169,12 @@ export class AccountService {
     const row = (await this.prisma.orm.public.UserProfile.first({ userId })) as ProfileRow | null;
 
     return row
-      ? { displayName: row.displayName, bio: row.bio, avatarBlobId: row.avatarBlobId, updatedAt: row.updatedAt }
+      ? {
+          displayName: row.displayName,
+          bio: row.bio,
+          avatarBlobId: row.avatarBlobId,
+          updatedAt: row.updatedAt,
+        }
       : null;
   }
 
@@ -191,7 +198,9 @@ export class AccountService {
     const value = identifier.normalize('NFC').trim().toLowerCase();
 
     if (value.includes('@')) {
-      const row = (await this.prisma.orm.public.User.where({ email: value }).first()) as UserRow | null;
+      const row = (await this.prisma.orm.public.User.where({
+        email: value,
+      }).first()) as UserRow | null;
 
       return row ? toRecord(row) : null;
     }

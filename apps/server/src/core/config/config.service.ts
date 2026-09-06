@@ -8,7 +8,7 @@ import {
   type ParameterValue,
 } from './registry.js';
 import { SettingsRepository } from './settings.repository.js';
-import { loadTomlConfig, type FlatConfig } from './toml-loader.js';
+import { type FlatConfig, loadTomlConfig } from './toml-loader.js';
 
 /** The registry entry for `key`, widened to the common `ParameterSpec` shape. */
 function specOf(key: ParameterKey): ParameterSpec {
@@ -51,7 +51,7 @@ export class ConfigService implements OnModuleInit {
 
   constructor(
     private readonly settingsRepo: SettingsRepository | null = null,
-    private readonly options: { tomlPath?: string; env?: NodeJS.ProcessEnv } = {}
+    private readonly options: { tomlPath?: string; env?: NodeJS.ProcessEnv } = {},
   ) {}
 
   async onModuleInit(): Promise<void> {

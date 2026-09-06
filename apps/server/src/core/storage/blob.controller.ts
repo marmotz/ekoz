@@ -2,8 +2,8 @@ import { Controller, Get, Param, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { DomainError } from '../http/domain-error.js';
 import { getRequestContext } from '../http/request-context.js';
-import { BlobAccessRegistry } from './blob-access.registry.js';
 import { BlobService } from './blob.service.js';
+import { BlobAccessRegistry } from './blob-access.registry.js';
 
 /**
  * `GET /blobs/:id` (technical.md §6). Authenticated (the global guard baseline;
@@ -17,7 +17,7 @@ import { BlobService } from './blob.service.js';
 export class BlobController {
   constructor(
     private readonly blobs: BlobService,
-    private readonly access: BlobAccessRegistry
+    private readonly access: BlobAccessRegistry,
   ) {}
 
   @Get(':id')

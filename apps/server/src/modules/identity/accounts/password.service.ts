@@ -50,7 +50,8 @@ export const ARGON2_PARAMS = {
  */
 let dummyHash: string | undefined;
 function getDummyHash(): string {
-  return (dummyHash ??= hashSync('ekoz-dummy-password', ARGON2_PARAMS));
+  dummyHash ??= hashSync('ekoz-dummy-password', ARGON2_PARAMS);
+  return dummyHash;
 }
 
 @Injectable()
@@ -62,7 +63,9 @@ export class PasswordService {
    */
   assertAcceptable(password: string): void {
     if (password.length < MIN_PASSWORD_LENGTH) {
-      throw new WeakPasswordError(`The password must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
+      throw new WeakPasswordError(
+        `The password must be at least ${MIN_PASSWORD_LENGTH} characters long.`,
+      );
     }
 
     if (COMMON_PASSWORDS.has(password.toLowerCase())) {
@@ -103,7 +106,11 @@ export class PasswordService {
       return true;
     }
 
-    const [memoryCost, timeCost, parallelism] = match.slice(1).map(Number) as [number, number, number];
+    const [memoryCost, timeCost, parallelism] = match.slice(1).map(Number) as [
+      number,
+      number,
+      number,
+    ];
 
     return (
       memoryCost < ARGON2_PARAMS.memoryCost ||

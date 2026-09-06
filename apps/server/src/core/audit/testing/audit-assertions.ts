@@ -22,7 +22,7 @@ export interface AuditLogRow {
 export async function expectAuditEntry(
   db: OrmLike,
   action: string,
-  match: Partial<Omit<AuditLogRow, 'id' | 'at'>> = {}
+  match: Partial<Omit<AuditLogRow, 'id' | 'at'>> = {},
 ): Promise<AuditLogRow> {
   const rows = (await db.orm.public.AuditLog.where({ action }).all()) as AuditLogRow[];
   expect(rows, `expected exactly one audit entry for "${action}"`).toHaveLength(1);

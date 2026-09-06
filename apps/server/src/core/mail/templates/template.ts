@@ -1,4 +1,4 @@
-import { render, wrapHtml, wrapText, type LayoutContext } from './layout.js';
+import { type LayoutContext, render, wrapHtml, wrapText } from './layout.js';
 
 /**
  * One email template (technical.md §7). `subject` / `text` / `html` are format
@@ -26,7 +26,7 @@ export interface RenderedTemplate {
 export function renderTemplate(
   template: EmailTemplate,
   vars: Record<string, string | number>,
-  layout: LayoutContext
+  layout: LayoutContext,
 ): RenderedTemplate {
   return {
     subject: render(template.subject, vars),

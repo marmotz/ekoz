@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Injectable } from '@nestjs/common';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { sha256Hex } from '../../../core/crypto/hashing.js';
@@ -35,7 +35,7 @@ export class RefreshTokenService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly sessions: SessionService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   /** Mint the first token for a freshly created session. Returns the plaintext. */

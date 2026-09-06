@@ -68,7 +68,11 @@ describe('identity — registration, verification, setup (integration)', () => {
       .send({ email: ownerEmail, password, name: 'owner', displayName: 'The Owner' })
       .expect(201);
 
-    expect(res.body.user).toMatchObject({ isOwner: true, emailVerified: true, identifier: 'owner/ekoz.example.com' });
+    expect(res.body.user).toMatchObject({
+      isOwner: true,
+      emailVerified: true,
+      identifier: 'owner/ekoz.example.com',
+    });
     expect(res.body.accessToken).toBeTypeOf('string');
     ownerAccessToken = res.body.accessToken;
 
@@ -81,7 +85,12 @@ describe('identity — registration, verification, setup (integration)', () => {
   it('rejects registration in invite mode without a valid invitation', async () => {
     await request(server())
       .post('/auth/register')
-      .send({ name: 'mallory', email: 'mallory@ekoz.example.com', password, displayName: 'Mallory' })
+      .send({
+        name: 'mallory',
+        email: 'mallory@ekoz.example.com',
+        password,
+        displayName: 'Mallory',
+      })
       .expect(422);
   });
 
@@ -129,7 +138,13 @@ describe('identity — registration, verification, setup (integration)', () => {
   it('refuses to reuse a consumed invitation', async () => {
     await request(server())
       .post('/auth/register')
-      .send({ name: 'eve', email: 'eve@ekoz.example.com', password, displayName: 'Eve', invitationToken })
+      .send({
+        name: 'eve',
+        email: 'eve@ekoz.example.com',
+        password,
+        displayName: 'Eve',
+        invitationToken,
+      })
       .expect(422);
   });
 
@@ -159,14 +174,23 @@ describe('identity — registration, verification, setup (integration)', () => {
         .post('/auth/register')
         .send({ name: 'olivia', email: 'olivia@ekoz.example.com', password, displayName: 'Olivia' })
         .expect(201);
-      expect(res.body).toMatchObject({ identifier: 'olivia/ekoz.example.com', emailVerified: false });
+      expect(res.body).toMatchObject({
+        identifier: 'olivia/ekoz.example.com',
+        emailVerified: false,
+      });
       // Verification is still required, so login is gated until the mail is consumed.
-      await request(server()).post('/auth/login').send({ identifier: 'olivia', password }).expect(403);
+      await request(server())
+        .post('/auth/login')
+        .send({ identifier: 'olivia', password })
+        .expect(403);
       await request(server())
         .post('/auth/verify-email')
         .send({ token: tokenFromLastMail('email-verification') })
         .expect(200);
-      await request(server()).post('/auth/login').send({ identifier: 'olivia', password }).expect(200);
+      await request(server())
+        .post('/auth/login')
+        .send({ identifier: 'olivia', password })
+        .expect(200);
     } finally {
       await config.set('registration.mode', 'invite', null);
     }
@@ -186,7 +210,10 @@ describe('identity — registration, verification, setup (integration)', () => {
       consumedAt: null,
     });
 
-    const res = await request(server()).post('/auth/verify-email').send({ token: 'idempotent-token' }).expect(200);
+    const res = await request(server())
+      .post('/auth/verify-email')
+      .send({ token: 'idempotent-token' })
+      .expect(200);
     expect(res.body).toEqual({ verified: true });
   });
 
@@ -209,11 +236,17 @@ describe('identity — registration, verification, setup (integration)', () => {
   });
 
   it('always answers 202 to a verification resend, without leaking existence', async () => {
-    await request(server()).post('/auth/verify-email/resend').send({ email: 'ghost@ekoz.example.com' }).expect(202);
+    await request(server())
+      .post('/auth/verify-email/resend')
+      .send({ email: 'ghost@ekoz.example.com' })
+      .expect(202);
   });
 
   it('changes an email address only after the new address is verified', async () => {
-    const login = await request(server()).post('/auth/login').send({ identifier: 'carol', password }).expect(200);
+    const login = await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'carol', password })
+      .expect(200);
 
     await request(server())
       .post('/me/email')
@@ -229,6 +262,10 @@ describe('identity — registration, verification, setup (integration)', () => {
 
     const moved = await app.get(AccountService).findByEmail('carol.new@ekoz.example.com');
     expect(moved?.name).toBe('carol');
-    expect(sentMail.some((m) => m.template === 'email-changed-notice' && m.to === 'carol@ekoz.example.com')).toBe(true);
+    expect(
+      sentMail.some(
+        (m) => m.template === 'email-changed-notice' && m.to === 'carol@ekoz.example.com',
+      ),
+    ).toBe(true);
   });
 });

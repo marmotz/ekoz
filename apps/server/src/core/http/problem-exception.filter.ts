@@ -1,4 +1,10 @@
-import { Catch, HttpException, HttpStatus, type ArgumentsHost, type ExceptionFilter } from '@nestjs/common';
+import {
+  type ArgumentsHost,
+  Catch,
+  type ExceptionFilter,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { NestLoggerService } from '../observability/nest-logger.service.js';
 import { DomainError, ValidationFailedError } from './domain-error.js';
@@ -27,7 +33,7 @@ export class ProblemExceptionFilter implements ExceptionFilter {
       this.logger.error(
         exception instanceof Error ? exception.message : 'Unhandled exception',
         exception instanceof Error ? exception.stack : undefined,
-        ProblemExceptionFilter.name
+        ProblemExceptionFilter.name,
       );
     }
 

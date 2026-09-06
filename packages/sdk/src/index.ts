@@ -7,40 +7,17 @@
  */
 
 export {
-  DEFAULT_PROTOCOL_VERSION,
-  HttpClient,
-  PROTOCOL_HEADER,
-  type HttpClientOptions,
-  type HttpMethod,
-  type QueryValue,
-  type RequestOptions,
-} from "./transport/http-client.js";
-
-export {
-  ERROR_CODE_MAP,
-  decodeProblem,
-  parseRetryAfter,
-  toNetworkError,
-} from "./transport/problem.js";
-
-export {
-  REQUEST_ID_HEADER,
-  newRequestId,
-  resolveRequestId,
-} from "./transport/request-context.js";
-
-export {
   Discovery,
-  SUPPORTED_PROTOCOL_MAJORS,
-  WELL_KNOWN_PATH,
   type DiscoveryDocument,
   type DiscoveryOptions,
-} from "./discovery/discovery.js";
-
+  SUPPORTED_PROTOCOL_MAJORS,
+  WELL_KNOWN_PATH,
+} from './discovery/discovery.js';
 export {
   AccountSuspendedError,
   AuthenticationError,
   EkozError,
+  type EkozErrorInit,
   EmailNotVerifiedError,
   EmailTakenError,
   InvalidCredentialsError,
@@ -48,6 +25,7 @@ export {
   LastOwnerError,
   NetworkError,
   NotFoundError,
+  type ProblemDetails,
   ProtocolMismatchError,
   RateLimitError,
   RefreshInvalidError,
@@ -58,8 +36,26 @@ export {
   UsernameImmutableError,
   UsernameTakenError,
   ValidationError,
-  WeakPasswordError,
-  type EkozErrorInit,
-  type ProblemDetails,
   type ValidationIssue,
-} from "./transport/errors.js";
+  WeakPasswordError,
+} from './transport/errors.js';
+export {
+  DEFAULT_PROTOCOL_VERSION,
+  HttpClient,
+  type HttpClientOptions,
+  type HttpMethod,
+  PROTOCOL_HEADER,
+  type QueryValue,
+  type RequestOptions,
+} from './transport/http-client.js';
+export {
+  decodeProblem,
+  ERROR_CODE_MAP,
+  parseRetryAfter,
+  toNetworkError,
+} from './transport/problem.js';
+export {
+  newRequestId,
+  REQUEST_ID_HEADER,
+  resolveRequestId,
+} from './transport/request-context.js';

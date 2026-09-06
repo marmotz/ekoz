@@ -7,14 +7,20 @@ import {
   MeDeletionController,
 } from './accounts/lifecycle.controller.js';
 import { LifecycleService } from './accounts/lifecycle.service.js';
+import { PasswordService } from './accounts/password.service.js';
 import { PasswordResetController } from './accounts/password-reset.controller.js';
 import { PasswordResetService } from './accounts/password-reset.service.js';
-import { PasswordService } from './accounts/password.service.js';
-import { AdminUsersController, RegistrationController } from './accounts/registration.controller.js';
+import {
+  AdminUsersController,
+  RegistrationController,
+} from './accounts/registration.controller.js';
 import { RegistrationService } from './accounts/registration.service.js';
-import { SetupOwnerService } from './accounts/setup-owner.service.js';
 import { SetupController } from './accounts/setup.controller.js';
-import { AdminUsernameRequestsController, MeUsernameController } from './accounts/username.controller.js';
+import { SetupOwnerService } from './accounts/setup-owner.service.js';
+import {
+  AdminUsernameRequestsController,
+  MeUsernameController,
+} from './accounts/username.controller.js';
 import { UsernameService } from './accounts/username.service.js';
 import { AuthController } from './auth/auth.controller.js';
 import { AuthService } from './auth/auth.service.js';
@@ -23,11 +29,14 @@ import { RevokedSessionRegistry } from './auth/revoked-session.registry.js';
 import { SensitiveThrottleGuard } from './auth/sensitive-throttle.guard.js';
 import { SessionService } from './auth/session.service.js';
 import { SessionsController } from './auth/sessions.controller.js';
-import { InProcessStreamTicketStore, STREAM_TICKET_STORE } from './auth/stream-ticket.store.js';
 import { StreamController } from './auth/stream.controller.js';
+import { InProcessStreamTicketStore, STREAM_TICKET_STORE } from './auth/stream-ticket.store.js';
 import { TicketService } from './auth/ticket.service.js';
 import { TokenService } from './auth/token.service.js';
-import { EmailVerificationController, MeEmailController } from './email-verification/email-verification.controller.js';
+import {
+  EmailVerificationController,
+  MeEmailController,
+} from './email-verification/email-verification.controller.js';
 import { EmailVerificationService } from './email-verification/email-verification.service.js';
 import { AuthGuard } from './guards/auth.guard.js';
 import { OwnerGuard } from './guards/owner.guard.js';

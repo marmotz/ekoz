@@ -31,7 +31,12 @@ export function flattenTomlObject(obj: unknown, env: NodeJS.ProcessEnv = process
   return flatten(obj, env);
 }
 
-function flatten(obj: unknown, env: NodeJS.ProcessEnv, prefix = '', out: FlatConfig = new Map()): FlatConfig {
+function flatten(
+  obj: unknown,
+  env: NodeJS.ProcessEnv,
+  prefix = '',
+  out: FlatConfig = new Map(),
+): FlatConfig {
   if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
     if (prefix) {
       out.set(prefix, interpolate(obj, env));

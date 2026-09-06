@@ -12,7 +12,7 @@ describe('ServerIdentityService (integration)', () => {
       { get: () => domain } as unknown as ConfigService,
       {
         orm: database.db.orm,
-      } as unknown as PrismaService
+      } as unknown as PrismaService,
     );
 
   beforeAll(async () => {
@@ -32,7 +32,7 @@ describe('ServerIdentityService (integration)', () => {
 
   it('refuses to start when server.domain changed', async () => {
     await expect(makeService('other.example').onModuleInit()).rejects.toThrow(
-      /server\.domain.*changed.*chat\.example.*other\.example/s
+      /server\.domain.*changed.*chat\.example.*other\.example/s,
     );
   });
 

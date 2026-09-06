@@ -6,8 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { ConfigService } from '../config/config.service.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../prisma/testing/test-database.js';
-import { BlobGcService } from './blob-gc.service.js';
 import { BlobService } from './blob.service.js';
+import { BlobGcService } from './blob-gc.service.js';
 import { LocalStorageDriver } from './local-storage.driver.js';
 
 function streamOf(content: string): NodeJS.ReadableStream {

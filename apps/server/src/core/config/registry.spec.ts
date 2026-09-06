@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { INFRA_KEYS, PARAMETER_REGISTRY, RUNTIME_KEYS, isParameterKey, type ParameterKey } from './registry.js';
+import {
+  INFRA_KEYS,
+  isParameterKey,
+  PARAMETER_REGISTRY,
+  type ParameterKey,
+  RUNTIME_KEYS,
+} from './registry.js';
 
 describe('parameter registry (unit)', () => {
   it('parses every declared default against its own schema', () => {
     for (const [key, spec] of Object.entries(PARAMETER_REGISTRY)) {
       if ((spec as { default?: unknown }).default === undefined) continue;
       const result = spec.schema.safeParse((spec as { default: unknown }).default);
-      expect(result.success, `${key} default should be valid: ${JSON.stringify(result)}`).toBe(true);
+      expect(result.success, `${key} default should be valid: ${JSON.stringify(result)}`).toBe(
+        true,
+      );
     }
   });
 
@@ -32,6 +40,8 @@ describe('parameter registry (unit)', () => {
   it('rejects localhost / IP for server.domain', () => {
     expect(PARAMETER_REGISTRY['server.domain'].schema.safeParse('localhost').success).toBe(false);
     expect(PARAMETER_REGISTRY['server.domain'].schema.safeParse('10.0.0.1').success).toBe(false);
-    expect(PARAMETER_REGISTRY['server.domain'].schema.safeParse('ekoz.example.com').success).toBe(true);
+    expect(PARAMETER_REGISTRY['server.domain'].schema.safeParse('ekoz.example.com').success).toBe(
+      true,
+    );
   });
 });

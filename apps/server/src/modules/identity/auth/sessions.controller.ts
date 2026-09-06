@@ -1,11 +1,21 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { DomainError } from '../../../core/http/domain-error.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
-import { RenameSessionSchema, type RenameSessionBody } from './auth.dto.js';
+import { type RenameSessionBody, RenameSessionSchema } from './auth.dto.js';
 import { SessionService } from './session.service.js';
-import { toSessionView, type SessionView } from './session.view.js';
+import { type SessionView, toSessionView } from './session.view.js';
 
 /**
  * Session management (technical.md §11, issue #14). All routes are scoped to the
@@ -27,7 +37,7 @@ export class SessionsController {
   async rename(
     @CurrentPrincipal() principal: AuthPrincipal,
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(RenameSessionSchema)) body: RenameSessionBody
+    @Body(new ZodValidationPipe(RenameSessionSchema)) body: RenameSessionBody,
   ): Promise<SessionView> {
     const updated = await this.sessions.rename(principal.userId, id, body.deviceName);
 
@@ -36,7 +46,10 @@ export class SessionsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async revoke(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string): Promise<void> {
+  async revoke(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id') id: string,
+  ): Promise<void> {
     await this.sessions.revokeOwned(principal.userId, id);
   }
 
@@ -44,13 +57,13 @@ export class SessionsController {
   @Delete()
   async revokeAll(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Query('all') all?: string
+    @Query('all') all?: string,
   ): Promise<{ revoked: number }> {
     if (all !== 'true') {
       throw new DomainError(
         'identity.sessions_bulk_scope_required',
         'Pass ?all=true to revoke every other session.',
-        400
+        400,
       );
     }
 

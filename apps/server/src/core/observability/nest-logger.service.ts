@@ -64,7 +64,7 @@ export class NestLoggerService implements LoggerService {
   error(message: unknown, stackOrContext?: string, context?: string): void {
     this.logger.error(
       { ...this.bindings(context ?? stackOrContext), stack: context ? stackOrContext : undefined },
-      String(message)
+      String(message),
     );
   }
 

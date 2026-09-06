@@ -1,4 +1,4 @@
-import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { ForbiddenError, UnauthenticatedError } from '../identity.errors.js';
 import type { AuthenticatedRequest } from './auth.guard.js';
 

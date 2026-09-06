@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  type AccessTokenClaims,
   assembleToken,
   base64UrlEncode,
+  type JwtHeader,
   parseToken,
   signingInput,
-  type AccessTokenClaims,
-  type JwtHeader,
 } from './jwt.js';
 
 const header: JwtHeader = { alg: 'EdDSA', typ: 'JWT', kid: 'key-1' };
@@ -36,7 +36,7 @@ describe('compact JWS helpers (unit)', () => {
 
   it('rejects a non-EdDSA header', () => {
     const bad = `${base64UrlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: 'k' }))}.${base64UrlEncode(
-      JSON.stringify(claims)
+      JSON.stringify(claims),
     )}.sig`;
     expect(parseToken(bad)).toBeNull();
   });

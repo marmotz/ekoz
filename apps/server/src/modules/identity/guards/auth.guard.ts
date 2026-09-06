@@ -1,4 +1,4 @@
-import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../../../core/http/public.decorator.js';
@@ -34,7 +34,7 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly tokens: TokenService,
     private readonly revoked: RevokedSessionRegistry,
-    private readonly accounts: AccountService
+    private readonly accounts: AccountService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

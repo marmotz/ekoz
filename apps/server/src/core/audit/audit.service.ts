@@ -3,7 +3,13 @@ import { getRequestContext } from '../http/request-context.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 /** JSON-serialisable value, the shape the `metadata` jsonb column accepts. */
-export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 export type AuditMetadata = { [key: string]: JsonValue };
 
 /** One audit entry. Actor / IP default to the ambient request context. */

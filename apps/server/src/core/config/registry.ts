@@ -1,4 +1,4 @@
-import { z, type ZodType } from 'zod';
+import { type ZodType, z } from 'zod';
 import { isValidServerDomain } from '../discovery/server-domain.js';
 
 /** `infra` resolves from file + env only; `runtime` also reads the settings table. */
@@ -37,18 +37,23 @@ const DURATION_UNIT_SECONDS: Record<string, number> = { s: 1, m: 60, h: 3600, d:
  * `<n><unit>` string (`s` / `m` / `h` / `d`, e.g. `15m`) or a bare number of
  * seconds (string or number, from env / file).
  */
-const durationSeconds = z.union([z.number().int().min(0), z.string().trim().min(1)]).transform((value, ctx) => {
-  if (typeof value === 'number') return value;
-  if (/^\d+$/.test(value)) return Number(value);
+const durationSeconds = z
+  .union([z.number().int().min(0), z.string().trim().min(1)])
+  .transform((value, ctx) => {
+    if (typeof value === 'number') return value;
+    if (/^\d+$/.test(value)) return Number(value);
 
-  const match = /^(\d+)\s*([smhd])$/.exec(value);
-  if (!match) {
-    ctx.addIssue({ code: 'custom', message: 'must be a duration like "15m", "30d" or a number of seconds' });
-    return z.NEVER;
-  }
+    const match = /^(\d+)\s*([smhd])$/.exec(value);
+    if (!match) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'must be a duration like "15m", "30d" or a number of seconds',
+      });
+      return z.NEVER;
+    }
 
-  return Number(match[1]) * DURATION_UNIT_SECONDS[match[2]!]!;
-});
+    return Number(match[1]) * DURATION_UNIT_SECONDS[match[2]!]!;
+  });
 
 /**
  * The single typed parameter registry (ADR 0009, technical.md §2). Only
@@ -58,12 +63,20 @@ export const PARAMETER_REGISTRY = {
   'server.domain': { kind: 'infra', schema: fqdn, hotReloadable: false, secret: false },
   'server.api_url': { kind: 'infra', schema: url, hotReloadable: false, secret: false },
   'server.web_url': { kind: 'infra', schema: url, hotReloadable: false, secret: false },
-  'http.host': { kind: 'infra', schema: z.string().min(1), default: '0.0.0.0', hotReloadable: false, secret: false },
+  'http.host': {
+    kind: 'infra',
+    schema: z.string().min(1),
+    default: '0.0.0.0',
+    hotReloadable: false,
+    secret: false,
+  },
   'http.port': { kind: 'infra', schema: port, default: 3010, hotReloadable: false, secret: false },
   'database.url': { kind: 'infra', schema: z.string().min(1), hotReloadable: false, secret: true },
   'secret.key': {
     kind: 'infra',
-    schema: z.string().refine((v) => Buffer.from(v, 'base64').length === 32, { message: 'must be 32 bytes, base64' }),
+    schema: z.string().refine((v) => Buffer.from(v, 'base64').length === 32, {
+      message: 'must be 32 bytes, base64',
+    }),
     hotReloadable: false,
     secret: true,
   },
@@ -88,12 +101,43 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: false,
     secret: false,
   },
-  'storage.s3.endpoint': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'storage.s3.region': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'storage.s3.bucket': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'storage.s3.access_key_id': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'storage.s3.secret_access_key': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'email.driver': { kind: 'infra', schema: z.enum(['smtp']), default: 'smtp', hotReloadable: false, secret: false },
+  'storage.s3.endpoint': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'storage.s3.region': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'storage.s3.bucket': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'storage.s3.access_key_id': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'storage.s3.secret_access_key': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'email.driver': {
+    kind: 'infra',
+    schema: z.enum(['smtp']),
+    default: 'smtp',
+    hotReloadable: false,
+    secret: false,
+  },
   'email.smtp.host': {
     kind: 'infra',
     schema: z.string().min(1),
@@ -101,10 +145,32 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: false,
     secret: true,
   },
-  'email.smtp.port': { kind: 'infra', schema: port, default: 1025, hotReloadable: false, secret: true },
-  'email.smtp.secure': { kind: 'infra', schema: bool, default: false, hotReloadable: false, secret: true },
-  'email.smtp.user': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'email.smtp.pass': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
+  'email.smtp.port': {
+    kind: 'infra',
+    schema: port,
+    default: 1025,
+    hotReloadable: false,
+    secret: true,
+  },
+  'email.smtp.secure': {
+    kind: 'infra',
+    schema: bool,
+    default: false,
+    hotReloadable: false,
+    secret: true,
+  },
+  'email.smtp.user': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'email.smtp.pass': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
   'email.retry_base_ms': {
     kind: 'infra',
     schema: int.pipe(z.number().min(0)),
@@ -126,7 +192,13 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: true,
     secret: false,
   },
-  'email.verification_required': { kind: 'runtime', schema: bool, default: true, hotReloadable: true, secret: false },
+  'email.verification_required': {
+    kind: 'runtime',
+    schema: bool,
+    default: true,
+    hotReloadable: true,
+    secret: false,
+  },
   'email.verification_ttl': {
     kind: 'runtime',
     schema: durationSeconds,
@@ -258,8 +330,18 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: true,
     secret: false,
   },
-  'observability.metrics_token': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: true },
-  'observability.otlp_endpoint': { kind: 'infra', schema: z.string().optional(), hotReloadable: false, secret: false },
+  'observability.metrics_token': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: true,
+  },
+  'observability.otlp_endpoint': {
+    kind: 'infra',
+    schema: z.string().optional(),
+    hotReloadable: false,
+    secret: false,
+  },
   'observability.trace_sample_ratio': {
     kind: 'runtime',
     schema: ratio,
@@ -278,7 +360,9 @@ export const PARAMETER_REGISTRY = {
 
 export type ParameterKey = keyof typeof PARAMETER_REGISTRY;
 
-export type ParameterValue<K extends ParameterKey> = z.infer<(typeof PARAMETER_REGISTRY)[K]['schema']>;
+export type ParameterValue<K extends ParameterKey> = z.infer<
+  (typeof PARAMETER_REGISTRY)[K]['schema']
+>;
 
 export function isParameterKey(key: string): key is ParameterKey {
   return key in PARAMETER_REGISTRY;
@@ -288,9 +372,9 @@ export function parameterSpec<K extends ParameterKey>(key: K): (typeof PARAMETER
   return PARAMETER_REGISTRY[key];
 }
 
-export const RUNTIME_KEYS: ParameterKey[] = (Object.keys(PARAMETER_REGISTRY) as ParameterKey[]).filter(
-  (k) => PARAMETER_REGISTRY[k].kind === 'runtime'
-);
-export const INFRA_KEYS: ParameterKey[] = (Object.keys(PARAMETER_REGISTRY) as ParameterKey[]).filter(
-  (k) => PARAMETER_REGISTRY[k].kind === 'infra'
-);
+export const RUNTIME_KEYS: ParameterKey[] = (
+  Object.keys(PARAMETER_REGISTRY) as ParameterKey[]
+).filter((k) => PARAMETER_REGISTRY[k].kind === 'runtime');
+export const INFRA_KEYS: ParameterKey[] = (
+  Object.keys(PARAMETER_REGISTRY) as ParameterKey[]
+).filter((k) => PARAMETER_REGISTRY[k].kind === 'infra');

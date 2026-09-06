@@ -13,10 +13,10 @@ describe('pretty-stream formatLine (unit)', () => {
         time: '2026-08-30T18:41:18.157Z',
         context: 'NestFactory',
         msg: 'Starting Nest application...',
-      })
+      }),
     );
     expect(out).toMatch(
-      /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}] INFO \[NestFactory] Starting Nest application\.\.\.$/
+      /^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}] INFO \[NestFactory] Starting Nest application\.\.\.$/,
     );
   });
 
@@ -27,7 +27,8 @@ describe('pretty-stream formatLine (unit)', () => {
   });
 
   it('maps every pino level to its display label', () => {
-    const label = (level: string) => plain(formatLine({ level, time: 0, msg: 'x' })).match(/] (\w+) x$/)?.[1];
+    const label = (level: string) =>
+      plain(formatLine({ level, time: 0, msg: 'x' })).match(/] (\w+) x$/)?.[1];
     expect(label('trace')).toBe('TRACE');
     expect(label('debug')).toBe('DEBUG');
     expect(label('info')).toBe('INFO');
@@ -37,18 +38,29 @@ describe('pretty-stream formatLine (unit)', () => {
 
   it('appends leftover structured fields as key=value pairs', () => {
     const out = plain(
-      formatLine({ level: 'info', time: 0, context: 'http', msg: 'GET /things 200', method: 'GET', status: 200 })
+      formatLine({
+        level: 'info',
+        time: 0,
+        context: 'http',
+        msg: 'GET /things 200',
+        method: 'GET',
+        status: 200,
+      }),
     );
     expect(out).toContain('GET /things 200 method=GET status=200');
   });
 
   it('drops pino noise (pid, hostname, v) from the tail', () => {
-    const out = plain(formatLine({ level: 'info', time: 0, msg: 'x', pid: 123, hostname: 'box', v: 1 }));
+    const out = plain(
+      formatLine({ level: 'info', time: 0, msg: 'x', pid: 123, hostname: 'box', v: 1 }),
+    );
     expect(out).not.toMatch(/pid|hostname/);
   });
 
   it('prints an indented stack trace when present', () => {
-    const out = plain(formatLine({ level: 'error', time: 0, msg: 'boom', stack: 'Error: boom\n    at foo' }));
+    const out = plain(
+      formatLine({ level: 'error', time: 0, msg: 'boom', stack: 'Error: boom\n    at foo' }),
+    );
     expect(out).toContain('\n    Error: boom\n        at foo');
   });
 });

@@ -1,0 +1,36 @@
+{
+  "name": "@ekozhq/monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "packageManager": "bun@1.4.0",
+  "engines": {
+    "node": ">=24",
+    "bun": ">=1.4.0"
+  },
+  "scripts": {
+    "build": "bun run --filter '@ekozhq/sdk' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "vitest run",
+    "test:server": "bun run --filter '@ekozhq/server' test",
+    "lint": "biome check .",
+    "lint:boundaries": "bun run --filter '@ekozhq/server' lint:boundaries",
+    "format": "biome format --write .",
+    "prepare": "lefthook install",
+    "release": "bash scripts/release-publish.sh",
+    "update:minor": "bun x npm-check-updates -i -t minor -ws",
+    "update:latest": "bun x npm-check-updates -i -t latest -ws"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.12",
+    "@changesets/cli": "3.0.2",
+    "@types/node": "^26.4.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "lefthook": "^2.1.12",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

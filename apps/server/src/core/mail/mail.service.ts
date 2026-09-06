@@ -11,7 +11,7 @@ import {
   type OutboundEmail,
   type SendEmailArgs,
 } from './mailer.js';
-import { renderTemplate, type EmailTemplate } from './templates/template.js';
+import { type EmailTemplate, renderTemplate } from './templates/template.js';
 
 interface EmailMessageRow {
   id: string;
@@ -46,7 +46,9 @@ export class MailService {
     private readonly audit: AuditService,
     @Inject(MAILER) private readonly mailer: Mailer,
     private readonly metrics: MetricsService,
-    @Optional() @Inject(MAIL_TEMPLATE_STORE) private readonly templateOverrides: MailTemplateStore | null = null
+    @Optional()
+    @Inject(MAIL_TEMPLATE_STORE)
+    private readonly templateOverrides: MailTemplateStore | null = null,
   ) {}
 
   /** Register a template under `name`. Called by the feature that owns it on init. */
@@ -123,7 +125,11 @@ export class MailService {
     await new Promise<void>((resolve) => this.idleWaiters.push(resolve));
   }
 
-  private async attempt(row: EmailMessageRow, message: OutboundEmail, attempt: number): Promise<void> {
+  private async attempt(
+    row: EmailMessageRow,
+    message: OutboundEmail,
+    attempt: number,
+  ): Promise<void> {
     this.metrics.recordEmailSendAttempt();
     try {
       await this.mailer.send(message);
@@ -139,18 +145,25 @@ export class MailService {
     row: EmailMessageRow,
     message: OutboundEmail,
     attempt: number,
-    error: Error
+    error: Error,
   ): Promise<void> {
     this.metrics.recordEmailSendFailure();
 
     if (attempt >= MAX_ATTEMPTS) {
-      this.logger.error(`Email to ${row.to} (${row.template}) failed after ${attempt} attempts: ${error.message}`);
+      this.logger.error(
+        `Email to ${row.to} (${row.template}) failed after ${attempt} attempts: ${error.message}`,
+      );
       await this.audit.record({
         action: 'email.failed',
         targetType: 'email_message',
         targetId: row.id,
         actorUserId: null,
-        metadata: { template: row.template, category: row.category, attempts: attempt, error: error.message },
+        metadata: {
+          template: row.template,
+          category: row.category,
+          attempts: attempt,
+          error: error.message,
+        },
       });
 
       return;
@@ -165,7 +178,9 @@ export class MailService {
         this.pending -= 1;
         this.metrics.setEmailQueueDepth(this.pending);
         if (this.pending === 0) {
-          this.idleWaiters.splice(0).forEach((resolve) => resolve());
+          for (const resolve of this.idleWaiters.splice(0)) {
+            resolve();
+          }
         }
       });
     }, delay);

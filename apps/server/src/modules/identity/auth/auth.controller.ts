@@ -4,7 +4,7 @@ import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
-import { LoginSchema, RefreshSchema, type LoginBody, type RefreshBody } from './auth.dto.js';
+import { type LoginBody, LoginSchema, type RefreshBody, RefreshSchema } from './auth.dto.js';
 import { AuthService } from './auth.service.js';
 import { SensitiveThrottleGuard } from './sensitive-throttle.guard.js';
 import { toSessionView } from './session.view.js';

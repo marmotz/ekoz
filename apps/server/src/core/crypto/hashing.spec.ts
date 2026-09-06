@@ -4,7 +4,9 @@ import { hashesEqual, sha256Hex } from './hashing.js';
 describe('hashing helpers (unit)', () => {
   it('computes a stable lower-case hex SHA-256', () => {
     // Known vector: SHA-256("abc").
-    expect(sha256Hex('abc')).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+    expect(sha256Hex('abc')).toBe(
+      'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    );
   });
 
   it('hashes strings and bytes identically', () => {

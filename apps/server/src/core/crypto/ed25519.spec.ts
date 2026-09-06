@@ -26,7 +26,9 @@ describe('ed25519 helpers (unit)', () => {
   it('rejects a signature over different bytes', () => {
     const { publicKeyBase64, privateKeyDer } = generateEd25519KeyPair();
     const signature = ed25519Sign(privateKeyFromDer(privateKeyDer), Buffer.from('a'));
-    expect(ed25519Verify(publicKeyFromBase64(publicKeyBase64), Buffer.from('b'), signature)).toBe(false);
+    expect(ed25519Verify(publicKeyFromBase64(publicKeyBase64), Buffer.from('b'), signature)).toBe(
+      false,
+    );
   });
 
   it('rejects a signature from a different key', () => {

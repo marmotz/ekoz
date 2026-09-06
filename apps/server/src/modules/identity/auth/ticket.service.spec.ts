@@ -3,7 +3,10 @@ import type { ConfigService } from '../../../core/config/config.service.js';
 import { InProcessStreamTicketStore } from './stream-ticket.store.js';
 import { TicketService } from './ticket.service.js';
 
-function makeService(ttlSeconds = 30): { service: TicketService; store: InProcessStreamTicketStore } {
+function makeService(ttlSeconds = 30): {
+  service: TicketService;
+  store: InProcessStreamTicketStore;
+} {
   const store = new InProcessStreamTicketStore();
   const config = { get: () => ttlSeconds } as unknown as ConfigService;
 

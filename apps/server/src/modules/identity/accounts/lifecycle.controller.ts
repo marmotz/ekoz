@@ -4,12 +4,12 @@ import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
 import {
-  AddOwnerSchema,
-  DeleteMeSchema,
-  SuspendUserSchema,
   type AddOwnerBody,
+  AddOwnerSchema,
   type DeleteMeBody,
+  DeleteMeSchema,
   type SuspendUserBody,
+  SuspendUserSchema,
 } from './lifecycle.dto.js';
 import { LifecycleService } from './lifecycle.service.js';
 
@@ -24,7 +24,7 @@ export class AdminUserLifecycleController {
   suspend(
     @Param('id') id: string,
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(SuspendUserSchema)) body: SuspendUserBody
+    @Body(new ZodValidationPipe(SuspendUserSchema)) body: SuspendUserBody,
   ): Promise<void> {
     return this.lifecycle.suspend(id, body.reason, principal.userId);
   }
@@ -52,14 +52,17 @@ export class AdminOwnersController {
   @HttpCode(204)
   add(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(AddOwnerSchema)) body: AddOwnerBody
+    @Body(new ZodValidationPipe(AddOwnerSchema)) body: AddOwnerBody,
   ): Promise<void> {
     return this.lifecycle.addOwner(body.userId, principal.userId);
   }
 
   @Delete(':userId')
   @HttpCode(204)
-  remove(@Param('userId') userId: string, @CurrentPrincipal() principal: AuthPrincipal): Promise<void> {
+  remove(
+    @Param('userId') userId: string,
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<void> {
     return this.lifecycle.removeOwner(userId, principal.userId);
   }
 }
@@ -74,7 +77,7 @@ export class MeDeletionController {
   @HttpCode(204)
   deleteSelf(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(DeleteMeSchema)) body: DeleteMeBody
+    @Body(new ZodValidationPipe(DeleteMeSchema)) body: DeleteMeBody,
   ): Promise<void> {
     return this.lifecycle.deleteSelf(principal.userId, body.password);
   }

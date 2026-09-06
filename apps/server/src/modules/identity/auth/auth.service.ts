@@ -10,7 +10,7 @@ import {
   RefreshInvalidError,
 } from '../identity.errors.js';
 import { RefreshTokenService } from './refresh-token.service.js';
-import { SessionService, type SessionRecord } from './session.service.js';
+import { type SessionRecord, SessionService } from './session.service.js';
 import { TokenService } from './token.service.js';
 
 export interface LoginInput {
@@ -44,7 +44,7 @@ export class AuthService {
     private readonly sessions: SessionService,
     private readonly tokens: TokenService,
     private readonly refreshTokens: RefreshTokenService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   async login(input: LoginInput): Promise<LoginResult> {

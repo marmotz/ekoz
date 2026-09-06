@@ -21,7 +21,7 @@ export class ServerIdentityService implements OnModuleInit {
 
   constructor(
     private readonly config: ConfigService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -30,7 +30,9 @@ export class ServerIdentityService implements OnModuleInit {
 
   /** The pinned canonical domain, or `null` before the first boot recorded it. */
   async recordedDomain(): Promise<string | null> {
-    const row = (await this.prisma.orm.public.ServerIdentity.where({ id: IDENTITY_ID }).first()) as {
+    const row = (await this.prisma.orm.public.ServerIdentity.where({
+      id: IDENTITY_ID,
+    }).first()) as {
       domain: string;
     } | null;
 
@@ -52,7 +54,7 @@ export class ServerIdentityService implements OnModuleInit {
     if (recorded !== domain) {
       throw new Error(
         `"server.domain" changed from "${recorded}" to "${domain}". This is not supported: ` +
-          'it would break every existing "name/server" identifier. Restore the previous domain.'
+          'it would break every existing "name/server" identifier. Restore the previous domain.',
       );
     }
   }

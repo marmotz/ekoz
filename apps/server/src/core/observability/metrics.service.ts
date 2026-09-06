@@ -1,7 +1,12 @@
-import { Injectable, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common';
-import { type Attributes, type Counter, type Histogram, metrics as otelMetrics } from '@opentelemetry/api';
 import { readdirSync } from 'node:fs';
 import { monitorEventLoopDelay, PerformanceObserver } from 'node:perf_hooks';
+import { Injectable, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common';
+import {
+  type Attributes,
+  type Counter,
+  type Histogram,
+  metrics as otelMetrics,
+} from '@opentelemetry/api';
 import { PullMetricReader, startMetrics } from './otel.js';
 
 const METER_NAME = 'ekoz-server-core';
@@ -80,7 +85,9 @@ export class MetricsService implements OnModuleInit, OnApplicationShutdown {
 
   /** Register an observable gauge backed by a synchronous callback. */
   gauge(name: string, read: () => number, description?: string, unit?: string): void {
-    const observable = otelMetrics.getMeter(METER_NAME).createObservableGauge(name, { description, unit });
+    const observable = otelMetrics
+      .getMeter(METER_NAME)
+      .createObservableGauge(name, { description, unit });
     observable.addCallback((result) => result.observe(read()));
   }
 
@@ -102,7 +109,7 @@ export class MetricsService implements OnModuleInit, OnApplicationShutdown {
     this.counter('http_server_requests_total').add(1, attributes);
     this.histogram('http_server_request_duration_seconds', 'HTTP request duration', 's').record(
       durationSeconds,
-      attributes
+      attributes,
     );
   }
 
@@ -116,7 +123,9 @@ export class MetricsService implements OnModuleInit, OnApplicationShutdown {
 
   /** Record one completed database query into the baseline histogram. */
   recordDbQuery(durationSeconds: number): void {
-    this.histogram('db_client_query_duration_seconds', 'Database query duration', 's').record(durationSeconds);
+    this.histogram('db_client_query_duration_seconds', 'Database query duration', 's').record(
+      durationSeconds,
+    );
   }
 
   /** Outbound email instruments, fed by the email feature when it lands (technical.md §11). */
@@ -143,11 +152,26 @@ export class MetricsService implements OnModuleInit, OnApplicationShutdown {
     });
     this.gcObserver.observe({ entryTypes: ['gc'] });
 
-    this.gauge('process_resident_memory_bytes', () => process.memoryUsage().rss, 'Resident set size', 'By');
+    this.gauge(
+      'process_resident_memory_bytes',
+      () => process.memoryUsage().rss,
+      'Resident set size',
+      'By',
+    );
     this.gauge('process_heap_used_bytes', () => process.memoryUsage().heapUsed, 'Heap used', 'By');
     this.gauge('process_uptime_seconds', () => process.uptime(), 'Process uptime', 's');
-    this.gauge('nodejs_eventloop_lag_seconds', () => this.loopDelay.mean / 1e9, 'Mean event-loop delay', 's');
-    this.gauge('nodejs_gc_pause_seconds_total', () => this.gcPauseTotalMs / 1000, 'Cumulative GC pause time', 's');
+    this.gauge(
+      'nodejs_eventloop_lag_seconds',
+      () => this.loopDelay.mean / 1e9,
+      'Mean event-loop delay',
+      's',
+    );
+    this.gauge(
+      'nodejs_gc_pause_seconds_total',
+      () => this.gcPauseTotalMs / 1000,
+      'Cumulative GC pause time',
+      's',
+    );
     this.gauge(
       'process_open_fds',
       () => {
@@ -158,7 +182,7 @@ export class MetricsService implements OnModuleInit, OnApplicationShutdown {
           return 0;
         }
       },
-      'Open file descriptors'
+      'Open file descriptors',
     );
   }
 
@@ -178,12 +202,20 @@ export class MetricsService implements OnModuleInit, OnApplicationShutdown {
    */
   private registerDatabaseInstruments(): void {
     this.histogram('db_client_query_duration_seconds', 'Database query duration', 's');
-    this.gauge('db_client_connections_max', () => this.dbPoolStats?.().size ?? 0, 'Connection pool size');
-    this.gauge('db_client_connections_used', () => this.dbPoolStats?.().inUse ?? 0, 'Connections currently in use');
+    this.gauge(
+      'db_client_connections_max',
+      () => this.dbPoolStats?.().size ?? 0,
+      'Connection pool size',
+    );
+    this.gauge(
+      'db_client_connections_used',
+      () => this.dbPoolStats?.().inUse ?? 0,
+      'Connections currently in use',
+    );
     this.gauge(
       'db_client_connections_waiting',
       () => this.dbPoolStats?.().waiting ?? 0,
-      'Requests waiting for a connection'
+      'Requests waiting for a connection',
     );
   }
 

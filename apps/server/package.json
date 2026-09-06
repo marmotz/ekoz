@@ -1,5 +1,5 @@
 {
-  "name": "@ekoz-chat/server",
+  "name": "@ekozhq/server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,14 +8,13 @@
     "bun": ">=1.4.0"
   },
   "scripts": {
-    "prepare": "lefthook install",
     "start": "bun run src/main.ts",
     "start:dev": "bun --watch src/main.ts",
     "build": "nest build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"*.ts\" \"*.mjs\"",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "lint:boundaries": "eslint src",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
@@ -27,7 +26,8 @@
     "db:status": "prisma migration status",
     "db:reset": "bun -e 'await Bun.sql.unsafe(`DROP SCHEMA IF EXISTS public CASCADE`); await Bun.sql.unsafe(`DROP SCHEMA IF EXISTS prisma_contract CASCADE`); await Bun.sql.unsafe(`CREATE SCHEMA public`)' && prisma db migrate --no-interactive",
     "db:verify": "prisma db verify",
-    "postinstall": "prisma contract emit && prisma skills sync"
+    "db:skills": "prisma skills sync",
+    "postinstall": "prisma contract emit"
   },
   "dependencies": {
     "@nestjs/common": "12.0.1",
@@ -58,7 +58,6 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@eslint/js": "10.0.1",
     "@nestjs/cli": "^12.0.0",
     "@nestjs/testing": "12.0.1",
     "@swc/core": "1.16.1",
@@ -69,10 +68,6 @@
     "@types/supertest": "7.2.1",
     "eslint": "10.9.1",
     "eslint-plugin-boundaries": "7.2.0",
-    "globals": "17.11.0",
-    "lefthook": "^2.1.12",
-    "prettier": "3.9.6",
-    "prettier-plugin-organize-imports": "^4.3.0",
     "supertest": "7.2.2",
     "testcontainers": "12.1.0",
     "typescript": "6.0.3",

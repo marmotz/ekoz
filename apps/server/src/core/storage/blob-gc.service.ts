@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, type OnApplicationShutdown, type OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  type OnApplicationShutdown,
+  type OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '../config/config.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Blob } from './blob.service.js';
@@ -21,12 +27,14 @@ export class BlobGcService implements OnModuleInit, OnApplicationShutdown {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    @Inject(STORAGE_DRIVER) private readonly driver: StorageDriver
+    @Inject(STORAGE_DRIVER) private readonly driver: StorageDriver,
   ) {}
 
   onModuleInit(): void {
     this.timer = setInterval(() => {
-      void this.sweep().catch((error) => this.logger.error(`Blob GC sweep failed: ${(error as Error).message}`));
+      void this.sweep().catch((error) =>
+        this.logger.error(`Blob GC sweep failed: ${(error as Error).message}`),
+      );
     }, SWEEP_INTERVAL_MS);
     this.timer.unref?.();
   }

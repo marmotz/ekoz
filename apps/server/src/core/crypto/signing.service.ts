@@ -1,5 +1,5 @@
-import { Injectable, Logger, Optional, type OnModuleInit } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Injectable, Logger, type OnModuleInit, Optional } from '@nestjs/common';
 import { ConfigService } from '../config/config.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -67,7 +67,7 @@ export class SigningService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    @Optional() secretBox: SecretBox | null = null
+    @Optional() secretBox: SecretBox | null = null,
   ) {
     this.secretBoxInstance = secretBox;
   }
@@ -106,15 +106,22 @@ export class SigningService implements OnModuleInit {
     const overlapMs = this.config.get('signing.key_overlap_seconds') * 1000;
     const now = Date.now();
     const rows = (await this.prisma.orm.public.ServerSigningKey.where((k) =>
-      k.activatedAt.isNotNull()
+      k.activatedAt.isNotNull(),
     ).all()) as SigningKeyRow[];
 
     return rows
       .map((row) => {
         const validUntil =
-          row.retiredAt === null ? null : new Date(Date.parse(row.retiredAt) + overlapMs).toISOString();
+          row.retiredAt === null
+            ? null
+            : new Date(Date.parse(row.retiredAt) + overlapMs).toISOString();
 
-        return { id: row.id, publicKey: row.publicKey, validFrom: row.activatedAt as string, validUntil };
+        return {
+          id: row.id,
+          publicKey: row.publicKey,
+          validFrom: row.activatedAt as string,
+          validUntil,
+        };
       })
       .filter((key) => key.validUntil === null || Date.parse(key.validUntil) > now)
       .sort((a, b) => {
@@ -130,12 +137,18 @@ export class SigningService implements OnModuleInit {
     const active = row ?? (await this.insertActiveKey());
     const privateKey = privateKeyFromDer(this.secretBox.open(active.privateKeyEnc));
 
-    return { keyId: active.id, algorithm: active.algorithm, signature: ed25519Sign(privateKey, bytes) };
+    return {
+      keyId: active.id,
+      algorithm: active.algorithm,
+      signature: ed25519Sign(privateKey, bytes),
+    };
   }
 
   /** Verify `sig` over `bytes` against the key `keyId` (active or still-published). */
   async verify(keyId: string, bytes: Uint8Array, sig: Uint8Array): Promise<boolean> {
-    const row = (await this.prisma.orm.public.ServerSigningKey.where({ id: keyId }).first()) as SigningKeyRow | null;
+    const row = (await this.prisma.orm.public.ServerSigningKey.where({
+      id: keyId,
+    }).first()) as SigningKeyRow | null;
     if (!row) {
       return false;
     }
@@ -165,7 +178,7 @@ export class SigningService implements OnModuleInit {
     const overlapMs = this.config.get('signing.key_overlap_seconds') * 1000;
     const cutoff = new Date(Date.now() - overlapMs).toISOString();
     const stale = (await this.prisma.orm.public.ServerSigningKey.where((k) =>
-      k.retiredAt.lt(cutoff)
+      k.retiredAt.lt(cutoff),
     ).all()) as SigningKeyRow[];
 
     for (const row of stale) {

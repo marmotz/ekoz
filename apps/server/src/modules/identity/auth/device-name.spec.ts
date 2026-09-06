@@ -10,10 +10,12 @@ describe('deriveDeviceName (unit)', () => {
   it('names browser + OS', () => {
     expect(
       deriveDeviceName(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
-      )
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+      ),
     ).toBe('Chrome on Windows');
-    expect(deriveDeviceName('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Firefox/121.0')).toBe('Firefox on macOS');
+    expect(deriveDeviceName('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Firefox/121.0')).toBe(
+      'Firefox on macOS',
+    );
   });
 
   it('recognises the native app and curl', () => {

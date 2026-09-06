@@ -23,13 +23,15 @@ describe('AuditService (integration)', () => {
   });
 
   it('persists an entry with a generated ULID id and server timestamp', async () => {
-    await runWithRequestContext({ requestId: 'r1', clientIp: '198.51.100.4', userId: 'user-42' }, () =>
-      service.record({
-        action: 'identity.user_registered',
-        targetType: 'user',
-        targetId: 'user-42',
-        metadata: { via: 'invite' },
-      })
+    await runWithRequestContext(
+      { requestId: 'r1', clientIp: '198.51.100.4', userId: 'user-42' },
+      () =>
+        service.record({
+          action: 'identity.user_registered',
+          targetType: 'user',
+          targetId: 'user-42',
+          metadata: { via: 'invite' },
+        }),
     );
 
     const row = await expectAuditEntry({ orm: database.db.orm }, 'identity.user_registered', {
@@ -45,7 +47,10 @@ describe('AuditService (integration)', () => {
 
   it('records a system action when there is no request context', async () => {
     await service.record({ action: 'server.migrated' });
-    await expectAuditEntry({ orm: database.db.orm }, 'server.migrated', { actorUserId: null, actorIp: null });
+    await expectAuditEntry({ orm: database.db.orm }, 'server.migrated', {
+      actorUserId: null,
+      actorIp: null,
+    });
   });
 
   it('expectNoAuditEntry passes for an action never recorded', async () => {

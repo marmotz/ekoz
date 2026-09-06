@@ -15,7 +15,7 @@ export default definePrismaConfig({
     contract: './src/core/prisma/contract.prisma',
     output: './src/core/prisma/generated',
     db: {
-      connection: process.env['DATABASE_URL'],
+      connection: process.env.DATABASE_URL,
     },
     migrations: {
       dir: './prisma/migrations',

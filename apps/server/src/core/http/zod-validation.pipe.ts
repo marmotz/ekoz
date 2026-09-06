@@ -1,4 +1,4 @@
-import { Injectable, type ArgumentMetadata, type PipeTransform } from '@nestjs/common';
+import { type ArgumentMetadata, Injectable, type PipeTransform } from '@nestjs/common';
 import type { ZodType } from 'zod';
 import { ValidationFailedError } from './domain-error.js';
 import type { ValidationIssue } from './problem-details.js';

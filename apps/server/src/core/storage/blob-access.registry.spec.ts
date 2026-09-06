@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { BlobAccessRegistry } from './blob-access.registry.js';
 import type { Blob } from './blob.service.js';
+import { BlobAccessRegistry } from './blob-access.registry.js';
 
 const blob = {
   id: 'blb_1',

@@ -19,8 +19,8 @@ import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { AvatarNotFoundError, AvatarRejectedError } from '../identity.errors.js';
 import type { UploadedAvatar } from './avatar.js';
-import { UpdateProfileSchema, type UpdateProfileBody } from './profile.dto.js';
-import { ProfileService, type MeView, type PublicProfileView } from './profile.service.js';
+import { type UpdateProfileBody, UpdateProfileSchema } from './profile.dto.js';
+import { type MeView, ProfileService, type PublicProfileView } from './profile.service.js';
 
 /**
  * The authenticated account's own profile (technical.md §13, issue #19).
@@ -38,7 +38,7 @@ export class MeController {
   @Patch('profile')
   updateProfile(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(UpdateProfileSchema)) body: UpdateProfileBody
+    @Body(new ZodValidationPipe(UpdateProfileSchema)) body: UpdateProfileBody,
   ): Promise<MeView> {
     return this.profiles.updateProfile(principal.userId, body);
   }
@@ -47,7 +47,7 @@ export class MeController {
   @UseInterceptors(FileInterceptor('file'))
   uploadAvatar(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @UploadedFile() file: UploadedAvatar | undefined
+    @UploadedFile() file: UploadedAvatar | undefined,
   ): Promise<{ avatarUrl: string }> {
     if (!file) {
       throw new AvatarRejectedError('No file was uploaded (expected multipart field "file").');

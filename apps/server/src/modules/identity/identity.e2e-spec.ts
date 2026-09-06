@@ -52,13 +52,18 @@ describe('identity — accounts, auth, sessions (integration)', () => {
 
   it('rejects a duplicate identifier / email', async () => {
     await expect(
-      app.get(AccountService).createAccount({ name: 'alice', email: 'x@y.co', password, displayName: 'X' })
+      app
+        .get(AccountService)
+        .createAccount({ name: 'alice', email: 'x@y.co', password, displayName: 'X' }),
     ).rejects.toMatchObject({ code: 'identity.username_taken' });
   });
 
   it('logs in with the bare name, the full name/server, and the email', async () => {
     for (const identifier of ['alice', 'alice/ekoz.example.com', 'alice@example.com']) {
-      const res = await request(server()).post('/auth/login').send({ identifier, password }).expect(200);
+      const res = await request(server())
+        .post('/auth/login')
+        .send({ identifier, password })
+        .expect(200);
       expect(res.body.accessToken).toMatch(/^[\w-]+\.[\w-]+\.[\w-]+$/);
       expect(res.body.refreshToken).toBeTypeOf('string');
       expect(res.body.session).toMatchObject({ current: true, deviceName: expect.any(String) });
@@ -66,8 +71,14 @@ describe('identity — accounts, auth, sessions (integration)', () => {
   });
 
   it('rejects a wrong password and an unknown identifier the same way', async () => {
-    await request(server()).post('/auth/login').send({ identifier: 'alice', password: 'nope' }).expect(401);
-    await request(server()).post('/auth/login').send({ identifier: 'ghost', password: 'nope' }).expect(401);
+    await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'alice', password: 'nope' })
+      .expect(401);
+    await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'ghost', password: 'nope' })
+      .expect(401);
   });
 
   it('derives a device name from the User-Agent when none is given', async () => {
@@ -82,7 +93,10 @@ describe('identity — accounts, auth, sessions (integration)', () => {
   it('guards a protected route and accepts a valid access token', async () => {
     await request(server()).get('/sessions').expect(401);
 
-    const login = await request(server()).post('/auth/login').send({ identifier: 'alice', password }).expect(200);
+    const login = await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'alice', password })
+      .expect(200);
     const list = await request(server())
       .get('/sessions')
       .set('Authorization', `Bearer ${login.body.accessToken}`)
@@ -98,15 +112,24 @@ describe('identity — accounts, auth, sessions (integration)', () => {
       .expect(200);
     const first = login.body.refreshToken;
 
-    const rotated = await request(server()).post('/auth/refresh').send({ refreshToken: first }).expect(200);
+    const rotated = await request(server())
+      .post('/auth/refresh')
+      .send({ refreshToken: first })
+      .expect(200);
     expect(rotated.body.refreshToken).not.toBe(first);
     expect(rotated.body.accessToken).toBeTypeOf('string');
 
     // Replaying the consumed token trips reuse detection and kills the session.
-    const reuse = await request(server()).post('/auth/refresh').send({ refreshToken: first }).expect(401);
+    const reuse = await request(server())
+      .post('/auth/refresh')
+      .send({ refreshToken: first })
+      .expect(401);
     expect(reuse.body.code ?? reuse.body.type).toContain('refresh_reuse');
 
-    await request(server()).post('/auth/refresh').send({ refreshToken: rotated.body.refreshToken }).expect(401);
+    await request(server())
+      .post('/auth/refresh')
+      .send({ refreshToken: rotated.body.refreshToken })
+      .expect(401);
   });
 
   it('renames and revokes sessions, and revokes all others', async () => {
@@ -144,9 +167,18 @@ describe('identity — accounts, auth, sessions (integration)', () => {
 
   it('logout revokes the current session and blocks its access token', async () => {
     const s = await login('Logout test');
-    await request(server()).post('/auth/logout').set('Authorization', `Bearer ${s.accessToken}`).expect(204);
-    await request(server()).get('/sessions').set('Authorization', `Bearer ${s.accessToken}`).expect(401);
-    await request(server()).post('/auth/refresh').send({ refreshToken: s.refreshToken }).expect(401);
+    await request(server())
+      .post('/auth/logout')
+      .set('Authorization', `Bearer ${s.accessToken}`)
+      .expect(204);
+    await request(server())
+      .get('/sessions')
+      .set('Authorization', `Bearer ${s.accessToken}`)
+      .expect(401);
+    await request(server())
+      .post('/auth/refresh')
+      .send({ refreshToken: s.refreshToken })
+      .expect(401);
   });
 
   async function login(deviceName: string): Promise<{

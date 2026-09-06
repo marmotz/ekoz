@@ -41,7 +41,7 @@ export function isValidServerDomain(value: string): boolean {
 export function assertValidServerDomain(value: string): void {
   if (!isValidServerDomain(value)) {
     throw new Error(
-      `Invalid "server.domain" (${value}): must be a lower-cased public FQDN, not an IP address or localhost.`
+      `Invalid "server.domain" (${value}): must be a lower-cased public FQDN, not an IP address or localhost.`,
     );
   }
 }

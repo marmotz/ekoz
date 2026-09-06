@@ -1,8 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { sha256Hex } from '../../../core/crypto/hashing.js';
-import { STREAM_TICKET_STORE, type StreamTicketBinding, type StreamTicketStore } from './stream-ticket.store.js';
+import {
+  STREAM_TICKET_STORE,
+  type StreamTicketBinding,
+  type StreamTicketStore,
+} from './stream-ticket.store.js';
 
 /** Result of {@link TicketService.issue}: the plaintext ticket and its TTL. */
 export interface IssuedStreamTicket {
@@ -23,7 +27,7 @@ export interface IssuedStreamTicket {
 export class TicketService {
   constructor(
     @Inject(STREAM_TICKET_STORE) private readonly store: StreamTicketStore,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {}
 
   /** Mint a single-use ticket for `binding`. Returns the plaintext once. */

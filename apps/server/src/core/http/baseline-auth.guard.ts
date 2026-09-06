@@ -1,4 +1,4 @@
-import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 
@@ -14,7 +14,10 @@ export class BaselineAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     // Read for its side effect of documenting the seam; result unused while the
     // baseline is allow-all.
-    this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
+    this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     return true;
   }

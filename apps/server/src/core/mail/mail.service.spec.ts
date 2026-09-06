@@ -21,7 +21,9 @@ function fakes() {
   const EmailMessage = {
     where(filter: Partial<Row>) {
       const match = (r: Row) =>
-        Object.entries(filter).every(([k, v]) => (r as unknown as Record<string, unknown>)[k] === v);
+        Object.entries(filter).every(
+          ([k, v]) => (r as unknown as Record<string, unknown>)[k] === v,
+        );
 
       return {
         first: async () => rows.find(match) ?? null,
@@ -47,7 +49,11 @@ function fakes() {
   } as unknown as MetricsService;
   const config = {
     get: (key: string) =>
-      ({ 'server.domain': 'chat.example', 'server.web_url': 'https://chat.example', 'email.retry_base_ms': 1 })[key],
+      ({
+        'server.domain': 'chat.example',
+        'server.web_url': 'https://chat.example',
+        'email.retry_base_ms': 1,
+      })[key],
   } as unknown as ConfigService;
 
   return { rows, prisma, audit, metrics, config };
@@ -62,18 +68,35 @@ describe('MailService (unit)', () => {
     const service = new MailService(f.prisma, f.config, f.audit, mailer, f.metrics);
     service.registerTemplate('greeting', template);
 
-    await service.send({ to: 'a@b.co', template: 'greeting', vars: { name: 'Sam' }, category: 'test' });
+    await service.send({
+      to: 'a@b.co',
+      template: 'greeting',
+      vars: { name: 'Sam' },
+      category: 'test',
+    });
 
     expect(mailer.send).toHaveBeenCalledWith(
-      expect.objectContaining({ to: 'a@b.co', subject: 'Hi Sam', text: expect.stringContaining('Hello Sam') })
+      expect.objectContaining({
+        to: 'a@b.co',
+        subject: 'Hi Sam',
+        text: expect.stringContaining('Hello Sam'),
+      }),
     );
     expect(f.rows[0]?.sentAt).toBeTypeOf('string');
   });
 
   it('throws for an unknown template', async () => {
     const f = fakes();
-    const service = new MailService(f.prisma, f.config, f.audit, { send: vi.fn(), verify: vi.fn() }, f.metrics);
-    await expect(service.send({ to: 'a@b.co', template: 'nope', vars: {}, category: 'x' })).rejects.toThrow(/unknown/);
+    const service = new MailService(
+      f.prisma,
+      f.config,
+      f.audit,
+      { send: vi.fn(), verify: vi.fn() },
+      f.metrics,
+    );
+    await expect(
+      service.send({ to: 'a@b.co', template: 'nope', vars: {}, category: 'x' }),
+    ).rejects.toThrow(/unknown/);
   });
 
   it('merges an owner template override over the registered default', async () => {
@@ -83,11 +106,19 @@ describe('MailService (unit)', () => {
     const service = new MailService(f.prisma, f.config, f.audit, mailer, f.metrics, overrides);
     service.registerTemplate('greeting', template);
 
-    await service.send({ to: 'a@b.co', template: 'greeting', vars: { name: 'Sam' }, category: 'test' });
+    await service.send({
+      to: 'a@b.co',
+      template: 'greeting',
+      vars: { name: 'Sam' },
+      category: 'test',
+    });
 
     expect(overrides.resolve).toHaveBeenCalledWith('greeting');
     expect(mailer.send).toHaveBeenCalledWith(
-      expect.objectContaining({ subject: 'Bienvenue Sam', text: expect.stringContaining('Hello Sam') })
+      expect.objectContaining({
+        subject: 'Bienvenue Sam',
+        text: expect.stringContaining('Hello Sam'),
+      }),
     );
   });
 
@@ -96,7 +127,13 @@ describe('MailService (unit)', () => {
     const mailer: Mailer = { send: vi.fn().mockResolvedValue(undefined), verify: vi.fn() };
     const service = new MailService(f.prisma, f.config, f.audit, mailer, f.metrics);
     service.registerTemplate('greeting', template);
-    const args = { to: 'a@b.co', template: 'greeting', vars: { name: 'S' }, category: 'test', dedupeKey: 'k1' };
+    const args = {
+      to: 'a@b.co',
+      template: 'greeting',
+      vars: { name: 'S' },
+      category: 'test',
+      dedupeKey: 'k1',
+    };
 
     await service.send(args);
     await service.send(args);
@@ -107,11 +144,25 @@ describe('MailService (unit)', () => {
 
   it('retries with backoff and succeeds on a later attempt', async () => {
     const f = fakes();
-    const send = vi.fn().mockRejectedValueOnce(new Error('greylisted')).mockResolvedValueOnce(undefined);
-    const service = new MailService(f.prisma, f.config, f.audit, { send, verify: vi.fn() }, f.metrics);
+    const send = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('greylisted'))
+      .mockResolvedValueOnce(undefined);
+    const service = new MailService(
+      f.prisma,
+      f.config,
+      f.audit,
+      { send, verify: vi.fn() },
+      f.metrics,
+    );
     service.registerTemplate('greeting', template);
 
-    await service.send({ to: 'a@b.co', template: 'greeting', vars: { name: 'S' }, category: 'test' });
+    await service.send({
+      to: 'a@b.co',
+      template: 'greeting',
+      vars: { name: 'S' },
+      category: 'test',
+    });
     await service.onIdle();
 
     expect(send).toHaveBeenCalledTimes(2);
@@ -122,15 +173,29 @@ describe('MailService (unit)', () => {
   it('records an email.failed audit entry after exhausting attempts', async () => {
     const f = fakes();
     const send = vi.fn().mockRejectedValue(new Error('relay down'));
-    const service = new MailService(f.prisma, f.config, f.audit, { send, verify: vi.fn() }, f.metrics);
+    const service = new MailService(
+      f.prisma,
+      f.config,
+      f.audit,
+      { send, verify: vi.fn() },
+      f.metrics,
+    );
     service.registerTemplate('greeting', template);
 
-    await service.send({ to: 'a@b.co', template: 'greeting', vars: { name: 'S' }, category: 'security' });
+    await service.send({
+      to: 'a@b.co',
+      template: 'greeting',
+      vars: { name: 'S' },
+      category: 'security',
+    });
     await service.onIdle();
 
     expect(send).toHaveBeenCalledTimes(4);
     expect(f.audit.record).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'email.failed', metadata: expect.objectContaining({ attempts: 4 }) })
+      expect.objectContaining({
+        action: 'email.failed',
+        metadata: expect.objectContaining({ attempts: 4 }),
+      }),
     );
     expect(f.rows[0]?.sentAt).toBeNull();
   });

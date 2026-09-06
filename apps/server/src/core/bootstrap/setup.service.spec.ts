@@ -19,10 +19,15 @@ function fakes(ownerExists = false) {
   const SetupToken = {
     where(arg: unknown) {
       const pred =
-        typeof arg === 'function' ? (arg as (t: { consumedAt: { isNull: () => boolean } }) => unknown) : null;
+        typeof arg === 'function'
+          ? (arg as (t: { consumedAt: { isNull: () => boolean } }) => unknown)
+          : null;
       const filter = typeof arg === 'object' && arg ? (arg as Partial<TokenRow>) : null;
       const match = (r: TokenRow) => {
-        if (filter) return Object.entries(filter).every(([k, v]) => (r as unknown as Record<string, unknown>)[k] === v);
+        if (filter)
+          return Object.entries(filter).every(
+            ([k, v]) => (r as unknown as Record<string, unknown>)[k] === v,
+          );
         if (pred) return r.consumedAt === null; // only `consumedAt.isNull()` is used
         return true;
       };
@@ -100,14 +105,22 @@ describe('SetupService (unit)', () => {
     const f = fakes(false);
     const service = new SetupService(f.prisma, f.audit, f.ownerLookup, {});
     // seed a known token
-    await f.prisma.orm.public.SetupToken.create({ tokenHash: sha256Hex('correct-horse'), consumedAt: null });
+    await f.prisma.orm.public.SetupToken.create({
+      tokenHash: sha256Hex('correct-horse'),
+      consumedAt: null,
+    });
 
     expect(await service.isValidToken('correct-horse')).toBe(true);
     expect(await service.isValidToken('wrong')).toBe(false);
   });
 
   it('assertOpen throws 410 once closed', async () => {
-    const service = new SetupService(fakes(true).prisma, fakes().audit, { ownerExists: async () => true }, {});
+    const service = new SetupService(
+      fakes(true).prisma,
+      fakes().audit,
+      { ownerExists: async () => true },
+      {},
+    );
     await expect(service.assertOpen()).rejects.toBeInstanceOf(DomainError);
     await service.assertOpen().catch((e: DomainError) => expect(e.status).toBe(410));
   });
@@ -121,7 +134,7 @@ describe('SetupService (unit)', () => {
 
     expect(f.rows[0]?.consumedAt).toBeTypeOf('string');
     expect(f.audit.record).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'server.initialized', actorUserId: 'user-1' })
+      expect.objectContaining({ action: 'server.initialized', actorUserId: 'user-1' }),
     );
   });
 });

@@ -6,7 +6,7 @@
  * can correlate a client-side failure with a server log line.
  */
 
-export const REQUEST_ID_HEADER = "X-Request-Id";
+export const REQUEST_ID_HEADER = 'X-Request-Id';
 
 /** Generate a fresh request id (UUID v4). */
 export function newRequestId(): string {
@@ -23,9 +23,5 @@ export function resolveRequestId(
   responseHeaders?: Headers,
   problemRequestId?: string,
 ): string {
-  return (
-    problemRequestId ??
-    responseHeaders?.get(REQUEST_ID_HEADER) ??
-    sent
-  );
+  return problemRequestId ?? responseHeaders?.get(REQUEST_ID_HEADER) ?? sent;
 }

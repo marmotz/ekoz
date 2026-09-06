@@ -7,15 +7,14 @@
  * major this SDK supports.
  */
 
-import { ProtocolMismatchError } from "../transport/errors.js";
-import { toNetworkError } from "../transport/problem.js";
-import { decodeProblem } from "../transport/problem.js";
-import { newRequestId } from "../transport/request-context.js";
+import { ProtocolMismatchError } from '../transport/errors.js';
+import { decodeProblem, toNetworkError } from '../transport/problem.js';
+import { newRequestId } from '../transport/request-context.js';
 
 /** Protocol majors this SDK is compatible with. */
-export const SUPPORTED_PROTOCOL_MAJORS = ["0"] as const;
+export const SUPPORTED_PROTOCOL_MAJORS = ['0'] as const;
 
-export const WELL_KNOWN_PATH = "/.well-known/ekoz";
+export const WELL_KNOWN_PATH = '/.well-known/ekoz';
 
 /** Shape of the `/.well-known/ekoz` document (see server discovery.service.ts). */
 export interface DiscoveryDocument {
@@ -40,11 +39,11 @@ export interface DiscoveryOptions {
 }
 
 function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
+  return value.replace(/\/+$/, '');
 }
 
 function normaliseServer(server: string): string {
-  return trimTrailingSlash(server.replace(/^https?:\/\//, ""));
+  return trimTrailingSlash(server.replace(/^https?:\/\//, ''));
 }
 
 export class Discovery {
@@ -58,19 +57,13 @@ export class Discovery {
 
   constructor(options: DiscoveryOptions) {
     if (!options.server && !options.resolveApiUrl) {
-      throw new TypeError(
-        "discovery requires either `server` or `resolveApiUrl`",
-      );
+      throw new TypeError('discovery requires either `server` or `resolveApiUrl`');
     }
-    this.#server = options.server
-      ? normaliseServer(options.server)
-      : undefined;
+    this.#server = options.server ? normaliseServer(options.server) : undefined;
     this.#resolveApiUrl = options.resolveApiUrl;
     const fetchImpl = options.fetch ?? globalThis.fetch;
-    if (typeof fetchImpl !== "function") {
-      throw new TypeError(
-        "global fetch is unavailable; pass options.fetch explicitly",
-      );
+    if (typeof fetchImpl !== 'function') {
+      throw new TypeError('global fetch is unavailable; pass options.fetch explicitly');
     }
     this.#fetch = (input, init) => fetchImpl(input, init);
   }
@@ -83,9 +76,7 @@ export class Discovery {
   /** The raw discovery document. Throws when `resolveApiUrl` is in use. */
   async get(): Promise<DiscoveryDocument> {
     if (this.#resolveApiUrl) {
-      throw new Error(
-        "discovery document is unavailable when `resolveApiUrl` is set",
-      );
+      throw new Error('discovery document is unavailable when `resolveApiUrl` is set');
     }
     if (this.#document) return this.#document;
     this.#pending ??= this.#resolve();
@@ -121,7 +112,7 @@ export class Discovery {
     let response: Response;
     try {
       response = await this.#fetch(url, {
-        headers: { Accept: "application/json" },
+        headers: { Accept: 'application/json' },
       });
     } catch (cause) {
       throw toNetworkError(cause, requestId);

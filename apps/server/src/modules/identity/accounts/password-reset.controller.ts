@@ -4,10 +4,10 @@ import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
 import {
-  ConfirmPasswordResetSchema,
-  RequestPasswordResetSchema,
   type ConfirmPasswordResetBody,
+  ConfirmPasswordResetSchema,
   type RequestPasswordResetBody,
+  RequestPasswordResetSchema,
 } from './password-reset.dto.js';
 import { PasswordResetService } from './password-reset.service.js';
 
@@ -25,7 +25,7 @@ export class PasswordResetController {
   @HttpCode(202)
   async request(
     @Body(new ZodValidationPipe(RequestPasswordResetSchema)) body: RequestPasswordResetBody,
-    @Req() request: Request
+    @Req() request: Request,
   ): Promise<{ accepted: true }> {
     await this.passwordReset.request(body.email, request.ip ?? null);
 
@@ -36,7 +36,7 @@ export class PasswordResetController {
   @Public()
   @HttpCode(204)
   async confirm(
-    @Body(new ZodValidationPipe(ConfirmPasswordResetSchema)) body: ConfirmPasswordResetBody
+    @Body(new ZodValidationPipe(ConfirmPasswordResetSchema)) body: ConfirmPasswordResetBody,
   ): Promise<void> {
     await this.passwordReset.confirm(body.token, body.newPassword);
   }

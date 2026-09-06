@@ -71,7 +71,10 @@ function formatExtras(log: Record<string, unknown>): string {
 
 /** Format a single parsed log record into its final display line(s). */
 export function formatLine(log: Record<string, unknown>): string {
-  const level = LEVELS[String(log['level'])] ?? { label: String(log['level'] ?? '?').toUpperCase(), color: '37' };
+  const level = LEVELS[String(log['level'])] ?? {
+    label: String(log['level'] ?? '?').toUpperCase(),
+    color: '37',
+  };
   const time = paint('90', `[${formatTime(log['time'])}]`);
   const label = paint(level.color, level.label);
   const context = log['context'] ? ` ${paint('36', `[${String(log['context'])}]`)}` : '';

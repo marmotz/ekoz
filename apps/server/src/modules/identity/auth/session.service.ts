@@ -33,7 +33,7 @@ export class SessionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    private readonly revoked: RevokedSessionRegistry
+    private readonly revoked: RevokedSessionRegistry,
   ) {}
 
   async createSession(input: CreateSessionInput): Promise<SessionRecord> {
@@ -56,7 +56,9 @@ export class SessionService {
 
   /** An active (non-revoked) session by id, or `null`. */
   async getActive(sessionId: string): Promise<SessionRecord | null> {
-    const row = (await this.prisma.orm.public.Session.first({ id: sessionId })) as SessionRow | null;
+    const row = (await this.prisma.orm.public.Session.first({
+      id: sessionId,
+    })) as SessionRow | null;
     if (!row || row.revokedAt !== null) {
       return null;
     }
@@ -90,7 +92,9 @@ export class SessionService {
 
   /** Revoke one session (idempotent). Adds the `sid` to the denylist. */
   async revoke(sessionId: string, reason = 'user_revoked'): Promise<void> {
-    const row = (await this.prisma.orm.public.Session.first({ id: sessionId })) as SessionRow | null;
+    const row = (await this.prisma.orm.public.Session.first({
+      id: sessionId,
+    })) as SessionRow | null;
     if (!row) {
       return;
     }
@@ -111,7 +115,10 @@ export class SessionService {
   }
 
   /** Revoke every active session of `userId`, optionally sparing `exceptSessionId`. */
-  async revokeAllForUser(userId: string, options: { exceptSessionId?: string; reason?: string } = {}): Promise<number> {
+  async revokeAllForUser(
+    userId: string,
+    options: { exceptSessionId?: string; reason?: string } = {},
+  ): Promise<number> {
     const rows = (await this.prisma.orm.public.Session.where({ userId })
       .where((s) => s.revokedAt.isNull())
       .all()) as SessionRow[];
@@ -130,7 +137,9 @@ export class SessionService {
   }
 
   private async assertOwned(userId: string, sessionId: string): Promise<void> {
-    const row = (await this.prisma.orm.public.Session.first({ id: sessionId })) as SessionRow | null;
+    const row = (await this.prisma.orm.public.Session.first({
+      id: sessionId,
+    })) as SessionRow | null;
     if (!row || row.userId !== userId) {
       throw new SessionNotFoundError();
     }

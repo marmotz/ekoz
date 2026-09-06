@@ -4,8 +4,12 @@ import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
-import { CreateInvitationSchema, type CreateInvitationBody } from './invitation.dto.js';
-import { InvitationService, type CreatedInvitation, type InvitationView } from './invitation.service.js';
+import { type CreateInvitationBody, CreateInvitationSchema } from './invitation.dto.js';
+import {
+  type CreatedInvitation,
+  InvitationService,
+  type InvitationView,
+} from './invitation.service.js';
 
 /**
  * Invitation management (technical.md §8, issue #15). Owners only for this
@@ -16,14 +20,14 @@ import { InvitationService, type CreatedInvitation, type InvitationView } from '
 export class InvitationsController {
   constructor(
     private readonly invitations: InvitationService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
   ) {}
 
   @Post()
   @HttpCode(201)
   async create(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(CreateInvitationSchema)) body: CreateInvitationBody
+    @Body(new ZodValidationPipe(CreateInvitationSchema)) body: CreateInvitationBody,
   ): Promise<CreatedInvitation> {
     const created = await this.invitations.create(principal.userId, {
       email: body.email ?? null,
@@ -48,7 +52,10 @@ export class InvitationsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async revoke(@CurrentPrincipal() principal: AuthPrincipal, @Param('id') id: string): Promise<void> {
+  async revoke(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id') id: string,
+  ): Promise<void> {
     await this.invitations.revoke(id);
     await this.audit.record({
       action: 'identity.invitation_revoked',

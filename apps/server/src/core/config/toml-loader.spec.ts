@@ -6,13 +6,19 @@ import { flattenTomlObject, loadTomlConfig } from './toml-loader.js';
 
 describe('TOML loader (unit)', () => {
   it('flattens nested tables to dotted keys', () => {
-    const flat = flattenTomlObject({ server: { domain: 'x.test' }, storage: { local: { path: '/b' } } }, {});
+    const flat = flattenTomlObject(
+      { server: { domain: 'x.test' }, storage: { local: { path: '/b' } } },
+      {},
+    );
     expect(flat.get('server.domain')).toBe('x.test');
     expect(flat.get('storage.local.path')).toBe('/b');
   });
 
   it('interpolates ${ENV_VAR} in string values', () => {
-    const flat = flattenTomlObject({ database: { url: 'postgres://${DB_HOST}/db' } }, { DB_HOST: 'db.internal' });
+    const flat = flattenTomlObject(
+      { database: { url: 'postgres://${DB_HOST}/db' } },
+      { DB_HOST: 'db.internal' },
+    );
     expect(flat.get('database.url')).toBe('postgres://db.internal/db');
   });
 

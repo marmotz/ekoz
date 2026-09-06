@@ -1,10 +1,20 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
 import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { OwnerGuard } from '../guards/owner.guard.js';
-import { ChangeUsernameSchema, type ChangeUsernameBody } from './username.dto.js';
-import { UsernameService, type UsernameChangeOutcome } from './username.service.js';
+import { type ChangeUsernameBody, ChangeUsernameSchema } from './username.dto.js';
+import { type UsernameChangeOutcome, UsernameService } from './username.service.js';
 
 /** `PATCH /me/username` — policy-driven identifier change (technical.md §17). */
 @Controller('me/username')
@@ -15,7 +25,7 @@ export class MeUsernameController {
   @Patch()
   change(
     @CurrentPrincipal() principal: AuthPrincipal,
-    @Body(new ZodValidationPipe(ChangeUsernameSchema)) body: ChangeUsernameBody
+    @Body(new ZodValidationPipe(ChangeUsernameSchema)) body: ChangeUsernameBody,
   ): Promise<UsernameChangeOutcome> {
     return this.usernames.changeOwn(principal.userId, body.name);
   }
@@ -35,7 +45,10 @@ export class AdminUsernameRequestsController {
   }
 
   @Post(':id/approve')
-  approve(@Param('id') id: string, @CurrentPrincipal() principal: AuthPrincipal): Promise<{ identifier: string }> {
+  approve(
+    @Param('id') id: string,
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<{ identifier: string }> {
     return this.usernames.approve(id, principal.userId);
   }
 

@@ -32,7 +32,9 @@ class ThingsController {
   }
 
   @Post()
-  create(@Body(new ZodValidationPipe(CreateThingSchema)) body: z.infer<typeof CreateThingSchema>): { name: string } {
+  create(@Body(new ZodValidationPipe(CreateThingSchema)) body: z.infer<typeof CreateThingSchema>): {
+    name: string;
+  } {
     return { name: body.name };
   }
 }
@@ -60,7 +62,10 @@ describe('HTTP conventions (e2e)', () => {
   });
 
   it('echoes a client-supplied X-Request-Id', async () => {
-    const res = await request(app.getHttpServer()).get('/things/ok').set('X-Request-Id', 'client-abc').expect(200);
+    const res = await request(app.getHttpServer())
+      .get('/things/ok')
+      .set('X-Request-Id', 'client-abc')
+      .expect(200);
     expect(res.headers['x-request-id']).toBe('client-abc');
     expect(res.body.requestId).toBe('client-abc');
   });
@@ -68,7 +73,11 @@ describe('HTTP conventions (e2e)', () => {
   it('renders a DomainError as application/problem+json', async () => {
     const res = await request(app.getHttpServer()).get('/things/boom').expect(409);
     expect(res.headers['content-type']).toContain('application/problem+json');
-    expect(res.body).toMatchObject({ code: 'things.exploded', status: 409, detail: 'The thing exploded.' });
+    expect(res.body).toMatchObject({
+      code: 'things.exploded',
+      status: 409,
+      detail: 'The thing exploded.',
+    });
     expect(res.body.requestId).toBe(res.headers['x-request-id']);
   });
 
@@ -85,7 +94,11 @@ describe('HTTP conventions (e2e)', () => {
   });
 
   it('accepts a valid body and returns the parsed value', async () => {
-    await request(app.getHttpServer()).post('/things').send({ name: 'widget' }).expect(201).expect({ name: 'widget' });
+    await request(app.getHttpServer())
+      .post('/things')
+      .send({ name: 'widget' })
+      .expect(201)
+      .expect({ name: 'widget' });
   });
 
   it('maps an unknown route to a not_found problem', async () => {

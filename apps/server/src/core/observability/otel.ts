@@ -1,4 +1,4 @@
-import { diag, DiagLogLevel, metrics as otelMetrics } from '@opentelemetry/api';
+import { DiagLogLevel, diag, metrics as otelMetrics } from '@opentelemetry/api';
 import { PrometheusSerializer } from '@opentelemetry/exporter-prometheus';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -7,12 +7,16 @@ import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MeterProvider, MetricReader } from '@opentelemetry/sdk-metrics';
-import { BatchSpanProcessor, NodeTracerProvider, TraceIdRatioBasedSampler } from '@opentelemetry/sdk-trace-node';
+import {
+  BatchSpanProcessor,
+  NodeTracerProvider,
+  TraceIdRatioBasedSampler,
+} from '@opentelemetry/sdk-trace-node';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 diag.setLogger(
   { error: () => {}, warn: () => {}, info: () => {}, debug: () => {}, verbose: () => {} },
-  DiagLogLevel.NONE
+  DiagLogLevel.NONE,
 );
 
 const SERVICE_NAME = 'ekoz-server';
@@ -76,7 +80,9 @@ export function startTracing(options: TracingOptions): { shutdown: () => Promise
   const provider = new NodeTracerProvider({
     resource: resourceFromAttributes({ [ATTR_SERVICE_NAME]: SERVICE_NAME }),
     sampler: new TraceIdRatioBasedSampler(tracingOn ? options.sampleRatio : 0),
-    spanProcessors: tracingOn ? [new BatchSpanProcessor(new OTLPTraceExporter({ url: options.otlpEndpoint }))] : [],
+    spanProcessors: tracingOn
+      ? [new BatchSpanProcessor(new OTLPTraceExporter({ url: options.otlpEndpoint }))]
+      : [],
   });
   provider.register();
 
@@ -86,7 +92,8 @@ export function startTracing(options: TracingOptions): { shutdown: () => Promise
       tracerProvider: provider,
       instrumentations: [
         new HttpInstrumentation({
-          ignoreIncomingRequestHook: (req) => ['/healthz', '/readyz', '/metrics'].includes(req.url ?? ''),
+          ignoreIncomingRequestHook: (req) =>
+            ['/healthz', '/readyz', '/metrics'].includes(req.url ?? ''),
         }),
         new ExpressInstrumentation(),
         new PgInstrumentation(),

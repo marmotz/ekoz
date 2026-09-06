@@ -1,4 +1,4 @@
-import { HttpException, NotFoundException, type ArgumentsHost } from '@nestjs/common';
+import { type ArgumentsHost, HttpException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import type { NestLoggerService } from '../observability/nest-logger.service.js';
 import { DomainError, ValidationFailedError } from './domain-error.js';
@@ -6,7 +6,12 @@ import { PROBLEM_JSON_CONTENT_TYPE, type ProblemDetails } from './problem-detail
 import { ProblemExceptionFilter } from './problem-exception.filter.js';
 import { runWithRequestContext } from './request-context.js';
 
-function fakeHost(): { host: ArgumentsHost; sent: () => ProblemDetails; status: () => number; type: () => string } {
+function fakeHost(): {
+  host: ArgumentsHost;
+  sent: () => ProblemDetails;
+  status: () => number;
+  type: () => string;
+} {
   let body: ProblemDetails = {} as ProblemDetails;
   let statusCode = 0;
   let contentType = '';
@@ -35,15 +40,25 @@ describe('ProblemExceptionFilter (unit)', () => {
 
   it('renders a DomainError as problem+json with its code and status', () => {
     const f = fakeHost();
-    filter.catch(new DomainError('identity.username_taken', 'That username is taken.', 409), f.host);
+    filter.catch(
+      new DomainError('identity.username_taken', 'That username is taken.', 409),
+      f.host,
+    );
     expect(f.status()).toBe(409);
     expect(f.type()).toBe(PROBLEM_JSON_CONTENT_TYPE);
-    expect(f.sent()).toMatchObject({ code: 'identity.username_taken', status: 409, detail: 'That username is taken.' });
+    expect(f.sent()).toMatchObject({
+      code: 'identity.username_taken',
+      status: 409,
+      detail: 'That username is taken.',
+    });
   });
 
   it('renders a ValidationFailedError as 422 with the errors array', () => {
     const f = fakeHost();
-    filter.catch(new ValidationFailedError([{ path: 'body.email', message: 'Invalid email' }]), f.host);
+    filter.catch(
+      new ValidationFailedError([{ path: 'body.email', message: 'Invalid email' }]),
+      f.host,
+    );
     expect(f.status()).toBe(422);
     expect(f.sent()).toMatchObject({
       code: 'validation_failed',
@@ -62,7 +77,10 @@ describe('ProblemExceptionFilter (unit)', () => {
     const f = fakeHost();
     filter.catch(new Error('boom'), f.host);
     expect(f.status()).toBe(500);
-    expect(f.sent()).toMatchObject({ code: 'internal_error', detail: 'An unexpected error occurred.' });
+    expect(f.sent()).toMatchObject({
+      code: 'internal_error',
+      detail: 'An unexpected error occurred.',
+    });
     expect(logger.error).toHaveBeenCalled();
   });
 

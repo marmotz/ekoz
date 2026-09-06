@@ -8,7 +8,10 @@ import type { Blob } from './blob.service.js';
  * (technical.md §6). Access is granted if **any** registered policy returns
  * `true`.
  */
-export type BlobAccessPolicy = (blob: Blob, context: RequestContext | undefined) => boolean | Promise<boolean>;
+export type BlobAccessPolicy = (
+  blob: Blob,
+  context: RequestContext | undefined,
+) => boolean | Promise<boolean>;
 
 /**
  * Holds the access policies the referencing features contribute. Server-core

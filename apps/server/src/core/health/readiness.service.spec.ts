@@ -4,15 +4,24 @@ import type { PrismaService } from '../prisma/prisma.service.js';
 import type { StorageDriver } from '../storage/storage-driver.js';
 import { ReadinessService } from './readiness.service.js';
 
-function build(overrides: { dbOk?: boolean; schemaOk?: boolean; signingKey?: boolean; storageOk?: boolean }) {
+function build(overrides: {
+  dbOk?: boolean;
+  schemaOk?: boolean;
+  signingKey?: boolean;
+  storageOk?: boolean;
+}) {
   const { dbOk = true, schemaOk = true, signingKey = true, storageOk = true } = overrides;
   const prisma = {
-    healthCheck: vi.fn(dbOk ? async () => undefined : async () => Promise.reject(new Error('pool closed'))),
+    healthCheck: vi.fn(
+      dbOk ? async () => undefined : async () => Promise.reject(new Error('pool closed')),
+    ),
     orm: {
       public: {
         Setting: {
           where: () => ({
-            first: schemaOk ? async () => null : async () => Promise.reject(new Error('schema behind')),
+            first: schemaOk
+              ? async () => null
+              : async () => Promise.reject(new Error('schema behind')),
           }),
         },
       },
@@ -20,7 +29,9 @@ function build(overrides: { dbOk?: boolean; schemaOk?: boolean; signingKey?: boo
   } as unknown as PrismaService;
   const signing = { hasActiveKey: vi.fn(async () => signingKey) } as unknown as SigningService;
   const storage = {
-    healthCheck: vi.fn(storageOk ? async () => undefined : async () => Promise.reject(new Error('read-only fs'))),
+    healthCheck: vi.fn(
+      storageOk ? async () => undefined : async () => Promise.reject(new Error('read-only fs')),
+    ),
   } as unknown as StorageDriver;
 
   return new ReadinessService(prisma, signing, storage);

@@ -38,13 +38,18 @@ describe('PrismaService (unit)', () => {
 
   it('onModuleInit tolerates a pool opened lazily by another module', async () => {
     const service = new PrismaService();
-    const db = (service as unknown as { db: { connect: () => Promise<unknown>; raw: { sql: unknown } } }).db;
+    const db = (
+      service as unknown as { db: { connect: () => Promise<unknown>; raw: { sql: unknown } } }
+    ).db;
 
     db.connect = () =>
       Promise.reject(
-        Object.assign(new Error('Postgres client already connected'), { code: 'DRIVER.ALREADY_CONNECTED' })
+        Object.assign(new Error('Postgres client already connected'), {
+          code: 'DRIVER.ALREADY_CONNECTED',
+        }),
       );
-    (service as unknown as { healthCheck: () => Promise<void> }).healthCheck = () => Promise.resolve();
+    (service as unknown as { healthCheck: () => Promise<void> }).healthCheck = () =>
+      Promise.resolve();
 
     await expect(service.onModuleInit()).resolves.toBeUndefined();
   });
