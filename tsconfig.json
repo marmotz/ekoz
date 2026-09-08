@@ -1,5 +1,15 @@
 {
   "// note": "Solution file for `tsc -b`. Only composite library packages are referenced here. Apps (apps/*) run their own `tsc --noEmit` via their `typecheck` script.",
   "files": [],
-  "references": [{ "path": "packages/sdk" }]
+  "references": [
+    {
+      "path": "packages/sdk"
+    }
+  ],
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "types": ["node"]
+  }
 }

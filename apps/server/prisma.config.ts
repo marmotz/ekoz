@@ -13,7 +13,7 @@ export default definePrismaConfig({
   },
   orm: ormConfig({
     contract: './src/core/prisma/contract.prisma',
-    output: './src/core/prisma/generated',
+    output: './src/core/prisma',
     db: {
       connection: process.env.DATABASE_URL,
     },

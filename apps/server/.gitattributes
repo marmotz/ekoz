@@ -1,9 +1,10 @@
 # Prisma Next emitted artefacts: committed, but flagged generated so diffs and
 # language stats ignore them. Regenerate with `bun run db:contract`.
-src/core/prisma/generated/contract.json linguist-generated
-src/core/prisma/generated/contract.d.ts linguist-generated
-prisma/migrations/**/ops.json linguist-generated
-prisma/migrations/**/migration.json linguist-generated
-prisma/migrations/snapshots/** linguist-generated
+src/core/prisma/contract.json linguist-generated
+src/core/prisma/contract.d.ts linguist-generated
+src/core/prisma/ops.json linguist-generated
+src/core/prisma/migration.json linguist-generated
+prisma/migrations/snapshots/**/contract.json linguist-generated
+prisma/migrations/snapshots/**/contract.d.ts linguist-generated
 
 bun.lock -diff linguist-generated

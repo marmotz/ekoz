@@ -1,6 +1,6 @@
 import postgres from '@prisma/orm-postgres/runtime';
-import type { Contract } from './generated/contract.js';
-import contractJson from './generated/contract.json' with { type: 'json' };
+import type { Contract } from './contract.js';
+import contractJson from './contract.json' with { type: 'json' };
 
 /**
  * Runtime factory for the Prisma Next client.

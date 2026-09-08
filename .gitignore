@@ -28,3 +28,6 @@ apps/server/http/vars.env
 !CLAUDE.md
 !**/AGENTS.md
 !**/CLAUDE.md
+node_modules/
+dist/
+.env

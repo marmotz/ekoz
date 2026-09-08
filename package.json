@@ -6,12 +6,14 @@
     "packages/*",
     "apps/*"
   ],
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.2",
   "engines": {
     "node": ">=24",
     "bun": ">=1.4.0"
   },
   "scripts": {
+    "reset": "bun clean && bun i",
+    "clean": "rm -rf node_modules dist && bun --workspaces clean",
     "build": "bun run --filter '@ekozhq/sdk' build",
     "typecheck": "bun run --filter '*' typecheck",
     "test": "vitest run",
@@ -23,14 +25,18 @@
     "prepare": "lefthook install",
     "release": "bash scripts/release-publish.sh",
     "update:minor": "bun x npm-check-updates -i -t minor -ws",
-    "update:latest": "bun x npm-check-updates -i -t latest -ws"
+    "update:latest": "bun x npm-check-updates -i -t latest -ws",
+    "wa": "bun --cwd=apps/admin",
+    "wc": "bun --cwd=apps/client-web",
+    "ws": "bun --cwd=apps/server",
+    "wk": "bun --cwd=packages/sdk"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.12",
     "@changesets/cli": "3.0.2",
     "@kurotako/gen-zod": "^0.1.0",
     "@kurotako/parser-prisma": "^0.1.0",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.5.0",
     "@vitest/coverage-v8": "^4.1.11",
     "kurotako": "^0.1.0",
     "lefthook": "^2.1.12",

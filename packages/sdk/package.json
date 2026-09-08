@@ -32,6 +32,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "clean": "rm -rf dist node_modules",
     "build": "tsdown",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -39,6 +40,6 @@
     "lint": "biome check ."
   },
   "devDependencies": {
-    "tsdown": "^0.22.14"
+    "tsdown": "^0.23.0"
   }
 }
