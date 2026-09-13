@@ -505,6 +505,7 @@
             "relations": {
               "createdBy": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "createdByUserId"
@@ -686,6 +687,7 @@
             "relations": {
               "session": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "sessionId"
@@ -970,6 +972,7 @@
             "relations": {
               "user": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "userId"
@@ -1298,6 +1301,7 @@
             "relations": {
               "user": {
                 "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
                     "userId"

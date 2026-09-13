@@ -24,6 +24,12 @@ All notable changes to the Ekoz protocol. Format
 - Identity surface (draft): `name/server` identifier rules, auth token model
   (JWT access + rotating opaque refresh, reuse detection), session objects,
   SSE stream ticket.
+- [Identity and profiles](identity.md) fully specified: setup, registration
+  (`open` / `invite` / `admin`), login / refresh / logout, sessions, email
+  verification, password reset, own and public profiles, invitations, owner
+  administration — method, path, request body, success shape and
+  `problem+json` `code` per endpoint, plus a full `auth.*` / `identity.*` code
+  reference table.
 - Conversations surface (draft): `room` object with `type`, capability list and
   permission resolution, `room_event` types and per-room `seq`,
   `GET /sync` and `GET /events` (per-account fan-in feed with its own cursor),

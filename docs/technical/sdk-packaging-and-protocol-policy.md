@@ -10,8 +10,9 @@ settles a set of choices that shape the public API third-party clients will
 bind, how the package is built and distributed, and how a client and a server
 negotiate protocol compatibility.
 
-The protocol "Identity and profiles" section is not written yet; until it is, the
-SDK sources its wire types from the server code.
+The protocol ["Identity and profiles"](../protocol/identity.md) section is now
+written; the SDK's generated wire types (§ Wire types below) are checked
+against it, not the other way round.
 
 ## Decision
 
@@ -63,10 +64,20 @@ SDK sources its wire types from the server code.
 
 ### Wire types
 
-- Until the protocol "Identity and profiles" section exists, the SDK's
-  request/response types are sourced from the server code. When that section
-  lands it becomes the authoritative source and any mismatch is reconciled in
-  `docs/protocol/` first (see [HTTP API conventions](api-conventions.md)).
+- Request/response payload types are **generated**, not hand-written: kurotako
+  (`@kurotako/parser-openapi` + `@kurotako/gen-typescript`) reads
+  [`apps/server/openapi.json`](../../apps/server/openapi.json) and writes
+  `packages/sdk/src/generated/`, committed like the OpenAPI document itself and
+  checked for drift by `bun run check`. `packages/sdk/src/types/wire.ts` is the
+  one hand-written mapping layer: it re-exports only the flat variant of each
+  generated schema (the generator also emits nine Prisma-style
+  Deep/Create/Update/Where/Select variants with no protocol equivalent) under a
+  name with the generator's duplicate `Dto` suffix dropped. No field is
+  redeclared there.
+- A mismatch between `apps/server/openapi.json` (and therefore the generated
+  types) and [`docs/protocol/identity.md`](../protocol/identity.md) is
+  reconciled in `docs/protocol/` first (see
+  [HTTP API conventions](api-conventions.md)), never worked around in the SDK.
 
 ## Consequences
 

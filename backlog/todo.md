@@ -1,4 +1,4 @@
-<!-- backlog-sync 2026-09-06T19:41Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
+<!-- backlog-sync 2026-09-12T20:54Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
 
 # Backlog
 
@@ -25,23 +25,23 @@ _[technical design](features/conversations/technical.md)_ — 0/14 tasks done
 
 ## SDK foundations ·  [overview](features/sdk-foundations/overview.md)
 
-_technical design — see [technical.md](./technical.md)_ — 0/9 tasks done
+_technical design — see [technical.md](features/sdk-foundations/technical.md)_ — 8/9 tasks done
 
 | Done | Issue                                            | Title                                               | Blocked by                                                                                                                                           |
 |------|--------------------------------------------------|-----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [ ]  | [#20](https://github.com/marmotz/ekoz/issues/20) | Session manager, store adapter and lifecycle events | —                                                                                                                                                    |
-| [ ]  | [#21](https://github.com/marmotz/ekoz/issues/21) | Client assembly and wire types                      | [#20](https://github.com/marmotz/ekoz/issues/20)                                                                                                     |
-| [ ]  | [#22](https://github.com/marmotz/ekoz/issues/22) | Setup and auth resource bindings                    | [#21](https://github.com/marmotz/ekoz/issues/21)                                                                                                     |
-| [ ]  | [#23](https://github.com/marmotz/ekoz/issues/23) | Profile, account and sessions resource bindings     | [#21](https://github.com/marmotz/ekoz/issues/21), [#22](https://github.com/marmotz/ekoz/issues/22)                                                   |
-| [ ]  | [#24](https://github.com/marmotz/ekoz/issues/24) | Invitations and admin resource bindings             | [#21](https://github.com/marmotz/ekoz/issues/21), [#22](https://github.com/marmotz/ekoz/issues/22)                                                   |
-| [ ]  | [#25](https://github.com/marmotz/ekoz/issues/25) | Opt-in integration test suite                       | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
-| [ ]  | [#26](https://github.com/marmotz/ekoz/issues/26) | README and usage guide                              | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
-| [ ]  | [#27](https://github.com/marmotz/ekoz/issues/27) | Admin console resource bindings                     | [#24](https://github.com/marmotz/ekoz/issues/24)                                                                                                     |
-| [ ]  | [#39](https://github.com/marmotz/ekoz/issues/39) | Protocol: "Identity and profiles" section           | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
+| [x]  | [#20](https://github.com/marmotz/ekoz/issues/20) | Session manager, store adapter and lifecycle events | —                                                                                                                                                    |
+| [x]  | [#21](https://github.com/marmotz/ekoz/issues/21) | Client assembly and wire types                      | [#20](https://github.com/marmotz/ekoz/issues/20)                                                                                                     |
+| [x]  | [#22](https://github.com/marmotz/ekoz/issues/22) | Setup and auth resource bindings                    | [#21](https://github.com/marmotz/ekoz/issues/21)                                                                                                     |
+| [x]  | [#23](https://github.com/marmotz/ekoz/issues/23) | Profile, account and sessions resource bindings     | [#21](https://github.com/marmotz/ekoz/issues/21), [#22](https://github.com/marmotz/ekoz/issues/22)                                                   |
+| [x]  | [#24](https://github.com/marmotz/ekoz/issues/24) | Invitations and admin resource bindings             | [#21](https://github.com/marmotz/ekoz/issues/21), [#22](https://github.com/marmotz/ekoz/issues/22)                                                   |
+| [x]  | [#25](https://github.com/marmotz/ekoz/issues/25) | Opt-in integration test suite                       | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
+| [x]  | [#26](https://github.com/marmotz/ekoz/issues/26) | README and usage guide                              | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
+| [ ]  | [#27](https://github.com/marmotz/ekoz/issues/27) | Admin console resource bindings                     | [#24](https://github.com/marmotz/ekoz/issues/24), [#14](https://github.com/marmotz/ekoz/issues/14), [#15](https://github.com/marmotz/ekoz/issues/15)                                                                                                     |
+| [x]  | [#39](https://github.com/marmotz/ekoz/issues/39) | Protocol: "Identity and profiles" section           | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
 
 ## Server administration ·  [overview](features/server-administration/overview.md)
 
-_technical design — see [technical.md](./technical.md)_ — 0/6 tasks done
+_technical design — see [technical.md](features/server-administration/technical.md)_ — 0/6 tasks done
 
 | Done | Issue                                            | Title                                                           | Blocked by                                                                                         |
 |------|--------------------------------------------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
@@ -54,7 +54,7 @@ _technical design — see [technical.md](./technical.md)_ — 0/6 tasks done
 
 ## Server OpenAPI documentation ·  [overview](features/server-openapi-doc/overview.md)
 
-_technical design — [technical.md](technical.md)_ — 6/7 tasks done
+_technical design — [technical.md](features/server-openapi-doc/technical.md)_ — 6/7 tasks done
 
 | Done | Issue                                            | Title                                                            | Blocked by                                                                                         |
 |------|--------------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
@@ -68,7 +68,7 @@ _technical design — [technical.md](technical.md)_ — 6/7 tasks done
 
 ## Web client foundations ·  [overview](features/web-client-foundations/overview.md)
 
-_technical design — see [technical.md](./technical.md)_ — 0/10 tasks done
+_technical design — see [technical.md](features/web-client-foundations/technical.md)_ — 0/10 tasks done
 
 | Done | Issue                                            | Title                                                | Blocked by                                                                                                                                                                                                                                               |
 |------|--------------------------------------------------|------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -79,8 +79,8 @@ _technical design — see [technical.md](./technical.md)_ — 0/10 tasks done
 | [ ]  | [#32](https://github.com/marmotz/ekoz/issues/32) | Thème light/dark/system                              | [#28](https://github.com/marmotz/ekoz/issues/28), [#30](https://github.com/marmotz/ekoz/issues/30)                                                                                                                                                       |
 | [ ]  | [#33](https://github.com/marmotz/ekoz/issues/33) | I18n react-i18next (SSR-safe)                        | [#28](https://github.com/marmotz/ekoz/issues/28), [#30](https://github.com/marmotz/ekoz/issues/30)                                                                                                                                                       |
 | [ ]  | [#34](https://github.com/marmotz/ekoz/issues/34) | Câblage SDK et session                               | [#28](https://github.com/marmotz/ekoz/issues/28), [#31](https://github.com/marmotz/ekoz/issues/31)                                                                                                                                                       |
-| [ ]  | [#36](https://github.com/marmotz/ekoz/issues/36) | CI — workflow GitHub Actions                         | [#28](https://github.com/marmotz/ekoz/issues/28), [#29](https://github.com/marmotz/ekoz/issues/29)                                                                                                                                                       |
 | [ ]  | [#35](https://github.com/marmotz/ekoz/issues/35) | Shell applicatif + root route + routes placeholder   | [#30](https://github.com/marmotz/ekoz/issues/30), [#31](https://github.com/marmotz/ekoz/issues/31), [#32](https://github.com/marmotz/ekoz/issues/32), [#33](https://github.com/marmotz/ekoz/issues/33), [#34](https://github.com/marmotz/ekoz/issues/34) |
+| [ ]  | [#36](https://github.com/marmotz/ekoz/issues/36) | CI — workflow GitHub Actions                         | [#28](https://github.com/marmotz/ekoz/issues/28), [#29](https://github.com/marmotz/ekoz/issues/29)                                                                                                                                                       |
 | [ ]  | [#37](https://github.com/marmotz/ekoz/issues/37) | Document the web client bootstrap in docs/technical/ | [#35](https://github.com/marmotz/ekoz/issues/35)                                                                                                                                                                                                         |
 
 ## No feature

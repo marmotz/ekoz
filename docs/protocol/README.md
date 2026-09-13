@@ -48,15 +48,22 @@ with SemVer, independently of the server implementation. See
 - Log event types: messages, edits, redactions/tombstones, membership and role
   changes, room state changes.
 
+## Sections written
+
+- [Identity and profiles](identity.md): setup, registration (open / invite /
+  admin), login / refresh / logout, sessions, email verification, password
+  reset, own and public profiles, invitations, owner administration — method,
+  path, request body, success shape and `problem+json` codes for each.
+
 ## Sections to write
 
-1. Authentication and sessions (tokens, refresh, SSE ticket).
-2. Identity and profiles.
-3. Spaces, rooms, roles and permissions.
-4. Messages and interactions (replies, reactions, mentions, read receipts).
-5. Presence and typing.
-6. Files and blobs.
-7. Notifications.
-8. Administration and audit.
-9. Discovery and server↔server federation.
-10. Extensions and fallback rendering.
+1. Authentication and sessions (SSE ticket; the rest moved to
+   [Identity and profiles](identity.md)).
+2. Spaces, rooms, roles and permissions.
+3. Messages and interactions (replies, reactions, mentions, read receipts).
+4. Presence and typing.
+5. Files and blobs.
+6. Notifications.
+7. Administration and audit.
+8. Discovery and server↔server federation.
+9. Extensions and fallback rendering.

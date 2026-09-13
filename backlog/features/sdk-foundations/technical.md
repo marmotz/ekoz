@@ -58,8 +58,10 @@ sdk-js/
     resources/
       setup.ts  auth.ts  me.ts  sessions.ts  users.ts
       invitations.ts  admin.ts
+    generated/            # écrit par `tako generate` (§11) — non modifié à la main
+      api/typescript/*.type.ts, aliases.ts, enums.ts, filters.ts, index.ts
     types/
-      wire.ts             # types de payloads alignés protocole v0
+      wire.ts             # ré-exports nommés depuis generated/, alignés protocole v0
   test/                   # unitaires (fetch mické) + intégration opt-in
 ```
 
@@ -303,25 +305,149 @@ téléchargement binaire viendra si un consommateur en a besoin),
 
 ## 11. Typage bout-en-bout
 
-- `src/types/wire.ts` redéclare les payloads (requêtes et réponses) alignés sur
-  le protocole v0. Sources actuelles : les DTO Zod et les *views* du serveur
-  (`*.dto.ts`, `account.view.ts`
-  [account.view.ts:5](https://github.com/marmotz/ekoz/blob/develop/apps/server/src/modules/identity/accounts/account.view.ts#L5),
-  `session.view.ts`
-  [session.view.ts:4](https://github.com/marmotz/ekoz/blob/develop/apps/server/src/modules/identity/auth/session.view.ts#L4),
-  `MeView` / `PublicProfileView`
-  [profile.service.ts:22](https://github.com/marmotz/ekoz/blob/develop/apps/server/src/modules/identity/profile/profile.service.ts#L22)).
+Décision overview (amendement post server-openapi-doc) : les types de payloads
+ne sont plus écrits à la main, ils sont générés par kurotako depuis
+[`apps/server/openapi.json`](https://github.com/marmotz/ekoz/blob/develop/apps/server/openapi.json),
+qui devient la source de vérité du contrat SDK. Seuls les **types** sont
+générés — client HTTP, `SessionManager`, `SessionStore`, émetteur
+d'événements et namespaces de ressources restent écrits à la main (§3–§10) et
+consomment ces types.
+
+### 11.1 Spike : ce qui a été vérifié
+
+`bunx tako generate` a été exécuté (hors dépôt, dans un projet jetable) contre
+le vrai `apps/server/openapi.json` avec `@kurotako/parser-openapi` (parser) et
+`@kurotako/gen-typescript` (generator). Deux constats :
+
+- **Bloquant initialement, corrigé côté kurotako et vérifié** : les versions
+  npm de l'époque déclaraient `"@kurotako/ir"` sur une plage trop basse pour
+  couvrir `@kurotako/ir@0.3.0` (celle qui introduit les kinds `array` et
+  `map`, IR format `'4'`) — or ces deux paquets émettent déjà ces kinds :
+  `DiscoveryDocumentDto.signing_keys` (`additionalProperties`, une map) et les
+  réponses `200` de `GET /sessions`, `GET /invitations`,
+  `GET /admin/username-requests` (`type: array` en racine) faisaient échouer
+  `tako generate` avec `ir_invalid`. Cause racine : `bun.lock` du dépôt
+  `kurotako` restait figé sur d'anciennes versions internes (`changeset
+  version` ne rafraîchit jamais le lockfile) et `bun pm pack` résout
+  `workspace:^` depuis ce lockfile, pas depuis les `package.json` à jour — deux
+  vagues de patch ont été nécessaires (une pour `parser-openapi`/
+  `gen-typescript`, une seconde pour `core`/`config`/`parser-prisma`/
+  `gen-zod`/`gen-angular`/`cli`, tous touchés par le même lockfile périmé) en
+  plus du correctif du workflow de release (`bun install` après `changeset
+  version`). **Revérifié en rejouant le spike avec les versions
+  définitivement publiées** (`@kurotako/parser-openapi@0.2.2`,
+  `@kurotako/gen-typescript@0.3.2`, `kurotako@0.2.1`) : `tako generate`
+  produit les 48 fichiers attendus, `signing_keys` en `Record<string,
+  unknown>`, les trois endpoints de liste en `T[]`. **Plus de blocage sur
+  cette tâche.**
+- **Pas de blocage, mais un vrai contournement nécessaire** : `gen-typescript`
+  n'a pas d'`optionsSchema` — aucun réglage possible — et émet pour **chaque**
+  schéma OpenAPI 10 variantes façon Prisma : `XxxDto`, `XxxDeepDto`,
+  `XxxCreateDto`, `XxxCreateDeepDto`, `XxxUpdateDto`, `XxxUpdateDeepDto`,
+  `XxxWhereDto`, `XxxWhereDeepDto`, `XxxSelectDto`, `XxxSelectDeepDto` (visible
+  sur `LoginResponseDtoDto`, `LoginResponseDtoWhereDto`, etc. dans le spike).
+  Seule `XxxDto` (variante « full », plate) a un sens pour un payload HTTP ;
+  les 9 autres n'ont pas d'équivalent protocole et sont ignorées. Autre
+  artefact observé : le générateur suffixe systématiquement `Dto`, y compris
+  quand le schéma OpenAPI s'appelle déjà `LoginResponseDto` → type généré
+  `LoginResponseDtoDto`. `src/types/wire.ts` absorbe ce renommage (§11.3).
+- Les réponses de type tableau sont correctement rendues en `T[]`
+  (`SessionsController_list200ResponseJson = SessionViewDtoDto[]`, etc.) une
+  fois l'IR à jour — confirmé dans le même spike après build local des paquets
+  `kurotako` sur leur `ir@0.3.0` déjà en place.
+
+### 11.2 Câblage `tako.config.ts`
+
+Nouvelle source `api` à côté de la source `db` existante (Prisma → Zod, déjà
+câblée mais pas encore reliée à un script — §17), et un nouvel `output`
+restreint par générateur (`OutputOption.generators`, cf.
+`CONFIG_TEMPLATE_MONOREPO` de `@kurotako/config`) :
+
+```ts
+import { typescriptGenerator } from '@kurotako/gen-typescript';
+import { zodGenerator } from '@kurotako/gen-zod';
+import { openapiParser } from '@kurotako/parser-openapi';
+import { prismaParser } from '@kurotako/parser-prisma';
+import { defineConfig } from 'kurotako';
+
+export default defineConfig({
+  sources: {
+    db: {
+      use: prismaParser,
+      options: { schema: './apps/server/src/core/prisma/contract.prisma', version: 8 },
+    },
+    api: {
+      use: openapiParser,
+      options: { document: './apps/server/openapi.json' },
+    },
+  },
+  generators: [
+    { use: zodGenerator, namespaces: ['db'] },
+    { use: typescriptGenerator, namespaces: ['api'] },
+  ],
+  outputs: [
+    { dir: './apps/server/src/generated', generators: ['zod'] },
+    { dir: './packages/sdk/src/generated', generators: ['typescript'] },
+  ],
+});
+```
+
+`namespaces` sur chaque générateur évite que `zodGenerator` voie la source
+`api` (et inversement) ; `generators` sur chaque `output` évite qu'un output
+reçoive la sortie de l'autre générateur — sans ces deux filtres, les deux
+sources fusionneraient dans les deux dossiers de sortie.
+
+**Dépendances racine** (`package.json`, à côté de `kurotako` /
+`@kurotako/parser-prisma` / `@kurotako/gen-zod` déjà présents) :
+`@kurotako/parser-openapi@^0.2.2` et `@kurotako/gen-typescript@^0.3.2` — les
+premières versions publiées avec le correctif §11.1. Le `bun install` qui les
+ajoute doit aussi rafraîchir les copies imbriquées de `@kurotako/core` /
+`@kurotako/config` (déjà déclarées via `kurotako`, `@kurotako/parser-prisma`,
+`@kurotako/gen-zod`) vers `^0.1.3`, elles aussi concernées par le même
+correctif.
+
+**Scripts** : aucun script `generate` / `check` n'existe encore à la racine
+(`tako` n'apparaît que dans `tako.config.ts` et les devDependencies — la
+source `db` est câblée mais jamais exécutée). Cette tâche introduit
+`"generate": "bunx tako generate"` et `"check": "bunx tako check"` à la racine
+— ils couvrent les deux sources (`db` et `api`), pas seulement celle ajoutée
+ici. `ci.yml` `check` job : `bun run openapi:emit` (déjà présent, régénère
+`apps/server/openapi.json`) puis `bun run check` (drift guard kurotako, couvre
+maintenant Prisma→Zod et OpenAPI→TypeScript).
+
+`packages/sdk/src/generated` est un artefact **committé** (même politique que
+`apps/server/openapi.json` et — une fois exécuté — `apps/server/src/generated`) :
+régénéré par `bun run generate`, vérifié par `bun run check` en CI.
+
+### 11.3 `src/types/wire.ts`
+
+Fine couche de ré-export au-dessus de `generated/api`, qui :
+
+- ne réexporte que la variante plate (`XxxDto`), jamais
+  `Deep/Create/Update/Where/Select` ;
+- renomme le double suffixe (`LoginResponseDtoDto` → `LoginResponse`,
+  `MeViewDtoDto` → `MeView`, etc.) ;
+- réexporte les alias d'opération utiles (`aliases.ts` du générateur, ex.
+  `SessionsController_list200ResponseJson`) sous les noms utilisés par les
+  ressources (§10), par exemple `type SessionsListResponse = SessionView[]`.
+
+C'est la seule pièce de mapping manuelle ; elle ne redéclare aucun champ.
+
+### 11.4 Contrat et écarts
+
 - Pas de validation runtime des réponses (pas de `zod` en dépendance : poids,
   et double source de vérité). Le SDK fait confiance au contrat ; un écart
   observé est un bug de contrat.
-- La section « Identity and profiles » de
+- `apps/server/openapi.json` (donc les types SDK) peut diverger de
   [`spec/docs/protocol/`](https://github.com/marmotz/ekoz/blob/develop/docs/protocol/README.md)
-  est un squelette. Discipline
+  (section « Identity and profiles » encore à l'état de squelette). Discipline
   [HTTP API conventions](../../../docs/technical/api-conventions.md) /
-  `AGENTS.md` : cet incrément doit **contribuer** cette section à `spec` (le
-  wire contract identité + le namespace de `code`), pas se contenter de la
-  déduire du code serveur. Tâche transverse (§17).
-- Un décalage constaté avec `spec` se corrige dans `spec`, jamais contourné ici.
+  `AGENTS.md` inchangée : cet incrément doit **contribuer** cette section à
+  `spec` (le wire contract identité + le namespace de `code`), pas se
+  contenter de la déduire du code serveur. Tâche transverse (§17).
+- Un décalage constaté entre le serveur et `spec` se corrige dans `spec`,
+  jamais contourné ici — seul change le mécanisme qui garde les types SDK
+  honnêtes (généré, plutôt qu'aligné à la main).
 
 ## 12. Build, packaging, distribution
 
@@ -373,6 +499,8 @@ téléchargement binaire viendra si un consommateur en a besoin),
 | Build | tsdown | tsup ; `bun build` + `tsc` | Aligné écosystème Vite/Rolldown de `client-web` ; dual ESM/CJS + types en une passe (overview) |
 | Avatar | `Blob` / `File` | + fallback `{ data, type, filename }` | Natif navigateur/Bun/Node ≥ 20 ; suffisant pour les consommateurs actuels (overview) |
 | Access token persisté | Non (mémoire seule) | Persister l'access token | Court (~15 min) ; re-frappé depuis le refresh au démarrage |
+| Source des types wire | Générés par kurotako depuis `apps/server/openapi.json` | Écrits/alignés à la main sur `spec/docs/protocol/` (plan initial de cet incrément) | Une seule source vérifiable, cohérente avec le serveur ; disponible depuis que kurotako a un parser OpenAPI + generator TypeScript (overview) |
+| Variantes `gen-typescript` consommées | `XxxDto` (plate) uniquement, renommée dans `wire.ts` | Les 10 variantes générées (Deep/Create/Update/Where/Select) | Aucune n'a de sens pour un payload HTTP ; pas d'option côté générateur pour les supprimer à la source (spike §11.1) |
 
 ## 15. Conséquences vérifiées
 
@@ -381,8 +509,18 @@ téléchargement binaire viendra si un consommateur en a besoin),
   d'un lecteur tolérant côté `server` ; sans lui l'en-tête reste informatif,
   sans régression.
 - **Section protocole squelette** : les types du SDK sont dérivés du code
-  serveur faute de spec détaillée. Obligation de contribuer la section identité
-  à `spec` dans cet incrément (discipline [HTTP API conventions](../../../docs/technical/api-conventions.md)).
+  serveur (via `openapi.json`) faute de spec détaillée. Obligation de
+  contribuer la section identité à `spec` dans cet incrément (discipline
+  [HTTP API conventions](../../../docs/technical/api-conventions.md)).
+- **Tâche #21 débloquée** : le blocage kurotako (§11.1) est résolu et vérifié
+  sur les versions publiées (`@kurotako/parser-openapi@0.2.2`,
+  `@kurotako/gen-typescript@0.3.2`) — cette tâche peut démarrer son câblage
+  `generated/` normalement.
+- **Premier usage réel de `tako generate`/`tako check` dans ce dépôt** : la
+  source `db` (Prisma → Zod) était câblée dans `tako.config.ts` mais jamais
+  exécutée (pas de script, `apps/server/src/generated` n'existe pas encore).
+  Cette tâche introduit les scripts `generate`/`check` et le job CI associé,
+  qui couvriront donc aussi cette source existante.
 - **`register` sans tokens** : le flux d'inscription côté consommateur est
   `register` puis `login` (et, selon `registration.mode`, vérification e-mail
   entre les deux). À documenter dans le README du SDK et côté `client-web`
@@ -413,9 +551,9 @@ Contenu attendu :
 - En-tête `X-Ekoz-Protocol` sur chaque requête + garde de compatibilité contre
   `protocol_versions` de la discovery ; le serveur ajoute un lecteur tolérant
   (tâche `server`).
-- Les types du SDK sont sourcés du code serveur tant que la section
-  « Identity and profiles » du protocole n'est pas écrite ; cet incrément la
-  rédige.
+- Les types du SDK sont générés par kurotako depuis `apps/server/openapi.json`
+  (§11) tant que la section « Identity and profiles » du protocole n'est pas
+  écrite ; cet incrément la rédige.
 
 `0025` est le prochain numéro libre (`docs/technical/` s'arrête à `0024`).
 
@@ -423,15 +561,15 @@ Contenu attendu :
 
 Dans l'ordre de dépendance (voir chaque fichier pour ses dépendances) :
 
-1. [1-package-skeleton](../../tasks/done/sdk-1-package-skeleton.md) — squelette du paquet, tsdown, Vitest, ESLint, changesets, CI. `(done)`
-2. [the SDK packaging and protocol-version policy design — packaging, distribution, politique de version de protocole](https://github.com/marmotz/ekoz/blob/develop/backlog/tasks/2-adr-0025-sdk-packaging.md) (docs task). `(done)`
-3. [2-transport-core-and-errors](../../tasks/done/sdk-2-transport-core-and-errors.md) — `HttpClient`, `X-Request-Id`, décodage `problem+json`, hiérarchie d'erreurs typées. `(done)`
-4. [3-discovery-and-protocol-guard](../../tasks/done/sdk-3-discovery-and-protocol-guard.md) — résolution `/.well-known/ekoz`, garde de version de protocole. `(done)`
-5. [4-session-manager-and-store](../../tasks/20-session-manager-and-store.md) — cycle de vie tokens, refresh single-flight, `SessionStore`, émetteur d'événements. `#20`
-6. [5-client-assembly-and-wire-types](../../tasks/21-client-assembly-and-wire-types.md) — types wire, `createClient`, assemblage des namespaces. `#21`
-7. [6-auth-and-setup-resources](../../tasks/22-auth-and-setup-resources.md) — bindings `setup` et `auth`. `#22`
-8. [7-profile-account-and-sessions-resources](../../tasks/23-profile-account-and-sessions-resources.md) — bindings `me`, `users`, `sessions`. `#23`
-9. [8-invitations-and-admin-resources](../../tasks/24-invitations-and-admin-resources.md) — bindings `invitations` et `admin.*`. `#24`
-10. [9-integration-test-suite](../../tasks/25-integration-test-suite.md) — suite d'intégration opt-in contre un serveur de référence. `#25`
-11. [10-readme-and-usage-guide](../../tasks/26-readme-and-usage-guide.md) — README et guide d'usage. `#26`
-12. [Section « Identity and profiles » du protocole](https://github.com/marmotz/ekoz/blob/develop/backlog/tasks/3-protocol-identity-section.md) (docs task). `#39`
+1. Squelette du paquet, tsdown, Vitest, ESLint, changesets, CI. `(done, pré-migration github-only — pas d'issue)`
+2. SDK packaging and protocol-version policy design — packaging, distribution, politique de version de protocole (docs task). `(done, pré-migration github-only — pas d'issue)`
+3. `HttpClient`, `X-Request-Id`, décodage `problem+json`, hiérarchie d'erreurs typées. `(done, pré-migration github-only — pas d'issue)`
+4. Résolution `/.well-known/ekoz`, garde de version de protocole. `(done, pré-migration github-only — pas d'issue)`
+5. Cycle de vie tokens, refresh single-flight, `SessionStore`, émetteur d'événements. [#20](https://github.com/marmotz/ekoz/issues/20)
+6. Types wire générés par kurotako (§11 — nouvelle source `api`, scripts `generate`/`check`, `wire.ts`), `createClient`, assemblage des namespaces. [#21](https://github.com/marmotz/ekoz/issues/21)
+7. Bindings `setup` et `auth`. [#22](https://github.com/marmotz/ekoz/issues/22)
+8. Bindings `me`, `users`, `sessions`. [#23](https://github.com/marmotz/ekoz/issues/23)
+9. Bindings `invitations` et `admin.*`. [#24](https://github.com/marmotz/ekoz/issues/24)
+10. Suite d'intégration opt-in contre un serveur de référence. [#25](https://github.com/marmotz/ekoz/issues/25)
+11. README et guide d'usage. [#26](https://github.com/marmotz/ekoz/issues/26)
+12. Section « Identity and profiles » du protocole (docs task). [#39](https://github.com/marmotz/ekoz/issues/39)
