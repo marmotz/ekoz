@@ -1,11 +1,9 @@
 /**
  * `@ekoz/sdk` public surface.
- *
- * This increment ships the transport core and discovery primitives; the
- * `createClient` assembly, session manager and resource bindings land in later
- * tasks.
  */
 
+export { createClient, type EkozClient, type SessionController } from './client.js';
+export type { ClientConfig } from './config.js';
 export {
   Discovery,
   type DiscoveryDocument,
@@ -13,6 +11,14 @@ export {
   SUPPORTED_PROTOCOL_MAJORS,
   WELL_KNOWN_PATH,
 } from './discovery/discovery.js';
+export type {
+  SessionEventMap,
+  SessionEventName,
+  SessionInvalidReason,
+} from './session/events.js';
+export type { AuthBundle } from './session/session-manager.js';
+export type { SessionState, SessionStore } from './session/session-store.js';
+export { memoryStore } from './session/session-store.js';
 export {
   AccountSuspendedError,
   AuthenticationError,
@@ -59,3 +65,43 @@ export {
   REQUEST_ID_HEADER,
   resolveRequestId,
 } from './transport/request-context.js';
+export type {
+  AcceptedResponse,
+  AccountView,
+  AddOwnerBody,
+  AdminCreateUserBody,
+  AvatarUploaded,
+  ChangeEmailBody,
+  ChangeUsernameBody,
+  ConfirmPasswordResetBody,
+  CreatedInvitation,
+  CreateInvitationBody,
+  DeleteMeBody,
+  EmailAcceptedResponse,
+  EmailVerifiedResponse,
+  InvitationsListResponse,
+  InvitationView,
+  LoginBody,
+  LoginResponse,
+  MeView,
+  PublicProfileView,
+  RegisterBody,
+  RenameSessionBody,
+  RequestPasswordResetBody,
+  ResendVerificationBody,
+  RevokeAllSessionsResponse,
+  SessionsListResponse,
+  SessionView,
+  SetupOwnerBody,
+  SetupOwnerResponse,
+  SuspendUserBody,
+  TokenBundle,
+  UpdateProfileBody,
+  UsernameApproved,
+  UsernameChangeApplied,
+  UsernameChangeOutcome,
+  UsernameChangePending,
+  UsernameChangeRequest,
+  UsernameRequestsListResponse,
+  VerifyEmailBody,
+} from './types/wire.js';

@@ -22,6 +22,7 @@ import type {
 
 import type {
   ContractWithTypeMaps,
+  RelationKeys,
   TypeMaps as TypeMapsType,
 } from '@prisma/orm-postgres/family-contract/types';
 import type {
@@ -807,6 +808,189 @@ export type StorageColumnInputTypes = {
     };
   };
 };
+
+export namespace Models {
+  export type public_Setting = {
+    key: CodecTypes['pg/text@1']['output'];
+    value: CodecTypes['pg/jsonb@1']['output'];
+    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    updatedBy: CodecTypes['pg/text@1']['output'] | null;
+    readonly [RelationKeys]?: never;
+  };
+  export type public_ServerIdentity = {
+    id: CodecTypes['pg/text@1']['output'];
+    domain: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_ServerSigningKey = {
+    id: CodecTypes['pg/text@1']['output'];
+    algorithm: CodecTypes['pg/text@1']['output'];
+    publicKey: CodecTypes['pg/text@1']['output'];
+    privateKeyEnc: CodecTypes['pg/bytea@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    activatedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    retiredAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    readonly [RelationKeys]?: never;
+  };
+  export type public_AuditLog = {
+    id: CodecTypes['pg/text@1']['output'];
+    at: CodecTypes['pg/timestamptz-string@1']['output'];
+    actorUserId: CodecTypes['pg/text@1']['output'] | null;
+    actorIp: CodecTypes['pg/text@1']['output'] | null;
+    action: CodecTypes['pg/text@1']['output'];
+    targetType: CodecTypes['pg/text@1']['output'] | null;
+    targetId: CodecTypes['pg/text@1']['output'] | null;
+    metadata: CodecTypes['pg/jsonb@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_SetupToken = {
+    id: CodecTypes['pg/text@1']['output'];
+    tokenHash: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    consumedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    readonly [RelationKeys]?: never;
+  };
+  export type public_Blob = {
+    id: CodecTypes['pg/text@1']['output'];
+    hash: CodecTypes['pg/text@1']['output'];
+    sizeBytes: CodecTypes['pg/int4@1']['output'];
+    contentType: CodecTypes['pg/text@1']['output'];
+    storageKey: CodecTypes['pg/text@1']['output'];
+    refCount: CodecTypes['pg/int4@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_EmailMessage = {
+    id: CodecTypes['pg/text@1']['output'];
+    to: CodecTypes['pg/text@1']['output'];
+    template: CodecTypes['pg/text@1']['output'];
+    category: CodecTypes['pg/text@1']['output'];
+    dedupeKey: CodecTypes['pg/text@1']['output'] | null;
+    sentAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_User = {
+    id: CodecTypes['pg/text@1']['output'];
+    name: CodecTypes['pg/text@1']['output'] | null;
+    email: CodecTypes['pg/text@1']['output'] | null;
+    emailVerifiedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    passwordHash: CodecTypes['pg/text@1']['output'];
+    isOwner: CodecTypes['pg/bool@1']['output'];
+    status: 'active' | 'suspended' | 'deleted';
+    suspendedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    suspendedReason: CodecTypes['pg/text@1']['output'] | null;
+    deletedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_UserProfile = {
+    userId: CodecTypes['pg/text@1']['output'];
+    displayName: CodecTypes['pg/text@1']['output'];
+    bio: CodecTypes['pg/text@1']['output'] | null;
+    avatarBlobId: CodecTypes['pg/text@1']['output'] | null;
+    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    user: public_User;
+    readonly [RelationKeys]?: 'user';
+  };
+  export type public_Session = {
+    id: CodecTypes['pg/text@1']['output'];
+    userId: CodecTypes['pg/text@1']['output'];
+    deviceName: CodecTypes['pg/text@1']['output'];
+    userAgent: CodecTypes['pg/text@1']['output'] | null;
+    ip: CodecTypes['pg/text@1']['output'] | null;
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    lastSeenAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    revokedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    revokedReason: CodecTypes['pg/text@1']['output'] | null;
+    user: public_User;
+    readonly [RelationKeys]?: 'user';
+  };
+  export type public_RefreshToken = {
+    id: CodecTypes['pg/text@1']['output'];
+    sessionId: CodecTypes['pg/text@1']['output'];
+    tokenHash: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    expiresAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    usedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    replacedById: CodecTypes['pg/text@1']['output'] | null;
+    session: public_Session;
+    readonly [RelationKeys]?: 'session';
+  };
+  export type public_ReservedUsername = {
+    name: CodecTypes['pg/text@1']['output'];
+    reservedUntil: CodecTypes['pg/timestamptz-string@1']['output'];
+    reason: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_Invitation = {
+    id: CodecTypes['pg/text@1']['output'];
+    email: CodecTypes['pg/text@1']['output'] | null;
+    tokenHash: CodecTypes['pg/text@1']['output'];
+    createdByUserId: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    expiresAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    consumedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    consumedByUserId: CodecTypes['pg/text@1']['output'] | null;
+    createdBy: public_User;
+    readonly [RelationKeys]?: 'createdBy';
+  };
+  export type public_EmailVerification = {
+    id: CodecTypes['pg/text@1']['output'];
+    userId: CodecTypes['pg/text@1']['output'];
+    email: CodecTypes['pg/text@1']['output'];
+    tokenHash: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    expiresAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    consumedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    readonly [RelationKeys]?: never;
+  };
+  export type public_PasswordReset = {
+    id: CodecTypes['pg/text@1']['output'];
+    userId: CodecTypes['pg/text@1']['output'];
+    tokenHash: CodecTypes['pg/text@1']['output'];
+    requestedIp: CodecTypes['pg/text@1']['output'] | null;
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    expiresAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    consumedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    readonly [RelationKeys]?: never;
+  };
+  export type public_UsernameChangeRequest = {
+    id: CodecTypes['pg/text@1']['output'];
+    userId: CodecTypes['pg/text@1']['output'];
+    requestedName: CodecTypes['pg/text@1']['output'];
+    status: 'pending' | 'approved' | 'rejected';
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    resolvedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    resolvedByUserId: CodecTypes['pg/text@1']['output'] | null;
+    readonly [RelationKeys]?: never;
+  };
+}
+
+export declare const models: {
+  public: {
+    Setting: Models.public_Setting;
+    ServerIdentity: Models.public_ServerIdentity;
+    ServerSigningKey: Models.public_ServerSigningKey;
+    AuditLog: Models.public_AuditLog;
+    SetupToken: Models.public_SetupToken;
+    Blob: Models.public_Blob;
+    EmailMessage: Models.public_EmailMessage;
+    User: Models.public_User;
+    UserProfile: Models.public_UserProfile;
+    Session: Models.public_Session;
+    RefreshToken: Models.public_RefreshToken;
+    ReservedUsername: Models.public_ReservedUsername;
+    Invitation: Models.public_Invitation;
+    EmailVerification: Models.public_EmailVerification;
+    PasswordReset: Models.public_PasswordReset;
+    UsernameChangeRequest: Models.public_UsernameChangeRequest;
+  };
+};
+
 export type TypeMaps = TypeMapsType<
   CodecTypes,
   QueryOperationTypes,
@@ -1981,6 +2165,7 @@ type ContractBase = Omit<
               readonly createdBy: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
+                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['createdByUserId'];
                   readonly targetFields: readonly ['id'];
@@ -2104,6 +2289,7 @@ type ContractBase = Omit<
                   readonly model: 'Session';
                 };
                 readonly cardinality: 'N:1';
+                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['sessionId'];
                   readonly targetFields: readonly ['id'];
@@ -2297,6 +2483,7 @@ type ContractBase = Omit<
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
+                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
@@ -2558,6 +2745,7 @@ type ContractBase = Omit<
               readonly user: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
                 readonly cardinality: 'N:1';
+                readonly nullable: false;
                 readonly on: {
                   readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];

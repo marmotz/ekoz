@@ -25,6 +25,8 @@ jobs:
       - run: bun run lint:boundaries
       - run: bun run typecheck
       - run: bun run build
+      - run: bun run openapi:emit
+      - run: bun run check
       - run: bun run test
       - run: bun run test:server
 
