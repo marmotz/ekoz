@@ -1,0 +1,51 @@
+{
+  "title": "Invitations",
+  "columns": {
+    "email": "Email",
+    "created": "Created",
+    "expiry": "Expiry",
+    "status": "Status"
+  },
+  "status": {
+    "pending": "Pending",
+    "used": "Used"
+  },
+  "new": {
+    "title": "New invitation",
+    "email": "Email (optional)",
+    "expiresInDays": "Expires in (days, optional)",
+    "submit": "Create invitation"
+  },
+  "created": {
+    "title": "Invitation created",
+    "description": "Copy this token now — it will not be shown again.",
+    "copied": "Token copied to clipboard."
+  },
+  "revoke": {
+    "action": "Revoke",
+    "confirmTitle": "Revoke this invitation?",
+    "toast": "Invitation revoked."
+  },
+  "usernameRequests": {
+    "title": "Username requests",
+    "filters": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "columns": {
+      "user": "User",
+      "requested": "Requested identifier",
+      "created": "Requested on",
+      "status": "Status"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "toasts": {
+      "approved": "Request approved — new identifier: {{identifier}}.",
+      "rejected": "Request rejected."
+    }
+  }
+}

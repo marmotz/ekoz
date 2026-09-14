@@ -1,0 +1,42 @@
+{
+  "appName": "Console d'administration Ekoz",
+  "nav": {
+    "users": "Comptes",
+    "invitations": "Invitations",
+    "usernameRequests": "Demandes de changement d'identifiant"
+  },
+  "topbar": {
+    "signOut": "Se déconnecter",
+    "theme": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
+    "language": {
+      "en": "Anglais",
+      "fr": "Français"
+    }
+  },
+  "actions": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "create": "Créer",
+    "loadMore": "Charger plus",
+    "copy": "Copier"
+  },
+  "status": {
+    "active": "Actif",
+    "suspended": "Suspendu",
+    "deleted": "Supprimé"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "unauthorized": "Vous n'êtes pas autorisé à faire cela."
+  },
+  "notOwner": {
+    "title": "Accès non autorisé",
+    "description": "Ce compte n'a pas les droits propriétaire pour la console d'administration.",
+    "signOut": "Se déconnecter"
+  }
+}

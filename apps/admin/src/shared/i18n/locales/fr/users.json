@@ -1,0 +1,64 @@
+{
+  "title": "Comptes",
+  "search": "Rechercher par nom, identifiant ou email",
+  "filters": {
+    "allStatuses": "Tous les statuts",
+    "ownersOnly": "Propriétaires uniquement"
+  },
+  "columns": {
+    "user": "Compte",
+    "email": "Email",
+    "status": "Statut",
+    "owner": "Propriétaire",
+    "created": "Créé le"
+  },
+  "newUser": "Nouveau compte",
+  "detail": {
+    "identifier": "Identifiant",
+    "email": "Email",
+    "emailVerified": "Email vérifié",
+    "status": "Statut",
+    "owner": "Propriétaire",
+    "created": "Créé le",
+    "activeSessions": "Sessions actives"
+  },
+  "actions": {
+    "suspend": "Suspendre",
+    "unsuspend": "Réactiver",
+    "delete": "Supprimer le compte",
+    "triggerPasswordReset": "Envoyer la réinitialisation du mot de passe",
+    "grantOwner": "Accorder le rôle propriétaire",
+    "revokeOwner": "Retirer le rôle propriétaire"
+  },
+  "confirm": {
+    "suspendTitle": "Suspendre ce compte ?",
+    "suspendReason": "Motif",
+    "unsuspendTitle": "Réactiver ce compte ?",
+    "deleteTitle": "Supprimer ce compte ?",
+    "deleteDescription": "Cette action est irréversible.",
+    "grantOwnerTitle": "Accorder le rôle propriétaire ?",
+    "revokeOwnerTitle": "Retirer le rôle propriétaire ?"
+  },
+  "toasts": {
+    "suspended": "Compte suspendu.",
+    "unsuspended": "Compte réactivé.",
+    "deleted": "Compte supprimé.",
+    "passwordResetSent": "Email de réinitialisation envoyé.",
+    "ownerGranted": "Rôle propriétaire accordé.",
+    "ownerRevoked": "Rôle propriétaire retiré.",
+    "userCreated": "Compte créé."
+  },
+  "errors": {
+    "lastOwner": "Impossible de retirer le dernier propriétaire restant."
+  },
+  "new": {
+    "title": "Créer un compte",
+    "fields": {
+      "email": "Email",
+      "identifier": "Identifiant",
+      "displayName": "Nom affiché",
+      "password": "Mot de passe"
+    },
+    "submit": "Créer le compte"
+  }
+}

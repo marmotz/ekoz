@@ -14,7 +14,7 @@ export function buildCorsOptions(allowedOrigins: readonly string[]): CorsOptions
   return {
     origin: [...allowedOrigins],
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['authorization', 'content-type', 'x-request-id'],
+    allowedHeaders: ['authorization', 'content-type', 'x-request-id', 'x-ekoz-protocol'],
     exposedHeaders: ['x-request-id'],
     maxAge: 600,
   };

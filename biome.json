@@ -18,7 +18,8 @@
       "!packages/sdk/src/generated",
       "!apps/server/openapi.json",
       "!apps/server/prisma/migrations",
-      "!**/CHANGELOG.md"
+      "!**/CHANGELOG.md",
+      "!apps/admin/src/routeTree.gen.ts"
     ]
   },
   "formatter": {
@@ -60,14 +61,22 @@
         "**/*.spec.ts",
         "**/*.e2e-spec.ts",
         "**/*.test.ts",
+        "**/*.test.tsx",
         "**/testing/**",
-        "**/test-support/**"
+        "**/test-support/**",
+        "apps/admin/test/**"
       ],
       "linter": {
         "rules": {
           "style": { "noNonNullAssertion": "off" },
           "suspicious": { "noTemplateCurlyInString": "off", "noExplicitAny": "off" }
         }
+      }
+    },
+    {
+      "includes": ["**/*.css"],
+      "css": {
+        "parser": { "tailwindDirectives": true }
       }
     }
   ]

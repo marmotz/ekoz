@@ -1,0 +1,23 @@
+{
+  "title": "Initialize this server",
+  "description": "Create the first owner account to start using Ekoz.",
+  "fields": {
+    "email": "Email",
+    "password": "Password",
+    "identifier": "Identifier",
+    "displayName": "Display name",
+    "token": "Setup token"
+  },
+  "tokenHint": "The single-use setup token is printed in the server logs on every restart.",
+  "submit": "Create owner account",
+  "alreadyInitialized": "This server is already initialized.",
+  "signInLink": "Go to sign in",
+  "auth": {
+    "loginTitle": "Sign in",
+    "identifier": "Identifier",
+    "password": "Password",
+    "submit": "Sign in",
+    "invalidCredentials": "Incorrect identifier or password.",
+    "accountSuspended": "This account has been suspended."
+  }
+}

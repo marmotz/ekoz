@@ -1,0 +1,42 @@
+{
+  "appName": "Ekoz admin console",
+  "nav": {
+    "users": "Users",
+    "invitations": "Invitations",
+    "usernameRequests": "Username requests"
+  },
+  "topbar": {
+    "signOut": "Sign out",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "en": "English",
+      "fr": "French"
+    }
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "create": "Create",
+    "loadMore": "Load more",
+    "copy": "Copy"
+  },
+  "status": {
+    "active": "Active",
+    "suspended": "Suspended",
+    "deleted": "Deleted"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "You are not allowed to do this."
+  },
+  "notOwner": {
+    "title": "Not an owner",
+    "description": "This account does not have owner access to the admin console.",
+    "signOut": "Sign out"
+  }
+}

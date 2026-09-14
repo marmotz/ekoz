@@ -1,0 +1,23 @@
+{
+  "title": "Initialiser ce serveur",
+  "description": "Créez le premier compte propriétaire pour commencer à utiliser Ekoz.",
+  "fields": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "identifier": "Identifiant",
+    "displayName": "Nom affiché",
+    "token": "Jeton d'initialisation"
+  },
+  "tokenHint": "Le jeton d'initialisation à usage unique est affiché dans les journaux du serveur à chaque redémarrage.",
+  "submit": "Créer le compte propriétaire",
+  "alreadyInitialized": "Ce serveur est déjà initialisé.",
+  "signInLink": "Aller à la connexion",
+  "auth": {
+    "loginTitle": "Connexion",
+    "identifier": "Identifiant",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "invalidCredentials": "Identifiant ou mot de passe incorrect.",
+    "accountSuspended": "Ce compte a été suspendu."
+  }
+}

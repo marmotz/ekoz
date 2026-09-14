@@ -14,7 +14,7 @@ describe('buildCorsOptions (unit)', () => {
     expect(options).toMatchObject({
       origin: ['https://admin.ekoz.example.com', 'https://app.ekoz.example.com'],
       methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['authorization', 'content-type', 'x-request-id'],
+      allowedHeaders: ['authorization', 'content-type', 'x-request-id', 'x-ekoz-protocol'],
       exposedHeaders: ['x-request-id'],
       maxAge: 600,
     });
