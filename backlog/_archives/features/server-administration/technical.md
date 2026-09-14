@@ -5,17 +5,17 @@ few read/reset endpoints the console needs, and build the **admin console**
 application (`apps/admin/`) covering server initialization and account
 administration.
 
-Builds on [identity and profiles](../identity-and-profiles/technical.md) and
-[server core](../server-core/technical.md). Product scope is settled in
+Builds on [identity and profiles](../../../features/identity-and-profiles/technical.md) and
+[server core](../../../features/server-core/technical.md). Product scope is settled in
 [overview.md](./overview.md).
 
 Related:
-[configuration model](../../../docs/technical/configuration-model.md),
-[server initialization](../../../docs/technical/server-initialization.md),
-[web client stack](../../../docs/technical/web-client-stack.md),
-[HTTP API conventions](../../../docs/technical/api-conventions.md),
-[backlog conventions](../../../AGENTS.md),
-[repository layout](../../../docs/technical/architecture.md).
+[configuration model](../../../../docs/technical/configuration-model.md),
+[server initialization](../../../../docs/technical/server-initialization.md),
+[web client stack](../../../../docs/technical/web-client-stack.md),
+[HTTP API conventions](../../../../docs/technical/api-conventions.md),
+[backlog conventions](../../../../AGENTS.md),
+[repository layout](../../../../docs/technical/architecture.md).
 `sdk-js`:
 [SDK foundations technical](https://github.com/marmotz/ekoz/blob/develop/packages/sdk/backlog/features/sdk-foundations/technical.md).
 `client-web`:
@@ -57,7 +57,7 @@ machinery).
 ### 2.1 `GET /admin/users` (owner-only)
 
 New controller method on `AdminUsersController`
-([registration.controller.ts:41](../../../apps/server/src/modules/identity/accounts/registration.controller.ts))
+([registration.controller.ts:41](../../../../apps/server/src/modules/identity/accounts/registration.controller.ts))
 or a dedicated `AdminUserQueryController` in the same folder — guarded
 `AuthGuard, OwnerGuard` like its siblings.
 
@@ -68,7 +68,7 @@ pagination on `(createdAt desc, id desc)`.
 
 Response: `{ items: AdminUserListItem[], nextCursor: string | null }` where
 `AdminUserListItem` is `AccountView`
-([account.view.ts:5](../../../apps/server/src/modules/identity/accounts/account.view.ts))
+([account.view.ts:5](../../../../apps/server/src/modules/identity/accounts/account.view.ts))
 plus `createdAt`, `suspendedAt`, `suspendedReason`. `email` is included (owner
 context, unlike the public `GET /users/:identifier`).
 
@@ -86,7 +86,7 @@ cheap "is this account in use" hint pending the real supervision increment.
 ### 2.3 `POST /admin/users/:id/password-reset` (owner-only)
 
 Owner-triggered reset: reuses `PasswordResetService`
-([password-reset.controller.ts](../../../apps/server/src/modules/identity/accounts/password-reset.controller.ts))
+([password-reset.controller.ts](../../../../apps/server/src/modules/identity/accounts/password-reset.controller.ts))
 to mint a token and send the existing reset mail to the account's address.
 Differs from the public `POST /auth/password-reset/request` in that it takes a
 user id (not an email), requires an owner, is **not** behind
@@ -98,7 +98,7 @@ user does not exist; `409 identity.account_deleted` if `status = deleted` or
 `PasswordResetService` currently exposes `request(email, ip)`; add
 `requestForUser(userId, actorUserId)` or expose an internal `issueFor(user)` it
 can share. Confirmed against
-[password-reset.service.ts](../../../apps/server/src/modules/identity/accounts/password-reset.service.ts)
+[password-reset.service.ts](../../../../apps/server/src/modules/identity/accounts/password-reset.service.ts)
 at task time.
 
 ### 2.4 `GET /setup` (public)
@@ -106,7 +106,7 @@ at task time.
 `@Public()`, no guard, so the console can branch before anyone signs in.
 Returns `{ state: 'email-pinned' | 'token-pinned' | 'closed' }` straight from
 `SetupService.resolveState()`
-([setup.service.ts:47](../../../apps/server/src/core/bootstrap/setup.service.ts)). It does
+([setup.service.ts:47](../../../../apps/server/src/core/bootstrap/setup.service.ts)). It does
 **not** return the pinned email (kept server-side; the form collects it and the
 service validates). Cache-Control `no-store`.
 
@@ -118,13 +118,13 @@ closed, so the state probe must be a separate controller **without**
 ### 2.5 CORS
 
 The server enables CORS today nowhere
-([main.ts](../../../apps/server/src/main.ts), no `app.enableCors`). The console and
+([main.ts](../../../../apps/server/src/main.ts), no `app.enableCors`). The console and
 `client-web` run on their own origins and only ever send a bearer token in
 `Authorization` (no cookies), so a plain allow-list CORS is enough — no
 `credentials: true`.
 
 - New **infra** parameter `http.cors_allowed_origins`
-  ([registry.ts](../../../apps/server/src/core/config/registry.ts), `list: true`, default
+  ([registry.ts](../../../../apps/server/src/core/config/registry.ts), `list: true`, default
   `[]`). Empty list ⇒ CORS stays off (current behaviour).
 - `main.ts`: after config resolves, `app.enableCors({ origin: <list>, methods:
 [...], allowedHeaders: ['authorization', 'content-type', 'x-request-id'],
@@ -135,7 +135,7 @@ exposedHeaders: ['x-request-id'], maxAge: 600 })` when the list is non-empty.
 
 Preflight (`OPTIONS`) is handled by the Nest/Express CORS middleware before the
 global `BaselineAuthGuard`
-([baseline-auth.guard.ts](../../../apps/server/src/core/http/baseline-auth.guard.ts)), so no
+([baseline-auth.guard.ts](../../../../apps/server/src/core/http/baseline-auth.guard.ts)), so no
 guard change is needed.
 
 ### 2.6 `http/` collection
@@ -169,7 +169,7 @@ Target (task #46 owns the mechanics):
 ```
 
 `client-web` and `sdk-js` stay separate repos
-([backlog conventions](../../../AGENTS.md));
+([backlog conventions](../../../../AGENTS.md));
 only the admin console joins this repo, because it ships with the reference
 server. During bring-up `apps/admin/` consumes `@ekozhq/sdk` via `bun link` from a
 sibling `sdk-js` checkout — it is **not** a workspace package here.
@@ -265,7 +265,7 @@ a `features/` split can come with the moderation increment.
 - `shared/sdk/require-owner.tsx`: `<RequireOwner>` renders a skeleton while
   `unknown`, redirects `anonymous` → `/login`, and — once authenticated —
   reads `sdk.me.get()` (`MeView.isOwner`,
-  [profile.service.ts:20](../../../apps/server/src/modules/identity/profile/profile.service.ts))
+  [profile.service.ts:20](../../../../apps/server/src/modules/identity/profile/profile.service.ts))
   and renders a "not an owner" screen (with a sign-out button) if
   `isOwner === false`. Only owners can use this console; there is no
   non-owner admin role in this increment.
@@ -277,7 +277,7 @@ a `features/` split can come with the moderation increment.
     printed in the server logs.
     A `410 setup.closed` from `POST /setup/owner` (race) surfaces as "already
     initialized, sign in". On success the SDK stores the returned session
-    ([setup-owner.service.ts](../../../apps/server/src/modules/identity/accounts/setup-owner.service.ts))
+    ([setup-owner.service.ts](../../../../apps/server/src/modules/identity/accounts/setup-owner.service.ts))
     and the console lands on `/users`.
 
 ## 7. Screen → endpoint map
@@ -297,10 +297,10 @@ a `features/` split can come with the moderation increment.
 | Invitations            | `GET /invitations`, `POST /invitations`, `DELETE /invitations/:id`  | OwnerGuard          |
 
 Existing endpoint references:
-[lifecycle.controller.ts](../../../apps/server/src/modules/identity/accounts/lifecycle.controller.ts),
-[username.controller.ts](../../../apps/server/src/modules/identity/accounts/username.controller.ts),
-[invitations.controller.ts](../../../apps/server/src/modules/identity/invitations/invitations.controller.ts),
-[auth.controller.ts](../../../apps/server/src/modules/identity/auth/auth.controller.ts).
+[lifecycle.controller.ts](../../../../apps/server/src/modules/identity/accounts/lifecycle.controller.ts),
+[username.controller.ts](../../../../apps/server/src/modules/identity/accounts/username.controller.ts),
+[invitations.controller.ts](../../../../apps/server/src/modules/identity/invitations/invitations.controller.ts),
+[auth.controller.ts](../../../../apps/server/src/modules/identity/auth/auth.controller.ts).
 
 ## 8. `sdk-js` impact
 
@@ -329,7 +329,7 @@ Expected content:
 
 - The `server` repo is a Bun-workspaces monorepo: `apps/backend`, `apps/admin`,
   shared config in `packages/`. Refines
-  [repository layout](../../../docs/technical/architecture.md).
+  [repository layout](../../../../docs/technical/architecture.md).
   `client-web` and `sdk-js` stay separate (the backlog conventions).
 - The admin console is a core app of the reference server, deployed on its own
   origin; NestJS does not serve it.
@@ -363,13 +363,13 @@ lower number.
 
 - **Restructure churn**: every path-bearing config file moves — `nest-cli.json`,
   `tsconfig*.json`, `prisma.config.ts` (`contract`/`migrations`/`output`,
-  [prisma.config.ts](../../../apps/server/prisma.config.ts)), `vitest.config.ts`,
+  [prisma.config.ts](../../../../apps/server/prisma.config.ts)), `vitest.config.ts`,
   `eslint.config.mjs`, `lefthook.yml`, `.github/workflows/*`, `Dockerfile`,
   `compose*.yaml`, `docker/entrypoint.sh`. Enumerated in task #46; this feature
   does not re-plan it.
 - **No migration**: `User` already carries `status` / `isOwner` / `suspendedAt`
   / `suspendedReason` / `createdAt`
-  ([contract.prisma:155](../../../apps/server/src/core/prisma/contract.prisma)); the new
+  ([contract.prisma:155](../../../../apps/server/src/core/prisma/contract.prisma)); the new
   endpoints only read.
 - **New config parameter**: `http.cors_allowed_origins` is `infra`, so it is
   file/env only and never appears in the (future) runtime-config UI — correct,
@@ -377,11 +377,11 @@ lower number.
   other bootstrap parameters (the existing ordering comment applies).
 - **`GET /setup` needs its own controller**: `SetupController` is
   `@UseGuards(SetupGuard)`
-  ([setup.controller.ts:14](../../../apps/server/src/modules/identity/accounts/setup.controller.ts));
+  ([setup.controller.ts:14](../../../../apps/server/src/modules/identity/accounts/setup.controller.ts));
   reusing it would 410 the probe once setup closes. A sibling controller with no
   guard is required.
 - **`PasswordResetService` surface**: today only `request(email, ip)` is public
-  ([password-reset.controller.ts](../../../apps/server/src/modules/identity/accounts/password-reset.controller.ts));
+  ([password-reset.controller.ts](../../../../apps/server/src/modules/identity/accounts/password-reset.controller.ts));
   the owner-triggered path needs a by-user-id entry point on the service —
   small, same mail template and token store.
 - **SDK is pre-implementation**: `sdk-js` has only its backlog
@@ -397,7 +397,7 @@ lower number.
   optional demo client), each its own process/origin. The deployment docs and
   `compose*.yaml` gain an `admin` service.
 - **Audit coverage**: existing owner actions already audit
-  ([invitations.controller.ts](../../../apps/server/src/modules/identity/invitations/invitations.controller.ts),
+  ([invitations.controller.ts](../../../../apps/server/src/modules/identity/invitations/invitations.controller.ts),
   `LifecycleService`); the one new audited action is
   `identity.password_reset_triggered`. The read endpoints are not audited.
 

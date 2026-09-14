@@ -6,34 +6,34 @@
 
 - **No `@nestjs/swagger` anywhere.** `apps/server/package.json` has no OpenAPI
   dependency; `grep -rn "swagger" apps/server/src` is empty. The bootstrap
-  ([`src/main.ts`](../../../apps/server/src/main.ts)) creates the app, runs
+  ([`src/main.ts`](../../../../apps/server/src/main.ts)) creates the app, runs
   `app.init()`, then `app.listen()` — no document generation.
 - **Validation is Zod v4, not class-validator.** Request bodies are plain Zod
   schemas in `*.dto.ts` files, applied through a hand-written pipe
-  ([`src/core/http/zod-validation.pipe.ts`](../../../apps/server/src/core/http/zod-validation.pipe.ts)):
+  ([`src/core/http/zod-validation.pipe.ts`](../../../../apps/server/src/core/http/zod-validation.pipe.ts)):
   `@Body(new ZodValidationPipe(LoginSchema)) body: LoginBody`. There are no DTO
   classes and no `class-validator` / `class-transformer` metadata for
   `@nestjs/swagger` to introspect.
 - **Responses have no schema.** Controllers return ad-hoc object literals or the
   output of `*.view.ts` helpers
-  ([`session.view.ts`](../../../apps/server/src/modules/identity/auth/session.view.ts),
-  [`account.view.ts`](../../../apps/server/src/modules/identity/accounts/account.view.ts)),
+  ([`session.view.ts`](../../../../apps/server/src/modules/identity/auth/session.view.ts),
+  [`account.view.ts`](../../../../apps/server/src/modules/identity/accounts/account.view.ts)),
   typed only by a hand-written `interface`. `stream.controller.ts` even inlines
   `Promise<{ ticket: string; expiresIn: number }>`.
 - **Errors are RFC 9457 `application/problem+json`**, one shape for the whole
   surface:
-  [`src/core/http/problem-details.ts`](../../../apps/server/src/core/http/problem-details.ts)
+  [`src/core/http/problem-details.ts`](../../../../apps/server/src/core/http/problem-details.ts)
   (`ProblemDetails`, `ValidationIssue`), emitted by
-  [`problem-exception.filter.ts`](../../../apps/server/src/core/http/problem-exception.filter.ts).
-  Documented in [`docs/technical/api-conventions.md`](../../../docs/technical/api-conventions.md).
+  [`problem-exception.filter.ts`](../../../../apps/server/src/core/http/problem-exception.filter.ts).
+  Documented in [`docs/technical/api-conventions.md`](../../../../docs/technical/api-conventions.md).
 - **Auth**: global `BaselineAuthGuard` (`APP_GUARD` in
-  [`http.module.ts`](../../../apps/server/src/core/http/http.module.ts)); routes
+  [`http.module.ts`](../../../../apps/server/src/core/http/http.module.ts)); routes
   opt out with `@Public()`
   ([`public.decorator.ts`](../../../apps/server/src/core/http/public.decorator.js)).
   Bearer JWT verified by
-  [`auth.guard.ts`](../../../apps/server/src/modules/identity/guards/auth.guard.ts).
+  [`auth.guard.ts`](../../../../apps/server/src/modules/identity/guards/auth.guard.ts).
   The SSE consumer instead takes a one-shot ticket in the query string
-  ([`stream.controller.ts`](../../../apps/server/src/modules/identity/auth/stream.controller.ts)).
+  ([`stream.controller.ts`](../../../../apps/server/src/modules/identity/auth/stream.controller.ts)).
 - **Controllers in scope** (everything the SDK calls — `apps/server/src/modules/**`
   plus `discovery` and `storage/blob` from `core`):
   `auth`, `sessions`, `stream`, `accounts/{registration,setup,lifecycle,password-reset,username}`,
@@ -43,7 +43,7 @@
 - **DTO files today**: `auth`, `accounts/{lifecycle,password-reset,registration,setup,username}`,
   `email-verification`, `invitations/invitation`, `profile` — 9 files, all
   bare `z.object` exports.
-- **CI**: [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml) runs
+- **CI**: [`.github/workflows/ci.yml`](../../../../.github/workflows/ci.yml) runs
   `bun run lint`, `lint:boundaries`, `typecheck`, `build`, `test`, `test:server`,
   then a separate `docker` job. No OpenAPI step.
 - **kurotako is already wired for another concern**: root `tako.config.ts` +

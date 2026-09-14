@@ -17,7 +17,7 @@ sessions, all against a running reference server.
 ## Decisions made
 
 - Lives in `src/features/profile/{api,components,hooks,routes}`; all network
-  access through [`@ekozhq/sdk`](../sdk-foundations/overview.md).
+  access through [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md).
 - <fill in as decisions are made>
 
 ## Dependencies

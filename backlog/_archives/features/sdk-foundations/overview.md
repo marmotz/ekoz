@@ -5,12 +5,12 @@
 ## Context
 
 The `sdk-js` repository is empty. Per
-[web client stack](../../../docs/technical/web-client-stack.md),
+[web client stack](../../../../docs/technical/web-client-stack.md),
 no Ekoz client may call `fetch` directly: every network access goes through this
 SDK. The reference server has shipped its identity layer (registration, login,
 sessions, email verification, password reset, profile, admin account
 operations), and two clients now need to consume it: the demonstration
-[web client](../web-client-foundations/overview.md) and the server
+[web client](../../../features/web-client-foundations/overview.md) and the server
 [admin console](https://github.com/marmotz/ekoz/blob/develop/backlog/features/server-administration/overview.md).
 
 This feature is the SDK's first increment: enough surface to build and test

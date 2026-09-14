@@ -523,7 +523,7 @@ delete any message (`room.delete_any`), kick (`room.kick`), ban/unban
 (`room.ban`). Every moderation action writes an `audit_log` entry
 (`action = "moderation.<verb>"`, `target` = room/message/user) in addition to the
 `room_event`. Server-wide moderation (global bans, cross-room deletion) is
-[server administration](../server-administration/overview.md).
+[server administration](../../_archives/features/server-administration/overview.md).
 
 ## 18. Endpoint summary (non-exhaustive)
 

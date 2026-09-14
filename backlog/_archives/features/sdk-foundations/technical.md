@@ -15,17 +15,17 @@ par cet incrément.
 
 ### Références externes
 
-- [federation protocol](../../../docs/technical/federation-protocol.md)
+- [federation protocol](../../../../docs/technical/federation-protocol.md)
   — découplage identité / hosting, discovery.
-- [authentication and sessions](../../../docs/technical/auth-and-sessions.md)
+- [authentication and sessions](../../../../docs/technical/auth-and-sessions.md)
   — access JWT court + refresh opaque rotatif, denylist `sid`, ticket SSE.
-- [web client stack](../../../docs/technical/web-client-stack.md)
+- [web client stack](../../../../docs/technical/web-client-stack.md)
   — aucun client n'appelle `fetch` directement.
-- [HTTP API conventions](../../../docs/technical/api-conventions.md)
+- [HTTP API conventions](../../../../docs/technical/api-conventions.md)
   — `application/problem+json`, `code` stable namespacé, `X-Request-Id`, `422 validation_failed`.
-- [entity identifier format](../../../docs/technical/entity-identifier-format.md)
+- [entity identifier format](../../../../docs/technical/entity-identifier-format.md)
   — identifiants ULID opaques.
-- [identity account and token mechanics](../../../docs/technical/identity-account-and-token-mechanics.md)
+- [identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md)
   — format JWS de l'access token, enregistrement du refresh, détection de réutilisation.
 - [discovery.md](https://github.com/marmotz/ekoz/blob/develop/docs/protocol/discovery.md)
   — `GET /.well-known/ekoz`.
@@ -77,7 +77,7 @@ ressources.
   - `Accept: application/json`
   - `X-Ekoz-Protocol: 0` (cf. §5)
   - `X-Request-Id: <uuid v4>` sauf si l'appelant en fournit un
-    ([HTTP API conventions](../../../docs/technical/api-conventions.md)).
+    ([HTTP API conventions](../../../../docs/technical/api-conventions.md)).
   - `Authorization: Bearer <access token>` injecté par le `SessionManager` pour
     les appels authentifiés.
 - Corps : `application/json` sérialisé, sauf `me.setAvatar` qui envoie un
@@ -94,7 +94,7 @@ ressources.
 
 `createClient({ server })` ne reçoit **pas** d'URL d'API (décision overview :
 domaine + résolution discovery, fidèle à
-[federation protocol](../../../docs/technical/federation-protocol.md)).
+[federation protocol](../../../../docs/technical/federation-protocol.md)).
 
 - Au premier appel réseau, le SDK récupère `GET https://<server>/.well-known/ekoz`
   et lit `api` (base URL REST, sans `/` final), `web`, `protocol_versions`.
@@ -133,7 +133,7 @@ Décision overview : exceptions typées, pas de `Result`.
 
 - Hiérarchie : `EkozError` (base) porte `code`, `status`, `detail`, `title`,
   `requestId`, `retryAfter?`. Le corps `problem+json` est celui d'
-  [HTTP API conventions](../../../docs/technical/api-conventions.md) :
+  [HTTP API conventions](../../../../docs/technical/api-conventions.md) :
   [problem-details.ts:26](https://github.com/marmotz/ekoz/blob/develop/apps/server/src/core/http/problem-details.ts#L26).
 - Sous-classes transverses : `ValidationError` (`code = validation_failed`,
   expose `issues: {path, message}[]`), `NotFoundError`, `RateLimitError`
@@ -159,15 +159,15 @@ Décision overview : exceptions typées, pas de `Result`.
 - Un `code` inconnu tombe sur `EkozError` générique en conservant `code` brut :
   le SDK ne se casse pas si le serveur ajoute un code avant le SDK.
 - Décodage centralisé : un seul chemin dans `transport/problem.ts`, quel que
-  soit l'endpoint (objectif [HTTP API conventions](../../../docs/technical/api-conventions.md)).
+  soit l'endpoint (objectif [HTTP API conventions](../../../../docs/technical/api-conventions.md)).
 - `requestId` renseigné depuis `problem.requestId` sinon depuis le
   `X-Request-Id` envoyé, pour la corrélation support.
 
 ## 7. Cycle de vie tokens et sessions — `SessionManager`
 
 Modèle serveur :
-[authentication and sessions](../../../docs/technical/auth-and-sessions.md) +
-[identity account and token mechanics](../../../docs/technical/identity-account-and-token-mechanics.md).
+[authentication and sessions](../../../../docs/technical/auth-and-sessions.md) +
+[identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md).
 Access JWT ~15 min, refresh opaque rotatif à usage unique, réutilisation d'un
 refresh consommé → révocation de toute la session + `auth.refresh_reuse`.
 
@@ -463,7 +463,7 @@ C'est la seule pièce de mapping manuelle ; elle ne redéclare aucun champ.
 - `apps/server/openapi.json` (donc les types SDK) peut diverger de
   [`spec/docs/protocol/`](https://github.com/marmotz/ekoz/blob/develop/docs/protocol/README.md)
   (section « Identity and profiles » encore à l'état de squelette). Discipline
-  [HTTP API conventions](../../../docs/technical/api-conventions.md) /
+  [HTTP API conventions](../../../../docs/technical/api-conventions.md) /
   `AGENTS.md` inchangée : cet incrément doit **contribuer** cette section à
   `spec` (le wire contract identité + le namespace de `code`), pas se
   contenter de la déduire du code serveur. Tâche transverse (§17).
@@ -513,7 +513,7 @@ C'est la seule pièce de mapping manuelle ; elle ne redéclare aucun champ.
 | Erreurs | Exceptions typées | Retour `Result` discriminé | Idiomatique TS/await ; `try/catch` unique côté consommateur (overview) |
 | Couche HTTP | `fetch` + wrapper maison | `ky` / `axios` | `AGENTS.md` : pas de dépendance runtime lourde ; embeddable |
 | Validation réponses | Types TS seuls | `zod` runtime | Poids ; double source de vérité avec `spec` |
-| Config serveur | `server` + résolution discovery | `apiBaseUrl` explicite ; les deux | Découplage identité/hosting ([federation protocol](../../../docs/technical/federation-protocol.md)) ; une seule voie à tester |
+| Config serveur | `server` + résolution discovery | `apiBaseUrl` explicite ; les deux | Découplage identité/hosting ([federation protocol](../../../../docs/technical/federation-protocol.md)) ; une seule voie à tester |
 | Version protocole | En-tête `X-Ekoz-Protocol` + garde discovery | Garde discovery seule ; constante non vérifiée | Prépare le serveur sans le bloquer ; échec net si incompatible (overview) |
 | Persistance session | Adaptateur `SessionStore` injecté | SDK possède `localStorage` | Non disponible hors navigateur ; SDK multi-runtime (overview) |
 | Notification rupture | Émetteur d'événements complet | Callback `onSessionInvalid` unique | Plusieurs consommateurs / plusieurs réactions (overview) |
@@ -533,7 +533,7 @@ C'est la seule pièce de mapping manuelle ; elle ne redéclare aucun champ.
 - **Section protocole squelette** : les types du SDK sont dérivés du code
   serveur (via `openapi.json`) faute de spec détaillée. Obligation de
   contribuer la section identité à `spec` dans cet incrément (discipline
-  [HTTP API conventions](../../../docs/technical/api-conventions.md)).
+  [HTTP API conventions](../../../../docs/technical/api-conventions.md)).
 - **Tâche #21 débloquée** : le blocage kurotako (§11.1) est résolu et vérifié
   sur les versions publiées (`@kurotako/parser-openapi@0.2.2`,
   `@kurotako/gen-typescript@0.3.2`) — cette tâche peut démarrer son câblage

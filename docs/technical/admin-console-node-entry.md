@@ -4,7 +4,7 @@
 
 `apps/admin` targets a plain Node process in production (see
 [web client stack](web-client-stack.md) and
-`backlog/features/server-administration/technical.md` §4). At the installed
+`backlog/_archives/features/server-administration/technical.md` §4). At the installed
 `@tanstack/react-start` version (1.168.x), `vite build` emits
 `dist/server/server.js`, which exports a Web-standard `{ fetch(request) }`
 handler — it does not start its own listener the way older Nitro-based Start

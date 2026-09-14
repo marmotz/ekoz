@@ -12,7 +12,7 @@ Routine administration is done through a web interface. That interface is a core
 application shipped with the reference server (the **admin console**), and this
 feature covers both what an operator can do and the application that lets them do
 it. It is distinct from the demonstration
-[web client](../web-client-foundations/overview.md), which exercises
+[web client](../../../features/web-client-foundations/overview.md), which exercises
 end-user features.
 
 The server has already shipped its identity and account-administration endpoints
@@ -36,7 +36,7 @@ its users and its spaces, through a web application deployed with the server.
   either through an email address fixed at deployment (the only one allowed), or
   through a single-use token printed in the logs. The initialization endpoint
   closes permanently afterwards. See
-  [server initialization](../../../docs/technical/server-initialization.md).
+  [server initialization](../../../../docs/technical/server-initialization.md).
 - A server can have several owners.
 - The owner can create accounts, reset passwords, suspend or delete accounts and
   grant or revoke administration roles.
@@ -51,7 +51,7 @@ its users and its spaces, through a web application deployed with the server.
 - Configuration follows a layered model: a TOML file at deployment, overrides
   from the admin for `runtime` parameters, with the environment able to lock a
   parameter. The admin never writes to the file. See
-  [configuration model](../../../docs/technical/configuration-model.md).
+  [configuration model](../../../../docs/technical/configuration-model.md).
 
 ### Admin console application
 
@@ -60,7 +60,7 @@ its users and its spaces, through a web application deployed with the server.
   Bun workspaces (server app + admin app + shared config); a `docs/technical/` page records the
   layout.
 - It is a React single-page application, same stack as the demonstration client
-  ([web client stack](../../../docs/technical/web-client-stack.md)):
+  ([web client stack](../../../../docs/technical/web-client-stack.md)):
   React, Vite, TypeScript, Tailwind CSS 4, shadcn/ui, Bun, Vitest.
 - It is deployed separately from the server (its own build and origin); NestJS
   does not serve its assets.
@@ -99,20 +99,20 @@ its users and its spaces, through a web application deployed with the server.
 
 ## Depends on
 
-- [Identity and profiles](../identity-and-profiles/overview.md), for
+- [Identity and profiles](../../../features/identity-and-profiles/overview.md), for
   administering accounts and roles.
 - [SDK foundations](https://github.com/marmotz/ekoz/blob/develop/packages/sdk/backlog/features/sdk-foundations/overview.md),
   the console's only integration surface.
 
 ## Feature order
 
-- [Conversations](../conversations/overview.md) introduce the server owner role,
+- [Conversations](../../../features/conversations/overview.md) introduce the server owner role,
   which holds global administration.
-- [Content and sharing](../content-and-sharing/overview.md) expose the storage
+- [Content and sharing](../../../features/content-and-sharing/overview.md) expose the storage
   and link preview settings to the server owner.
-- [Notifications](../notifications/overview.md) expose channel enablement and the
+- [Notifications](../../../features/notifications/overview.md) expose channel enablement and the
   global rules to the server owner.
-- [Federation](../federation/overview.md) exposes peer approval, supervision and
+- [Federation](../../../features/federation/overview.md) exposes peer approval, supervision and
   relationship severing to the server owner.
-- [Extensibility](../extensibility/overview.md) exposes extension installation,
+- [Extensibility](../../../features/extensibility/overview.md) exposes extension installation,
   approval and enablement to the server owner.

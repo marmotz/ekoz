@@ -2,7 +2,7 @@
 
 Setup, credentials, sessions, profiles and owner administration. This is the
 wire contract the SDK's identity resources bind against (see the
-[SDK foundations technical design](../../backlog/features/sdk-foundations/technical.md)
+[SDK foundations technical design](../../backlog/_archives/features/sdk-foundations/technical.md)
 §10–§11); a mismatch between this page and `apps/server` is a bug, fixed here
 first (see [HTTP API conventions](../technical/api-conventions.md)).
 

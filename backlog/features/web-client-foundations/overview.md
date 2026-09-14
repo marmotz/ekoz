@@ -34,7 +34,7 @@ running reference server, with no domain feature implemented yet.
   structure (`src/features/<domain>/{api,components,hooks,routes}`) with
   cross-feature imports forbidden (`eslint-plugin-boundaries`).
 - All network access goes through
-  [`@ekozhq/sdk`](../sdk-foundations/overview.md), never a direct `fetch`. A gap
+  [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md), never a direct `fetch`. A gap
   in the SDK is fixed in `sdk-js`, not worked around here.
 - During bring-up the SDK is consumed via `npm link` / `bun link` from a sibling
   checkout; no dependency on a published version yet.

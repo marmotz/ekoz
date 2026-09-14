@@ -42,7 +42,7 @@ exchanges without weighing down the operation of a standalone instance.
   messages and read receipts.
 - [Content and sharing](../content-and-sharing/overview.md), for files exchanged
   with remote members.
-- [Server administration](../server-administration/overview.md), to approve,
+- [Server administration](../../_archives/features/server-administration/overview.md), to approve,
   supervise and interrupt peer relationships.
 
 ## Feature order

@@ -16,7 +16,7 @@ Two concerns are often conflated and must be separated:
   skeleton on.
 - **Presenting** it to the operator: the supervision screens (users and activity, storage usage, server health,
   federation state) — a
-  [server administration](../../backlog/features/server-administration/overview.md)
+  [server administration](../../backlog/_archives/features/server-administration/overview.md)
   responsibility, later. That feature consumes what this page defines; it does not define new telemetry.
 
 Constraints: single process in the first increment (see

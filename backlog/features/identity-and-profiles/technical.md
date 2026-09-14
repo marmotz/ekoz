@@ -426,7 +426,7 @@ increment"; the general policy still comes later.
 | `POST /admin/username-requests/:id/approve` / `reject`, `GET /admin/username-requests` | owner         | approval-mode username changes     |
 
 The `/admin/*` endpoints here are the minimal owner surface needed by this
-feature; the full admin experience is [server administration](../server-administration/overview.md).
+feature; the full admin experience is [server administration](../../_archives/features/server-administration/overview.md).
 
 ## 17. Identifier change flows
 

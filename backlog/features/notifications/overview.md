@@ -39,7 +39,7 @@ channels later.
   email address and user preferences.
 - [Conversations](../conversations/overview.md), for events from rooms and
   messages.
-- [Server administration](../server-administration/overview.md), for enabling
+- [Server administration](../../_archives/features/server-administration/overview.md), for enabling
   channels and the global rules.
 
 ## Feature order

@@ -40,7 +40,7 @@ rules and retention.
 ## Depends on
 
 - [Conversations](../conversations/overview.md), for sharing content in rooms.
-- [Server administration](../server-administration/overview.md), for storage
+- [Server administration](../../_archives/features/server-administration/overview.md), for storage
   limits and the link preview option.
 
 ## Feature order

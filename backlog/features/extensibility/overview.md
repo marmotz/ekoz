@@ -31,7 +31,7 @@ compatibility and security guarantees to be defined.
 
 ## Depends on
 
-- [Server administration](../server-administration/overview.md), for installing,
+- [Server administration](../../_archives/features/server-administration/overview.md), for installing,
   approving and enabling extensions.
 - [Federation](../federation/overview.md), for exchanging extension content with
   peer servers.

@@ -18,7 +18,7 @@ password, all against a running reference server.
 ## Decisions made
 
 - Lives in `src/features/auth/{api,components,hooks,routes}`; all network access
-  through [`@ekozhq/sdk`](../sdk-foundations/overview.md).
+  through [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md).
 - <fill in as decisions are made>
 
 ## Dependencies

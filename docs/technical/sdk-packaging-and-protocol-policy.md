@@ -5,7 +5,7 @@
 `@ekozhq/sdk` is the first consumer of the REST surface fixed by
 [HTTP API conventions](api-conventions.md) and the token / session model of
 [authentication and sessions](auth-and-sessions.md). Its
-[SDK foundations technical design](../../backlog/features/sdk-foundations/technical.md)
+[SDK foundations technical design](../../backlog/_archives/features/sdk-foundations/technical.md)
 settles a set of choices that shape the public API third-party clients will
 bind, how the package is built and distributed, and how a client and a server
 negotiate protocol compatibility.

@@ -57,7 +57,7 @@ Messages must be retained according to configurable retention rules.
 
 - [Identity and profiles](../identity-and-profiles/overview.md), to identify the
   members of spaces and rooms.
-- [Server administration](../server-administration/overview.md), for the global
+- [Server administration](../../_archives/features/server-administration/overview.md), for the global
   administration performed by the server owner.
 
 ## Feature order

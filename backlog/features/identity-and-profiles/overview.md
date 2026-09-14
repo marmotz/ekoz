@@ -43,7 +43,7 @@ later.
 
 - [Conversations](../conversations/overview.md) use the accounts and profiles
   managed by this feature.
-- [Server administration](../server-administration/overview.md) manages accounts
+- [Server administration](../../_archives/features/server-administration/overview.md) manages accounts
   and roles at the server scale.
 - [Notifications](../notifications/overview.md) use the verified email address
   and account preferences.

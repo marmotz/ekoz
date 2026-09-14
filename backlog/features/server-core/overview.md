@@ -59,5 +59,5 @@ Provide the foundations the first increment builds on:
 - [Identity and profiles](../identity-and-profiles/overview.md) is the first
   feature to build on this core (accounts, sessions, profile, avatars via object
   storage, verification and reset via email).
-- [Server administration](../server-administration/overview.md) later exposes the
+- [Server administration](../../_archives/features/server-administration/overview.md) later exposes the
   configuration, the audit log and supervision through the web admin.

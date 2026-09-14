@@ -271,7 +271,7 @@ interface StorageDriver {
   through an override store consulted _before_ the registered default; the store
   (a table keyed by template name, plus a branding block for colours / product
   name / logo feeding the layout) and its admin surface land with
-  [server administration](../server-administration/overview.md). The registered
+  [server administration](../../_archives/features/server-administration/overview.md). The registered
   templates are the fallback defaults. A `docs/technical/` page is owed for this model.
 - `email_message` table: `id`, `to`, `template`, `category`, `sent_at`,
   `dedupe_key` (nullable, unique-per-window). Used now for a coarse
@@ -288,7 +288,7 @@ interface StorageDriver {
   `target_id` (nullable), `metadata jsonb`.
 - `AuditService.record(entry)` — called by features. No update/delete API.
 - Retention/rotation of the audit log itself is out of scope here (revisited in
-  [server administration](../server-administration/overview.md)).
+  [server administration](../../_archives/features/server-administration/overview.md)).
 
 ## 9. Health
 
@@ -325,7 +325,7 @@ interface StorageDriver {
 Per [observability and instrumentation](../../../docs/technical/observability.md).
 Server-core ships the emission side (logs, metrics, traces, health); the
 operator-facing supervision screens belong to
-[server administration](../server-administration/overview.md) and only consume
+[server administration](../../_archives/features/server-administration/overview.md) and only consume
 what is defined here.
 
 ### Logging
