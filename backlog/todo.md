@@ -42,16 +42,16 @@ _technical design — see [technical.md](features/sdk-foundations/technical.md)_
 
 ## Server administration ·  [overview](features/server-administration/overview.md)
 
-_technical design — see [technical.md](features/server-administration/technical.md)_ — 2/6 tasks done
+_technical design — see [technical.md](features/server-administration/technical.md)_ — 6/6 tasks done
 
 | Done | Issue                                            | Title                                                           | Blocked by                                                                                         |
 |------|--------------------------------------------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
 | [x]  | [#14](https://github.com/marmotz/ekoz/issues/14) | Admin account read endpoints and owner-triggered password reset | —                                                                                                  |
 | [x]  | [#15](https://github.com/marmotz/ekoz/issues/15) | Public setup-state probe and CORS support                       | —                                                                                                  |
-| [ ]  | [#16](https://github.com/marmotz/ekoz/issues/16) | Admin console — application bootstrap                           | —                                                                                                  |
-| [ ]  | [#17](https://github.com/marmotz/ekoz/issues/17) | Admin console — server initialization and owner sign-in         | [#15](https://github.com/marmotz/ekoz/issues/15), [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53) |
-| [ ]  | [#18](https://github.com/marmotz/ekoz/issues/18) | Admin console — account administration                          | [#14](https://github.com/marmotz/ekoz/issues/14), [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53) |
-| [ ]  | [#19](https://github.com/marmotz/ekoz/issues/19) | Admin console — invitations and username-change requests        | [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53)                                                   |
+| [x]  | [#16](https://github.com/marmotz/ekoz/issues/16) | Admin console — application bootstrap                           | —                                                                                                  |
+| [x]  | [#17](https://github.com/marmotz/ekoz/issues/17) | Admin console — server initialization and owner sign-in         | [#15](https://github.com/marmotz/ekoz/issues/15), [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53) |
+| [x]  | [#18](https://github.com/marmotz/ekoz/issues/18) | Admin console — account administration                          | [#14](https://github.com/marmotz/ekoz/issues/14), [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53) |
+| [x]  | [#19](https://github.com/marmotz/ekoz/issues/19) | Admin console — invitations and username-change requests        | [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53)                                                   |
 
 ## Server OpenAPI documentation ·  [overview](features/server-openapi-doc/overview.md)
 

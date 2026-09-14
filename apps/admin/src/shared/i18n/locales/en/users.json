@@ -1,0 +1,64 @@
+{
+  "title": "Users",
+  "search": "Search by name, identifier or email",
+  "filters": {
+    "allStatuses": "All statuses",
+    "ownersOnly": "Owners only"
+  },
+  "columns": {
+    "user": "User",
+    "email": "Email",
+    "status": "Status",
+    "owner": "Owner",
+    "created": "Created"
+  },
+  "newUser": "New user",
+  "detail": {
+    "identifier": "Identifier",
+    "email": "Email",
+    "emailVerified": "Email verified",
+    "status": "Status",
+    "owner": "Owner",
+    "created": "Created",
+    "activeSessions": "Active sessions"
+  },
+  "actions": {
+    "suspend": "Suspend",
+    "unsuspend": "Unsuspend",
+    "delete": "Delete account",
+    "triggerPasswordReset": "Send password reset",
+    "grantOwner": "Grant owner",
+    "revokeOwner": "Revoke owner"
+  },
+  "confirm": {
+    "suspendTitle": "Suspend this account?",
+    "suspendReason": "Reason",
+    "unsuspendTitle": "Unsuspend this account?",
+    "deleteTitle": "Delete this account?",
+    "deleteDescription": "This cannot be undone.",
+    "grantOwnerTitle": "Grant owner access?",
+    "revokeOwnerTitle": "Revoke owner access?"
+  },
+  "toasts": {
+    "suspended": "Account suspended.",
+    "unsuspended": "Account unsuspended.",
+    "deleted": "Account deleted.",
+    "passwordResetSent": "Password reset email sent.",
+    "ownerGranted": "Owner access granted.",
+    "ownerRevoked": "Owner access revoked.",
+    "userCreated": "User created."
+  },
+  "errors": {
+    "lastOwner": "You cannot revoke the last remaining owner."
+  },
+  "new": {
+    "title": "Create a user",
+    "fields": {
+      "email": "Email",
+      "identifier": "Identifier",
+      "displayName": "Display name",
+      "password": "Password"
+    },
+    "submit": "Create user"
+  }
+}

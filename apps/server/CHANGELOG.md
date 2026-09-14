@@ -8,6 +8,7 @@ that does not touch this file.
 
 ### Fixed
 
+- CORS now allows the `X-Ekoz-Protocol` header, which every SDK request sends. (#16)
 - Bootstrap reads configuration after `app.init()`, so `config.toml` / env apply
   to the logger, bind address and tracing. (#4)
 - `log_format = "pretty"` renders one line per event; `pino-pretty` dropped. (#38)

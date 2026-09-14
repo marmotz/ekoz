@@ -23,8 +23,9 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run lint
       - run: bun run lint:boundaries
-      - run: bun run typecheck
       - run: bun run build
+      - run: bun run typecheck
+      - run: bun run --filter '@ekozhq/admin' build
       - run: bun run openapi:emit
       - run: bun run check
       - run: bun run test

@@ -51,8 +51,8 @@ host = "0.0.0.0"
 port = 3010
 # Origins allowed to call this API cross-origin (the admin console and
 # `client-web` each run on their own origin). Empty ⇒ CORS stays off. Local
-# dev: client-web on 5173, the admin console on 5174. Default: `[]`.
-cors_allowed_origins = ["http://localhost:5173", "http://localhost:5174"]
+# dev: client-web on 5173, the admin console on 7010. Default: `[]`.
+cors_allowed_origins = ["http://localhost:5173", "http://localhost:7010"]
 
 
 # ---------------------------------------------------------------------------

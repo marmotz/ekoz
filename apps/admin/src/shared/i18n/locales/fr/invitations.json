@@ -1,0 +1,51 @@
+{
+  "title": "Invitations",
+  "columns": {
+    "email": "Email",
+    "created": "Créée le",
+    "expiry": "Expiration",
+    "status": "Statut"
+  },
+  "status": {
+    "pending": "En attente",
+    "used": "Utilisée"
+  },
+  "new": {
+    "title": "Nouvelle invitation",
+    "email": "Email (optionnel)",
+    "expiresInDays": "Expire dans (jours, optionnel)",
+    "submit": "Créer l'invitation"
+  },
+  "created": {
+    "title": "Invitation créée",
+    "description": "Copiez ce jeton maintenant — il ne sera plus jamais affiché.",
+    "copied": "Jeton copié dans le presse-papiers."
+  },
+  "revoke": {
+    "action": "Révoquer",
+    "confirmTitle": "Révoquer cette invitation ?",
+    "toast": "Invitation révoquée."
+  },
+  "usernameRequests": {
+    "title": "Demandes de changement d'identifiant",
+    "filters": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Rejetée"
+    },
+    "columns": {
+      "user": "Compte",
+      "requested": "Identifiant demandé",
+      "created": "Demandée le",
+      "status": "Statut"
+    },
+    "actions": {
+      "approve": "Approuver",
+      "reject": "Rejeter"
+    },
+    "toasts": {
+      "approved": "Demande approuvée — nouvel identifiant : {{identifier}}.",
+      "rejected": "Demande rejetée."
+    }
+  }
+}
