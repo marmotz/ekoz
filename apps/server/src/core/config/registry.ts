@@ -77,6 +77,14 @@ export const PARAMETER_REGISTRY = {
     secret: false,
   },
   'http.port': { kind: 'infra', schema: port, default: 3010, hotReloadable: false, secret: false },
+  'http.cors_allowed_origins': {
+    kind: 'infra',
+    schema: z.array(z.url()).default([]),
+    default: [],
+    hotReloadable: false,
+    secret: false,
+    list: true,
+  },
   'database.url': { kind: 'infra', schema: z.string().min(1), hotReloadable: false, secret: true },
   'secret.key': {
     kind: 'infra',

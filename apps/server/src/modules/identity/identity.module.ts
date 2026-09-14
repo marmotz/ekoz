@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AccountService } from './accounts/account.service.js';
+import { AdminUserQueryController } from './accounts/admin-users.controller.js';
+import { AdminUsersQueryService } from './accounts/admin-users.service.js';
 import { IdentifierService } from './accounts/identifier.service.js';
 import {
   AdminOwnersController,
@@ -17,6 +19,7 @@ import {
 import { RegistrationService } from './accounts/registration.service.js';
 import { SetupController } from './accounts/setup.controller.js';
 import { SetupOwnerService } from './accounts/setup-owner.service.js';
+import { SetupStateController } from './accounts/setup-state.controller.js';
 import {
   AdminUsernameRequestsController,
   MeUsernameController,
@@ -65,10 +68,12 @@ import { ProfileService } from './profile/profile.service.js';
     StreamController,
     RegistrationController,
     AdminUsersController,
+    AdminUserQueryController,
     EmailVerificationController,
     MeEmailController,
     InvitationsController,
     SetupController,
+    SetupStateController,
     PasswordResetController,
     MeController,
     UsersController,
@@ -97,6 +102,7 @@ import { ProfileService } from './profile/profile.service.js';
     ProfileService,
     UsernameService,
     LifecycleService,
+    AdminUsersQueryService,
     SensitiveThrottleGuard,
     AuthGuard,
     OwnerGuard,

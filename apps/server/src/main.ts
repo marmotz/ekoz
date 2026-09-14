@@ -3,11 +3,25 @@ import { SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import { AppModule } from './app.module.js';
 import { ConfigService } from './core/config/config.service.js';
+import { buildCorsOptions } from './core/http/cors.js';
 import { NestLoggerService } from './core/observability/nest-logger.service.js';
 import { startTracing } from './core/observability/otel.js';
 import { buildOpenApiDocument } from './openapi/document.js';
 
 const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+// `enableCors` must run before `app.init()` registers the routes — Express
+// middleware only sees requests that reach it, and a route already matched
+// earlier in the stack never falls through to a CORS middleware bolted on
+// afterwards. A standalone `ConfigService` (no settings-table repository, so
+// no DB round trip) resolves the infra-only `http.cors_allowed_origins` this
+// early, ahead of the DI-provided instance the rest of bootstrap uses.
+const bootConfig = new ConfigService();
+await bootConfig.init();
+const corsOptions = buildCorsOptions(bootConfig.get('http.cors_allowed_origins'));
+if (corsOptions) {
+  app.enableCors(corsOptions);
+}
 
 // Run every module's `onModuleInit` now — this is where `ConfigService` loads the layered
 // configuration (`config.toml` + env).

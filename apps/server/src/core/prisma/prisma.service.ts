@@ -70,6 +70,11 @@ export class PrismaService implements OnModuleInit, OnApplicationShutdown {
     return this.db.transaction.bind(this.db);
   }
 
+  /** Executes a plan built via `raw.sql\`...\`.returnsRow(...).build()`. */
+  get runtime(): Db['runtime'] {
+    return this.db.runtime.bind(this.db);
+  }
+
   /**
    * Opens the pool and forces the schema-marker check (`verifyMarker:
    * 'onFirstUse'` in `db.ts`). A stale schema or an unreachable database aborts

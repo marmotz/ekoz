@@ -12,6 +12,18 @@ function resource(fetchImpl: typeof fetch) {
 }
 
 describe('setup resource', () => {
+  it('state() GETs /setup unauthenticated', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { state: 'token-pinned' } }));
+    const { setup } = resource(fetchMock);
+
+    const result = await setup.state();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/setup');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+    expect(new Headers(fetchMock.calls[0]?.init?.headers).has('Authorization')).toBe(false);
+    expect(result).toEqual({ state: 'token-pinned' });
+  });
+
   it('creates the owner and establishes the session', async () => {
     const fetchMock = createFetchMock(
       jsonResponse({

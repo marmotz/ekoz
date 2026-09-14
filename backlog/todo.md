@@ -25,7 +25,7 @@ _[technical design](features/conversations/technical.md)_ — 0/14 tasks done
 
 ## SDK foundations ·  [overview](features/sdk-foundations/overview.md)
 
-_technical design — see [technical.md](features/sdk-foundations/technical.md)_ — 8/9 tasks done
+_technical design — see [technical.md](features/sdk-foundations/technical.md)_ — 9/9 tasks done
 
 | Done | Issue                                            | Title                                               | Blocked by                                                                                                                                           |
 |------|--------------------------------------------------|-----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -36,17 +36,17 @@ _technical design — see [technical.md](features/sdk-foundations/technical.md)_
 | [x]  | [#24](https://github.com/marmotz/ekoz/issues/24) | Invitations and admin resource bindings             | [#21](https://github.com/marmotz/ekoz/issues/21), [#22](https://github.com/marmotz/ekoz/issues/22)                                                   |
 | [x]  | [#25](https://github.com/marmotz/ekoz/issues/25) | Opt-in integration test suite                       | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
 | [x]  | [#26](https://github.com/marmotz/ekoz/issues/26) | README and usage guide                              | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
-| [ ]  | [#27](https://github.com/marmotz/ekoz/issues/27) | Admin console resource bindings                     | [#24](https://github.com/marmotz/ekoz/issues/24), [#14](https://github.com/marmotz/ekoz/issues/14), [#15](https://github.com/marmotz/ekoz/issues/15)                                                                                                     |
+| [x]  | [#27](https://github.com/marmotz/ekoz/issues/27) | Admin console resource bindings                     | [#24](https://github.com/marmotz/ekoz/issues/24), [#14](https://github.com/marmotz/ekoz/issues/14), [#15](https://github.com/marmotz/ekoz/issues/15)                                                                                                     |
 | [x]  | [#39](https://github.com/marmotz/ekoz/issues/39) | Protocol: "Identity and profiles" section           | [#22](https://github.com/marmotz/ekoz/issues/22), [#23](https://github.com/marmotz/ekoz/issues/23), [#24](https://github.com/marmotz/ekoz/issues/24) |
 
 ## Server administration ·  [overview](features/server-administration/overview.md)
 
-_technical design — see [technical.md](features/server-administration/technical.md)_ — 0/6 tasks done
+_technical design — see [technical.md](features/server-administration/technical.md)_ — 2/6 tasks done
 
 | Done | Issue                                            | Title                                                           | Blocked by                                                                                         |
 |------|--------------------------------------------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| [ ]  | [#14](https://github.com/marmotz/ekoz/issues/14) | Admin account read endpoints and owner-triggered password reset | —                                                                                                  |
-| [ ]  | [#15](https://github.com/marmotz/ekoz/issues/15) | Public setup-state probe and CORS support                       | —                                                                                                  |
+| [x]  | [#14](https://github.com/marmotz/ekoz/issues/14) | Admin account read endpoints and owner-triggered password reset | —                                                                                                  |
+| [x]  | [#15](https://github.com/marmotz/ekoz/issues/15) | Public setup-state probe and CORS support                       | —                                                                                                  |
 | [ ]  | [#16](https://github.com/marmotz/ekoz/issues/16) | Admin console — application bootstrap                           | —                                                                                                  |
 | [ ]  | [#17](https://github.com/marmotz/ekoz/issues/17) | Admin console — server initialization and owner sign-in         | [#15](https://github.com/marmotz/ekoz/issues/15), [#16](https://github.com/marmotz/ekoz/issues/16) |
 | [ ]  | [#18](https://github.com/marmotz/ekoz/issues/18) | Admin console — account administration                          | [#14](https://github.com/marmotz/ekoz/issues/14), [#16](https://github.com/marmotz/ekoz/issues/16) |
