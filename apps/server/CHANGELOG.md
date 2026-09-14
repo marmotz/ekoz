@@ -19,8 +19,18 @@ that does not touch this file.
 - `setAvatar` rejects an account with no display name instead of returning a
   broken avatar URL. (#40)
 
+### Changed
+
+- `AuthGuard` / `OwnerGuard` moved to `core/http`, usable by any feature
+  module. (#1)
+
 ### Added
 
+- Room hierarchy: spaces and channels, closure-table ancestry, move and
+  soft-delete. (#1)
+- Per-room event log with a gap-free monotonic `seq`. (#2)
+- Capability-based permission ACL with role defaults, per-node and per-user
+  overrides, and a resolver endpoint. (#3)
 - Admin account list, detail and owner-triggered password reset. (#14)
 - Public setup-state probe and configurable CORS allow-list. (#15)
 - OpenAPI description of the HTTP API, with a Swagger UI at `/docs` and the JSON

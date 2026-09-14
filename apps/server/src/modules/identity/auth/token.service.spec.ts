@@ -8,7 +8,7 @@ import {
   publicKeyFromBase64,
 } from '../../../core/crypto/ed25519.js';
 import type { SigningService } from '../../../core/crypto/signing.service.js';
-import { UnauthenticatedError } from '../identity.errors.js';
+import { UnauthenticatedError } from '../../../core/http/auth.errors.js';
 import { TokenService } from './token.service.js';
 
 const keyPair = generateEd25519KeyPair();

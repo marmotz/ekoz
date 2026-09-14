@@ -370,6 +370,86 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: false,
     secret: false,
   },
+  'rooms.max_depth': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 4,
+    hotReloadable: true,
+    secret: false,
+  },
+  'rooms.directory_page_size': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 25,
+    hotReloadable: true,
+    secret: false,
+  },
+  'messages.body_max_length': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 16_000,
+    hotReloadable: true,
+    secret: false,
+  },
+  'messages.edit_window': {
+    kind: 'runtime',
+    schema: z.union([durationSeconds, z.null()]),
+    default: null,
+    hotReloadable: true,
+    secret: false,
+  },
+  'retention.default': {
+    kind: 'runtime',
+    // Accepts the resolved object, or a JSON string from an env override —
+    // same pattern as `auth.sensitive_throttle`.
+    schema: z
+      .union([z.string().transform((s) => JSON.parse(s) as unknown), z.object({}).passthrough()])
+      .pipe(
+        z.discriminatedUnion('mode', [
+          z.object({ mode: z.literal('keep') }),
+          z.object({ mode: z.literal('hide'), after: durationSeconds }),
+          z.object({ mode: z.literal('delete'), after: durationSeconds }),
+        ]),
+      ),
+    default: { mode: 'keep' },
+    hotReloadable: true,
+    secret: false,
+  },
+  'presence.heartbeat_interval': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '45s',
+    hotReloadable: true,
+    secret: false,
+  },
+  'presence.away_after': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '5m',
+    hotReloadable: true,
+    secret: false,
+  },
+  'presence.offline_after': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '15m',
+    hotReloadable: true,
+    secret: false,
+  },
+  'typing.ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '6s',
+    hotReloadable: true,
+    secret: false,
+  },
+  'sync.max_page': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 200,
+    hotReloadable: true,
+    secret: false,
+  },
 } as const satisfies Record<string, ParameterSpec>;
 
 export type ParameterKey = keyof typeof PARAMETER_REGISTRY;

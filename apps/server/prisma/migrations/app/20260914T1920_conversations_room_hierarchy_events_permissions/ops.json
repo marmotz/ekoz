@@ -1,0 +1,638 @@
+[
+  {
+    "id": "table.role_default_capability",
+    "label": "Create table \"role_default_capability\"",
+    "summary": "Creates table \"role_default_capability\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "role_default_capability"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"role_default_capability\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"role_default_capability\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"role_default_capability\"",
+        "sql": "CREATE TABLE \"public\".\"role_default_capability\" (\n  \"capability\" text NOT NULL,\n  \"effect\" text NOT NULL,\n  \"role\" text NOT NULL,\n  PRIMARY KEY (\"role\", \"capability\"),\n  CONSTRAINT \"role_default_capability_effect_check_42ce71e5\" CHECK (\"effect\" IN ('allow', 'deny')),\n  CONSTRAINT \"role_default_capability_role_check_9fefc26a\" CHECK (\"role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"role_default_capability\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"role_default_capability\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room",
+    "label": "Create table \"room\"",
+    "summary": "Creates table \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room\"",
+        "sql": "CREATE TABLE \"public\".\"room\" (\n  \"avatar_blob_id\" text,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"created_by_id\" text,\n  \"default_role\" text DEFAULT 'member' NOT NULL,\n  \"deleted_at\" timestamptz,\n  \"dm_key\" text,\n  \"id\" text NOT NULL,\n  \"last_seq\" int8 DEFAULT '0'::int8 NOT NULL,\n  \"name\" text,\n  \"origin_server\" text NOT NULL,\n  \"parent_id\" text,\n  \"read_only\" bool DEFAULT false NOT NULL,\n  \"retention\" jsonb NOT NULL,\n  \"slug\" text,\n  \"topic\" text,\n  \"type\" text NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  \"visibility\" text DEFAULT 'private' NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"room_default_role_check_ecb244b3\" CHECK (\"default_role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader')),\n  CONSTRAINT \"room_type_check_e5a8a21c\" CHECK (\"type\" IN ('space', 'channel', 'dm', 'group_dm')),\n  CONSTRAINT \"room_visibility_check_00a2ae5e\" CHECK (\"visibility\" IN ('public', 'private', 'invite'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_closure",
+    "label": "Create table \"room_closure\"",
+    "summary": "Creates table \"room_closure\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_closure"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_closure\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_closure\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_closure\"",
+        "sql": "CREATE TABLE \"public\".\"room_closure\" (\n  \"ancestor_id\" text NOT NULL,\n  \"depth\" int4 NOT NULL,\n  \"descendant_id\" text NOT NULL,\n  PRIMARY KEY (\"ancestor_id\", \"descendant_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_closure\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_closure\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_event",
+    "label": "Create table \"room_event\"",
+    "summary": "Creates table \"room_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_event\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_event\"",
+        "sql": "CREATE TABLE \"public\".\"room_event\" (\n  \"content\" jsonb NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"room_id\" text NOT NULL,\n  \"sender_id\" text,\n  \"seq\" int8 NOT NULL,\n  \"type\" text NOT NULL,\n  PRIMARY KEY (\"room_id\", \"seq\"),\n  CONSTRAINT \"room_event_type_check_869a5b2b\" CHECK (\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_event\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_member_permission",
+    "label": "Create table \"room_member_permission\"",
+    "summary": "Creates table \"room_member_permission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_member_permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_member_permission\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_member_permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_member_permission\"",
+        "sql": "CREATE TABLE \"public\".\"room_member_permission\" (\n  \"capability\" text NOT NULL,\n  \"effect\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"node_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"room_member_permission_effect_check_42ce71e5\" CHECK (\"effect\" IN ('allow', 'deny'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_member_permission\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_member_permission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_permission_override",
+    "label": "Create table \"room_permission_override\"",
+    "summary": "Creates table \"room_permission_override\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_permission_override"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_permission_override\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_permission_override\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_permission_override\"",
+        "sql": "CREATE TABLE \"public\".\"room_permission_override\" (\n  \"capability\" text NOT NULL,\n  \"effect\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"node_id\" text NOT NULL,\n  \"role\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"room_permission_override_effect_check_42ce71e5\" CHECK (\"effect\" IN ('allow', 'deny')),\n  CONSTRAINT \"room_permission_override_role_check_9fefc26a\" CHECK (\"role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_permission_override\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_permission_override\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.room.room_dm_key_key",
+    "label": "Add unique constraint on \"room\" (dm_key)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "room_dm_key_key",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_dm_key_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_dm_key_key",
+          "public",
+          "\"public\".\"room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"room_dm_key_key\"",
+        "sql": "ALTER TABLE \"public\".\"room\" ADD CONSTRAINT \"room_dm_key_key\" UNIQUE (\"dm_key\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_dm_key_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_dm_key_key",
+          "public",
+          "\"public\".\"room\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.room_member_permission.room_member_permission_node_id_user_id_capability_key",
+    "label": "Add unique constraint on \"room_member_permission\" (node_id, user_id, capability)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "room_member_permission_node_id_user_id_capability_key",
+        "table": "room_member_permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_member_permission_node_id_user_id_capability_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_member_permission_node_id_user_id_capability_key",
+          "public",
+          "\"public\".\"room_member_permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"room_member_permission_node_id_user_id_capability_key\"",
+        "sql": "ALTER TABLE \"public\".\"room_member_permission\" ADD CONSTRAINT \"room_member_permission_node_id_user_id_capability_key\" UNIQUE (\"node_id\", \"user_id\", \"capability\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_member_permission_node_id_user_id_capability_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_member_permission_node_id_user_id_capability_key",
+          "public",
+          "\"public\".\"room_member_permission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.room_permission_override.room_permission_override_node_id_role_capability_key",
+    "label": "Add unique constraint on \"room_permission_override\" (node_id, role, capability)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "room_permission_override_node_id_role_capability_key",
+        "table": "room_permission_override"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_permission_override_node_id_role_capability_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_permission_override_node_id_role_capability_key",
+          "public",
+          "\"public\".\"room_permission_override\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"room_permission_override_node_id_role_capability_key\"",
+        "sql": "ALTER TABLE \"public\".\"room_permission_override\" ADD CONSTRAINT \"room_permission_override_node_id_role_capability_key\" UNIQUE (\"node_id\", \"role\", \"capability\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_permission_override_node_id_role_capability_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_permission_override_node_id_role_capability_key",
+          "public",
+          "\"public\".\"room_permission_override\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room.room_parent_id_idx_ab33b399",
+    "label": "Create index \"room_parent_id_idx_ab33b399\" on \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_parent_id_idx_ab33b399",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_parent_id_idx_ab33b399\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_parent_id_idx_ab33b399\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_parent_id_idx_ab33b399\"",
+        "sql": "CREATE INDEX \"room_parent_id_idx_ab33b399\" ON \"public\".\"room\" (\"parent_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_parent_id_idx_ab33b399\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_parent_id_idx_ab33b399\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room.room_type_visibility_idx_894b4660",
+    "label": "Create index \"room_type_visibility_idx_894b4660\" on \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_type_visibility_idx_894b4660",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_type_visibility_idx_894b4660\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_type_visibility_idx_894b4660\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_type_visibility_idx_894b4660\"",
+        "sql": "CREATE INDEX \"room_type_visibility_idx_894b4660\" ON \"public\".\"room\" (\"type\", \"visibility\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_type_visibility_idx_894b4660\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_type_visibility_idx_894b4660\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room_closure.room_closure_descendant_id_idx_c65fc595",
+    "label": "Create index \"room_closure_descendant_id_idx_c65fc595\" on \"room_closure\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_closure_descendant_id_idx_c65fc595",
+        "table": "room_closure"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_closure_descendant_id_idx_c65fc595\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_closure_descendant_id_idx_c65fc595\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_closure_descendant_id_idx_c65fc595\"",
+        "sql": "CREATE INDEX \"room_closure_descendant_id_idx_c65fc595\" ON \"public\".\"room_closure\" (\"descendant_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_closure_descendant_id_idx_c65fc595\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_closure_descendant_id_idx_c65fc595\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room_event.room_event_room_id_created_at_idx_3f0ddf95",
+    "label": "Create index \"room_event_room_id_created_at_idx_3f0ddf95\" on \"room_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_event_room_id_created_at_idx_3f0ddf95",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_event_room_id_created_at_idx_3f0ddf95\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_event_room_id_created_at_idx_3f0ddf95\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_event_room_id_created_at_idx_3f0ddf95\"",
+        "sql": "CREATE INDEX \"room_event_room_id_created_at_idx_3f0ddf95\" ON \"public\".\"room_event\" (\"room_id\", \"created_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_event_room_id_created_at_idx_3f0ddf95\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_event_room_id_created_at_idx_3f0ddf95\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room_member_permission.room_member_permission_node_id_idx_c068255a",
+    "label": "Create index \"room_member_permission_node_id_idx_c068255a\" on \"room_member_permission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_member_permission_node_id_idx_c068255a",
+        "table": "room_member_permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_member_permission_node_id_idx_c068255a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_member_permission_node_id_idx_c068255a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_member_permission_node_id_idx_c068255a\"",
+        "sql": "CREATE INDEX \"room_member_permission_node_id_idx_c068255a\" ON \"public\".\"room_member_permission\" (\"node_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_member_permission_node_id_idx_c068255a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_member_permission_node_id_idx_c068255a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room_permission_override.room_permission_override_node_id_idx_c068255a",
+    "label": "Create index \"room_permission_override_node_id_idx_c068255a\" on \"room_permission_override\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_permission_override_node_id_idx_c068255a",
+        "table": "room_permission_override"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_permission_override_node_id_idx_c068255a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_permission_override_node_id_idx_c068255a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_permission_override_node_id_idx_c068255a\"",
+        "sql": "CREATE INDEX \"room_permission_override_node_id_idx_c068255a\" ON \"public\".\"room_permission_override\" (\"node_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_permission_override_node_id_idx_c068255a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_permission_override_node_id_idx_c068255a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.room.room_parent_id_fkey",
+    "label": "Add foreign key \"room_parent_id_fkey\" on \"room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "room_parent_id_fkey",
+        "table": "room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"room_parent_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_parent_id_fkey",
+          "public",
+          "\"public\".\"room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"room_parent_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"room\"\nADD CONSTRAINT \"room_parent_id_fkey\"\nFOREIGN KEY (\"parent_id\")\nREFERENCES \"public\".\"room\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"room_parent_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_parent_id_fkey",
+          "public",
+          "\"public\".\"room\""
+        ]
+      }
+    ]
+  }
+]

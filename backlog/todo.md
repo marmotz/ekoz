@@ -4,13 +4,13 @@
 
 ## conversations ·  [overview](features/conversations/overview.md)
 
-_[technical design](technical.md)_ — 0/14 tasks done
+_[technical design](technical.md)_ — 3/14 tasks done
 
 | Done | Issue                                            | Title                                                      | Blocked by |
 |------|--------------------------------------------------|------------------------------------------------------------|------------|
-| [ ]  | [#1](https://github.com/marmotz/ekoz/issues/1)   | Conversations: room model and hierarchy                    | —          |
-| [ ]  | [#2](https://github.com/marmotz/ekoz/issues/2)   | Conversations: per-room event log and seq allocation       | #1         |
-| [ ]  | [#3](https://github.com/marmotz/ekoz/issues/3)   | Conversations: capability ACL and resolver                 | #1, #2     |
+| [x]  | [#1](https://github.com/marmotz/ekoz/issues/1)   | Conversations: room model and hierarchy                    | —          |
+| [x]  | [#2](https://github.com/marmotz/ekoz/issues/2)   | Conversations: per-room event log and seq allocation       | #1         |
+| [x]  | [#3](https://github.com/marmotz/ekoz/issues/3)   | Conversations: capability ACL and resolver                 | #1, #2     |
 | [ ]  | [#4](https://github.com/marmotz/ekoz/issues/4)   | Conversations: membership lifecycle                        | #1, #2, #3 |
 | [ ]  | [#5](https://github.com/marmotz/ekoz/issues/5)   | Conversations: direct and group conversations              | #1, #4     |
 | [ ]  | [#6](https://github.com/marmotz/ekoz/issues/6)   | Conversations: public room directory                       | #1, #3     |

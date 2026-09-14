@@ -10,10 +10,10 @@ import {
 } from '@nestjs/swagger';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
+import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
+import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
+import { OwnerGuard } from '../../../core/http/owner.guard.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
-import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
-import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
-import { OwnerGuard } from '../guards/owner.guard.js';
 import {
   CreatedInvitationDto,
   type CreateInvitationBody,

@@ -133,6 +133,24 @@ http/
   stream/
     ticket.hurl                       POST   /stream/ticket           200 · needs access_token
     ticket-unauthenticated.hurl       POST   /stream/ticket           401 auth.unauthenticated
+  rooms/
+    create-space.hurl                  POST   /spaces                  201 · needs owner access_token
+    create-space-forbidden.hurl        POST   /spaces                  403 room.permission_denied (non-owner)
+    create-channel.hurl                POST   /rooms                   201 · owner + room_id (parent space)
+    get.hurl                           GET    /rooms/:id               200 · needs access_token + room_id
+    get-not-found.hurl                 GET    /rooms/:id               404 room.not_found
+    get-forbidden.hurl                 GET    /rooms/:id               403 room.permission_denied (private, non-member)
+    children.hurl                      GET    /rooms/:id/children      200 · needs access_token + room_id
+    update.hurl                        PATCH  /rooms/:id               200 · owner + room_id
+    move.hurl                          POST   /rooms/:id/move          200 · owner + room_id + parent_room_id
+    move-cycle.hurl                    POST   /rooms/:id/move          422 room.cycle
+    delete.hurl                        DELETE /rooms/:id               204 · owner, throwaway empty room
+    delete-not-empty.hurl              DELETE /rooms/:id               409 room.not_empty
+  permissions/
+    my-permissions.hurl                GET    /rooms/:id/my-permissions          200 · needs access_token + room_id
+    set-role.hurl                      PUT    /rooms/:id/permissions              204 · owner + room_id
+    set-role-forbidden.hurl            PUT    /rooms/:id/permissions              403 room.permission_denied
+    set-member.hurl                    PUT    /rooms/:id/members/:userId/permissions 204 · owner + room_id + target_user_id
 ```
 
 ## Prerequisites

@@ -54,16 +54,20 @@ with SemVer, independently of the server implementation. See
   admin), login / refresh / logout, sessions, email verification, password
   reset, own and public profiles, invitations, owner administration — method,
   path, request body, success shape and `problem+json` codes for each.
+- [Spaces, rooms, roles and permissions](rooms-and-permissions.md): room
+  hierarchy CRUD and move, the capability ACL and its resolver, and the
+  `room_*` / `permission_override_changed` event payloads — method, path,
+  request body, success shape and `problem+json` codes for each. Membership,
+  messages and the rest of the `room_event` payloads are not covered yet.
 
 ## Sections to write
 
 1. Authentication and sessions (SSE ticket; the rest moved to
    [Identity and profiles](identity.md)).
-2. Spaces, rooms, roles and permissions.
-3. Messages and interactions (replies, reactions, mentions, read receipts).
-4. Presence and typing.
-5. Files and blobs.
-6. Notifications.
-7. Administration and audit.
-8. Discovery and server↔server federation.
-9. Extensions and fallback rendering.
+2. Messages and interactions (replies, reactions, mentions, read receipts).
+3. Presence and typing.
+4. Files and blobs.
+5. Notifications.
+6. Administration and audit.
+7. Discovery and server↔server federation.
+8. Extensions and fallback rendering.

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { SigningService } from '../../../core/crypto/signing.service.js';
-import { UnauthenticatedError } from '../identity.errors.js';
+import { UnauthenticatedError } from '../../../core/http/auth.errors.js';
 import {
   type AccessTokenClaims,
   assembleToken,
