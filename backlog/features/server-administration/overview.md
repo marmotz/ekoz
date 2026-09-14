@@ -67,6 +67,10 @@ its users and its spaces, through a web application deployed with the server.
 - All network access goes through
   [`@ekozhq/sdk`](../sdk-foundations/overview.md), never a direct `fetch`.
   During bring-up the SDK is consumed via `npm link` (no publish).
+- Admin console forms validate input with the Zod schemas kurotako generates
+  from the API contract (`api` source, `zodGenerator` extended to that
+  namespace in [SDK foundations](../sdk-foundations/overview.md)), exported by
+  `@ekozhq/sdk` — no hand-written validation schema duplicating a server DTO.
 - UI available in French and English (i18n catalogues); code identifiers in
   English.
 - Every design decision or notable change is written up under `docs/technical/`.

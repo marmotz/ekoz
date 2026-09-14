@@ -384,10 +384,11 @@ export default defineConfig({
   generators: [
     { use: zodGenerator, namespaces: ['db'] },
     { use: typescriptGenerator, namespaces: ['api'] },
+    { use: zodGenerator, namespaces: ['api'] },
   ],
   outputs: [
     { dir: './apps/server/src/generated', generators: ['zod'] },
-    { dir: './packages/sdk/src/generated', generators: ['typescript'] },
+    { dir: './packages/sdk/src/generated', generators: ['typescript', 'zod'] },
   ],
 });
 ```
@@ -395,7 +396,28 @@ export default defineConfig({
 `namespaces` sur chaque générateur évite que `zodGenerator` voie la source
 `api` (et inversement) ; `generators` sur chaque `output` évite qu'un output
 reçoive la sortie de l'autre générateur — sans ces deux filtres, les deux
-sources fusionneraient dans les deux dossiers de sortie.
+sources fusionneraient dans les deux dossiers de sortie. `zodGenerator` est
+câblé deux fois (`db` → `apps/server/src/generated`, validation runtime
+serveur ; `api` → `packages/sdk/src/generated`, validation de formulaire côté
+client) : même générateur, deux sources, deux sorties distinctes, chacune
+listée dans son propre `outputs[].generators`.
+
+**Amendement (décision produit :
+[server-administration/overview.md](https://github.com/marmotz/ekoz/blob/develop/backlog/features/server-administration/overview.md))** :
+la source `api` gagne `zodGenerator` en plus de `typescriptGenerator`, pour que
+les consommateurs du SDK (admin console en premier lieu, potentiellement
+`client-web` ensuite) valident leurs formulaires avec les mêmes schémas Zod
+que ceux dérivés du contrat serveur, au lieu d'en écrire une copie à la main.
+`gen-zod` n'a pas besoin d'évolution pour ça : il sait déjà produire des
+schémas Zod depuis n'importe quelle IR source, `api` comprise (le support des
+types issus de `parser-openapi` — maps typées, objets `additionalProperties`
+— a été livré côté kurotako pour l'incrément `parser-openapi`, issue
+[marmotz/kurotako#135](https://github.com/marmotz/kurotako/issues/135)) ; il
+s'agit uniquement d'étendre la config `namespaces`/`outputs` ci-dessus.
+`src/types/wire.ts` (§11.3) gagne un ré-export équivalent côté Zod, avec le
+même renommage de double suffixe que pour les types TypeScript (à vérifier au
+spike de cette tâche : `gen-zod` peut suivre une convention de nommage
+différente de `gen-typescript`).
 
 **Dépendances racine** (`package.json`, à côté de `kurotako` /
 `@kurotako/parser-prisma` / `@kurotako/gen-zod` déjà présents) :
@@ -538,6 +560,13 @@ C'est la seule pièce de mapping manuelle ; elle ne redéclare aucun champ.
   l'incrément conversations.
 - **Changesets** : le `AGENTS.md` impose un changeset par changement visible dès
   maintenant, même sans publication — le `CHANGELOG.md` démarre avec le paquet.
+- **Amendement post-clôture** : les tâches #20–#39 sont déjà livrées (`bun run
+  generate` ne couvre aujourd'hui que `zodGenerator` sur `db` et
+  `typescriptGenerator` sur `api`). L'extension de `zodGenerator` à `api`
+  (§11.2) est donc une nouvelle tâche, pas une réouverture de #21 ; elle
+  touche `tako.config.ts`, `src/types/wire.ts` et exige un changeset. Les
+  écrans de l'admin console qui consomment ces schémas (#18, #19 côté
+  `server-administration`) en dépendent.
 
 ## 16. À documenter dans `docs/technical/`
 
@@ -573,3 +602,6 @@ Dans l'ordre de dépendance (voir chaque fichier pour ses dépendances) :
 10. Suite d'intégration opt-in contre un serveur de référence. [#25](https://github.com/marmotz/ekoz/issues/25)
 11. README et guide d'usage. [#26](https://github.com/marmotz/ekoz/issues/26)
 12. Section « Identity and profiles » du protocole (docs task). [#39](https://github.com/marmotz/ekoz/issues/39)
+13. Extension de `zodGenerator` à la source `api` (§11.2, amendement), export
+    des schémas de validation dans `wire.ts`. Débloque les écrans de formulaire
+    de l'admin console (#18, #19). [#53](https://github.com/marmotz/ekoz/issues/53)

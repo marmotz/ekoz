@@ -36,14 +36,15 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.13",
     "@changesets/cli": "3.0.2",
+    "@kurotako/core": "^0.2.1",
     "@kurotako/gen-typescript": "^0.3.3",
-    "@kurotako/gen-zod": "^0.3.2",
+    "@kurotako/gen-zod": "^0.3.4",
     "@kurotako/parser-openapi": "^0.2.3",
     "@kurotako/parser-prisma": "^0.2.3",
     "@types/node": "^26.5.1",
     "@vitest/coverage-v8": "^4.1.11",
     "kurotako": "^0.2.1",
-    "lefthook": "^2.1.12",
+    "lefthook": "^2.1.14",
     "typescript": "6.0.3",
     "vitest": "^4.1.11"
   }
