@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SessionEventEmitter } from '../session/events.js';
 import { SessionManager } from '../session/session-manager.js';
 import { createFetchMock, jsonResponse } from '../test-support/fetch-mock.js';
-import { LastOwnerError } from '../transport/errors.js';
+import { LastOwnerError, NotFoundError } from '../transport/errors.js';
 import { HttpClient } from '../transport/http-client.js';
 import { createAdminResource } from './admin.js';
 
@@ -20,6 +20,62 @@ async function resource(fetchImpl: typeof fetch) {
 }
 
 describe('admin resource', () => {
+  it('users.list() sends path/verb and forwards query params', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { items: [], nextCursor: null } }));
+    const admin = await resource(fetchMock);
+
+    const result = await admin.users.list({
+      q: 'alice',
+      status: 'active',
+      owner: true,
+      cursor: 'c1',
+      limit: 20,
+    });
+
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+    expect(fetchMock.calls[0]?.url).toBe(
+      'https://api.example.com/admin/users?q=alice&status=active&owner=true&cursor=c1&limit=20',
+    );
+    expect(new Headers(fetchMock.calls[0]?.init?.headers).get('Authorization')).toBe(
+      'Bearer owner-token',
+    );
+    expect(result).toEqual({ items: [], nextCursor: null });
+  });
+
+  it('users.list() with no params omits the query string', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { items: [], nextCursor: null } }));
+    const admin = await resource(fetchMock);
+
+    await admin.users.list();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/users');
+  });
+
+  it('users.get() GETs /admin/users/:id, 404 surfaces as NotFoundError', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { id: 'u2' } }));
+    const admin = await resource(fetchMock);
+    await admin.users.get('u2');
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/users/u2');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+
+    const notFound = createFetchMock(
+      jsonResponse({ status: 404, body: { code: 'identity.user_not_found', status: 404 } }),
+    );
+    const admin2 = await resource(notFound);
+    await expect(admin2.users.get('nope')).rejects.toThrow(NotFoundError);
+  });
+
+  it('users.triggerPasswordReset() POSTs /admin/users/:id/password-reset', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { accepted: true } }));
+    const admin = await resource(fetchMock);
+
+    const result = await admin.users.triggerPasswordReset('u2');
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/users/u2/password-reset');
+    expect(fetchMock.calls[0]?.init?.method).toBe('POST');
+    expect(result).toEqual({ accepted: true });
+  });
+
   it('users.create() POSTs /admin/users with the bearer token', async () => {
     const fetchMock = createFetchMock(jsonResponse({ body: { id: 'u2' } }));
     const admin = await resource(fetchMock);

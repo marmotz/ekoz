@@ -51,6 +51,12 @@ describe('identity — first-owner setup, token-pinned (integration)', () => {
 
   const server = () => app.getHttpServer();
 
+  it('GET /setup reports token-pinned before the owner exists', async () => {
+    const res = await request(server()).get('/setup').expect(200);
+    expect(res.body).toEqual({ state: 'token-pinned' });
+    expect(res.headers['cache-control']).toBe('no-store');
+  });
+
   it('rejects a wrong token', async () => {
     const res = await request(server())
       .post('/setup/owner')
@@ -89,5 +95,8 @@ describe('identity — first-owner setup, token-pinned (integration)', () => {
         displayName: 'x',
       })
       .expect(410);
+
+    const state = await request(server()).get('/setup').expect(200);
+    expect(state.body).toEqual({ state: 'closed' });
   });
 });

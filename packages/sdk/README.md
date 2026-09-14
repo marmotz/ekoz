@@ -53,13 +53,13 @@ per-resource constructors:
 
 | Namespace                 | Covers                                                         |
 | -------------------------- | --------------------------------------------------------------- |
-| `client.setup`             | First-owner setup (`createOwner`)                               |
+| `client.setup`             | Setup-state probe, first-owner setup (`state`, `createOwner`)    |
 | `client.auth`              | Register, login, logout, email verification, password reset     |
 | `client.me`                | Own profile, avatar, email, username, account deletion           |
 | `client.users`             | Public profile lookup by identifier                              |
 | `client.sessions`          | List / rename / revoke the caller's own sessions                 |
 | `client.invitations`       | Owner-only registration invitations                              |
-| `client.admin`             | Owner-only user, owner and username-request administration       |
+| `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset), owner and username-request administration |
 | `client.discovery`         | The resolved discovery document (`get` / `refresh`)              |
 | `client.session`           | Local session state (`getState`, `resume`, `clear`)              |
 

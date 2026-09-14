@@ -20,6 +20,8 @@ that does not touch this file.
 
 ### Added
 
+- Admin account list, detail and owner-triggered password reset. (#14)
+- Public setup-state probe and configurable CORS allow-list. (#15)
 - OpenAPI description of the HTTP API, with a Swagger UI at `/docs` and the JSON
   at `/docs/json`. (#43)
 - Shared `problem+json` response schema and an error-response decorator for

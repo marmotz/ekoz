@@ -6,14 +6,19 @@
 
 import type { SessionManager } from '../session/session-manager.js';
 import type { HttpClient } from '../transport/http-client.js';
-import type { SetupOwnerBody, SetupOwnerResponse } from '../types/wire.js';
+import type { SetupOwnerBody, SetupOwnerResponse, SetupStateResponse } from '../types/wire.js';
 
 export interface SetupResource {
+  /** `GET /setup` (unauthenticated): whether setup is open, and how it is pinned. */
+  state(): Promise<SetupStateResponse>;
   createOwner(body: SetupOwnerBody): Promise<SetupOwnerResponse>;
 }
 
 export function createSetupResource(http: HttpClient, session: SessionManager): SetupResource {
   return {
+    state() {
+      return http.request<SetupStateResponse>('GET', '/setup');
+    },
     async createOwner(body) {
       const result = await http.request<SetupOwnerResponse>('POST', '/setup/owner', { body });
       await session.establish({

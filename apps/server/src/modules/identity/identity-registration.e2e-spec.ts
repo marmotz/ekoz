@@ -63,6 +63,9 @@ describe('identity — registration, verification, setup (integration)', () => {
   let ownerAccessToken: string;
 
   it('creates the first owner (email-pinned) and then closes /setup', async () => {
+    const before = await request(server()).get('/setup').expect(200);
+    expect(before.body).toEqual({ state: 'email-pinned' });
+
     const res = await request(server())
       .post('/setup/owner')
       .send({ email: ownerEmail, password, name: 'owner', displayName: 'The Owner' })

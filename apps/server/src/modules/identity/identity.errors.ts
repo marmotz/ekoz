@@ -174,6 +174,12 @@ export class UsernameChangeRequestResolvedError extends DomainError {
   }
 }
 
+export class AccountDeletedError extends DomainError {
+  constructor(detail = 'This account has been deleted.') {
+    super('identity.account_deleted', detail, 409, 'Conflict');
+  }
+}
+
 export class LastOwnerError extends DomainError {
   constructor(detail = 'The server must keep at least one owner.') {
     super('identity.last_owner', detail, 409, 'Conflict');

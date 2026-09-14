@@ -52,6 +52,7 @@ http/
   blobs/
     not-found.hurl                    GET /blobs/:id                  (404 until a feature adds a policy)
   setup/
+    state.hurl                        GET /setup                      200 · public, any state
     create-owner.hurl                 POST /setup/owner               201 · fresh DB + real setup_token
     create-owner-rejected.hurl        POST /setup/owner               403 · bad token / email
     create-owner-closed.hurl          POST /setup/owner               410 · owner already exists
@@ -102,6 +103,11 @@ http/
     revoke-unauthenticated.hurl       DELETE /invitations/:id          401 auth.unauthenticated
     revoke-not-found.hurl             DELETE /invitations/:id          404 identity.invitation_not_found
   admin/
+    users-list.hurl                    GET    /admin/users                     200 · needs owner access_token
+    users-list-forbidden.hurl          GET    /admin/users                     403 · non-owner
+    user-get.hurl                      GET    /admin/users/:id                 200 · owner + target_user_id
+    user-get-not-found.hurl            GET    /admin/users/:id                 404 identity.user_not_found
+    user-password-reset.hurl           POST   /admin/users/:id/password-reset  202 · owner + target_user_id
     create-user.hurl                  POST   /admin/users             201 · needs owner access_token
     create-user-unauthenticated.hurl  POST   /admin/users             401 auth.unauthenticated
     create-user-forbidden.hurl        POST   /admin/users             403 auth.forbidden (non-owner)

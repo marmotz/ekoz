@@ -41,7 +41,7 @@ web_url = "https://app.ekoz.example.com"
 
 
 # ---------------------------------------------------------------------------
-# [http] — HTTP listener bind address. Both infra.
+# [http] — HTTP listener bind address and CORS. All infra.
 # ---------------------------------------------------------------------------
 [http]
 # Interface to bind. `0.0.0.0` = all IPv4 interfaces (containers, LAN),
@@ -49,6 +49,10 @@ web_url = "https://app.ekoz.example.com"
 host = "0.0.0.0"
 # TCP port to listen on, 1-65535. Default: `3010`.
 port = 3010
+# Origins allowed to call this API cross-origin (the admin console and
+# `client-web` each run on their own origin). Empty ⇒ CORS stays off. Local
+# dev: client-web on 5173, the admin console on 5174. Default: `[]`.
+cors_allowed_origins = ["http://localhost:5173", "http://localhost:5174"]
 
 
 # ---------------------------------------------------------------------------

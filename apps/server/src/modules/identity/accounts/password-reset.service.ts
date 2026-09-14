@@ -7,8 +7,12 @@ import { MailService } from '../../../core/mail/mail.service.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { RefreshTokenService } from '../auth/refresh-token.service.js';
 import { SessionService } from '../auth/session.service.js';
-import { PasswordResetInvalidError } from '../identity.errors.js';
-import { AccountService } from './account.service.js';
+import {
+  AccountDeletedError,
+  PasswordResetInvalidError,
+  UserNotFoundError,
+} from '../identity.errors.js';
+import { AccountService, type UserRecord } from './account.service.js';
 import { PasswordService } from './password.service.js';
 import { PASSWORD_RESET_TEMPLATE } from './templates.js';
 
@@ -52,6 +56,38 @@ export class PasswordResetService implements OnModuleInit {
   async request(email: string, requestedIp: string | null): Promise<void> {
     const user = await this.accounts.findByEmail(email);
     if (user?.status !== 'active' || user.email === null) {
+      return;
+    }
+
+    await this.issueFor(user, requestedIp);
+  }
+
+  /**
+   * Owner-triggered reset (technical.md §2.3, issue #14): same token and mail
+   * as the public {@link request}, but keyed by user id, allowed for a
+   * suspended account too, and audited as `identity.password_reset_triggered`.
+   */
+  async requestForUser(userId: string, actorUserId: string): Promise<void> {
+    const user = await this.accounts.findById(userId);
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+    if (user.status === 'deleted' || user.email === null) {
+      throw new AccountDeletedError();
+    }
+
+    await this.issueFor(user, null);
+
+    await this.audit.record({
+      action: 'identity.password_reset_triggered',
+      actorUserId,
+      targetType: 'user',
+      targetId: userId,
+    });
+  }
+
+  private async issueFor(user: UserRecord, requestedIp: string | null): Promise<void> {
+    if (user.email === null) {
       return;
     }
 

@@ -3,6 +3,8 @@ import type { AcceptedResponseDtoDto } from './AcceptedResponseDto.type.js';
 import type { AccountViewDtoDto } from './AccountViewDto.type.js';
 import type { AddOwnerDtoDto } from './AddOwnerDto.type.js';
 import type { AdminCreateUserDtoDto } from './AdminCreateUserDto.type.js';
+import type { AdminUserDetailDtoDto } from './AdminUserDetailDto.type.js';
+import type { AdminUserListResponseDtoDto } from './AdminUserListResponseDto.type.js';
 import type { AvatarUploadedDtoDto } from './AvatarUploadedDto.type.js';
 import type { ChangeEmailDtoDto } from './ChangeEmailDto.type.js';
 import type { ChangeUsernameDtoDto } from './ChangeUsernameDto.type.js';
@@ -28,6 +30,7 @@ import type { RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsRespons
 import type { SessionViewDtoDto } from './SessionViewDto.type.js';
 import type { SetupOwnerDtoDto } from './SetupOwnerDto.type.js';
 import type { SetupOwnerResponseDtoDto } from './SetupOwnerResponseDto.type.js';
+import type { SetupStateDtoDto } from './SetupStateDto.type.js';
 import type { StreamTicketResponseDtoDto } from './StreamTicketResponseDto.type.js';
 import type { SuspendUserDtoDto } from './SuspendUserDto.type.js';
 import type { TokenBundleDtoDto } from './TokenBundleDto.type.js';
@@ -116,6 +119,24 @@ export type RegistrationController_register422ResponseProblemJson = ProblemDetai
 
 export type RegistrationController_register429ResponseProblemJson = ProblemDetailsDtoDto;
 
+export type AdminUserQueryController_list200ResponseJson = AdminUserListResponseDtoDto;
+
+export type AdminUserQueryController_list401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_list403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_list422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_listQueryLimit = number;
+
+export type AdminUserQueryController_listQueryCursor = string;
+
+export type AdminUserQueryController_listQueryOwner = unknown;
+
+export type AdminUserQueryController_listQueryStatus = unknown;
+
+export type AdminUserQueryController_listQueryQ = string;
+
 export type AdminUsersController_createRequest = AdminCreateUserDtoDto;
 
 export type AdminUsersController_create201ResponseJson = AccountViewDtoDto;
@@ -127,6 +148,36 @@ export type AdminUsersController_create403ResponseProblemJson = ProblemDetailsDt
 export type AdminUsersController_create409ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type AdminUsersController_create422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_get200ResponseJson = AdminUserDetailDtoDto;
+
+export type AdminUserQueryController_get401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_get403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_get404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_getPathId = string;
+
+export type AdminUserLifecycleController_remove401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserLifecycleController_remove403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserLifecycleController_remove404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserLifecycleController_removePathId = string;
+
+export type AdminUserQueryController_triggerPasswordReset202ResponseJson = AcceptedResponseDtoDto;
+
+export type AdminUserQueryController_triggerPasswordReset401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_triggerPasswordReset403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_triggerPasswordReset404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_triggerPasswordReset409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserQueryController_triggerPasswordResetPathId = string;
 
 export type EmailVerificationController_verifyRequest = VerifyEmailDtoDto;
 
@@ -189,6 +240,8 @@ export type SetupController_createOwner403ResponseProblemJson = ProblemDetailsDt
 export type SetupController_createOwner410ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type SetupController_createOwner422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SetupStateController_state200ResponseJson = SetupStateDtoDto;
 
 export type PasswordResetController_requestRequest = RequestPasswordResetDtoDto;
 
@@ -315,14 +368,6 @@ export type AdminUserLifecycleController_unsuspend403ResponseProblemJson = Probl
 export type AdminUserLifecycleController_unsuspend404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type AdminUserLifecycleController_unsuspendPathId = string;
-
-export type AdminUserLifecycleController_remove401ResponseProblemJson = ProblemDetailsDtoDto;
-
-export type AdminUserLifecycleController_remove403ResponseProblemJson = ProblemDetailsDtoDto;
-
-export type AdminUserLifecycleController_remove404ResponseProblemJson = ProblemDetailsDtoDto;
-
-export type AdminUserLifecycleController_removePathId = string;
 
 export type AdminOwnersController_addRequest = AddOwnerDtoDto;
 
