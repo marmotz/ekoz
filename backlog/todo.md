@@ -1,4 +1,4 @@
-<!-- backlog-sync 2026-09-12T20:54Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
+<!-- backlog-sync 2026-09-14T13:00Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
 
 # Backlog
 
@@ -25,10 +25,11 @@ _[technical design](features/conversations/technical.md)_ — 0/14 tasks done
 
 ## SDK foundations ·  [overview](features/sdk-foundations/overview.md)
 
-_technical design — see [technical.md](features/sdk-foundations/technical.md)_ — 9/9 tasks done
+_technical design — see [technical.md](features/sdk-foundations/technical.md)_ — 10/10 tasks done
 
 | Done | Issue                                            | Title                                               | Blocked by                                                                                                                                           |
 |------|--------------------------------------------------|-----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [x]  | [#53](https://github.com/marmotz/ekoz/issues/53) | Extend kurotako zodGenerator to the api namespace   | —                                                                                                                                                    |
 | [x]  | [#20](https://github.com/marmotz/ekoz/issues/20) | Session manager, store adapter and lifecycle events | —                                                                                                                                                    |
 | [x]  | [#21](https://github.com/marmotz/ekoz/issues/21) | Client assembly and wire types                      | [#20](https://github.com/marmotz/ekoz/issues/20)                                                                                                     |
 | [x]  | [#22](https://github.com/marmotz/ekoz/issues/22) | Setup and auth resource bindings                    | [#21](https://github.com/marmotz/ekoz/issues/21)                                                                                                     |
@@ -48,9 +49,9 @@ _technical design — see [technical.md](features/server-administration/technica
 | [x]  | [#14](https://github.com/marmotz/ekoz/issues/14) | Admin account read endpoints and owner-triggered password reset | —                                                                                                  |
 | [x]  | [#15](https://github.com/marmotz/ekoz/issues/15) | Public setup-state probe and CORS support                       | —                                                                                                  |
 | [ ]  | [#16](https://github.com/marmotz/ekoz/issues/16) | Admin console — application bootstrap                           | —                                                                                                  |
-| [ ]  | [#17](https://github.com/marmotz/ekoz/issues/17) | Admin console — server initialization and owner sign-in         | [#15](https://github.com/marmotz/ekoz/issues/15), [#16](https://github.com/marmotz/ekoz/issues/16) |
-| [ ]  | [#18](https://github.com/marmotz/ekoz/issues/18) | Admin console — account administration                          | [#14](https://github.com/marmotz/ekoz/issues/14), [#16](https://github.com/marmotz/ekoz/issues/16) |
-| [ ]  | [#19](https://github.com/marmotz/ekoz/issues/19) | Admin console — invitations and username-change requests        | [#16](https://github.com/marmotz/ekoz/issues/16)                                                   |
+| [ ]  | [#17](https://github.com/marmotz/ekoz/issues/17) | Admin console — server initialization and owner sign-in         | [#15](https://github.com/marmotz/ekoz/issues/15), [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53) |
+| [ ]  | [#18](https://github.com/marmotz/ekoz/issues/18) | Admin console — account administration                          | [#14](https://github.com/marmotz/ekoz/issues/14), [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53) |
+| [ ]  | [#19](https://github.com/marmotz/ekoz/issues/19) | Admin console — invitations and username-change requests        | [#16](https://github.com/marmotz/ekoz/issues/16), [#53](https://github.com/marmotz/ekoz/issues/53)                                                   |
 
 ## Server OpenAPI documentation ·  [overview](features/server-openapi-doc/overview.md)
 

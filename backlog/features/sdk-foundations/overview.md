@@ -50,6 +50,12 @@ publish yet).
   discrepancy between the server's actual behaviour and `spec/docs/protocol/`
   is still fixed in `spec`, not worked around here — that principle is
   unchanged, only the mechanism that keeps the SDK's types honest changes.
+- **Amendment** (decided while discussing
+  [server administration](https://github.com/marmotz/ekoz/blob/develop/backlog/features/server-administration/overview.md)):
+  kurotako's Zod generator is also wired to the same OpenAPI source and its
+  output exported by the SDK, so a consuming form (admin console today) can
+  validate input with the exact schema derived from the server contract,
+  instead of a hand-written duplicate.
 - Distribution during this increment: consumed via `npm link` / `bun link` from
   a sibling checkout. No npm publish, no changesets release until the surface
   stabilises. A `docs/technical/` page records the SDK packaging and protocol-version policy.

@@ -40,6 +40,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check ."
   },
+  "dependencies": {
+    "zod": "^4.6.2"
+  },
   "devDependencies": {
     "tsdown": "^0.23.0"
   }
