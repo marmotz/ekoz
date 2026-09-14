@@ -55,11 +55,11 @@ _technical design — see [technical.md](features/server-administration/technica
 
 ## Server OpenAPI documentation ·  [overview](features/server-openapi-doc/overview.md)
 
-_technical design — [technical.md](features/server-openapi-doc/technical.md)_ — 6/7 tasks done
+_technical design — [technical.md](features/server-openapi-doc/technical.md)_ — 7/7 tasks done
 
 | Done | Issue                                            | Title                                                            | Blocked by                                                                                         |
 |------|--------------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| [ ]  | [#48](https://github.com/marmotz/ekoz/issues/48) | OpenAPI: drift check via tako check                              | [#47](https://github.com/marmotz/ekoz/issues/47)                                                   |
+| [x]  | [#48](https://github.com/marmotz/ekoz/issues/48) | OpenAPI: drift check via tako check                              | [#47](https://github.com/marmotz/ekoz/issues/47)                                                   |
 | [x]  | [#43](https://github.com/marmotz/ekoz/issues/43) | OpenAPI: swagger bootstrap and Zod bridge                        | —                                                                                                  |
 | [x]  | [#44](https://github.com/marmotz/ekoz/issues/44) | OpenAPI: shared problem+json schema and error response decorator | [#43](https://github.com/marmotz/ekoz/issues/43)                                                   |
 | [x]  | [#45](https://github.com/marmotz/ekoz/issues/45) | OpenAPI: convert request DTOs to Zod DTO classes                 | [#43](https://github.com/marmotz/ekoz/issues/43)                                                   |
