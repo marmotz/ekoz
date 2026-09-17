@@ -1,0 +1,121 @@
+[
+  {
+    "id": "column.public.room_event.origin_server",
+    "label": "Add column \"origin_server\" to \"room_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "origin_server",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"origin_server\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room_event",
+          "origin_server"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"origin_server\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" ADD COLUMN \"origin_server\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"origin_server\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room_event",
+          "origin_server"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-room_event-origin_server",
+    "label": "Data transform: backfill-room_event-origin_server",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-room_event-origin_server has work to do",
+        "sql": "SELECT EXISTS (SELECT \"room_id\" AS \"room_id\" FROM \"public\".\"room_event\" WHERE \"origin_server\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-room_event-origin_server",
+        "sql": "UPDATE \"public\".\"room_event\" SET \"origin_server\" = (SELECT origin_server FROM room WHERE room.id = room_event.room_id) WHERE \"origin_server\" IS NULL",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-room_event-origin_server resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT \"room_id\" AS \"room_id\" FROM \"public\".\"room_event\" WHERE \"origin_server\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.room_event.origin_server",
+    "label": "Set NOT NULL on \"room_event\".\"origin_server\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "origin_server",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"origin_server\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "room_event",
+          "origin_server"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"origin_server\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"room_event\" WHERE \"origin_server\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"origin_server\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" ALTER COLUMN \"origin_server\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"origin_server\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "room_event",
+          "origin_server",
+          "NO"
+        ]
+      }
+    ]
+  }
+]

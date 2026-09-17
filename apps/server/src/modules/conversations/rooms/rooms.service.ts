@@ -38,6 +38,7 @@ export class RoomsService {
 
   async createSpace(actor: RoomActor, input: CreateSpace): Promise<RoomView> {
     if (input.parentId) {
+      await this.findParentOrThrow(input.parentId);
       await this.permissions.assertCan(actor, input.parentId, 'space.create_child');
     } else if (!actor.isOwner) {
       // No parent node to check a capability against yet — provisional
@@ -56,9 +57,8 @@ export class RoomsService {
   }
 
   async createChannel(actor: RoomActor, input: CreateChannel): Promise<RoomView> {
+    const parent = await this.findParentOrThrow(input.parentId);
     await this.permissions.assertCan(actor, input.parentId, 'space.create_child');
-
-    const parent = await this.findRoomOrThrow(input.parentId);
     if (parent.type !== 'space') {
       throw new RoomInvalidParentTypeError();
     }
@@ -115,12 +115,15 @@ export class RoomsService {
         roomId: id,
         type: 'room_updated',
         senderId: actor.userId,
+        // Only the fields the caller actually set, per docs/protocol/rooms-and-permissions.md
+        // ("only the fields set on the current state at write time") — not the full merged
+        // state, which would misrepresent a `PATCH { readOnly: true }` as also having
+        // touched `name` / `topic` / `visibility`.
         content: {
-          name: nextName,
-          topic: nextTopic,
-          visibility: nextVisibility,
-          readOnly: nextReadOnly,
-          defaultRole: room.defaultRole,
+          ...(patch.name !== undefined && { name: nextName }),
+          ...(patch.topic !== undefined && { topic: nextTopic }),
+          ...(patch.visibility !== undefined && { visibility: nextVisibility }),
+          ...(patch.readOnly !== undefined && { readOnly: nextReadOnly }),
         },
       });
 
@@ -263,6 +266,18 @@ export class RoomsService {
     const row = (await this.prisma.orm.public.Room.where({ id }).first()) as RoomRow | null;
     if (!row || row.deletedAt) {
       throw new RoomNotFoundError();
+    }
+
+    return row;
+  }
+
+  /** Same lookup as {@link findRoomOrThrow}, but `422 room.parent_not_found` — a missing
+   * `parentId` on create is a validation problem with the request, not a 404 on some
+   * resource the client asked for directly. */
+  private async findParentOrThrow(id: string): Promise<RoomRow> {
+    const row = (await this.prisma.orm.public.Room.where({ id }).first()) as RoomRow | null;
+    if (!row || row.deletedAt) {
+      throw new RoomParentNotFoundError();
     }
 
     return row;

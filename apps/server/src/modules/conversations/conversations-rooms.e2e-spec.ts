@@ -4,6 +4,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from '../identity/accounts/account.service.js';
 
@@ -15,6 +16,7 @@ describe('conversations — rooms (integration)', () => {
   let app: INestApplication;
   let restoreConfig: () => void;
   let accounts: AccountService;
+  let prisma: PrismaService;
 
   const password = 'a-perfectly-fine-passphrase';
 
@@ -40,6 +42,7 @@ describe('conversations — rooms (integration)', () => {
     await app.init();
 
     accounts = app.get(AccountService);
+    prisma = app.get(PrismaService);
     await accounts.createAccount({
       name: 'owner',
       email: 'owner@ekoz.example.com',
@@ -116,6 +119,24 @@ describe('conversations — rooms (integration)', () => {
       .expect(404);
   });
 
+  it('rejects a create with an unknown parent with 422, not 404', async () => {
+    const ownerToken = await login('owner');
+
+    const space = await request(server())
+      .post('/spaces')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: 'Orphan space', parentId: '01ARZ3NDEKTSV4RRFFQ69G5FAV' })
+      .expect(422);
+    expect(space.body.code).toBe('room.parent_not_found');
+
+    const channel = await request(server())
+      .post('/rooms')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ parentId: '01ARZ3NDEKTSV4RRFFQ69G5FAV', name: 'orphan-channel' })
+      .expect(422);
+    expect(channel.body.code).toBe('room.parent_not_found');
+  });
+
   it('lets a non-owner read a public room but not a private one', async () => {
     const ownerToken = await login('owner');
     const aliceToken = await login('alice');
@@ -155,6 +176,14 @@ describe('conversations — rooms (integration)', () => {
       .send({ name: 'Renamed', readOnly: true })
       .expect(200);
     expect(updated.body).toMatchObject({ name: 'Renamed', readOnly: true });
+
+    // The event only carries the fields the caller actually set (docs/protocol/
+    // rooms-and-permissions.md), not the full merged room state.
+    const events = (await prisma.orm.public.RoomEvent.where((f) =>
+      f.roomId.eq(space.body.id),
+    ).all()) as Array<{ type: string; content: Record<string, unknown> }>;
+    const roomUpdated = events.find((e) => e.type === 'room_updated');
+    expect(roomUpdated?.content).toEqual({ name: 'Renamed', readOnly: true });
   });
 
   it('moves a room and rejects a cycle', async () => {

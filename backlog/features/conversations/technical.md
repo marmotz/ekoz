@@ -260,12 +260,13 @@ model ReadMarker {
 }
 
 model RoomEvent {
-  roomId    String
-  seq       BigInt
-  type      RoomEventType
-  senderId  String?
-  content   Json
-  createdAt DateTime @default(now())
+  roomId       String
+  seq          BigInt
+  type         RoomEventType
+  senderId     String?
+  content      Json
+  originServer String                              // server.domain now; the room's home server once federated (§10)
+  createdAt    DateTime @default(now())
   @@id([roomId, seq])
   @@index([roomId, createdAt])
   @@map("room_event")

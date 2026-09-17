@@ -40,4 +40,48 @@ describe('ROOM_EVENT_PAYLOAD_SCHEMAS (unit)', () => {
   it('accepts an empty room_deleted payload', () => {
     expect(ROOM_EVENT_PAYLOAD_SCHEMAS.room_deleted.safeParse({}).success).toBe(true);
   });
+
+  it('accepts a role-scoped permission_override_changed payload', () => {
+    const result = ROOM_EVENT_PAYLOAD_SCHEMAS.permission_override_changed.safeParse({
+      scope: 'role',
+      role: 'member',
+      capability: 'room.pin',
+      effect: 'allow',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a user-scoped permission_override_changed payload', () => {
+    const result = ROOM_EVENT_PAYLOAD_SCHEMAS.permission_override_changed.safeParse({
+      scope: 'user',
+      userId: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      capability: 'room.pin',
+      effect: 'deny',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a permission_override_changed payload mixing scope fields', () => {
+    // `userId` on a role-scoped payload (and vice versa) — the discriminated
+    // union must reject the wrong branch's shape, not just check `scope`.
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.permission_override_changed.safeParse({
+        scope: 'role',
+        userId: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+        capability: 'room.pin',
+        effect: 'allow',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects an unknown capability in permission_override_changed', () => {
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.permission_override_changed.safeParse({
+        scope: 'role',
+        role: 'member',
+        capability: 'room.nope',
+        effect: 'allow',
+      }).success,
+    ).toBe(false);
+  });
 });

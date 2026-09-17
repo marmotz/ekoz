@@ -19,6 +19,7 @@ import type { InvitationViewDtoDto } from './InvitationViewDto.type.js';
 import type { LoginDtoDto } from './LoginDto.type.js';
 import type { LoginResponseDtoDto } from './LoginResponseDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
+import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
 import type { PublicProfileViewDtoDto } from './PublicProfileViewDto.type.js';
 import type { RefreshDtoDto } from './RefreshDto.type.js';
@@ -27,6 +28,7 @@ import type { RenameSessionDtoDto } from './RenameSessionDto.type.js';
 import type { RequestPasswordResetDtoDto } from './RequestPasswordResetDto.type.js';
 import type { ResendVerificationDtoDto } from './ResendVerificationDto.type.js';
 import type { RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.type.js';
+import type { RoomViewDtoDto } from './RoomViewDto.type.js';
 import type { SessionViewDtoDto } from './SessionViewDto.type.js';
 import type { SetupOwnerDtoDto } from './SetupOwnerDto.type.js';
 import type { SetupOwnerResponseDtoDto } from './SetupOwnerResponseDto.type.js';
@@ -388,3 +390,89 @@ export type AdminOwnersController_remove404ResponseProblemJson = ProblemDetailsD
 export type AdminOwnersController_remove409ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type AdminOwnersController_removePathUserId = string;
+
+export type RoomsController_createSpace201ResponseJson = RoomViewDtoDto;
+
+export type RoomsController_createSpace401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createSpace403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createSpace404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createSpace422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createChannel201ResponseJson = RoomViewDtoDto;
+
+export type RoomsController_createChannel401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createChannel403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createChannel404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createChannel422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getRoom200ResponseJson = RoomViewDtoDto;
+
+export type RoomsController_getRoom401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getRoom403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getRoom404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_deleteRoom401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_deleteRoom403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_deleteRoom404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_deleteRoom409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_updateRoom200ResponseJson = RoomViewDtoDto;
+
+export type RoomsController_updateRoom401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_updateRoom403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_updateRoom404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_updateRoom422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getChildren200ResponseJson = RoomViewDtoDto[];
+
+export type RoomsController_getChildren401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getChildren403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getChildren404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_moveRoom200ResponseJson = RoomViewDtoDto;
+
+export type RoomsController_moveRoom401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_moveRoom403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_moveRoom404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_moveRoom422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_myPermissions200ResponseJson = MyPermissionsResponseDtoDto;
+
+export type PermissionsController_myPermissions401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_myPermissions404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setRolePermission401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setRolePermission403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setRolePermission404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setRolePermission422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setMemberPermission401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setMemberPermission403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setMemberPermission404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PermissionsController_setMemberPermission422ResponseProblemJson = ProblemDetailsDtoDto;

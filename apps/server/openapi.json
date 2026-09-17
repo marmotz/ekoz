@@ -2426,7 +2426,7 @@
         "operationId": "RoomsController_createSpace",
         "parameters": [],
         "responses": {
-          "200": {
+          "201": {
             "description": "",
             "content": {
               "application/json": {
@@ -2493,7 +2493,7 @@
         "operationId": "RoomsController_createChannel",
         "parameters": [],
         "responses": {
-          "200": {
+          "201": {
             "description": "",
             "content": {
               "application/json": {

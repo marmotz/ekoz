@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CAPABILITIES } from '../permissions/capabilities.js';
 
 /** Mirrors the `RoomEventType` enum in `contract.prisma` (technical.md §4). */
 export type RoomEventType =
@@ -27,13 +28,15 @@ export type RoomEventType =
 const roomTypeSchema = z.enum(['space', 'channel', 'dm', 'group_dm']);
 const roomVisibilitySchema = z.enum(['public', 'private', 'invite']);
 const roomRoleSchema = z.enum(['space_admin', 'room_admin', 'moderator', 'member', 'reader']);
+const capabilitySchema = z.enum(CAPABILITIES);
+const overrideEffectSchema = z.enum(['allow', 'deny']);
 
 /**
  * Typed content payload per {@link RoomEventType} (technical.md §10, item 4),
- * shared with the protocol doc. Only `room_*` events (issue #1) have a payload
- * this increment actually writes; every other type is reserved for the issue
- * that owns its behaviour (#4, #7-#13) — its schema here is a permissive
- * placeholder, not yet the protocol-fixed shape.
+ * shared with the protocol doc. Only `room_*` and `permission_override_changed`
+ * (issues #1, #3) have a payload this increment actually writes; every other
+ * type is reserved for the issue that owns its behaviour (#4, #7-#13) — its
+ * schema here is a permissive placeholder, not yet the protocol-fixed shape.
  */
 export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   room_created: z.object({
@@ -57,6 +60,23 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   }),
   room_deleted: z.object({}),
 
+  // Fixed shape (technical.md §6, permission-model.md, issue #3): the only
+  // non-`room_*` event type this increment actually writes.
+  permission_override_changed: z.discriminatedUnion('scope', [
+    z.object({
+      scope: z.literal('role'),
+      role: roomRoleSchema,
+      capability: capabilitySchema,
+      effect: overrideEffectSchema,
+    }),
+    z.object({
+      scope: z.literal('user'),
+      userId: z.string(),
+      capability: capabilitySchema,
+      effect: overrideEffectSchema,
+    }),
+  ]),
+
   // Placeholders: content shape is owned by the issue that implements the
   // behaviour, not fixed yet.
   message_created: z.record(z.string(), z.unknown()),
@@ -71,7 +91,6 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   member_banned: z.record(z.string(), z.unknown()),
   member_unbanned: z.record(z.string(), z.unknown()),
   role_changed: z.record(z.string(), z.unknown()),
-  permission_override_changed: z.record(z.string(), z.unknown()),
   pin_added: z.record(z.string(), z.unknown()),
   pin_removed: z.record(z.string(), z.unknown()),
   retention_changed: z.record(z.string(), z.unknown()),

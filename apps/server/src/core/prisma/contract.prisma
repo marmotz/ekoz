@@ -436,14 +436,18 @@ enum RoomEventType {
 /// Append-only per-room event log (technical.md §10, event-log-and-ordering.md).
 /// `seq` is allocated by `EventLogService.append` via
 /// `UPDATE room SET last_seq = last_seq + 1 WHERE id = $1 RETURNING last_seq`
-/// inside the caller's transaction — never assigned here.
+/// inside the caller's transaction — never assigned here. `originServer` is
+/// `server.domain` now, same as `Room.originServer`; it becomes meaningful
+/// with federation, where a remote-authored event carries its home server's
+/// domain instead (technical.md §10).
 model RoomEvent {
-  roomId    String        @map("room_id")
-  seq       BigInt
-  type      RoomEventType
-  senderId  String?       @map("sender_id")
-  content   Jsonb
-  createdAt temporal.createdAtString() @map("created_at")
+  roomId       String        @map("room_id")
+  seq          BigInt
+  type         RoomEventType
+  senderId     String?       @map("sender_id")
+  content      Jsonb
+  originServer String        @map("origin_server")
+  createdAt    temporal.createdAtString() @map("created_at")
 
   @@id([roomId, seq])
   @@index([roomId, createdAt])

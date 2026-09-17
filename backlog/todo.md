@@ -4,7 +4,7 @@
 
 ## conversations ·  [overview](features/conversations/overview.md)
 
-_[technical design](technical.md)_ — 3/14 tasks done
+_[technical design](technical.md)_ — 4/14 tasks done
 
 | Done | Issue                                            | Title                                                      | Blocked by |
 |------|--------------------------------------------------|------------------------------------------------------------|------------|
@@ -21,7 +21,7 @@ _[technical design](technical.md)_ — 3/14 tasks done
 | [ ]  | [#10](https://github.com/marmotz/ekoz/issues/10) | Conversations: presence and typing                         | #4, #11    |
 | [ ]  | [#12](https://github.com/marmotz/ekoz/issues/12) | Conversations: retention policies and worker               | #2, #3, #8 |
 | [ ]  | [#13](https://github.com/marmotz/ekoz/issues/13) | Conversations: local moderation surface                    | #4, #8     |
-| [ ]  | [#38](https://github.com/marmotz/ekoz/issues/38) | Protocol: conversations sections                           | #2, #3     |
+| [x]  | [#38](https://github.com/marmotz/ekoz/issues/38) | Protocol: conversations sections                           | #2, #3     |
 
 ## web-client-foundations ·  [overview](features/web-client-foundations/overview.md)
 

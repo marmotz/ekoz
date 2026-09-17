@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { JsonValue } from '@prisma/orm-postgres/target/codec-types';
+import { ConfigService } from '../../../core/config/config.service.js';
 import type { PrismaService } from '../../../core/prisma/prisma.service.js';
 import {
   ROOM_EVENT_PAYLOAD_SCHEMAS,
@@ -23,6 +24,7 @@ export interface RoomEventRecord {
   type: RoomEventType;
   senderId: string | null;
   content: unknown;
+  originServer: string;
   createdAt: string;
 }
 
@@ -42,6 +44,8 @@ export interface RoomEventRecord {
  */
 @Injectable()
 export class EventLogService {
+  constructor(private readonly config: ConfigService) {}
+
   async append<T extends RoomEventType>(
     tx: RoomTx,
     input: AppendEventInput<T>,
@@ -66,6 +70,9 @@ export class EventLogService {
       type: input.type,
       senderId: input.senderId,
       content: content as JsonValue,
+      // `server.domain` now; meaningful with federation, where a remote-authored
+      // event carries its home server's domain instead (technical.md §10).
+      originServer: this.config.get('server.domain'),
     });
 
     return event as RoomEventRecord;

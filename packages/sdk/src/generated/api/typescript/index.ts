@@ -48,4 +48,6 @@ export type * from './UsernameApprovedDto.type.js';
 export type * from './SuspendUserDto.type.js';
 export type * from './AddOwnerDto.type.js';
 export type * from './DeleteMeDto.type.js';
+export type * from './RoomViewDto.type.js';
+export type * from './MyPermissionsResponseDto.type.js';
 export type * from './MeController_uploadAvatarRequest.type.js';

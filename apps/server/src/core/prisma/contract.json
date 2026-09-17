@@ -1321,6 +1321,13 @@
                   "kind": "scalar"
                 }
               },
+              "originServer": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "roomId": {
                 "nullable": false,
                 "type": {
@@ -1364,6 +1371,9 @@
                 },
                 "createdAt": {
                   "column": "created_at"
+                },
+                "originServer": {
+                  "column": "origin_server"
                 },
                 "roomId": {
                   "column": "room_id"
@@ -3034,6 +3044,11 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "origin_server": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "room_id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -3801,7 +3816,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "30b81e67b2f532a5b193a405f9e66c9697c74179a816de6def580c51a8769ab8"
+    "storageHash": "19215e056f2aba61741c3158ed53b6f13c276f4cb311b2d6dc8a0ef5567549c6"
   },
   "execution": {
     "executionHash": "5f9af94627b83332efc1fee464dfbf3b23d9226e39a99e2c726775c68da56d86",

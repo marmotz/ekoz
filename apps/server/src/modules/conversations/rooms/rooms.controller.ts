@@ -9,7 +9,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
 import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
 import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
@@ -37,7 +43,7 @@ export class RoomsController {
 
   @Post('spaces')
   @ApiOperation({ summary: 'Create a space (hierarchy node).' })
-  @ApiOkResponse({ type: RoomViewDto })
+  @ApiCreatedResponse({ type: RoomViewDto })
   @ApiProblemResponses({ validation: true, statuses: [403, 404, 422] })
   createSpace(
     @Body(new ZodValidationPipe(CreateSpaceDto)) body: CreateSpace,
@@ -48,7 +54,7 @@ export class RoomsController {
 
   @Post('rooms')
   @ApiOperation({ summary: 'Create a channel, attached to a space.' })
-  @ApiOkResponse({ type: RoomViewDto })
+  @ApiCreatedResponse({ type: RoomViewDto })
   @ApiProblemResponses({ validation: true, statuses: [403, 404, 422] })
   createChannel(
     @Body(new ZodValidationPipe(CreateChannelDto)) body: CreateChannel,

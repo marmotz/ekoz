@@ -48,4 +48,6 @@ export * from './UsernameApprovedDto.schema.js';
 export * from './SuspendUserDto.schema.js';
 export * from './AddOwnerDto.schema.js';
 export * from './DeleteMeDto.schema.js';
+export * from './RoomViewDto.schema.js';
+export * from './MyPermissionsResponseDto.schema.js';
 export * from './MeController_uploadAvatarRequest.schema.js';
