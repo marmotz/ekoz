@@ -1,10 +1,10 @@
 import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
-import { ForbiddenError, UnauthenticatedError } from '../identity.errors.js';
-import type { AuthenticatedRequest } from './auth.guard.js';
+import { ForbiddenError, UnauthenticatedError } from './auth.errors.js';
+import type { AuthenticatedRequest } from './principal-authenticator.js';
 
 /**
- * Restricts a route to server owners (technical.md §15, §16). Runs after
- * {@link AuthGuard}, so the principal is already attached; use them together
+ * Restricts a route to server owners. Runs after {@link AuthGuard}, so the
+ * principal is already attached; use them together
  * (`@UseGuards(AuthGuard, OwnerGuard)`).
  */
 @Injectable()

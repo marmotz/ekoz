@@ -25,9 +25,9 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
+import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
+import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
-import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
-import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import { AvatarNotFoundError, AvatarRejectedError } from '../identity.errors.js';
 import type { UploadedAvatar } from './avatar.js';
 import {

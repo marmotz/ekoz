@@ -1,6 +1,6 @@
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-import { UnauthenticatedError } from '../identity.errors.js';
-import type { AuthenticatedRequest, AuthPrincipal } from './auth.guard.js';
+import { UnauthenticatedError } from './auth.errors.js';
+import type { AuthenticatedRequest, AuthPrincipal } from './principal-authenticator.js';
 
 /**
  * Injects the {@link AuthPrincipal} attached by {@link AuthGuard}. Throws if the

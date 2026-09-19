@@ -1,11 +1,11 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
+import { AuthGuard } from '../../../core/http/auth.guard.js';
+import { OwnerGuard } from '../../../core/http/owner.guard.js';
 import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
-import { AuthGuard } from '../guards/auth.guard.js';
-import { OwnerGuard } from '../guards/owner.guard.js';
 import { type AccountView, AccountViewDto } from './account.view.js';
 import {
   type AdminCreateUserBody,

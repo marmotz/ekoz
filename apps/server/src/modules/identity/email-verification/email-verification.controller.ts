@@ -8,11 +8,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
+import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
+import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { Public } from '../../../core/http/public.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
 import { SensitiveThrottleGuard } from '../auth/sensitive-throttle.guard.js';
-import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
-import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
 import {
   type ChangeEmailBody,
   ChangeEmailDto,

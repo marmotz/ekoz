@@ -41,8 +41,6 @@ import {
   MeEmailController,
 } from './email-verification/email-verification.controller.js';
 import { EmailVerificationService } from './email-verification/email-verification.service.js';
-import { AuthGuard } from './guards/auth.guard.js';
-import { OwnerGuard } from './guards/owner.guard.js';
 import { InvitationService } from './invitations/invitation.service.js';
 import { InvitationsController } from './invitations/invitations.controller.js';
 import { MeController, UsersController } from './profile/profile.controller.js';
@@ -57,9 +55,10 @@ import { ProfileService } from './profile/profile.service.js';
  * suspension / deletion / owner management (#21); the credential-endpoint
  * throttle (#22); and the SSE stream ticket (#23).
  *
- * `AuthGuard` / `OwnerGuard` are exported for controllers to opt into with
- * `@UseGuards(...)`; a later task promotes `AuthGuard` to a global guard once
- * every core controller has been audited for `@Public()`.
+ * `AuthGuard` / `OwnerGuard` (core/http) are the shared guards controllers opt
+ * into with `@UseGuards(...)`; this module binds their `PRINCIPAL_AUTHENTICATOR`
+ * seam to a real implementation via `PrincipalAuthenticatorModule` (sibling
+ * module in `guards/`), not here — see `docs/technical/shared-auth-guard.md`.
  */
 @Module({
   controllers: [
@@ -104,21 +103,18 @@ import { ProfileService } from './profile/profile.service.js';
     LifecycleService,
     AdminUsersQueryService,
     SensitiveThrottleGuard,
-    AuthGuard,
-    OwnerGuard,
   ],
   exports: [
     AccountService,
     IdentifierService,
     PasswordService,
     TokenService,
+    RevokedSessionRegistry,
     SessionService,
     TicketService,
     EmailVerificationService,
     InvitationService,
     ProfileService,
-    AuthGuard,
-    OwnerGuard,
   ],
 })
 export class IdentityModule {}

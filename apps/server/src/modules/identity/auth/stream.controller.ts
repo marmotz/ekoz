@@ -1,8 +1,8 @@
 import { Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiProblemResponses } from '../../../core/http/api-problem-responses.decorator.js';
-import { AuthGuard, type AuthPrincipal } from '../guards/auth.guard.js';
-import { CurrentPrincipal } from '../guards/current-principal.decorator.js';
+import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
+import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { type StreamTicketResponse, StreamTicketResponseDto } from './stream.dto.js';
 import { TicketService } from './ticket.service.js';
 

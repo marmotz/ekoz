@@ -309,3 +309,190 @@ model UsernameChangeRequest {
   @@index([status])
   @@map("username_change_request")
 }
+
+// ── conversations: room hierarchy, event log, capability ACL ────────────────
+// Feature `conversations` (technical.md §4-§10). Issue #1 (room model and
+// hierarchy), #2 (per-room event log and seq allocation), #3 (capability ACL
+// and resolver). Membership, invitations, messages, reactions, receipts,
+// presence and retention each add their own models on their own issue (#4-#13)
+// — this slice ships only what those three issues need. No FK to `User`: the
+// identity feature owns that table (same cross-feature-FK avoidance as
+// `UserProfile.avatarBlobId` above).
+
+enum RoomType {
+  @@type("pg/text@1")
+  space    = "space"
+  channel  = "channel"
+  dm       = "dm"
+  group_dm = "group_dm"
+}
+
+enum RoomVisibility {
+  @@type("pg/text@1")
+  public  = "public"
+  private = "private"
+  invite  = "invite"
+}
+
+/// Named role a member holds on a room or space (permission-model.md). `owner`
+/// (server-level, implicit allow-all) is not a member of this set — it is the
+/// `User.isOwner` flag, checked before any role resolution.
+enum RoomRole {
+  @@type("pg/text@1")
+  space_admin = "space_admin"
+  room_admin  = "room_admin"
+  moderator   = "moderator"
+  member      = "member"
+  reader      = "reader"
+}
+
+/// An explicit allow/deny decision in an ACL override row (permission-model.md).
+enum OverrideEffect {
+  @@type("pg/text@1")
+  allow = "allow"
+  deny  = "deny"
+}
+
+/// Hierarchy node or conversation (technical.md §4-§5, §7, conversation-data-model.md).
+/// `space` holds no message; `channel` is attached to a space; `dm` / `group_dm`
+/// sit outside the hierarchy (`parentId = null`) and never appear in
+/// `RoomClosure` beyond their self row. `lastSeq` is the per-room event `seq`
+/// allocator, advanced under a row lock (technical.md §10, event-log-and-ordering.md).
+model Room {
+  id           String             @id @default(ulid())
+  type         RoomType
+  parentId     String?            @map("parent_id")
+  visibility   RoomVisibility     @default(private)
+  slug         String?
+  name         String?
+  topic        String?
+  avatarBlobId String?            @map("avatar_blob_id")
+  defaultRole  RoomRole           @default(member) @map("default_role")
+  readOnly     Boolean            @default(false) @map("read_only")
+  originServer String             @map("origin_server")
+  lastSeq      BigInt             @default(0) @map("last_seq")
+  // `Jsonb` (not `Json`) → a `jsonb` column, per technical.md §3. Shape:
+  // `{ mode: "inherit" | "keep" }` | `{ mode: "hide" | "delete", after: "<duration>" }`
+  // (retention.md); the retention feature (#12) reads/writes it, this slice
+  // only carries the column with an application-level `{ mode: "inherit" }` default.
+  retention    Jsonb
+  dmKey        String?            @unique @map("dm_key")
+  createdById  String?            @map("created_by_id")
+  createdAt    temporal.createdAtString() @map("created_at")
+  updatedAt    temporal.updatedAtString() @map("updated_at")
+  deletedAt    TimestamptzString? @map("deleted_at")
+
+  parent   Room?  @relation("room_children", fields: [parentId], references: [id])
+  children Room[] @relation("room_children")
+
+  @@index([parentId])
+  @@index([type, visibility])
+  @@map("room")
+}
+
+/// Ancestor/descendant closure for `Room.parentId`, including the self row
+/// (`depth = 0`) — one indexed query for both the ancestor chain (permission
+/// resolution) and subtree checks (move / delete), per technical.md §5.
+model RoomClosure {
+  ancestorId   String @map("ancestor_id")
+  descendantId String @map("descendant_id")
+  depth        Int
+
+  @@id([ancestorId, descendantId])
+  @@index([descendantId])
+  @@map("room_closure")
+}
+
+/// Every `RoomEventType` this increment's issues emit or reserve
+/// (technical.md §4). Only `room_*` events are actually written by #1-#3; the
+/// rest are reserved for the issues that own that behaviour (#4, #7-#13) so the
+/// enum does not grow non-additively later (permission-model.md: "the list is
+/// part of the protocol and grows only additively").
+enum RoomEventType {
+  @@type("pg/text@1")
+  message_created           = "message_created"
+  message_edited            = "message_edited"
+  message_redacted          = "message_redacted"
+  message_hidden            = "message_hidden"
+  reaction_added            = "reaction_added"
+  reaction_removed          = "reaction_removed"
+  member_joined             = "member_joined"
+  member_left               = "member_left"
+  member_kicked             = "member_kicked"
+  member_banned             = "member_banned"
+  member_unbanned           = "member_unbanned"
+  role_changed              = "role_changed"
+  permission_override_changed = "permission_override_changed"
+  room_created              = "room_created"
+  room_updated              = "room_updated"
+  room_moved                = "room_moved"
+  room_deleted              = "room_deleted"
+  pin_added                 = "pin_added"
+  pin_removed               = "pin_removed"
+  retention_changed         = "retention_changed"
+  receipt_updated           = "receipt_updated"
+}
+
+/// Append-only per-room event log (technical.md §10, event-log-and-ordering.md).
+/// `seq` is allocated by `EventLogService.append` via
+/// `UPDATE room SET last_seq = last_seq + 1 WHERE id = $1 RETURNING last_seq`
+/// inside the caller's transaction — never assigned here. `originServer` is
+/// `server.domain` now, same as `Room.originServer`; it becomes meaningful
+/// with federation, where a remote-authored event carries its home server's
+/// domain instead (technical.md §10).
+model RoomEvent {
+  roomId       String        @map("room_id")
+  seq          BigInt
+  type         RoomEventType
+  senderId     String?       @map("sender_id")
+  content      Jsonb
+  originServer String        @map("origin_server")
+  createdAt    temporal.createdAtString() @map("created_at")
+
+  @@id([roomId, seq])
+  @@index([roomId, createdAt])
+  @@map("room_event")
+}
+
+/// Server-wide default capability grant/denial per role (permission-model.md),
+/// seeded from the technical.md §6 matrix. Editable by an owner later; fixed
+/// for this increment.
+model RoleDefaultCapability {
+  role       RoomRole
+  capability String
+  effect     OverrideEffect
+
+  @@id([role, capability])
+  @@map("role_default_capability")
+}
+
+/// A role-scoped ACL override on a space or room node, inherited by descendants
+/// (permission-model.md). `nodeId` references a {@link Room}; no FK — the
+/// resolver walks the closure table, not a join on this table.
+model RoomPermissionOverride {
+  id         String         @id @default(ulid())
+  nodeId     String         @map("node_id")
+  role       RoomRole
+  capability String
+  effect     OverrideEffect
+
+  @@unique([nodeId, role, capability])
+  @@index([nodeId])
+  @@map("room_permission_override")
+}
+
+/// A per-user ACL override on a space or room node, inherited by descendants
+/// (permission-model.md). Beats a same-node `RoomPermissionOverride` at equal
+/// depth (per-user wins over per-role).
+model RoomMemberPermission {
+  id         String         @id @default(ulid())
+  nodeId     String         @map("node_id")
+  userId     String         @map("user_id")
+  capability String
+  effect     OverrideEffect
+
+  @@unique([nodeId, userId, capability])
+  @@index([nodeId])
+  @@map("room_member_permission")
+}
+

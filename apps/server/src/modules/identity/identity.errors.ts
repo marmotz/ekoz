@@ -48,18 +48,6 @@ export class RefreshReuseError extends DomainError {
   }
 }
 
-export class UnauthenticatedError extends DomainError {
-  constructor(detail = 'Authentication is required.') {
-    super('auth.unauthenticated', detail, 401, 'Unauthorized');
-  }
-}
-
-export class ForbiddenError extends DomainError {
-  constructor(detail = 'You are not allowed to perform this action.') {
-    super('auth.forbidden', detail, 403, 'Forbidden');
-  }
-}
-
 export class SessionNotFoundError extends DomainError {
   constructor(detail = 'Session not found.') {
     super('identity.session_not_found', detail, 404, 'Not Found');

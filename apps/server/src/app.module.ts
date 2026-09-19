@@ -5,13 +5,16 @@ import { ConfigModule } from './core/config/config.module.js';
 import { CryptoModule } from './core/crypto/crypto.module.js';
 import { DiscoveryModule } from './core/discovery/discovery.module.js';
 import { HealthModule } from './core/health/health.module.js';
+import { AuthGuardModule } from './core/http/auth-guard.module.js';
 import { HttpModule } from './core/http/http.module.js';
 import { MailModule } from './core/mail/mail.module.js';
 import { MetricsModule } from './core/observability/metrics.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
 import { PrismaModule } from './core/prisma/prisma.module.js';
 import { StorageModule } from './core/storage/storage.module.js';
+import { ConversationsModule } from './modules/conversations/conversations.module.js';
 import { OwnerLookupModule } from './modules/identity/accounts/owner-lookup.module.js';
+import { PrincipalAuthenticatorModule } from './modules/identity/guards/principal-authenticator.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 
 /**
@@ -24,6 +27,7 @@ import { IdentityModule } from './modules/identity/identity.module.js';
   imports: [
     ObservabilityModule,
     HttpModule,
+    AuthGuardModule,
     PrismaModule,
     ConfigModule,
     CryptoModule,
@@ -36,6 +40,8 @@ import { IdentityModule } from './modules/identity/identity.module.js';
     HealthModule,
     IdentityModule,
     OwnerLookupModule,
+    PrincipalAuthenticatorModule,
+    ConversationsModule,
   ],
 })
 export class AppModule {}

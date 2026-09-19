@@ -35,3 +35,16 @@ All notable changes to the Ekoz protocol. Format
   `GET /sync` and `GET /events` (per-account fan-in feed with its own cursor),
   restricted-Markdown message body, structured mentions, read markers,
   presence/typing signals.
+- [Spaces, rooms, roles and permissions](rooms-and-permissions.md) fully
+  specified for room hierarchy CRUD/move and the capability ACL (issues
+  #1-#3): method, path, request body, success shape and `problem+json` `code`
+  per endpoint, the `room_*` / `permission_override_changed` event payloads,
+  and the capability/role lists.
+- [Messages and interactions](messages-and-interactions.md),
+  [Presence and typing](presence-and-typing.md) and
+  [Synchronisation](synchronisation.md) (issue #38): restricted-Markdown
+  grammar, structured mentions, message/pin/reaction/receipt endpoints and
+  event payloads, presence/typing semantics, `GET /sync` and `GET /events`
+  with the per-account `feedSeq`. Written ahead of the server implementation
+  (issues #7-#11) from the settled technical design; reconciled against real
+  behaviour once each ships.

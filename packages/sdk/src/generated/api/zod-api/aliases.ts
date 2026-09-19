@@ -19,6 +19,7 @@ import { InvitationViewDtoSchema, type InvitationViewDtoDto } from './Invitation
 import { LoginDtoSchema, type LoginDtoDto } from './LoginDto.schema.js';
 import { LoginResponseDtoSchema, type LoginResponseDtoDto } from './LoginResponseDto.schema.js';
 import { MeViewDtoSchema, type MeViewDtoDto } from './MeViewDto.schema.js';
+import { MyPermissionsResponseDtoSchema, type MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.schema.js';
 import { ProblemDetailsDtoSchema, type ProblemDetailsDtoDto } from './ProblemDetailsDto.schema.js';
 import { PublicProfileViewDtoSchema, type PublicProfileViewDtoDto } from './PublicProfileViewDto.schema.js';
 import { RefreshDtoSchema, type RefreshDtoDto } from './RefreshDto.schema.js';
@@ -27,6 +28,7 @@ import { RenameSessionDtoSchema, type RenameSessionDtoDto } from './RenameSessio
 import { RequestPasswordResetDtoSchema, type RequestPasswordResetDtoDto } from './RequestPasswordResetDto.schema.js';
 import { ResendVerificationDtoSchema, type ResendVerificationDtoDto } from './ResendVerificationDto.schema.js';
 import { RevokeAllSessionsResponseDtoSchema, type RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.schema.js';
+import { RoomViewDtoSchema, type RoomViewDtoDto } from './RoomViewDto.schema.js';
 import { SessionViewDtoSchema, type SessionViewDtoDto } from './SessionViewDto.schema.js';
 import { SetupOwnerDtoSchema, type SetupOwnerDtoDto } from './SetupOwnerDto.schema.js';
 import { SetupOwnerResponseDtoSchema, type SetupOwnerResponseDtoDto } from './SetupOwnerResponseDto.schema.js';
@@ -444,6 +446,39 @@ export type PasswordResetController_request429ResponseProblemJson = z.infer<type
 export const PasswordResetController_requestRequestSchema = RequestPasswordResetDtoSchema;
 export type PasswordResetController_requestRequest = z.infer<typeof PasswordResetController_requestRequestSchema>;
 
+export const PermissionsController_myPermissions200ResponseJsonSchema = MyPermissionsResponseDtoSchema;
+export type PermissionsController_myPermissions200ResponseJson = z.infer<typeof PermissionsController_myPermissions200ResponseJsonSchema>;
+
+export const PermissionsController_myPermissions401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_myPermissions401ResponseProblemJson = z.infer<typeof PermissionsController_myPermissions401ResponseProblemJsonSchema>;
+
+export const PermissionsController_myPermissions404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_myPermissions404ResponseProblemJson = z.infer<typeof PermissionsController_myPermissions404ResponseProblemJsonSchema>;
+
+export const PermissionsController_setMemberPermission401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setMemberPermission401ResponseProblemJson = z.infer<typeof PermissionsController_setMemberPermission401ResponseProblemJsonSchema>;
+
+export const PermissionsController_setMemberPermission403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setMemberPermission403ResponseProblemJson = z.infer<typeof PermissionsController_setMemberPermission403ResponseProblemJsonSchema>;
+
+export const PermissionsController_setMemberPermission404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setMemberPermission404ResponseProblemJson = z.infer<typeof PermissionsController_setMemberPermission404ResponseProblemJsonSchema>;
+
+export const PermissionsController_setMemberPermission422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setMemberPermission422ResponseProblemJson = z.infer<typeof PermissionsController_setMemberPermission422ResponseProblemJsonSchema>;
+
+export const PermissionsController_setRolePermission401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setRolePermission401ResponseProblemJson = z.infer<typeof PermissionsController_setRolePermission401ResponseProblemJsonSchema>;
+
+export const PermissionsController_setRolePermission403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setRolePermission403ResponseProblemJson = z.infer<typeof PermissionsController_setRolePermission403ResponseProblemJsonSchema>;
+
+export const PermissionsController_setRolePermission404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setRolePermission404ResponseProblemJson = z.infer<typeof PermissionsController_setRolePermission404ResponseProblemJsonSchema>;
+
+export const PermissionsController_setRolePermission422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PermissionsController_setRolePermission422ResponseProblemJson = z.infer<typeof PermissionsController_setRolePermission422ResponseProblemJsonSchema>;
+
 export const RegistrationController_register201ResponseJsonSchema = AccountViewDtoSchema;
 export type RegistrationController_register201ResponseJson = z.infer<typeof RegistrationController_register201ResponseJsonSchema>;
 
@@ -461,6 +496,102 @@ export type RegistrationController_register429ResponseProblemJson = z.infer<type
 
 export const RegistrationController_registerRequestSchema = RegisterDtoSchema;
 export type RegistrationController_registerRequest = z.infer<typeof RegistrationController_registerRequestSchema>;
+
+export const RoomsController_createChannel201ResponseJsonSchema = RoomViewDtoSchema;
+export type RoomsController_createChannel201ResponseJson = z.infer<typeof RoomsController_createChannel201ResponseJsonSchema>;
+
+export const RoomsController_createChannel401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createChannel401ResponseProblemJson = z.infer<typeof RoomsController_createChannel401ResponseProblemJsonSchema>;
+
+export const RoomsController_createChannel403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createChannel403ResponseProblemJson = z.infer<typeof RoomsController_createChannel403ResponseProblemJsonSchema>;
+
+export const RoomsController_createChannel404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createChannel404ResponseProblemJson = z.infer<typeof RoomsController_createChannel404ResponseProblemJsonSchema>;
+
+export const RoomsController_createChannel422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createChannel422ResponseProblemJson = z.infer<typeof RoomsController_createChannel422ResponseProblemJsonSchema>;
+
+export const RoomsController_createSpace201ResponseJsonSchema = RoomViewDtoSchema;
+export type RoomsController_createSpace201ResponseJson = z.infer<typeof RoomsController_createSpace201ResponseJsonSchema>;
+
+export const RoomsController_createSpace401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createSpace401ResponseProblemJson = z.infer<typeof RoomsController_createSpace401ResponseProblemJsonSchema>;
+
+export const RoomsController_createSpace403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createSpace403ResponseProblemJson = z.infer<typeof RoomsController_createSpace403ResponseProblemJsonSchema>;
+
+export const RoomsController_createSpace404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createSpace404ResponseProblemJson = z.infer<typeof RoomsController_createSpace404ResponseProblemJsonSchema>;
+
+export const RoomsController_createSpace422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_createSpace422ResponseProblemJson = z.infer<typeof RoomsController_createSpace422ResponseProblemJsonSchema>;
+
+export const RoomsController_deleteRoom401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_deleteRoom401ResponseProblemJson = z.infer<typeof RoomsController_deleteRoom401ResponseProblemJsonSchema>;
+
+export const RoomsController_deleteRoom403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_deleteRoom403ResponseProblemJson = z.infer<typeof RoomsController_deleteRoom403ResponseProblemJsonSchema>;
+
+export const RoomsController_deleteRoom404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_deleteRoom404ResponseProblemJson = z.infer<typeof RoomsController_deleteRoom404ResponseProblemJsonSchema>;
+
+export const RoomsController_deleteRoom409ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_deleteRoom409ResponseProblemJson = z.infer<typeof RoomsController_deleteRoom409ResponseProblemJsonSchema>;
+
+export const RoomsController_getChildren200ResponseJsonSchema = z.array(RoomViewDtoSchema);
+export type RoomsController_getChildren200ResponseJson = z.infer<typeof RoomsController_getChildren200ResponseJsonSchema>;
+
+export const RoomsController_getChildren401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getChildren401ResponseProblemJson = z.infer<typeof RoomsController_getChildren401ResponseProblemJsonSchema>;
+
+export const RoomsController_getChildren403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getChildren403ResponseProblemJson = z.infer<typeof RoomsController_getChildren403ResponseProblemJsonSchema>;
+
+export const RoomsController_getChildren404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getChildren404ResponseProblemJson = z.infer<typeof RoomsController_getChildren404ResponseProblemJsonSchema>;
+
+export const RoomsController_getRoom200ResponseJsonSchema = RoomViewDtoSchema;
+export type RoomsController_getRoom200ResponseJson = z.infer<typeof RoomsController_getRoom200ResponseJsonSchema>;
+
+export const RoomsController_getRoom401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getRoom401ResponseProblemJson = z.infer<typeof RoomsController_getRoom401ResponseProblemJsonSchema>;
+
+export const RoomsController_getRoom403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getRoom403ResponseProblemJson = z.infer<typeof RoomsController_getRoom403ResponseProblemJsonSchema>;
+
+export const RoomsController_getRoom404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getRoom404ResponseProblemJson = z.infer<typeof RoomsController_getRoom404ResponseProblemJsonSchema>;
+
+export const RoomsController_moveRoom200ResponseJsonSchema = RoomViewDtoSchema;
+export type RoomsController_moveRoom200ResponseJson = z.infer<typeof RoomsController_moveRoom200ResponseJsonSchema>;
+
+export const RoomsController_moveRoom401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_moveRoom401ResponseProblemJson = z.infer<typeof RoomsController_moveRoom401ResponseProblemJsonSchema>;
+
+export const RoomsController_moveRoom403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_moveRoom403ResponseProblemJson = z.infer<typeof RoomsController_moveRoom403ResponseProblemJsonSchema>;
+
+export const RoomsController_moveRoom404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_moveRoom404ResponseProblemJson = z.infer<typeof RoomsController_moveRoom404ResponseProblemJsonSchema>;
+
+export const RoomsController_moveRoom422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_moveRoom422ResponseProblemJson = z.infer<typeof RoomsController_moveRoom422ResponseProblemJsonSchema>;
+
+export const RoomsController_updateRoom200ResponseJsonSchema = RoomViewDtoSchema;
+export type RoomsController_updateRoom200ResponseJson = z.infer<typeof RoomsController_updateRoom200ResponseJsonSchema>;
+
+export const RoomsController_updateRoom401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_updateRoom401ResponseProblemJson = z.infer<typeof RoomsController_updateRoom401ResponseProblemJsonSchema>;
+
+export const RoomsController_updateRoom403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_updateRoom403ResponseProblemJson = z.infer<typeof RoomsController_updateRoom403ResponseProblemJsonSchema>;
+
+export const RoomsController_updateRoom404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_updateRoom404ResponseProblemJson = z.infer<typeof RoomsController_updateRoom404ResponseProblemJsonSchema>;
+
+export const RoomsController_updateRoom422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_updateRoom422ResponseProblemJson = z.infer<typeof RoomsController_updateRoom422ResponseProblemJsonSchema>;
 
 export const SessionsController_list200ResponseJsonSchema = z.array(SessionViewDtoSchema);
 export type SessionsController_list200ResponseJson = z.infer<typeof SessionsController_list200ResponseJsonSchema>;
