@@ -151,6 +151,24 @@ http/
     set-role.hurl                      PUT    /rooms/:id/permissions              204 · owner + room_id
     set-role-forbidden.hurl            PUT    /rooms/:id/permissions              403 room.permission_denied
     set-member.hurl                    PUT    /rooms/:id/members/:userId/permissions 204 · owner + room_id + target_user_id
+  membership/
+    join.hurl                          POST   /rooms/:id/join                          201 · needs access_token + room_id (public room)
+    join-not-joinable.hurl             POST   /rooms/:id/join                          422 room.not_joinable (private room)
+    join-banned.hurl                   POST   /rooms/:id/join                          403 room.banned
+    leave.hurl                         POST   /rooms/:id/leave                         204 · needs access_token + room_id
+    invite.hurl                        POST   /rooms/:id/invitations                   201 · needs room.invite + target_user_id
+    invite-forbidden.hurl              POST   /rooms/:id/invitations                   403 room.permission_denied
+    accept-invitation.hurl             POST   /invitations/:id/accept                  201 · needs invitation_id (invitee)
+    decline-invitation.hurl            POST   /invitations/:id/decline                 204 · needs invitation_id (invitee)
+    join-request.hurl                  POST   /rooms/:id/join-request                  201 · needs access_token + room_id
+    join-request-approve.hurl          POST   /rooms/:id/join-requests/:id/approve     201 · needs room.manage_members + join_request_id
+    join-request-reject.hurl           POST   /rooms/:id/join-requests/:id/reject      204 · needs room.manage_members + join_request_id
+    kick.hurl                          DELETE /rooms/:id/members/:userId               204 · needs room.kick + target_user_id
+    kick-not-found.hurl                DELETE /rooms/:id/members/:userId               404 room.membership_not_found
+    ban.hurl                           POST   /rooms/:id/bans                          204 · needs room.ban + target_user_id
+    unban.hurl                         DELETE /rooms/:id/bans/:userId                  204 · needs room.ban + target_user_id
+    change-role.hurl                   PATCH  /rooms/:id/members/:userId               200 · needs room.manage_roles + target_user_id
+    change-role-above-authority.hurl   PATCH  /rooms/:id/members/:userId               403 room.role_above_authority
 ```
 
 ## Prerequisites

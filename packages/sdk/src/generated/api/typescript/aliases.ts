@@ -12,22 +12,30 @@ import type { ConfirmPasswordResetDtoDto } from './ConfirmPasswordResetDto.type.
 import type { CreatedInvitationDtoDto } from './CreatedInvitationDto.type.js';
 import type { CreateInvitationDtoDto } from './CreateInvitationDto.type.js';
 import type { DeleteMeDtoDto } from './DeleteMeDto.type.js';
+import type { DirectoryListResponseDtoDto } from './DirectoryListResponseDto.type.js';
 import type { DiscoveryDocumentDtoDto } from './DiscoveryDocumentDto.type.js';
 import type { EmailAcceptedResponseDtoDto } from './EmailAcceptedResponseDto.type.js';
 import type { EmailVerifiedResponseDtoDto } from './EmailVerifiedResponseDto.type.js';
+import type { HeartbeatResponseDtoDto } from './HeartbeatResponseDto.type.js';
 import type { InvitationViewDtoDto } from './InvitationViewDto.type.js';
+import type { JoinRequestViewDtoDto } from './JoinRequestViewDto.type.js';
 import type { LoginDtoDto } from './LoginDto.type.js';
 import type { LoginResponseDtoDto } from './LoginResponseDto.type.js';
+import type { MembershipViewDtoDto } from './MembershipViewDto.type.js';
+import type { MessagePinViewDtoDto } from './MessagePinViewDto.type.js';
+import type { MessageViewDtoDto } from './MessageViewDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
 import type { PublicProfileViewDtoDto } from './PublicProfileViewDto.type.js';
+import type { ReadMarkerViewDtoDto } from './ReadMarkerViewDto.type.js';
 import type { RefreshDtoDto } from './RefreshDto.type.js';
 import type { RegisterDtoDto } from './RegisterDto.type.js';
 import type { RenameSessionDtoDto } from './RenameSessionDto.type.js';
 import type { RequestPasswordResetDtoDto } from './RequestPasswordResetDto.type.js';
 import type { ResendVerificationDtoDto } from './ResendVerificationDto.type.js';
 import type { RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.type.js';
+import type { RoomInvitationViewDtoDto } from './RoomInvitationViewDto.type.js';
 import type { RoomViewDtoDto } from './RoomViewDto.type.js';
 import type { SessionViewDtoDto } from './SessionViewDto.type.js';
 import type { SetupOwnerDtoDto } from './SetupOwnerDto.type.js';
@@ -35,6 +43,7 @@ import type { SetupOwnerResponseDtoDto } from './SetupOwnerResponseDto.type.js';
 import type { SetupStateDtoDto } from './SetupStateDto.type.js';
 import type { StreamTicketResponseDtoDto } from './StreamTicketResponseDto.type.js';
 import type { SuspendUserDtoDto } from './SuspendUserDto.type.js';
+import type { SyncResponseDtoDto } from './SyncResponseDto.type.js';
 import type { TokenBundleDtoDto } from './TokenBundleDto.type.js';
 import type { UpdateProfileDtoDto } from './UpdateProfileDto.type.js';
 import type { UsernameApprovedDtoDto } from './UsernameApprovedDto.type.js';
@@ -476,3 +485,253 @@ export type PermissionsController_setMemberPermission403ResponseProblemJson = Pr
 export type PermissionsController_setMemberPermission404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type PermissionsController_setMemberPermission422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_join201ResponseJson = MembershipViewDtoDto;
+
+export type MembershipController_join401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_join403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_join404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_join409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_join422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_leave401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_leave404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_invite201ResponseJson = RoomInvitationViewDtoDto;
+
+export type MembershipController_invite401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_invite403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_invite404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_invite409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_invite422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_acceptInvitation200ResponseJson = MembershipViewDtoDto;
+
+export type MembershipController_acceptInvitation401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_acceptInvitation403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_acceptInvitation404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_acceptInvitation409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_declineInvitation401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_declineInvitation404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_declineInvitation409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_createJoinRequest201ResponseJson = JoinRequestViewDtoDto;
+
+export type MembershipController_createJoinRequest401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_createJoinRequest403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_createJoinRequest404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_createJoinRequest409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_approveJoinRequest200ResponseJson = MembershipViewDtoDto;
+
+export type MembershipController_approveJoinRequest401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_approveJoinRequest403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_approveJoinRequest404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_approveJoinRequest409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_rejectJoinRequest401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_rejectJoinRequest403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_rejectJoinRequest404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_rejectJoinRequest409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_kick401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_kick403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_kick404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_changeRole200ResponseJson = MembershipViewDtoDto;
+
+export type MembershipController_changeRole401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_changeRole403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_changeRole404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_changeRole422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_ban401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_ban403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_ban404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_ban422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_unban401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_unban403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_unban404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_list200ResponseJson = DirectoryListResponseDtoDto;
+
+export type DirectoryController_list401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_list422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_publish200ResponseJson = RoomViewDtoDto;
+
+export type DirectoryController_publish401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_publish403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_publish404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_unpublish200ResponseJson = RoomViewDtoDto;
+
+export type DirectoryController_unpublish401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_unpublish403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DirectoryController_unpublish404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_sendMessage201ResponseJson = MessageViewDtoDto;
+
+export type MessagesController_sendMessage401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_sendMessage403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_sendMessage404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_sendMessage422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_getMessage200ResponseJson = MessageViewDtoDto;
+
+export type MessagesController_getMessage401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_getMessage403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_getMessage404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_deleteMessage401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_deleteMessage403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_deleteMessage404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_editMessage200ResponseJson = MessageViewDtoDto;
+
+export type MessagesController_editMessage401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_editMessage403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_editMessage404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_editMessage422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_pin200ResponseJson = MessagePinViewDtoDto;
+
+export type MessagesController_pin401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_pin403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_pin404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_pin409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_unpin401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_unpin403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_unpin404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listPins200ResponseJson = MessagePinViewDtoDto[];
+
+export type MessagesController_listPins401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listPins403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listPins404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DmController_createDm201ResponseJson = RoomViewDtoDto;
+
+export type DmController_createDm401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DmController_createDm422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DmController_createGroupDm201ResponseJson = RoomViewDtoDto;
+
+export type DmController_createGroupDm401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type DmController_createGroupDm422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_add401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_add403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_add404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_add409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_remove401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_remove403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReactionsController_remove404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_setReceipt200ResponseJson = ReadMarkerViewDtoDto;
+
+export type ReceiptsController_setReceipt401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_setReceipt403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_setReceipt404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_setReceipt422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_listReceipts200ResponseJson = ReadMarkerViewDtoDto[];
+
+export type ReceiptsController_listReceipts401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_listReceipts403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ReceiptsController_listReceipts404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SyncController_get200ResponseJson = SyncResponseDtoDto;
+
+export type SyncController_get401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SyncController_get403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SyncController_get404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SyncController_get422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type EventsController_streamQueryTicket = string;
+
+export type PresenceController_heartbeat200ResponseJson = HeartbeatResponseDtoDto;
+
+export type PresenceController_heartbeat401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PresenceController_heartbeat422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type TypingController_broadcast401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type TypingController_broadcast403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type TypingController_broadcast404ResponseProblemJson = ProblemDetailsDtoDto;

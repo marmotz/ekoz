@@ -1,0 +1,281 @@
+[
+  {
+    "id": "table.membership",
+    "label": "Create table \"membership\"",
+    "summary": "Creates table \"membership\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "membership"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"membership\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"membership\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"membership\"",
+        "sql": "CREATE TABLE \"public\".\"membership\" (\n  \"invited_by_id\" text,\n  \"joined_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"role\" text NOT NULL,\n  \"room_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"room_id\", \"user_id\"),\n  CONSTRAINT \"membership_role_check_9fefc26a\" CHECK (\"role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"membership\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"membership\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_ban",
+    "label": "Create table \"room_ban\"",
+    "summary": "Creates table \"room_ban\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_ban"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_ban\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_ban\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_ban\"",
+        "sql": "CREATE TABLE \"public\".\"room_ban\" (\n  \"banned_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"banned_by_id\" text NOT NULL,\n  \"reason\" text,\n  \"room_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"room_id\", \"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_ban\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_ban\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_invitation",
+    "label": "Create table \"room_invitation\"",
+    "summary": "Creates table \"room_invitation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_invitation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_invitation\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_invitation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_invitation\"",
+        "sql": "CREATE TABLE \"public\".\"room_invitation\" (\n  \"accepted_at\" timestamptz,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"declined_at\" timestamptz,\n  \"expires_at\" timestamptz,\n  \"id\" text NOT NULL,\n  \"invited_by_id\" text NOT NULL,\n  \"role\" text DEFAULT 'member' NOT NULL,\n  \"room_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"room_invitation_role_check_9fefc26a\" CHECK (\"role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_invitation\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_invitation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_join_request",
+    "label": "Create table \"room_join_request\"",
+    "summary": "Creates table \"room_join_request\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_join_request"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_join_request\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_join_request\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_join_request\"",
+        "sql": "CREATE TABLE \"public\".\"room_join_request\" (\n  \"approved\" bool,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"resolved_at\" timestamptz,\n  \"resolved_by_id\" text,\n  \"room_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_join_request\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_join_request\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.room_invitation.room_invitation_room_id_user_id_key",
+    "label": "Add unique constraint on \"room_invitation\" (room_id, user_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "room_invitation_room_id_user_id_key",
+        "table": "room_invitation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_invitation_room_id_user_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_invitation_room_id_user_id_key",
+          "public",
+          "\"public\".\"room_invitation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"room_invitation_room_id_user_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"room_invitation\" ADD CONSTRAINT \"room_invitation_room_id_user_id_key\" UNIQUE (\"room_id\", \"user_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_invitation_room_id_user_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_invitation_room_id_user_id_key",
+          "public",
+          "\"public\".\"room_invitation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.room_join_request.room_join_request_room_id_user_id_key",
+    "label": "Add unique constraint on \"room_join_request\" (room_id, user_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "room_join_request_room_id_user_id_key",
+        "table": "room_join_request"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_join_request_room_id_user_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_join_request_room_id_user_id_key",
+          "public",
+          "\"public\".\"room_join_request\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"room_join_request_room_id_user_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"room_join_request\" ADD CONSTRAINT \"room_join_request_room_id_user_id_key\" UNIQUE (\"room_id\", \"user_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_join_request_room_id_user_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_join_request_room_id_user_id_key",
+          "public",
+          "\"public\".\"room_join_request\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.membership.membership_user_id_idx_6c952402",
+    "label": "Create index \"membership_user_id_idx_6c952402\" on \"membership\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "membership_user_id_idx_6c952402",
+        "table": "membership"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"membership_user_id_idx_6c952402\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"membership_user_id_idx_6c952402\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"membership_user_id_idx_6c952402\"",
+        "sql": "CREATE INDEX \"membership_user_id_idx_6c952402\" ON \"public\".\"membership\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"membership_user_id_idx_6c952402\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"membership_user_id_idx_6c952402\""
+        ]
+      }
+    ]
+  }
+]

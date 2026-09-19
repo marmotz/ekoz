@@ -21,11 +21,26 @@ that does not touch this file.
 
 ### Changed
 
+- Capability resolution now reads real `Membership` rows (own or inherited
+  from an ancestor space) instead of the provisional public-room-only rule. (#4)
 - `AuthGuard` / `OwnerGuard` moved to `core/http`, usable by any feature
   module. (#1)
 
 ### Added
 
+- Presence heartbeats and typing signals, fanned out live over the SSE stream
+  to co-members and `dm` partners. (#10)
+- `GET /sync` per-room catch-up, the per-account feed fan-out, and the
+  `GET /events` SSE stream authenticated by a single-use ticket. (#11)
+- Reactions and monotonic per-room read markers. (#9)
+- Message edit, delete and tombstones (the original event is rewritten so a
+  deleted body never lingers in the log). (#8)
+- Messages: restricted-Markdown validation, structured mentions, replies,
+  pinned messages. (#7)
+- Public room directory: listing, full-text search, publish/unpublish. (#6)
+- Direct and group conversations, with per-user hide/archive for `dm`s. (#5)
+- Membership lifecycle: join/leave public rooms, invitations, invite-only
+  join requests, kick, ban/unban, role change with authority capping. (#4)
 - Room hierarchy: spaces and channels, closure-table ancestry, move and
   soft-delete. (#1)
 - Per-room event log with a gap-free monotonic `seq`. (#2)

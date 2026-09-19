@@ -3,6 +3,19 @@ import type { Capability } from './capabilities.js';
 export type RoomRole = 'space_admin' | 'room_admin' | 'moderator' | 'member' | 'reader';
 
 /**
+ * Relative authority order, highest first (technical.md §9: "cannot set a
+ * role above the caller's own effective authority"). Not a capability itself
+ * — `MembershipService` compares ranks directly on a role change.
+ */
+export const ROLE_RANK: Readonly<Record<RoomRole, number>> = {
+  space_admin: 4,
+  room_admin: 3,
+  moderator: 2,
+  member: 1,
+  reader: 0,
+};
+
+/**
  * Default capability matrix (technical.md §6), seeded into
  * `role_default_capability`. Only `allow` rows are listed — an absent
  * (role, capability) pair resolves to `deny` (permission-model.md), so this is

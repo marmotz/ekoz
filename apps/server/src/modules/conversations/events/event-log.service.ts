@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { JsonValue } from '@prisma/orm-postgres/target/codec-types';
 import { ConfigService } from '../../../core/config/config.service.js';
 import type { PrismaService } from '../../../core/prisma/prisma.service.js';
+import { FeedFanoutService } from '../streaming/feed-fanout.service.js';
 import {
   ROOM_EVENT_PAYLOAD_SCHEMAS,
   type RoomEventContent,
@@ -44,7 +45,10 @@ export interface RoomEventRecord {
  */
 @Injectable()
 export class EventLogService {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly feedFanout: FeedFanoutService,
+  ) {}
 
   async append<T extends RoomEventType>(
     tx: RoomTx,
@@ -64,7 +68,7 @@ export class EventLogService {
     }
     const seq = seqRow.last_seq as bigint;
 
-    const event = await tx.orm.public.RoomEvent.create({
+    const event = (await tx.orm.public.RoomEvent.create({
       roomId: input.roomId,
       seq,
       type: input.type,
@@ -73,8 +77,10 @@ export class EventLogService {
       // `server.domain` now; meaningful with federation, where a remote-authored
       // event carries its home server's domain instead (technical.md §10).
       originServer: this.config.get('server.domain'),
-    });
+    })) as RoomEventRecord;
 
-    return event as RoomEventRecord;
+    await this.feedFanout.fanOutRoomEvent(tx, event);
+
+    return event;
   }
 }

@@ -77,24 +77,45 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
     }),
   ]),
 
+  // Fixed shape (technical.md §9, issue #4). `senderId` on the event already
+  // carries the actor (inviter / kicker / banner / ...); content is only the
+  // delta.
+  member_joined: z.object({ userId: z.string(), role: roomRoleSchema }),
+  member_left: z.object({ userId: z.string() }),
+  member_kicked: z.object({ userId: z.string() }),
+  member_banned: z.object({ userId: z.string(), reason: z.string().nullable() }),
+  member_unbanned: z.object({ userId: z.string() }),
+  role_changed: z.object({ userId: z.string(), role: roomRoleSchema }),
+
+  // Fixed shape (technical.md §11, issue #7).
+  message_created: z.object({
+    messageId: z.string(),
+    body: z.string(),
+    replyToId: z.string().nullable(),
+    mentions: z.array(z.string()),
+  }),
+  // Fixed shape (technical.md §11, issue #7). `senderId` carries the pinner.
+  pin_added: z.object({ messageId: z.string() }),
+  pin_removed: z.object({ messageId: z.string() }),
+
+  // Fixed shape (technical.md §12, retention-and-tombstones.md, issue #8).
+  // `message_redacted` REWRITES the original `message_created` row in place
+  // (same `seq`, no new event) so the deleted body never lingers in the
+  // event log — the retention worker (#12) reuses the same rewrite for
+  // `reason: "retention"`.
+  message_edited: z.object({ editedAt: z.iso.datetime() }),
+  message_redacted: z.object({ reason: z.enum(['user', 'retention']) }),
+
+  // Fixed shape (technical.md §11, §14, issue #9). `senderId` carries the
+  // reactor / the user whose marker moved.
+  reaction_added: z.object({ messageId: z.string(), emoji: z.string() }),
+  reaction_removed: z.object({ messageId: z.string(), emoji: z.string() }),
+  receipt_updated: z.object({ userId: z.string(), seq: z.string() }),
+
   // Placeholders: content shape is owned by the issue that implements the
   // behaviour, not fixed yet.
-  message_created: z.record(z.string(), z.unknown()),
-  message_edited: z.record(z.string(), z.unknown()),
-  message_redacted: z.record(z.string(), z.unknown()),
   message_hidden: z.record(z.string(), z.unknown()),
-  reaction_added: z.record(z.string(), z.unknown()),
-  reaction_removed: z.record(z.string(), z.unknown()),
-  member_joined: z.record(z.string(), z.unknown()),
-  member_left: z.record(z.string(), z.unknown()),
-  member_kicked: z.record(z.string(), z.unknown()),
-  member_banned: z.record(z.string(), z.unknown()),
-  member_unbanned: z.record(z.string(), z.unknown()),
-  role_changed: z.record(z.string(), z.unknown()),
-  pin_added: z.record(z.string(), z.unknown()),
-  pin_removed: z.record(z.string(), z.unknown()),
   retention_changed: z.record(z.string(), z.unknown()),
-  receipt_updated: z.record(z.string(), z.unknown()),
 } as const satisfies Record<RoomEventType, z.ZodType>;
 
 export type RoomEventContent<T extends RoomEventType> = z.infer<

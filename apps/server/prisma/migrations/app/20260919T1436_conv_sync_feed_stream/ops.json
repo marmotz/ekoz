@@ -1,0 +1,80 @@
+[
+  {
+    "id": "table.account_feed_event",
+    "label": "Create table \"account_feed_event\"",
+    "summary": "Creates table \"account_feed_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "account_feed_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"account_feed_event\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"account_feed_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"account_feed_event\"",
+        "sql": "CREATE TABLE \"public\".\"account_feed_event\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"feed_seq\" BIGSERIAL NOT NULL,\n  \"kind\" text NOT NULL,\n  \"payload\" jsonb NOT NULL,\n  \"room_id\" text NOT NULL,\n  \"room_seq\" int8,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"user_id\", \"feed_seq\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"account_feed_event\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"account_feed_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.account_feed_event.account_feed_event_user_id_created_at_idx_b562028f",
+    "label": "Create index \"account_feed_event_user_id_created_at_idx_b562028f\" on \"account_feed_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "account_feed_event_user_id_created_at_idx_b562028f",
+        "table": "account_feed_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"account_feed_event_user_id_created_at_idx_b562028f\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"account_feed_event_user_id_created_at_idx_b562028f\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"account_feed_event_user_id_created_at_idx_b562028f\"",
+        "sql": "CREATE INDEX \"account_feed_event_user_id_created_at_idx_b562028f\" ON \"public\".\"account_feed_event\" (\"user_id\", \"created_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"account_feed_event_user_id_created_at_idx_b562028f\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"account_feed_event_user_id_created_at_idx_b562028f\""
+        ]
+      }
+    ]
+  }
+]

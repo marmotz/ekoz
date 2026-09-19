@@ -47,3 +47,30 @@ and typing indicators are part of the messaging increment.
   active users — identical to WebSocket.
 - The SDK carries the reconnection logic (jittered backoff) and the
   reconciliation.
+
+## Implementation notes (issues #10-#11)
+
+Two deviations from the plan above, both deliberate simplifications for this
+increment rather than design changes:
+
+- **Durable delivery is poll-based, not push.** `GET /events` re-reads
+  `AccountFeedEvent` for the connected account on a 1s `setInterval` instead of
+  the fan-out writer notifying the open connection directly. A true push would
+  need the notification to fire only *after* the write's transaction commits
+  (the fan-out happens inside `EventLogService.append`'s transaction, which the
+  connection has no visibility into until it commits) — a correct in-process
+  `EventEmitter` bridge for that is more machinery than this increment's
+  traffic needs. `GET /sync` is still the source of truth either way, so the
+  ~1s added latency does not change the client contract.
+- **Fan-out is synchronous, inside the same transaction as the `room_event`
+  write** (`EventLogService.append` calls `FeedFanoutService.fanOutRoomEvent`
+  directly), not the separate async worker this page and
+  [Synchronisation](../protocol/synchronisation.md) originally sketched. This
+  couples message-send latency to the fan-out's cost (proportional to a room's
+  member count) instead of isolating it — acceptable at this increment's
+  scale; splitting it into a real worker is a candidate change if fan-out cost
+  becomes measurable on the write path.
+
+The presence/typing half **is** pushed live, through the in-process event bus
+this page already called for (`EphemeralBroadcaster`) — that part matches the
+original design as planned.

@@ -1,0 +1,119 @@
+[
+  {
+    "id": "table.reaction",
+    "label": "Create table \"reaction\"",
+    "summary": "Creates table \"reaction\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "reaction"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"reaction\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"reaction\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"reaction\"",
+        "sql": "CREATE TABLE \"public\".\"reaction\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"emoji\" text NOT NULL,\n  \"message_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"message_id\", \"user_id\", \"emoji\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"reaction\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"reaction\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.read_marker",
+    "label": "Create table \"read_marker\"",
+    "summary": "Creates table \"read_marker\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "read_marker"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"read_marker\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"read_marker\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"read_marker\"",
+        "sql": "CREATE TABLE \"public\".\"read_marker\" (\n  \"room_id\" text NOT NULL,\n  \"seq\" int8 NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"room_id\", \"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"read_marker\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"read_marker\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.reaction.reaction_message_id_idx_8a7ff1ba",
+    "label": "Create index \"reaction_message_id_idx_8a7ff1ba\" on \"reaction\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "reaction_message_id_idx_8a7ff1ba",
+        "table": "reaction"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"reaction_message_id_idx_8a7ff1ba\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"reaction_message_id_idx_8a7ff1ba\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"reaction_message_id_idx_8a7ff1ba\"",
+        "sql": "CREATE INDEX \"reaction_message_id_idx_8a7ff1ba\" ON \"public\".\"reaction\" (\"message_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"reaction_message_id_idx_8a7ff1ba\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"reaction_message_id_idx_8a7ff1ba\""
+        ]
+      }
+    ]
+  }
+]

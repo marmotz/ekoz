@@ -13,9 +13,29 @@ export const AdminUserListResponseDtoItemsStatus = ["active", "suspended", "dele
 export const AdminUserListResponseDtoItemsStatusSchema = z.enum(AdminUserListResponseDtoItemsStatus);
 export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseDtoItemsStatus)[number];
 
+export const DirectoryListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export const DirectoryListResponseDtoItemsDefaultRoleSchema = z.enum(DirectoryListResponseDtoItemsDefaultRole);
+export type DirectoryListResponseDtoItemsDefaultRole = (typeof DirectoryListResponseDtoItemsDefaultRole)[number];
+
+export const DirectoryListResponseDtoItemsType = ["space", "channel", "dm", "group_dm"] as const;
+export const DirectoryListResponseDtoItemsTypeSchema = z.enum(DirectoryListResponseDtoItemsType);
+export type DirectoryListResponseDtoItemsType = (typeof DirectoryListResponseDtoItemsType)[number];
+
+export const DirectoryListResponseDtoItemsVisibility = ["public", "private", "invite"] as const;
+export const DirectoryListResponseDtoItemsVisibilitySchema = z.enum(DirectoryListResponseDtoItemsVisibility);
+export type DirectoryListResponseDtoItemsVisibility = (typeof DirectoryListResponseDtoItemsVisibility)[number];
+
+export const HeartbeatResponseDtoStatus = ["online", "away", "offline"] as const;
+export const HeartbeatResponseDtoStatusSchema = z.enum(HeartbeatResponseDtoStatus);
+export type HeartbeatResponseDtoStatus = (typeof HeartbeatResponseDtoStatus)[number];
+
 export const InvitationViewDtoStatus = ["pending", "accepted", "revoked", "expired"] as const;
 export const InvitationViewDtoStatusSchema = z.enum(InvitationViewDtoStatus);
 export type InvitationViewDtoStatus = (typeof InvitationViewDtoStatus)[number];
+
+export const MembershipViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export const MembershipViewDtoRoleSchema = z.enum(MembershipViewDtoRole);
+export type MembershipViewDtoRole = (typeof MembershipViewDtoRole)[number];
 
 export const MeViewDtoStatus = ["active", "suspended", "deleted"] as const;
 export const MeViewDtoStatusSchema = z.enum(MeViewDtoStatus);
@@ -24,6 +44,10 @@ export type MeViewDtoStatus = (typeof MeViewDtoStatus)[number];
 export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "space.create_child", "space.manage", "directory.publish"] as const;
 export const MyPermissionsResponseDtoCapabilitiesSchema = z.enum(MyPermissionsResponseDtoCapabilities);
 export type MyPermissionsResponseDtoCapabilities = (typeof MyPermissionsResponseDtoCapabilities)[number];
+
+export const RoomInvitationViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export const RoomInvitationViewDtoRoleSchema = z.enum(RoomInvitationViewDtoRole);
+export type RoomInvitationViewDtoRole = (typeof RoomInvitationViewDtoRole)[number];
 
 export const RoomViewDtoDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export const RoomViewDtoDefaultRoleSchema = z.enum(RoomViewDtoDefaultRole);
