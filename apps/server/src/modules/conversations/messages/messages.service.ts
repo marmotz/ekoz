@@ -142,24 +142,30 @@ export class MessagesService {
    * author) or `room.delete_any`. Clears `body`, removes `message_mention`
    * and `message_pin` rows, and rewrites the original `message_created`
    * event into a tombstone (same `seq`, no new event) — reused by the
-   * retention worker (#12) via {@link redactMessage}.
+   * retention worker (#12) via {@link redactMessage}. Returns which
+   * capability the deletion went through, so the moderation façade (#13)
+   * knows whether this was a moderation action (`delete_any`) worth
+   * auditing, as opposed to the author deleting their own message.
    */
   async deleteMessage(
     actor: PermissionPrincipal,
     roomId: string,
     messageId: string,
-  ): Promise<void> {
+  ): Promise<{ authorId: string | null; viaCapability: 'delete_own' | 'delete_any' }> {
     const message = await this.findMessageOrThrow(roomId, messageId);
     if (message.redactedAt) {
       throw new MessageNotFoundError();
     }
     const isAuthor = message.authorId === actor.userId;
-    const allowed = isAuthor && (await this.permissions.can(actor, roomId, 'room.delete_own'));
-    if (!allowed) {
+    const canDeleteOwn = isAuthor && (await this.permissions.can(actor, roomId, 'room.delete_own'));
+    const viaCapability = canDeleteOwn ? 'delete_own' : 'delete_any';
+    if (!canDeleteOwn) {
       await this.permissions.assertCan(actor, roomId, 'room.delete_any');
     }
 
     await this.redactMessage(roomId, message, actor.userId, 'user');
+
+    return { authorId: message.authorId, viaCapability };
   }
 
   /** Shared redact core (technical.md §12-§13): also the retention worker's delete-mode helper. */

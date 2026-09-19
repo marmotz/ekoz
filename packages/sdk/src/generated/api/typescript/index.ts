@@ -61,4 +61,6 @@ export type * from './ReadMarkerViewDto.type.js';
 export type * from './SyncResponseDtoEvents.type.js';
 export type * from './SyncResponseDto.type.js';
 export type * from './HeartbeatResponseDto.type.js';
+export type * from './RoomRetentionViewDto.type.js';
+export type * from './ModerationLogEntryDto.type.js';
 export type * from './MeController_uploadAvatarRequest.type.js';

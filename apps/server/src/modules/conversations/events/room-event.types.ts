@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CAPABILITIES } from '../permissions/capabilities.js';
+import { retentionRuleSchema } from '../retention/retention-rule.js';
 
 /** Mirrors the `RoomEventType` enum in `contract.prisma` (technical.md §4). */
 export type RoomEventType =
@@ -112,10 +113,13 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   reaction_removed: z.object({ messageId: z.string(), emoji: z.string() }),
   receipt_updated: z.object({ userId: z.string(), seq: z.string() }),
 
-  // Placeholders: content shape is owned by the issue that implements the
-  // behaviour, not fixed yet.
-  message_hidden: z.record(z.string(), z.unknown()),
-  retention_changed: z.record(z.string(), z.unknown()),
+  // Fixed shape (technical.md §13, issue #12). Own `seq` (unlike
+  // `message_redacted`, which rewrites the original event): `messageId`
+  // identifies the affected message.
+  message_hidden: z.object({ messageId: z.string() }),
+  // Fixed shape (technical.md §13, issue #12). `rule` is the node's own new
+  // rule (never the resolved effective rule).
+  retention_changed: z.object({ rule: retentionRuleSchema }),
 } as const satisfies Record<RoomEventType, z.ZodType>;
 
 export type RoomEventContent<T extends RoomEventType> = z.infer<

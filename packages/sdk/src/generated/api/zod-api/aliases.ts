@@ -25,6 +25,7 @@ import { MembershipViewDtoSchema, type MembershipViewDtoDto } from './Membership
 import { MessagePinViewDtoSchema, type MessagePinViewDtoDto } from './MessagePinViewDto.schema.js';
 import { MessageViewDtoSchema, type MessageViewDtoDto } from './MessageViewDto.schema.js';
 import { MeViewDtoSchema, type MeViewDtoDto } from './MeViewDto.schema.js';
+import { ModerationLogEntryDtoSchema, type ModerationLogEntryDtoDto } from './ModerationLogEntryDto.schema.js';
 import { MyPermissionsResponseDtoSchema, type MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.schema.js';
 import { ProblemDetailsDtoSchema, type ProblemDetailsDtoDto } from './ProblemDetailsDto.schema.js';
 import { PublicProfileViewDtoSchema, type PublicProfileViewDtoDto } from './PublicProfileViewDto.schema.js';
@@ -36,6 +37,7 @@ import { RequestPasswordResetDtoSchema, type RequestPasswordResetDtoDto } from '
 import { ResendVerificationDtoSchema, type ResendVerificationDtoDto } from './ResendVerificationDto.schema.js';
 import { RevokeAllSessionsResponseDtoSchema, type RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.schema.js';
 import { RoomInvitationViewDtoSchema, type RoomInvitationViewDtoDto } from './RoomInvitationViewDto.schema.js';
+import { RoomRetentionViewDtoSchema, type RoomRetentionViewDtoDto } from './RoomRetentionViewDto.schema.js';
 import { RoomViewDtoSchema, type RoomViewDtoDto } from './RoomViewDto.schema.js';
 import { SessionViewDtoSchema, type SessionViewDtoDto } from './SessionViewDto.schema.js';
 import { SetupOwnerDtoSchema, type SetupOwnerDtoDto } from './SetupOwnerDto.schema.js';
@@ -728,6 +730,18 @@ export type MeUsernameController_change422ResponseProblemJson = z.infer<typeof M
 export const MeUsernameController_changeRequestSchema = ChangeUsernameDtoSchema;
 export type MeUsernameController_changeRequest = z.infer<typeof MeUsernameController_changeRequestSchema>;
 
+export const ModerationController_getModerationLog200ResponseJsonSchema = z.array(ModerationLogEntryDtoSchema);
+export type ModerationController_getModerationLog200ResponseJson = z.infer<typeof ModerationController_getModerationLog200ResponseJsonSchema>;
+
+export const ModerationController_getModerationLog401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type ModerationController_getModerationLog401ResponseProblemJson = z.infer<typeof ModerationController_getModerationLog401ResponseProblemJsonSchema>;
+
+export const ModerationController_getModerationLog403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type ModerationController_getModerationLog403ResponseProblemJson = z.infer<typeof ModerationController_getModerationLog403ResponseProblemJsonSchema>;
+
+export const ModerationController_getModerationLog404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type ModerationController_getModerationLog404ResponseProblemJson = z.infer<typeof ModerationController_getModerationLog404ResponseProblemJsonSchema>;
+
 export const PasswordResetController_confirm401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type PasswordResetController_confirm401ResponseProblemJson = z.infer<typeof PasswordResetController_confirm401ResponseProblemJsonSchema>;
 
@@ -856,6 +870,33 @@ export type RegistrationController_register429ResponseProblemJson = z.infer<type
 
 export const RegistrationController_registerRequestSchema = RegisterDtoSchema;
 export type RegistrationController_registerRequest = z.infer<typeof RegistrationController_registerRequestSchema>;
+
+export const RetentionController_getRetention200ResponseJsonSchema = RoomRetentionViewDtoSchema;
+export type RetentionController_getRetention200ResponseJson = z.infer<typeof RetentionController_getRetention200ResponseJsonSchema>;
+
+export const RetentionController_getRetention401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_getRetention401ResponseProblemJson = z.infer<typeof RetentionController_getRetention401ResponseProblemJsonSchema>;
+
+export const RetentionController_getRetention403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_getRetention403ResponseProblemJson = z.infer<typeof RetentionController_getRetention403ResponseProblemJsonSchema>;
+
+export const RetentionController_getRetention404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_getRetention404ResponseProblemJson = z.infer<typeof RetentionController_getRetention404ResponseProblemJsonSchema>;
+
+export const RetentionController_setRetention200ResponseJsonSchema = RoomRetentionViewDtoSchema;
+export type RetentionController_setRetention200ResponseJson = z.infer<typeof RetentionController_setRetention200ResponseJsonSchema>;
+
+export const RetentionController_setRetention401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_setRetention401ResponseProblemJson = z.infer<typeof RetentionController_setRetention401ResponseProblemJsonSchema>;
+
+export const RetentionController_setRetention403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_setRetention403ResponseProblemJson = z.infer<typeof RetentionController_setRetention403ResponseProblemJsonSchema>;
+
+export const RetentionController_setRetention404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_setRetention404ResponseProblemJson = z.infer<typeof RetentionController_setRetention404ResponseProblemJsonSchema>;
+
+export const RetentionController_setRetention422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RetentionController_setRetention422ResponseProblemJson = z.infer<typeof RetentionController_setRetention422ResponseProblemJsonSchema>;
 
 export const RoomsController_createChannel201ResponseJsonSchema = RoomViewDtoSchema;
 export type RoomsController_createChannel201ResponseJson = z.infer<typeof RoomsController_createChannel201ResponseJsonSchema>;

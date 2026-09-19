@@ -84,4 +84,36 @@ describe('ROOM_EVENT_PAYLOAD_SCHEMAS (unit)', () => {
       }).success,
     ).toBe(false);
   });
+
+  it('accepts a message_hidden payload', () => {
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.message_hidden.safeParse({
+        messageId: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a message_hidden payload missing messageId', () => {
+    expect(ROOM_EVENT_PAYLOAD_SCHEMAS.message_hidden.safeParse({}).success).toBe(false);
+  });
+
+  it('accepts a retention_changed payload for each rule mode', () => {
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.retention_changed.safeParse({ rule: { mode: 'inherit' } }).success,
+    ).toBe(true);
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.retention_changed.safeParse({ rule: { mode: 'keep' } }).success,
+    ).toBe(true);
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.retention_changed.safeParse({
+        rule: { mode: 'hide', after: 3600 },
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a retention_changed payload with a rule missing after', () => {
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.retention_changed.safeParse({ rule: { mode: 'delete' } }).success,
+    ).toBe(false);
+  });
 });
