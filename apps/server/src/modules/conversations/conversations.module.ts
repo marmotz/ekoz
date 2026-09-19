@@ -8,6 +8,8 @@ import { MembershipController } from './membership/membership.controller.js';
 import { MembershipService } from './membership/membership.service.js';
 import { MessagesController } from './messages/messages.controller.js';
 import { MessagesService } from './messages/messages.service.js';
+import { ModerationController } from './moderation/moderation.controller.js';
+import { ModerationService } from './moderation/moderation.service.js';
 import { PermissionsController } from './permissions/permissions.controller.js';
 import { PermissionsService } from './permissions/permissions.service.js';
 import { RoleDefaultCapabilitiesSeeder } from './permissions/role-default-capabilities.seeder.js';
@@ -20,6 +22,9 @@ import { ReactionsController } from './reactions/reactions.controller.js';
 import { ReactionsService } from './reactions/reactions.service.js';
 import { ReceiptsController } from './receipts/receipts.controller.js';
 import { ReceiptsService } from './receipts/receipts.service.js';
+import { RetentionController } from './retention/retention.controller.js';
+import { RetentionService } from './retention/retention.service.js';
+import { RetentionWorkerService } from './retention/retention-worker.service.js';
 import { RoomsController } from './rooms/rooms.controller.js';
 import { RoomsService } from './rooms/rooms.service.js';
 import { EphemeralBroadcaster } from './streaming/ephemeral-broadcaster.service.js';
@@ -36,8 +41,8 @@ import { SyncService } from './streaming/sync.service.js';
  * lifecycle (#4), direct/group conversations (#5), public directory (#6),
  * messages/mentions/replies/pins (#7), message edit/delete/tombstones (#8),
  * reactions and read markers (#9), presence and typing (#10), sync/account
- * feed/SSE stream (#11). Retention (#12) and local moderation (#13) each
- * arrive with their own issue.
+ * feed/SSE stream (#11), retention policies and worker (#12), local
+ * moderation (#13).
  */
 @Module({
   controllers: [
@@ -53,6 +58,8 @@ import { SyncService } from './streaming/sync.service.js';
     EventsController,
     PresenceController,
     TypingController,
+    RetentionController,
+    ModerationController,
   ],
   providers: [
     EventLogService,
@@ -62,6 +69,7 @@ import { SyncService } from './streaming/sync.service.js';
     MembershipService,
     DirectoryService,
     MessagesService,
+    ModerationService,
     DmService,
     ReactionsService,
     ReceiptsService,
@@ -73,6 +81,8 @@ import { SyncService } from './streaming/sync.service.js';
     PresenceService,
     TypingService,
     { provide: PRESENCE_STORE, useClass: InProcessPresenceStore },
+    RetentionService,
+    RetentionWorkerService,
   ],
   exports: [EventLogService, PermissionsService],
 })

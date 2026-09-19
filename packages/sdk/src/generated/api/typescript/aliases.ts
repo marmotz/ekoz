@@ -25,6 +25,7 @@ import type { MembershipViewDtoDto } from './MembershipViewDto.type.js';
 import type { MessagePinViewDtoDto } from './MessagePinViewDto.type.js';
 import type { MessageViewDtoDto } from './MessageViewDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
+import type { ModerationLogEntryDtoDto } from './ModerationLogEntryDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
 import type { PublicProfileViewDtoDto } from './PublicProfileViewDto.type.js';
@@ -36,6 +37,7 @@ import type { RequestPasswordResetDtoDto } from './RequestPasswordResetDto.type.
 import type { ResendVerificationDtoDto } from './ResendVerificationDto.type.js';
 import type { RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.type.js';
 import type { RoomInvitationViewDtoDto } from './RoomInvitationViewDto.type.js';
+import type { RoomRetentionViewDtoDto } from './RoomRetentionViewDto.type.js';
 import type { RoomViewDtoDto } from './RoomViewDto.type.js';
 import type { SessionViewDtoDto } from './SessionViewDto.type.js';
 import type { SetupOwnerDtoDto } from './SetupOwnerDto.type.js';
@@ -735,3 +737,29 @@ export type TypingController_broadcast401ResponseProblemJson = ProblemDetailsDto
 export type TypingController_broadcast403ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type TypingController_broadcast404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_getRetention200ResponseJson = RoomRetentionViewDtoDto;
+
+export type RetentionController_getRetention401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_getRetention403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_getRetention404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_setRetention200ResponseJson = RoomRetentionViewDtoDto;
+
+export type RetentionController_setRetention401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_setRetention403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_setRetention404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RetentionController_setRetention422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ModerationController_getModerationLog200ResponseJson = ModerationLogEntryDtoDto[];
+
+export type ModerationController_getModerationLog401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ModerationController_getModerationLog403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type ModerationController_getModerationLog404ResponseProblemJson = ProblemDetailsDtoDto;

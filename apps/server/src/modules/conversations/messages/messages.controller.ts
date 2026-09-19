@@ -21,6 +21,7 @@ import { ApiProblemResponses } from '../../../core/http/api-problem-responses.de
 import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
 import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
+import { ModerationService } from '../moderation/moderation.service.js';
 import { RoomIdParamSchema } from '../rooms/rooms.dto.js';
 import { type MessageView, MessageViewDto } from './message.view.js';
 import {
@@ -38,7 +39,10 @@ import { type MessagePinView, MessagePinViewDto } from './pin.view.js';
 @Controller()
 @UseGuards(AuthGuard)
 export class MessagesController {
-  constructor(private readonly messages: MessagesService) {}
+  constructor(
+    private readonly messages: MessagesService,
+    private readonly moderation: ModerationService,
+  ) {}
 
   @Post('rooms/:id/messages')
   @ApiOperation({ summary: 'Send a message (needs room.post).' })
@@ -85,7 +89,7 @@ export class MessagesController {
     @Param(new ZodValidationPipe(MessageIdParamSchema)) params: { id: string; messageId: string },
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<void> {
-    await this.messages.deleteMessage(principal, params.id, params.messageId);
+    await this.moderation.deleteMessage(principal, params.id, params.messageId);
   }
 
   @Put('rooms/:id/pins/:messageId')

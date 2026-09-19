@@ -28,6 +28,10 @@ that does not touch this file.
 
 ### Added
 
+- Local moderation: kick, ban/unban and delete-any-message now also write an
+  audit trail, exposed at `GET /rooms/:id/moderation-log`. (#13)
+- Retention policies (server default, space/room overrides) with a periodic
+  worker that hides or deletes messages past their rule's age. (#12)
 - Presence heartbeats and typing signals, fanned out live over the SSE stream
   to co-members and `dm` partners. (#10)
 - `GET /sync` per-room catch-up, the per-account feed fan-out, and the

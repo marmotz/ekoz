@@ -42,7 +42,7 @@ const DURATION_UNIT_SECONDS: Record<'s' | 'm' | 'h' | 'd', number> = {
  * `<n><unit>` string (`s` / `m` / `h` / `d`, e.g. `15m`) or a bare number of
  * seconds (string or number, from env / file).
  */
-const durationSeconds = z
+export const durationSeconds = z
   .union([z.number().int().min(0), z.string().trim().min(1)])
   .transform((value, ctx) => {
     if (typeof value === 'number') return value;
@@ -413,6 +413,13 @@ export const PARAMETER_REGISTRY = {
       ),
     default: { mode: 'keep' },
     hotReloadable: true,
+    secret: false,
+  },
+  'retention.worker_interval': {
+    kind: 'infra',
+    schema: durationSeconds,
+    default: '15m',
+    hotReloadable: false,
     secret: false,
   },
   'presence.heartbeat_interval': {

@@ -10,6 +10,7 @@ import { ApiProblemResponses } from '../../../core/http/api-problem-responses.de
 import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
 import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
+import { ModerationService } from '../moderation/moderation.service.js';
 import { RoomIdParamSchema } from '../rooms/rooms.dto.js';
 import {
   type BanMember,
@@ -37,7 +38,10 @@ import {
 @Controller()
 @UseGuards(AuthGuard)
 export class MembershipController {
-  constructor(private readonly membership: MembershipService) {}
+  constructor(
+    private readonly membership: MembershipService,
+    private readonly moderation: ModerationService,
+  ) {}
 
   @Post('rooms/:id/join')
   @ApiOperation({ summary: 'Join a public room.' })
@@ -136,7 +140,7 @@ export class MembershipController {
     @Param(new ZodValidationPipe(RoomMemberParamSchema)) params: { id: string; userId: string },
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<void> {
-    await this.membership.kick(principal, params.id, params.userId);
+    await this.moderation.kick(principal, params.id, params.userId);
   }
 
   @Post('rooms/:id/bans')
@@ -148,7 +152,7 @@ export class MembershipController {
     @Body(new ZodValidationPipe(BanMemberDto)) body: BanMember,
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<void> {
-    await this.membership.ban(principal, params.id, body);
+    await this.moderation.ban(principal, params.id, body);
   }
 
   @Delete('rooms/:id/bans/:userId')
@@ -159,7 +163,7 @@ export class MembershipController {
     @Param(new ZodValidationPipe(RoomMemberParamSchema)) params: { id: string; userId: string },
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<void> {
-    await this.membership.unban(principal, params.id, params.userId);
+    await this.moderation.unban(principal, params.id, params.userId);
   }
 
   @Patch('rooms/:id/members/:userId')

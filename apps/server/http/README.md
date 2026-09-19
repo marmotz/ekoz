@@ -151,6 +151,13 @@ http/
     set-role.hurl                      PUT    /rooms/:id/permissions              204 · owner + room_id
     set-role-forbidden.hurl            PUT    /rooms/:id/permissions              403 room.permission_denied
     set-member.hurl                    PUT    /rooms/:id/members/:userId/permissions 204 · owner + room_id + target_user_id
+  retention/
+    get.hurl                           GET    /rooms/:id/retention               200 · needs access_token + room_id
+    set.hurl                           PUT    /rooms/:id/retention               200 · owner + room_id
+    set-forbidden.hurl                 PUT    /rooms/:id/retention               403 room.permission_denied
+  moderation/
+    log.hurl                           GET    /rooms/:id/moderation-log          200 · needs a moderation capability + room_id
+    log-forbidden.hurl                 GET    /rooms/:id/moderation-log          403 room.permission_denied
   membership/
     join.hurl                          POST   /rooms/:id/join                          201 · needs access_token + room_id (public room)
     join-not-joinable.hurl             POST   /rooms/:id/join                          422 room.not_joinable (private room)
