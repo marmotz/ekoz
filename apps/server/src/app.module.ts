@@ -15,6 +15,7 @@ import { StorageModule } from './core/storage/storage.module.js';
 import { ConversationsModule } from './modules/conversations/conversations.module.js';
 import { OwnerLookupModule } from './modules/identity/accounts/owner-lookup.module.js';
 import { PrincipalAuthenticatorModule } from './modules/identity/guards/principal-authenticator.module.js';
+import { StreamTicketConsumerModule } from './modules/identity/guards/stream-ticket-consumer.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 
 /**
@@ -41,6 +42,7 @@ import { IdentityModule } from './modules/identity/identity.module.js';
     IdentityModule,
     OwnerLookupModule,
     PrincipalAuthenticatorModule,
+    StreamTicketConsumerModule,
     ConversationsModule,
   ],
 })

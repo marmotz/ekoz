@@ -4,18 +4,13 @@ Sending, editing, deleting and pinning messages; reactions; read markers. This
 is the wire contract for `apps/server`'s `conversations` feature, the messages
 slice (issues #7-#9) — a mismatch between this page and `apps/server` is a bug,
 fixed here first (see
-[HTTP API conventions](../technical/api-conventions.md)). **Draft ahead of
-implementation**: issues #7-#9 have not landed yet (see
-[Spaces, rooms, roles and permissions](rooms-and-permissions.md) for what has);
-this page transcribes the settled design from
-`backlog/features/conversations/technical.md` §11-§12 and §14 so clients can be
-built against it, and gets corrected against the real server the day it ships.
+[HTTP API conventions](../technical/api-conventions.md)).
 
 ## Conventions
 
-- Error responses are `application/problem+json` with a stable `code`
-  (see [HTTP API conventions](../technical/api-conventions.md)), namespace
-  `room.*`.
+- Error responses are `application/problem+json` with a stable `code`,
+  namespace `message.*` (`room.*` for room-level guards like read-only or
+  permission checks).
 - Timestamps: UTC ISO-8601. Identifiers: ULID. `Message.seq` is a 64-bit
   integer, serialised as a decimal **string** — see
   [Spaces, rooms, roles and permissions](rooms-and-permissions.md) for why.
@@ -40,29 +35,30 @@ built against it, and gets corrected against the real server the day it ships.
 
 `seq` equals the `seq` of the message's `message_created` event (technical.md
 §10); later events about the same message (`message_edited`,
-`message_redacted`, `message_hidden`, reactions, pins, receipts) get their own
-higher `seq`. `authorId` resolves to "Deleted account" if the author's account
-is later deleted (identity-and-profiles' forward contract); it does not become
-`null`. A redacted message has `body: ""` and `redactedAt` set; a hidden
-message keeps its `body` (visible only out-of-band) with `hiddenAt` set.
+`message_redacted`, reactions, pins, receipts) get their own higher `seq`. A
+redacted message has `body: ""` and `redactedAt` set; `hiddenAt` is carried on
+the wire but not yet set by anything (the retention worker that sets it is
+issue #12).
 
 ## Restricted Markdown
 
 `body` is a restricted Markdown source, at most `messages.body_max_length`
-characters (server config; not yet exposed to clients). Allowed constructs:
-emphasis, strong, strikethrough, inline code, fenced code, blockquote,
-ordered/unordered lists, links (`http(s)` and `mailto` only), hard/soft
-breaks. Disallowed: raw HTML, images, headings, tables, autolinked bare URLs
-beyond a safe linkifier. The server validates the source parses to only
-allowed nodes and stores the source verbatim; clients render with the same
-allowlist, so a client-side renderer must implement the identical restriction
-(the source is not pre-sanitised HTML).
+characters (server config). Allowed constructs: emphasis, strong,
+strikethrough, inline code, fenced code, blockquote, ordered/unordered lists,
+links (`http(s)` and `mailto` only), hard/soft breaks. Disallowed: raw HTML,
+images, headings, tables. The server parses the source with a `remark`
+pipeline (`remark-gfm` for strikethrough) and rejects any node type outside
+that allowlist, or a link whose scheme isn't `http:`, `https:` or `mailto:`;
+it stores the source verbatim. A bare URL written without `[]()` syntax is
+still linkified by `remark-gfm` and passes through like any other link — the
+scheme check is what actually keeps rendering safe, not whether the client
+typed brackets.
 
 **Mentions** are structured, not parsed from the body: the client sends
 `mentions: [userId]` alongside `body`; the server verifies each mentioned user
-is resolvable, stores them, and echoes them in `Message.mentions` and the
-`message_created` event. The rendered `@name` inside `body` is cosmetic — the
-structured list is authoritative and drives notifications.
+is a member of the room, stores them, and echoes them in `Message.mentions`
+and the `message_created` event. The rendered `@name` inside `body` is
+cosmetic — the structured list is authoritative and drives notifications.
 
 ## Sending, editing, deleting
 
@@ -71,12 +67,20 @@ structured list is authoritative and drives notifications.
 Needs `room.post` and the room not read-only (or `room.edit_any`).
 
 - Body: `{ body, replyToId?, mentions? }`. `replyToId` must reference a message
-  in the same room (a redacted/hidden parent still anchors the reply, shown as
-  "deleted message").
+  in the same room (a redacted parent still anchors the reply).
 - `201`: `Message`.
 - Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
-  validation (`422`, includes a `body` that fails the restricted-Markdown
-  parse).
+  `room.read_only` (`422`), `message.body_too_long` (`422`),
+  `message.body_invalid` (`422`, fails the restricted-Markdown parse),
+  `message.reply_not_in_room` (`422`), `message.mention_not_member` (`422`),
+  validation (`422`).
+
+### `GET /rooms/:id/messages/:messageId`
+
+Needs `room.read`.
+
+- `200`: `Message`.
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`).
 
 ### `PATCH /rooms/:id/messages/:messageId`
 
@@ -84,19 +88,23 @@ Needs `room.edit_own` (author, within `messages.edit_window` if set) or
 `room.edit_any`. Sets `editedAt`; the previous body is not retained. Emits
 `message_edited` with `{ editedAt }` only — never the previous body.
 
-- Body: `{ body }`.
+- Body: `{ body }` — validated the same way as `POST`.
 - `200`: `Message`.
-- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
-  validation (`422`).
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`, also
+  returned for an already-redacted message), `message.body_too_long` (`422`),
+  `message.body_invalid` (`422`), validation (`422`).
 
 ### `DELETE /rooms/:id/messages/:messageId`
 
-Needs `room.delete_own` or `room.delete_any`. Sets `redactedAt` /
-`redactedById`, clears `body`, cascades: removes reactions, mentions and pins
-on the message. Emits `message_redacted`.
+Needs `room.delete_own` (author) or `room.delete_any`. Sets `redactedAt` /
+`redactedById`, clears `body`, cascades: removes `reaction`, `message_mention`
+and `message_pin` rows. Rewrites the original `message_created` room_event
+into a tombstone (same `seq`, `type: "message_redacted"`) rather than
+appending a new one — the deleted body never lingers in the append-only log.
 
 - `204`.
-- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`).
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`, also
+  returned for an already-deleted message — delete is not idempotent).
 
 ## Pins
 
@@ -104,75 +112,91 @@ on the message. Emits `message_redacted`.
 
 Needs `room.pin`. Emits `pin_added`.
 
-- `204`.
-- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`).
+- `200`: `{ roomId, messageId, pinnedById, pinnedAt }`.
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`),
+  `message.already_pinned` (`409`).
 
 ### `DELETE /rooms/:id/pins/:messageId`
 
 Needs `room.pin`. Emits `pin_removed`.
 
 - `204`.
-- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`).
+- Errors: `room.permission_denied` (`403`), `message.not_pinned` (`404`).
 
 ### `GET /rooms/:id/pins`
 
 Needs `room.read`.
 
-- `200`: `Message[]`, pinned messages in pin order.
+- `200`: `{ roomId, messageId, pinnedById, pinnedAt }[]`, most recently pinned
+  first. Fetch each `Message` separately (`GET
+  /rooms/:id/messages/:messageId`) if the body is needed — this endpoint does
+  not join it.
 
 ## Reactions
 
+Reaction routes are not room-scoped in the path (`/messages/:messageId/...`)
+— the server resolves the message's room internally to run the `room.react`
+check.
+
 ### `PUT /messages/:messageId/reactions/:emoji`
 
-Needs `room.react`. Emits `reaction_added`. Idempotent: reacting twice with the
-same emoji is a no-op.
+Needs `room.react`. Emits `reaction_added`. Not idempotent: reacting twice
+with the same emoji is a conflict, not a no-op.
 
 - `204`.
-- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`, unknown
-  message).
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`,
+  unknown message), `message.reaction_already_exists` (`409`).
 
 ### `DELETE /messages/:messageId/reactions/:emoji`
 
 Removes the caller's own reaction. Emits `reaction_removed`.
 
 - `204`.
-- Errors: `room.not_found` (`404`).
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`),
+  `message.reaction_not_found` (`404`).
 
 ## Read markers
 
-One row per `(room, user)`: the highest contiguous `seq` the user has read.
-Visible to every room participant (not just the reader), per the functional
-spec.
+One row per `(room, user)`: the highest `seq` the user has read. Visible to
+every room participant (not just the reader), per the functional spec —
+gated on actual `Membership`, not `room.read` (a `public` room's non-member
+default-role reader does not get this).
 
 ### `PUT /rooms/:id/receipt`
 
-Needs to be a member. Monotonic: a lower `seq` than the caller's current
-marker is ignored (not an error). Emits `receipt_updated { userId, seq }` to
-the room.
+Needs to be a member. Monotonic: a `seq` lower than the caller's current
+marker is ignored (not an error, and the previous marker is returned
+unchanged). Emits `receipt_updated { userId, seq }` to the room.
 
-- Body: `{ seq }`.
-- `204`.
-- Errors: `room.not_found` (`404`), validation (`422`).
+- Body: `{ seq }` — decimal string.
+- `200`: `{ roomId, userId, seq, updatedAt }`.
+- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`, not a
+  participant), validation (`422`).
 
 ### `GET /rooms/:id/receipts`
 
-Needs `room.read`.
+Needs to be a member.
 
-- `200`: `{ userId, seq }[]`, one entry per member with a marker.
+- `200`: `{ roomId, userId, seq, updatedAt }[]`, one entry per member with a
+  marker.
+- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`, not a
+  participant).
 
 ## Room events
 
 New payloads on top of
-[Spaces, rooms, roles and permissions](rooms-and-permissions.md#room-events):
+[Spaces, rooms, roles and permissions](rooms-and-permissions.md#room-events).
+`senderId` on the event row already carries the actor (author, editor,
+deleter, reactor, pinner); `content` only ever carries the delta.
 
 | type | payload |
 |---|---|
-| `message_created` | `{ authorId, body, replyToId, mentions }` |
+| `message_created` | `{ messageId, body, replyToId, mentions }` |
 | `message_edited` | `{ editedAt }` — never the previous body |
-| `message_redacted` | `{ reason?: "retention" }` — present when the retention worker (not this issue set) produced the tombstone |
-| `message_hidden` | `{}` |
-| `reaction_added` | `{ userId, emoji }` |
-| `reaction_removed` | `{ userId, emoji }` |
+| `message_redacted` | `{ reason: "user" \| "retention" }` — this REWRITES the original `message_created` row (same `seq`); it is not a new event |
+| `message_hidden` | reserved for the retention worker (issue #12); no payload shape fixed yet |
+| `reaction_added` | `{ messageId, emoji }` |
+| `reaction_removed` | `{ messageId, emoji }` |
 | `pin_added` | `{ messageId }` |
 | `pin_removed` | `{ messageId }` |
 | `receipt_updated` | `{ userId, seq }` |

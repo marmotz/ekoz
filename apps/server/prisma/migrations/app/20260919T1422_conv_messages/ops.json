@@ -1,0 +1,278 @@
+[
+  {
+    "id": "table.message",
+    "label": "Create table \"message\"",
+    "summary": "Creates table \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message\"",
+        "sql": "CREATE TABLE \"public\".\"message\" (\n  \"author_id\" text,\n  \"body\" text NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"edited_at\" timestamptz,\n  \"hidden_at\" timestamptz,\n  \"id\" text NOT NULL,\n  \"redacted_at\" timestamptz,\n  \"redacted_by_id\" text,\n  \"reply_to_id\" text,\n  \"room_id\" text NOT NULL,\n  \"seq\" int8 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.message_mention",
+    "label": "Create table \"message_mention\"",
+    "summary": "Creates table \"message_mention\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_mention"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_mention\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message_mention\"",
+        "sql": "CREATE TABLE \"public\".\"message_mention\" (\n  \"message_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"message_id\", \"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_mention\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.message_pin",
+    "label": "Create table \"message_pin\"",
+    "summary": "Creates table \"message_pin\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_pin"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_pin\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_pin\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message_pin\"",
+        "sql": "CREATE TABLE \"public\".\"message_pin\" (\n  \"message_id\" text NOT NULL,\n  \"pinned_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"pinned_by_id\" text NOT NULL,\n  \"room_id\" text NOT NULL,\n  PRIMARY KEY (\"room_id\", \"message_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_pin\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_pin\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.message.message_room_id_seq_key",
+    "label": "Add unique constraint on \"message\" (room_id, seq)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "message_room_id_seq_key",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"message_room_id_seq_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_room_id_seq_key",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"message_room_id_seq_key\"",
+        "sql": "ALTER TABLE \"public\".\"message\" ADD CONSTRAINT \"message_room_id_seq_key\" UNIQUE (\"room_id\", \"seq\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"message_room_id_seq_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_room_id_seq_key",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message.message_reply_to_id_idx_384c8aaa",
+    "label": "Create index \"message_reply_to_id_idx_384c8aaa\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_reply_to_id_idx_384c8aaa",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_reply_to_id_idx_384c8aaa\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_reply_to_id_idx_384c8aaa\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_reply_to_id_idx_384c8aaa\"",
+        "sql": "CREATE INDEX \"message_reply_to_id_idx_384c8aaa\" ON \"public\".\"message\" (\"reply_to_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_reply_to_id_idx_384c8aaa\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_reply_to_id_idx_384c8aaa\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message.message_room_id_created_at_idx_3f0ddf95",
+    "label": "Create index \"message_room_id_created_at_idx_3f0ddf95\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_room_id_created_at_idx_3f0ddf95",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_room_id_created_at_idx_3f0ddf95\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_room_id_created_at_idx_3f0ddf95\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_room_id_created_at_idx_3f0ddf95\"",
+        "sql": "CREATE INDEX \"message_room_id_created_at_idx_3f0ddf95\" ON \"public\".\"message\" (\"room_id\", \"created_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_room_id_created_at_idx_3f0ddf95\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_room_id_created_at_idx_3f0ddf95\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message_mention.message_mention_user_id_idx_6c952402",
+    "label": "Create index \"message_mention_user_id_idx_6c952402\" on \"message_mention\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_mention_user_id_idx_6c952402",
+        "table": "message_mention"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_mention_user_id_idx_6c952402\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_user_id_idx_6c952402\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_mention_user_id_idx_6c952402\"",
+        "sql": "CREATE INDEX \"message_mention_user_id_idx_6c952402\" ON \"public\".\"message_mention\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_mention_user_id_idx_6c952402\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_user_id_idx_6c952402\""
+        ]
+      }
+    ]
+  }
+]

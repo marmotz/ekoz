@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.membership.hidden_at",
+    "label": "Add column \"hidden_at\" to \"membership\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "hidden_at",
+        "table": "membership"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"hidden_at\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "membership",
+          "hidden_at"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"hidden_at\"",
+        "sql": "ALTER TABLE \"public\".\"membership\" ADD COLUMN \"hidden_at\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"hidden_at\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "membership",
+          "hidden_at"
+        ]
+      }
+    ]
+  }
+]

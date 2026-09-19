@@ -4,21 +4,21 @@
 
 ## conversations ·  [overview](features/conversations/overview.md)
 
-_[technical design](technical.md)_ — 4/14 tasks done
+_[technical design](technical.md)_ — 12/14 tasks done
 
 | Done | Issue                                            | Title                                                      | Blocked by |
 |------|--------------------------------------------------|------------------------------------------------------------|------------|
 | [x]  | [#1](https://github.com/marmotz/ekoz/issues/1)   | Conversations: room model and hierarchy                    | —          |
 | [x]  | [#2](https://github.com/marmotz/ekoz/issues/2)   | Conversations: per-room event log and seq allocation       | #1         |
 | [x]  | [#3](https://github.com/marmotz/ekoz/issues/3)   | Conversations: capability ACL and resolver                 | #1, #2     |
-| [ ]  | [#4](https://github.com/marmotz/ekoz/issues/4)   | Conversations: membership lifecycle                        | #1, #2, #3 |
-| [ ]  | [#5](https://github.com/marmotz/ekoz/issues/5)   | Conversations: direct and group conversations              | #1, #4     |
-| [ ]  | [#6](https://github.com/marmotz/ekoz/issues/6)   | Conversations: public room directory                       | #1, #3     |
-| [ ]  | [#7](https://github.com/marmotz/ekoz/issues/7)   | Conversations: messages, Markdown, mentions, replies, pins | #2, #3     |
-| [ ]  | [#8](https://github.com/marmotz/ekoz/issues/8)   | Conversations: message edit, delete, tombstones            | #7         |
-| [ ]  | [#9](https://github.com/marmotz/ekoz/issues/9)   | Conversations: reactions and read markers                  | #4, #7     |
-| [ ]  | [#11](https://github.com/marmotz/ekoz/issues/11) | Conversations: sync endpoint, account feed, SSE stream     | #2, #4     |
-| [ ]  | [#10](https://github.com/marmotz/ekoz/issues/10) | Conversations: presence and typing                         | #4, #11    |
+| [x]  | [#4](https://github.com/marmotz/ekoz/issues/4)   | Conversations: membership lifecycle                        | #1, #2, #3 |
+| [x]  | [#5](https://github.com/marmotz/ekoz/issues/5)   | Conversations: direct and group conversations              | #1, #4     |
+| [x]  | [#6](https://github.com/marmotz/ekoz/issues/6)   | Conversations: public room directory                       | #1, #3     |
+| [x]  | [#7](https://github.com/marmotz/ekoz/issues/7)   | Conversations: messages, Markdown, mentions, replies, pins | #2, #3     |
+| [x]  | [#8](https://github.com/marmotz/ekoz/issues/8)   | Conversations: message edit, delete, tombstones            | #7         |
+| [x]  | [#9](https://github.com/marmotz/ekoz/issues/9)   | Conversations: reactions and read markers                  | #4, #7     |
+| [x]  | [#11](https://github.com/marmotz/ekoz/issues/11) | Conversations: sync endpoint, account feed, SSE stream     | #2, #4     |
+| [x]  | [#10](https://github.com/marmotz/ekoz/issues/10) | Conversations: presence and typing                         | #4, #11    |
 | [ ]  | [#12](https://github.com/marmotz/ekoz/issues/12) | Conversations: retention policies and worker               | #2, #3, #8 |
 | [ ]  | [#13](https://github.com/marmotz/ekoz/issues/13) | Conversations: local moderation surface                    | #4, #8     |
 | [x]  | [#38](https://github.com/marmotz/ekoz/issues/38) | Protocol: conversations sections                           | #2, #3     |

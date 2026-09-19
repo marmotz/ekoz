@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "account_feed_event": {
+      "model": "AccountFeedEvent",
+      "namespace": "public"
+    },
     "audit_log": {
       "model": "AuditLog",
       "namespace": "public"
@@ -24,8 +28,32 @@
       "model": "Invitation",
       "namespace": "public"
     },
+    "membership": {
+      "model": "Membership",
+      "namespace": "public"
+    },
+    "message": {
+      "model": "Message",
+      "namespace": "public"
+    },
+    "message_mention": {
+      "model": "MessageMention",
+      "namespace": "public"
+    },
+    "message_pin": {
+      "model": "MessagePin",
+      "namespace": "public"
+    },
     "password_reset": {
       "model": "PasswordReset",
+      "namespace": "public"
+    },
+    "reaction": {
+      "model": "Reaction",
+      "namespace": "public"
+    },
+    "read_marker": {
+      "model": "ReadMarker",
       "namespace": "public"
     },
     "refresh_token": {
@@ -44,12 +72,24 @@
       "model": "Room",
       "namespace": "public"
     },
+    "room_ban": {
+      "model": "RoomBan",
+      "namespace": "public"
+    },
     "room_closure": {
       "model": "RoomClosure",
       "namespace": "public"
     },
     "room_event": {
       "model": "RoomEvent",
+      "namespace": "public"
+    },
+    "room_invitation": {
+      "model": "RoomInvitation",
+      "namespace": "public"
+    },
+    "room_join_request": {
+      "model": "RoomJoinRequest",
       "namespace": "public"
     },
     "room_member_permission": {
@@ -298,6 +338,87 @@
           }
         },
         "models": {
+          "AccountFeedEvent": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "feedSeq": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "kind": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "payload": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/jsonb@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomSeq": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "feedSeq": {
+                  "column": "feed_seq"
+                },
+                "kind": {
+                  "column": "kind"
+                },
+                "payload": {
+                  "column": "payload"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "roomSeq": {
+                  "column": "room_seq"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "account_feed_event"
+            }
+          },
           "AuditLog": {
             "fields": {
               "action": {
@@ -740,6 +861,286 @@
               "table": "invitation"
             }
           },
+          "Membership": {
+            "fields": {
+              "hiddenAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "invitedById": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "joinedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "role": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "RoomRole",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "hiddenAt": {
+                  "column": "hidden_at"
+                },
+                "invitedById": {
+                  "column": "invited_by_id"
+                },
+                "joinedAt": {
+                  "column": "joined_at"
+                },
+                "role": {
+                  "column": "role"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "membership"
+            }
+          },
+          "Message": {
+            "fields": {
+              "authorId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "body": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "editedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "hiddenAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "redactedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "redactedById": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "replyToId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "seq": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "authorId": {
+                  "column": "author_id"
+                },
+                "body": {
+                  "column": "body"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "editedAt": {
+                  "column": "edited_at"
+                },
+                "hiddenAt": {
+                  "column": "hidden_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "redactedAt": {
+                  "column": "redacted_at"
+                },
+                "redactedById": {
+                  "column": "redacted_by_id"
+                },
+                "replyToId": {
+                  "column": "reply_to_id"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "seq": {
+                  "column": "seq"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message"
+            }
+          },
+          "MessageMention": {
+            "fields": {
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "messageId": {
+                  "column": "message_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message_mention"
+            }
+          },
+          "MessagePin": {
+            "fields": {
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "pinnedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "pinnedById": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "messageId": {
+                  "column": "message_id"
+                },
+                "pinnedAt": {
+                  "column": "pinned_at"
+                },
+                "pinnedById": {
+                  "column": "pinned_by_id"
+                },
+                "roomId": {
+                  "column": "room_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message_pin"
+            }
+          },
           "PasswordReset": {
             "fields": {
               "consumedAt": {
@@ -819,6 +1220,108 @@
               },
               "namespaceId": "public",
               "table": "password_reset"
+            }
+          },
+          "Reaction": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "emoji": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "emoji": {
+                  "column": "emoji"
+                },
+                "messageId": {
+                  "column": "message_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "reaction"
+            }
+          },
+          "ReadMarker": {
+            "fields": {
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "seq": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "roomId": {
+                  "column": "room_id"
+                },
+                "seq": {
+                  "column": "seq"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "read_marker"
             }
           },
           "RefreshToken": {
@@ -1264,6 +1767,67 @@
               "table": "room"
             }
           },
+          "RoomBan": {
+            "fields": {
+              "bannedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "bannedById": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "reason": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "bannedAt": {
+                  "column": "banned_at"
+                },
+                "bannedById": {
+                  "column": "banned_by_id"
+                },
+                "reason": {
+                  "column": "reason"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "room_ban"
+            }
+          },
           "RoomClosure": {
             "fields": {
               "ancestorId": {
@@ -1390,6 +1954,194 @@
               },
               "namespaceId": "public",
               "table": "room_event"
+            }
+          },
+          "RoomInvitation": {
+            "fields": {
+              "acceptedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "declinedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "expiresAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "invitedById": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "role": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "RoomRole",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "acceptedAt": {
+                  "column": "accepted_at"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "declinedAt": {
+                  "column": "declined_at"
+                },
+                "expiresAt": {
+                  "column": "expires_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "invitedById": {
+                  "column": "invited_by_id"
+                },
+                "role": {
+                  "column": "role"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "room_invitation"
+            }
+          },
+          "RoomJoinRequest": {
+            "fields": {
+              "approved": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "resolvedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "resolvedById": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "approved": {
+                  "column": "approved"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "resolvedAt": {
+                  "column": "resolved_at"
+                },
+                "resolvedById": {
+                  "column": "resolved_by_id"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "room_join_request"
             }
           },
           "RoomMemberPermission": {
@@ -2185,6 +2937,72 @@
       "public": {
         "entries": {
           "table": {
+            "account_feed_event": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "feed_seq": {
+                  "codecId": "pg/int8@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "kind": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "payload": {
+                  "codecId": "pg/jsonb@1",
+                  "nativeType": "jsonb",
+                  "nullable": false
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "room_seq": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": true
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "user_id",
+                    "created_at"
+                  ],
+                  "name": "account_feed_event_user_id_created_at_idx_b562028f",
+                  "prefix": "account_feed_event_user_id_created_at_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "user_id",
+                  "feed_seq"
+                ]
+              },
+              "uniques": []
+            },
             "audit_log": {
               "columns": {
                 "action": {
@@ -2539,6 +3357,240 @@
                 }
               ]
             },
+            "membership": {
+              "checks": [
+                {
+                  "expression": "\"role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader')",
+                  "name": "membership_role_check_9fefc26a",
+                  "prefix": "membership_role_check"
+                }
+              ],
+              "columns": {
+                "hidden_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "invited_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "joined_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "role": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "RoomRole",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "user_id"
+                  ],
+                  "name": "membership_user_id_idx_6c952402",
+                  "prefix": "membership_user_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "room_id",
+                  "user_id"
+                ]
+              },
+              "uniques": []
+            },
+            "message": {
+              "columns": {
+                "author_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "body": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "edited_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "hidden_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "redacted_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "redacted_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "reply_to_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "seq": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "reply_to_id"
+                  ],
+                  "name": "message_reply_to_id_idx_384c8aaa",
+                  "prefix": "message_reply_to_id_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "room_id",
+                    "created_at"
+                  ],
+                  "name": "message_room_id_created_at_idx_3f0ddf95",
+                  "prefix": "message_room_id_created_at_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "room_id",
+                    "seq"
+                  ]
+                }
+              ]
+            },
+            "message_mention": {
+              "columns": {
+                "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "user_id"
+                  ],
+                  "name": "message_mention_user_id_idx_6c952402",
+                  "prefix": "message_mention_user_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "message_id",
+                  "user_id"
+                ]
+              },
+              "uniques": []
+            },
+            "message_pin": {
+              "columns": {
+                "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "pinned_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "pinned_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "room_id",
+                  "message_id"
+                ]
+              },
+              "uniques": []
+            },
             "password_reset": {
               "columns": {
                 "consumed_at": {
@@ -2604,6 +3656,86 @@
                   ]
                 }
               ]
+            },
+            "reaction": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "emoji": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "message_id"
+                  ],
+                  "name": "reaction_message_id_idx_8a7ff1ba",
+                  "prefix": "reaction_message_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "message_id",
+                  "user_id",
+                  "emoji"
+                ]
+              },
+              "uniques": []
+            },
+            "read_marker": {
+              "columns": {
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "seq": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "room_id",
+                  "user_id"
+                ]
+              },
+              "uniques": []
             },
             "refresh_token": {
               "columns": {
@@ -2954,6 +4086,13 @@
               ],
               "indexes": [
                 {
+                  "expression": "to_tsvector('simple', coalesce(name, '') || ' ' || coalesce(topic, ''))",
+                  "name": "room_directory_fts_4bb947ef",
+                  "prefix": "room_directory_fts",
+                  "type": "gin",
+                  "unique": false
+                },
+                {
                   "columns": [
                     "parent_id"
                   ],
@@ -2983,6 +4122,48 @@
                   ]
                 }
               ]
+            },
+            "room_ban": {
+              "columns": {
+                "banned_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "banned_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "reason": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "room_id",
+                  "user_id"
+                ]
+              },
+              "uniques": []
             },
             "room_closure": {
               "columns": {
@@ -3095,6 +4276,149 @@
                 ]
               },
               "uniques": []
+            },
+            "room_invitation": {
+              "checks": [
+                {
+                  "expression": "\"role\" IN ('space_admin', 'room_admin', 'moderator', 'member', 'reader')",
+                  "name": "room_invitation_role_check_9fefc26a",
+                  "prefix": "room_invitation_role_check"
+                }
+              ],
+              "columns": {
+                "accepted_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "declined_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "expires_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "invited_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "role": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "member"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "RoomRole",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "room_id",
+                    "user_id"
+                  ]
+                }
+              ]
+            },
+            "room_join_request": {
+              "columns": {
+                "approved": {
+                  "codecId": "pg/bool@1",
+                  "nativeType": "bool",
+                  "nullable": true
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "resolved_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "resolved_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "room_id",
+                    "user_id"
+                  ]
+                }
+              ]
             },
             "room_member_permission": {
               "checks": [
@@ -3816,10 +5140,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "19215e056f2aba61741c3158ed53b6f13c276f4cb311b2d6dc8a0ef5567549c6"
+    "storageHash": "5c906b8f045aa6a6276b19679d29a61e79af27f7b16bbef50fc8daa7a1c15f94"
   },
   "execution": {
-    "executionHash": "5f9af94627b83332efc1fee464dfbf3b23d9226e39a99e2c726775c68da56d86",
+    "executionHash": "97287832eef1065781f34394e3048bb70ea6956ebc227fa85c0eb92bba8af219",
     "mutations": {
       "defaults": [
         {
@@ -3885,7 +5209,33 @@
           "ref": {
             "column": "id",
             "namespace": "public",
+            "table": "message"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
             "table": "password_reset"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updated_at",
+            "namespace": "public",
+            "table": "read_marker"
           }
         },
         {
@@ -3923,6 +5273,28 @@
             "column": "updated_at",
             "namespace": "public",
             "table": "room"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "room_invitation"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "room_join_request"
           }
         },
         {

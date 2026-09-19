@@ -18,17 +18,12 @@ interface OverrideRow {
 }
 
 /**
- * Capability resolver (technical.md §6, permission-model.md, issue #3).
+ * Capability resolver (technical.md §6, permission-model.md, issues #3-#4).
  *
- * `Membership` does not exist yet (issue #4): the "explicit membership role on
- * the room, else the role inherited from the nearest ancestor space
- * membership" step of the algorithm has nothing to read yet. Until #4 lands,
- * the effective role for a non-owner is the room's `defaultRole` on a
- * `public` room (the only case where the room is "joinable by the user"
- * without an invitation system either), and no access otherwise — a
- * provisional narrowing, not a design change; `PermissionsService.can`
- * degrades to real membership-based resolution as soon as #4 ships without
- * changing its signature.
+ * Effective role, in order: explicit `Membership` on the room; else the role
+ * from the nearest ancestor space `Membership` (via `RoomClosure`, smallest
+ * depth wins); else the room's `defaultRole` if the user may join (a
+ * `public` room, or a pending `RoomInvitation`); else no access.
  */
 @Injectable()
 export class PermissionsService {
@@ -160,6 +155,71 @@ export class PermissionsService {
     }
   }
 
+  /** Effective role for `principal` on `roomId`, per the resolution order above; `null` = no access. */
+  async effectiveRole(principal: PermissionPrincipal, roomId: string): Promise<RoomRole | null> {
+    const room = (await this.prisma.orm.public.Room.where({ id: roomId }).first()) as {
+      id: string;
+      visibility: string;
+      defaultRole: RoomRole;
+    } | null;
+    if (!room) {
+      throw new RoomNotFoundError();
+    }
+
+    return this.resolveRole(principal, room, roomId);
+  }
+
+  private async resolveRole(
+    principal: PermissionPrincipal,
+    room: { visibility: string; defaultRole: RoomRole },
+    roomId: string,
+  ): Promise<RoomRole | null> {
+    const ownMembership = (await this.prisma.orm.public.Membership.where({
+      roomId,
+      userId: principal.userId,
+    }).first()) as { role: RoomRole } | null;
+    if (ownMembership) {
+      return ownMembership.role;
+    }
+
+    // Ancestor spaces, nearest first (smallest depth, excluding the self row).
+    const ancestorRows = (await this.prisma.orm.public.RoomClosure.where((f) =>
+      and(f.descendantId.eq(roomId), f.depth.gt(0)),
+    )
+      .orderBy((f) => f.depth.asc())
+      .all()) as Array<{ ancestorId: string; depth: number }>;
+    if (ancestorRows.length > 0) {
+      const ancestorMemberships = (await this.prisma.orm.public.Membership.where((f) =>
+        and(f.roomId.in(ancestorRows.map((r) => r.ancestorId)), f.userId.eq(principal.userId)),
+      ).all()) as Array<{ roomId: string; role: RoomRole }>;
+      const byRoomId = new Map(ancestorMemberships.map((m) => [m.roomId, m.role]));
+      for (const ancestor of ancestorRows) {
+        const role = byRoomId.get(ancestor.ancestorId);
+        if (role) {
+          return role;
+        }
+      }
+    }
+
+    if (room.visibility === 'public') {
+      return room.defaultRole;
+    }
+
+    const pendingInvitation = (await this.prisma.orm.public.RoomInvitation.where((f) =>
+      and(
+        f.roomId.eq(roomId),
+        f.userId.eq(principal.userId),
+        f.acceptedAt.isNull(),
+        f.declinedAt.isNull(),
+      ),
+    ).first()) as unknown;
+    if (pendingInvitation) {
+      return room.defaultRole;
+    }
+
+    return null;
+  }
+
   private async resolve(
     principal: PermissionPrincipal,
     roomId: string,
@@ -174,7 +234,7 @@ export class PermissionsService {
       throw new RoomNotFoundError();
     }
 
-    const role: RoomRole | null = room.visibility === 'public' ? room.defaultRole : null;
+    const role = await this.resolveRole(principal, room, roomId);
     if (!role) {
       return false;
     }
