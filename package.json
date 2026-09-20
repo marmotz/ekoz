@@ -23,7 +23,7 @@
     "generate": "bunx tako generate",
     "check": "bunx tako check",
     "lint": "biome check .",
-    "lint:boundaries": "bun run --filter '@ekozhq/server' lint:boundaries && bun run --filter '@ekozhq/admin' lint:boundaries",
+    "lint:boundaries": "bun run --filter '@ekozhq/server' lint:boundaries && bun run --filter '@ekozhq/admin' lint:boundaries && bun run --filter '@ekozhq/client-web' lint:boundaries",
     "format": "biome format --write .",
     "prepare": "lefthook install",
     "release": "bash scripts/release-publish.sh",

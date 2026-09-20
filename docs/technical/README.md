@@ -26,6 +26,7 @@ has its own page with full context, alternatives and consequences:
 - [Server secret box and signing keys](server-secret-box-and-signing-keys.md).
 - [File storage and quotas](file-storage-and-quotas.md).
 - [Observability and instrumentation](observability.md).
+- [Server error reporting](error-reporting.md).
 - [Stack POC — NestJS 12 + Prisma + Bun](poc-nestjs12-prisma-bun.md).
 
 Primary technical goal: favour a readable architecture, deployable with few

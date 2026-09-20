@@ -6,8 +6,19 @@ export default defineConfig({
   test: {
     name: 'client-web',
     environment: 'jsdom',
+    environmentOptions: {
+      jsdom: { url: 'http://localhost:3000' },
+    },
     globals: true,
-    setupFiles: ['src/test-setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    setupFiles: ['test/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.{ts,tsx}'],
+    env: {
+      VITE_EKOZ_SERVER: 'http://localhost:3010',
+    },
+  },
+  resolve: {
+    alias: {
+      '@': new URL('./src', import.meta.url).pathname,
+    },
   },
 });

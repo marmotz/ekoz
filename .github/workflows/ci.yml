@@ -26,6 +26,7 @@ jobs:
       - run: bun run build
       - run: bun run typecheck
       - run: bun run --filter '@ekozhq/admin' build
+      - run: bun run --filter '@ekozhq/client-web' build
       - run: bun run openapi:check
       - run: bun run check
       - run: bun run test

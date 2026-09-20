@@ -8,6 +8,9 @@ that does not touch this file.
 
 ### Fixed
 
+- Boot failures and crashes print one readable report (cause, fix, hint) instead of a raw dump repeated per module.
+- 5xx log lines include the cause chain.
+
 - CORS now allows the `X-Ekoz-Protocol` header, which every SDK request sends. (#16)
 - Bootstrap reads configuration after `app.init()`, so `config.toml` / env apply
   to the logger, bind address and tracing. (#4)

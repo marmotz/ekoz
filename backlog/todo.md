@@ -25,16 +25,16 @@ _[technical design](technical.md)_ — 14/14 tasks done
 
 ## web-client-foundations ·  [overview](features/web-client-foundations/overview.md)
 
-_technical design — see [technical.md](./technical.md)_ — 0/10 tasks done
+_technical design — see [technical.md](./technical.md)_ — 6/10 tasks done
 
 | Done | Issue                                            | Title                                                | Blocked by              |
 |------|--------------------------------------------------|------------------------------------------------------|-------------------------|
-| [ ]  | [#28](https://github.com/marmotz/ekoz/issues/28) | Scaffold TanStack Start                              | —                       |
-| [ ]  | [#29](https://github.com/marmotz/ekoz/issues/29) | ESLint flat config + eslint-plugin-boundaries        | #28                     |
-| [ ]  | [#30](https://github.com/marmotz/ekoz/issues/30) | Shadcn/ui + composants de base                       | #28                     |
-| [ ]  | [#31](https://github.com/marmotz/ekoz/issues/31) | Intégration TanStack Query (SSR)                     | #28                     |
-| [ ]  | [#32](https://github.com/marmotz/ekoz/issues/32) | Thème light/dark/system                              | #28, #30                |
-| [ ]  | [#33](https://github.com/marmotz/ekoz/issues/33) | I18n react-i18next (SSR-safe)                        | #28, #30                |
+| [x]  | [#28](https://github.com/marmotz/ekoz/issues/28) | Scaffold TanStack Start                              | —                       |
+| [x]  | [#29](https://github.com/marmotz/ekoz/issues/29) | ESLint flat config + eslint-plugin-boundaries        | #28                     |
+| [x]  | [#30](https://github.com/marmotz/ekoz/issues/30) | Shadcn/ui + composants de base                       | #28                     |
+| [x]  | [#31](https://github.com/marmotz/ekoz/issues/31) | Intégration TanStack Query (SSR)                     | #28                     |
+| [x]  | [#32](https://github.com/marmotz/ekoz/issues/32) | Thème light/dark/system                              | #28, #30                |
+| [x]  | [#33](https://github.com/marmotz/ekoz/issues/33) | I18n react-i18next (SSR-safe)                        | #28, #30                |
 | [ ]  | [#34](https://github.com/marmotz/ekoz/issues/34) | Câblage SDK et session                               | #28, #31                |
 | [ ]  | [#35](https://github.com/marmotz/ekoz/issues/35) | Shell applicatif + root route + routes placeholder   | #30, #31, #32, #33, #34 |
 | [ ]  | [#36](https://github.com/marmotz/ekoz/issues/36) | CI — workflow GitHub Actions                         | #28, #29                |
