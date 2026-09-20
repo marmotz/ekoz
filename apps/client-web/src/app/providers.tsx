@@ -5,8 +5,10 @@ import type { i18n } from 'i18next';
 import { type ReactNode, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
+import { SessionGuard } from '@/app/session-guard';
 import { ThemeProvider } from '@/app/theme';
 import { readStoredLanguage, setHtmlLanguage } from '@/shared/i18n/config';
+import { SdkProvider } from '@/shared/sdk/provider';
 
 /**
  * The server renders with the `Accept-Language` language; once hydrated, a
@@ -37,8 +39,11 @@ export function AppProviders({
     <I18nextProvider i18n={i18nInstance}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <StoredLanguageSync i18nInstance={i18nInstance} />
-          {children}
+          <SdkProvider>
+            <StoredLanguageSync i18nInstance={i18nInstance} />
+            <SessionGuard />
+            {children}
+          </SdkProvider>
         </ThemeProvider>
         {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>

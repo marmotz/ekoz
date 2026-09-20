@@ -1,11 +1,13 @@
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { useState } from 'react';
 
+import { AppFrame } from '@/app/app-frame';
 import { createI18n } from '@/app/i18n';
 import { AppProviders } from '@/app/providers';
 import type { RouterContext } from '@/app/router-context';
 import { themeScript } from '@/app/theme-script';
 import { detectLanguage } from '@/server/language';
+import { Toaster } from '@/shared/ui/sonner';
 import appCss from '@/styles/globals.css?url';
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -15,7 +17,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: 'Ekoz web client' },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [
+      { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+      { rel: 'stylesheet', href: appCss },
+    ],
     scripts: [{ children: themeScript }],
   }),
   loader: async () => ({ locale: await detectLanguage() }),
@@ -32,9 +37,12 @@ function RootComponent() {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <AppProviders queryClient={queryClient} i18nInstance={i18nInstance}>
-          <Outlet />
+          <AppFrame>
+            <Outlet />
+          </AppFrame>
+          <Toaster />
         </AppProviders>
         <Scripts />
       </body>

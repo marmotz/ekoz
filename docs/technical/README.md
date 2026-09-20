@@ -5,6 +5,7 @@ has its own page with full context, alternatives and consequences:
 
 - [Server stack](server-stack.md) — Bun, NestJS 12, Prisma 8, PostgreSQL.
 - [Web client stack](web-client-stack.md) — React, Vite, Tailwind 4, shadcn/ui.
+- [Web client bootstrap](web-client-bootstrap.md) — TanStack Start, shell, theme, i18n, session wiring, CI.
 - [Admin console Node entry point](admin-console-node-entry.md) — the `server.entry.mjs` adapter.
 - [SDK packaging and protocol-version policy](sdk-packaging-and-protocol-policy.md).
 - [HTTP API conventions](api-conventions.md) — problem+json, correlation, validation.

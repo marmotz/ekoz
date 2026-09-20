@@ -36,6 +36,8 @@ exercise every server feature as it ships.
   not static files. At the installed version the build emits a Web-standard
   `fetch` handler, wrapped by a small `server.entry.mjs` (see
   [admin console Node entry point](admin-console-node-entry.md)).
+- How the shell, theme, i18n and session are wired, and the CI checks, is recorded in
+  [web client bootstrap](web-client-bootstrap.md).
 - Tailwind 4's CSS-first config replaces `tailwind.config.js` for most settings.
 - The SDK is the only integration surface; a gap in the SDK is fixed in `sdk-js`,
   not worked around in the client.
