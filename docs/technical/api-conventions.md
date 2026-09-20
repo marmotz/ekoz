@@ -5,7 +5,7 @@
 The REST surface is consumed by `sdk-js` and, later, by third-party clients and
 peer servers. A few conventions must be fixed once, centrally, because they
 affect every endpoint and the SDK's shape. They emerged while writing the
-[server-core technical design](../../backlog/features/server-core/technical.md).
+[server-core technical design](../../backlog/_archives/features/server-core/technical.md).
 
 A dedicated `server-core` backlog feature was also created to hold the
 non-functional foundations (skeleton, config, initialization, shared storage /

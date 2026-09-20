@@ -9,8 +9,8 @@ Bootstrap seul du client de démonstration. Livrable : une application
 **TanStack Start** (React + Vite + runtime serveur Nitro) qui build, lint,
 teste, se lance, affiche un shell applicatif (sidebar + topbar + bascule de
 thème) et câble l'accès serveur via `sdk-js`. **Aucune** feature métier ici :
-`auth` ([overview](../auth/overview.md)) et `profile`
-([overview](../profile/overview.md)) sont des features séparées qui se branchent
+`auth` ([overview](../../../features/auth/overview.md)) et `identity-and-profiles`
+([overview](../../../features/identity-and-profiles/overview.md)) sont des features séparées qui se branchent
 sur ce socle.
 
 Hors périmètre : toute route/écran métier, la persistance de session réelle
@@ -22,18 +22,18 @@ Le dépôt est vide : `git ls-files` → `AGENTS.md`, `CHANGELOG.md`, `LICENSE`,
 
 ### Références externes
 
-- [web client stack](../../../docs/technical/web-client-stack.md)
+- [web client stack](../../../../docs/technical/web-client-stack.md)
   — stack client web (React, Vite, TS, Tailwind 4, shadcn/ui, Bun, Vitest,
   TanStack Query, structure feature-first, i18n FR/EN). Ne mentionne pas
   TanStack Start : la section bootstrap (§14) l'ajoute.
 - design records
   — toute décision → une page `docs/technical/`.
-- [changelog discipline](../../../CONTRIBUTING.md)
+- [changelog discipline](../../../../CONTRIBUTING.md)
   — discipline `CHANGELOG.md`.
-- [federation protocol](../../../docs/technical/federation-protocol.md)
+- [federation protocol](../../../../docs/technical/federation-protocol.md)
   — découplage identité / hosting : le client vise un **domaine serveur**, l'URL
   d'API vient de la discovery.
-- [authentication and sessions](../../../docs/technical/auth-and-sessions.md)
+- [authentication and sessions](../../../../docs/technical/auth-and-sessions.md)
   — access JWT court + refresh rotatif : le cycle de vie tokens est **interne au
   SDK**, le client n'y touche pas.
 - [SDK foundations — technical.md](https://github.com/marmotz/ekoz/blob/develop/packages/sdk/backlog/features/sdk-foundations/technical.md)
@@ -109,7 +109,7 @@ client-web/
   .github/workflows/ci.yml
 ```
 
-Règle feature-first ([web client stack](../../../docs/technical/web-client-stack.md)) :
+Règle feature-first ([web client stack](../../../../docs/technical/web-client-stack.md)) :
 `src/features/<domain>/{api,components,hooks,routes}`, imports croisés entre
 features interdits. `src/shared/**` importable par tous ; `src/app/**` et
 `src/server/**` importés seulement par `router.tsx` / les routes.
@@ -288,7 +288,7 @@ vers la déconnexion (§7).
 Workflow GitHub Actions (`.github/workflows/ci.yml`) : `bun install`,
 `bun run lint`, `bun run typecheck`, `bun run test`, `bun run build`, et un
 check « entrée CHANGELOG présente si `src/` modifié » (
-[changelog discipline](../../../CONTRIBUTING.md)).
+[changelog discipline](../../../../CONTRIBUTING.md)).
 Le SDK n'étant pas publié, la CI le récupère depuis un checkout voisin du dépôt
 `sdk-js` (`actions/checkout` + `bun link`) ou un tarball ; à trancher à
 l'implémentation de la tâche CI. Pas de job de déploiement dans cet incrément.

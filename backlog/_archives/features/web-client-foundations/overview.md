@@ -1,12 +1,12 @@
 # Web client foundations
 
-**Status**: technical design — see [technical.md](./technical.md)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 
 The `client-web` repository is empty. It is the Ekoz **demonstration** web
 client (see the repo `AGENTS.md` and
-[web client stack](../../../docs/technical/web-client-stack.md)):
+[web client stack](../../../../docs/technical/web-client-stack.md)):
 not a finished product, but good-looking and complete enough to exercise every
 server feature as it ships. The reference server has shipped its identity layer,
 so a real UI needs to exist before any identity flow can be exercised.
@@ -28,13 +28,13 @@ running reference server, with no domain feature implemented yet.
 ## Decisions made
 
 - Stack per
-  [web client stack](../../../docs/technical/web-client-stack.md):
+  [web client stack](../../../../docs/technical/web-client-stack.md):
   React, Vite, TypeScript, Tailwind CSS 4, shadcn/ui (components copied in),
   Bun, Vitest + Testing Library, TanStack Query for server state, feature-first
   structure (`src/features/<domain>/{api,components,hooks,routes}`) with
   cross-feature imports forbidden (`eslint-plugin-boundaries`).
 - All network access goes through
-  [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md), never a direct `fetch`. A gap
+  [`@ekozhq/sdk`](../sdk-foundations/overview.md), never a direct `fetch`. A gap
   in the SDK is fixed in `sdk-js`, not worked around here.
 - During bring-up the SDK is consumed via `npm link` / `bun link` from a sibling
   checkout; no dependency on a published version yet.
@@ -66,9 +66,9 @@ running reference server, with no domain feature implemented yet.
 ## Feature order
 
 1. **web-client-foundations** (this feature) — the bootstrap.
-2. [`auth`](../auth/overview.md) — depends on this feature and on the SDK
+2. [`auth`](../../../features/auth/overview.md) — depends on this feature and on the SDK
    identity bindings.
-3. [`profile`](../profile/overview.md) — depends on `auth`.
+3. [`identity-and-profiles`](../../../features/identity-and-profiles/overview.md) (client part, formerly `profile`) — depends on `auth`.
 
 Every later client feature (conversations UI, notifications, sharing) builds on
 this bootstrap and follows the matching server feature.

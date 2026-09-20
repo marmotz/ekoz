@@ -12,7 +12,7 @@ Routine administration is done through a web interface. That interface is a core
 application shipped with the reference server (the **admin console**), and this
 feature covers both what an operator can do and the application that lets them do
 it. It is distinct from the demonstration
-[web client](../../../features/web-client-foundations/overview.md), which exercises
+[web client](../web-client-foundations/overview.md), which exercises
 end-user features.
 
 The server has already shipped its identity and account-administration endpoints
@@ -106,7 +106,7 @@ its users and its spaces, through a web application deployed with the server.
 
 ## Feature order
 
-- [Conversations](../../../features/conversations/overview.md) introduce the server owner role,
+- [Conversations](../conversations/overview.md) introduce the server owner role,
   which holds global administration.
 - [Content and sharing](../../../features/content-and-sharing/overview.md) expose the storage
   and link preview settings to the server owner.

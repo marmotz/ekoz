@@ -1,6 +1,6 @@
 # Conversations
 
-**Status**: [technical design](technical.md)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 
@@ -19,7 +19,7 @@ Messages must be retained according to configurable retention rules.
   nesting has no hard limit; a soft limit is configurable (4 by default).
 - Technically, spaces and rooms are a single `room` concept with a `type`
   discriminator (`space`, `channel`, `dm`, `group_dm`). See
-  [conversation data model](../../../docs/technical/conversation-data-model.md).
+  [conversation data model](../../../../docs/technical/conversation-data-model.md).
 - Rooms can be public, private or invite-only.
 - Public rooms are listed and searchable in a server directory.
 - Any authenticated user can freely join and leave a public room.
@@ -45,7 +45,7 @@ Messages must be retained according to configurable retention rules.
   overridden at the space or room level, subject to the required permissions.
   Each rule chooses between permanent deletion and hiding on expiry. On deletion,
   the actual content is erased and only a contentless audit marker remains. See
-  [retention and tombstones](../../../docs/technical/retention-and-tombstones.md).
+  [retention and tombstones](../../../../docs/technical/retention-and-tombstones.md).
 - Basic interactions include replies to a message, reactions and mentions;
   dedicated threads are not part of the first increment.
 - Read receipts are available from the first increment and visible to the room
@@ -55,15 +55,15 @@ Messages must be retained according to configurable retention rules.
 
 ## Depends on
 
-- [Identity and profiles](../identity-and-profiles/overview.md), to identify the
+- [Identity and profiles](../../../features/identity-and-profiles/overview.md), to identify the
   members of spaces and rooms.
-- [Server administration](../../_archives/features/server-administration/overview.md), for the global
+- [Server administration](../server-administration/overview.md), for the global
   administration performed by the server owner.
 
 ## Feature order
 
-- [Content and sharing](../content-and-sharing/overview.md) extends room
+- [Content and sharing](../../../features/content-and-sharing/overview.md) extends room
   messages.
-- [Notifications](../notifications/overview.md) consume message and room events.
-- [Federation](../federation/overview.md) extends rooms, private messages and
+- [Notifications](../../../features/notifications/overview.md) consume message and room events.
+- [Federation](../../../features/federation/overview.md) extends rooms, private messages and
   read receipts to other servers.

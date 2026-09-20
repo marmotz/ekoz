@@ -6,7 +6,7 @@ application (`apps/admin/`) covering server initialization and account
 administration.
 
 Builds on [identity and profiles](../../../features/identity-and-profiles/technical.md) and
-[server core](../../../features/server-core/technical.md). Product scope is settled in
+[server core](../server-core/technical.md). Product scope is settled in
 [overview.md](./overview.md).
 
 Related:

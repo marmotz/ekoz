@@ -72,7 +72,7 @@ Constraints: single process in the first increment (see
 
 ### Health
 
-- Unchanged from [server core](../../backlog/features/server-core/technical.md):
+- Unchanged from [server core](../../backlog/_archives/features/server-core/technical.md):
   `GET /healthz` (liveness, no dependencies) and `GET /readyz` (DB, migrations, signing key, storage driver; `503` +
   per-check breakdown on failure).
 - `/metrics`, `/healthz`, `/readyz` are excluded from the per-request access log to avoid drowning it in scrape noise.

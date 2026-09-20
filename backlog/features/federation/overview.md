@@ -38,7 +38,7 @@ exchanges without weighing down the operation of a standalone instance.
 
 - [Identity and profiles](../identity-and-profiles/overview.md), for the users'
   home identity.
-- [Conversations](../conversations/overview.md), for shared rooms, private
+- [Conversations](../../_archives/features/conversations/overview.md), for shared rooms, private
   messages and read receipts.
 - [Content and sharing](../content-and-sharing/overview.md), for files exchanged
   with remote members.

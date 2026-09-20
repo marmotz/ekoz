@@ -37,7 +37,7 @@ channels later.
 
 - [Identity and profiles](../identity-and-profiles/overview.md), for the verified
   email address and user preferences.
-- [Conversations](../conversations/overview.md), for events from rooms and
+- [Conversations](../../_archives/features/conversations/overview.md), for events from rooms and
   messages.
 - [Server administration](../../_archives/features/server-administration/overview.md), for enabling
   channels and the global rules.

@@ -1,41 +1,80 @@
-<!-- backlog-sync 2026-09-14T18:49Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
+<!-- backlog-sync 2026-09-20T15:09Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
 
 # Backlog
 
-## conversations ·  [overview](features/conversations/overview.md)
+## Auth ·  [overview](features/auth/overview.md)
 
-_[technical design](technical.md)_ — 14/14 tasks done
+_[technical design](features/auth/technical.md)_ — 0/11 tasks done
 
-| Done | Issue                                            | Title                                                      | Blocked by |
-|------|--------------------------------------------------|------------------------------------------------------------|------------|
-| [x]  | [#1](https://github.com/marmotz/ekoz/issues/1)   | Conversations: room model and hierarchy                    | —          |
-| [x]  | [#2](https://github.com/marmotz/ekoz/issues/2)   | Conversations: per-room event log and seq allocation       | #1         |
-| [x]  | [#3](https://github.com/marmotz/ekoz/issues/3)   | Conversations: capability ACL and resolver                 | #1, #2     |
-| [x]  | [#4](https://github.com/marmotz/ekoz/issues/4)   | Conversations: membership lifecycle                        | #1, #2, #3 |
-| [x]  | [#5](https://github.com/marmotz/ekoz/issues/5)   | Conversations: direct and group conversations              | #1, #4     |
-| [x]  | [#6](https://github.com/marmotz/ekoz/issues/6)   | Conversations: public room directory                       | #1, #3     |
-| [x]  | [#7](https://github.com/marmotz/ekoz/issues/7)   | Conversations: messages, Markdown, mentions, replies, pins | #2, #3     |
-| [x]  | [#8](https://github.com/marmotz/ekoz/issues/8)   | Conversations: message edit, delete, tombstones            | #7         |
-| [x]  | [#9](https://github.com/marmotz/ekoz/issues/9)   | Conversations: reactions and read markers                  | #4, #7     |
-| [x]  | [#11](https://github.com/marmotz/ekoz/issues/11) | Conversations: sync endpoint, account feed, SSE stream     | #2, #4     |
-| [x]  | [#10](https://github.com/marmotz/ekoz/issues/10) | Conversations: presence and typing                         | #4, #11    |
-| [x]  | [#12](https://github.com/marmotz/ekoz/issues/12) | Conversations: retention policies and worker               | #2, #3, #8 |
-| [x]  | [#13](https://github.com/marmotz/ekoz/issues/13) | Conversations: local moderation surface                    | #4, #8     |
-| [x]  | [#38](https://github.com/marmotz/ekoz/issues/38) | Protocol: conversations sections                           | #2, #3     |
+| Done | Issue                                              | Title                                                                       | Blocked by              |
+|------|----------------------------------------------------|-----------------------------------------------------------------------------|-------------------------|
+| [ ]  | [#90](https://github.com/marmotz/ekoz/issues/90)   | Auth server: public GET /auth/policy                                        | —                       |
+| [ ]  | [#91](https://github.com/marmotz/ekoz/issues/91)   | Auth SDK: auth.policy() binding                                             | #90                     |
+| [ ]  | [#92](https://github.com/marmotz/ekoz/issues/92)   | Auth client: route layouts (app shell vs auth pages), GuestOnly and UI base | —                       |
+| [ ]  | [#93](https://github.com/marmotz/ekoz/issues/93)   | Auth client: signed-in user menu with sign out                              | #92, #65                |
+| [ ]  | [#94](https://github.com/marmotz/ekoz/issues/94)   | Auth client: generated forms wiring, password input and error mapping       | #92                     |
+| [ ]  | [#95](https://github.com/marmotz/ekoz/issues/95)   | Auth client: check-email screen, resend verification and policy hook        | #91, #94                |
+| [ ]  | [#96](https://github.com/marmotz/ekoz/issues/96)   | Auth client: sign-in page                                                   | #94                     |
+| [ ]  | [#97](https://github.com/marmotz/ekoz/issues/97)   | Auth client: registration page (open, invite and admin modes)               | #94, #95                |
+| [ ]  | [#98](https://github.com/marmotz/ekoz/issues/98)   | Auth client: email verification page                                        | #94, #95                |
+| [ ]  | [#99](https://github.com/marmotz/ekoz/issues/99)   | Auth client: forgot and reset password pages                                | #94, #95                |
+| [ ]  | [#100](https://github.com/marmotz/ekoz/issues/100) | Document the web client auth design in docs/technical/                      | #96, #97, #98, #99, #93 |
 
-## web-client-foundations ·  [overview](features/web-client-foundations/overview.md)
+## Identity and profiles ·  [overview](features/identity-and-profiles/overview.md)
 
-_technical design — see [technical.md](./technical.md)_ — 10/10 tasks done
+_[technical design](features/identity-and-profiles/technical.md) (§1 to §20 server layer as shipped, §21 to §28 client
+scope)_ — 0/9 tasks done
 
-| Done | Issue                                            | Title                                                | Blocked by              |
-|------|--------------------------------------------------|------------------------------------------------------|-------------------------|
-| [x]  | [#28](https://github.com/marmotz/ekoz/issues/28) | Scaffold TanStack Start                              | —                       |
-| [x]  | [#29](https://github.com/marmotz/ekoz/issues/29) | ESLint flat config + eslint-plugin-boundaries        | #28                     |
-| [x]  | [#30](https://github.com/marmotz/ekoz/issues/30) | Shadcn/ui + composants de base                       | #28                     |
-| [x]  | [#31](https://github.com/marmotz/ekoz/issues/31) | Intégration TanStack Query (SSR)                     | #28                     |
-| [x]  | [#32](https://github.com/marmotz/ekoz/issues/32) | Thème light/dark/system                              | #28, #30                |
-| [x]  | [#33](https://github.com/marmotz/ekoz/issues/33) | I18n react-i18next (SSR-safe)                        | #28, #30                |
-| [x]  | [#34](https://github.com/marmotz/ekoz/issues/34) | Câblage SDK et session                               | #28, #31                |
-| [x]  | [#35](https://github.com/marmotz/ekoz/issues/35) | Shell applicatif + root route + routes placeholder   | #30, #31, #32, #33, #34 |
-| [x]  | [#36](https://github.com/marmotz/ekoz/issues/36) | CI — workflow GitHub Actions                         | #28, #29                |
-| [x]  | [#37](https://github.com/marmotz/ekoz/issues/37) | Document the web client bootstrap in docs/technical/ | #35                     |
+| Done | Issue                                              | Title                                                                                  | Blocked by               |
+|------|----------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------|
+| [ ]  | [#101](https://github.com/marmotz/ekoz/issues/101) | Identity server: POST /me/password to change the password                              | —                        |
+| [ ]  | [#102](https://github.com/marmotz/ekoz/issues/102) | Identity server: username change state, single pending request and cancellation        | —                        |
+| [ ]  | [#103](https://github.com/marmotz/ekoz/issues/103) | Identity server: pendingEmail in MeView and versioned avatarUrl                        | —                        |
+| [ ]  | [#104](https://github.com/marmotz/ekoz/issues/104) | Identity SDK: password, username state and avatar blob bindings                        | #101, #102, #103         |
+| [ ]  | [#105](https://github.com/marmotz/ekoz/issues/105) | Profile client: shared pieces (menu entries, avatar, UI base, generated hooks, errors) | #104, #65, #92, #93, #94 |
+| [ ]  | [#106](https://github.com/marmotz/ekoz/issues/106) | Profile client: /account route, profile and avatar sections                            | #105                     |
+| [ ]  | [#107](https://github.com/marmotz/ekoz/issues/107) | Profile client: identifier, email and password sections                                | #106                     |
+| [ ]  | [#108](https://github.com/marmotz/ekoz/issues/108) | Profile client: sessions and danger zone                                               | #106                     |
+| [ ]  | [#109](https://github.com/marmotz/ekoz/issues/109) | Profile docs: docs/technical/web-client-account.md                                     | #107, #108               |
+
+## Web client chat ·  [overview](features/web-client-chat/overview.md)
+
+_technical design, see [technical.md](features/web-client-chat/./technical.md)_ — 0/13 tasks done
+
+| Done | Issue                                            | Title                                                                           | Blocked by         |
+|------|--------------------------------------------------|---------------------------------------------------------------------------------|--------------------|
+| [ ]  | [#66](https://github.com/marmotz/ekoz/issues/66) | Web chat server: paginated GET /rooms/:id/messages                              | —                  |
+| [ ]  | [#67](https://github.com/marmotz/ekoz/issues/67) | Web chat server: GET /rooms/:id/members with effective members                  | —                  |
+| [ ]  | [#68](https://github.com/marmotz/ekoz/issues/68) | Web chat server: live edit and delete events (message_deleted)                  | —                  |
+| [ ]  | [#69](https://github.com/marmotz/ekoz/issues/69) | Web chat server: GET /events starts at the feed head without a cursor           | —                  |
+| [ ]  | [#70](https://github.com/marmotz/ekoz/issues/70) | Web chat server: feed fan-out to effective members                              | —                  |
+| [ ]  | [#71](https://github.com/marmotz/ekoz/issues/71) | Web chat SDK: messages, sync and rooms.members bindings, RoomEvent union        | #66, #67, #68      |
+| [ ]  | [#72](https://github.com/marmotz/ekoz/issues/72) | Web chat SDK: RoomStream (SSE with fresh-ticket reconnection)                   | #69, #71           |
+| [ ]  | [#73](https://github.com/marmotz/ekoz/issues/73) | Web chat client: shared/realtime (stream provider, subscriptions, unseen store) | #72                |
+| [ ]  | [#74](https://github.com/marmotz/ekoz/issues/74) | Web chat client: timeline reducer, queries and Markdown allow-list              | #71                |
+| [ ]  | [#75](https://github.com/marmotz/ekoz/issues/75) | Web chat client: history view, authors and route composition                    | #71, #74           |
+| [ ]  | [#76](https://github.com/marmotz/ekoz/issues/76) | Web chat client: live sync, reconnection catch-up and connection banner         | #68, #70, #73, #75 |
+| [ ]  | [#77](https://github.com/marmotz/ekoz/issues/77) | Web chat client: composer with optimistic send and read-only states             | #75                |
+| [ ]  | [#78](https://github.com/marmotz/ekoz/issues/78) | Web chat docs: docs/technical/web-client-chat.md                                | #75, #77, #76      |
+
+## Web client rooms ·  [overview](features/web-client-rooms/overview.md)
+
+_technical design, see [technical.md](features/web-client-rooms/./technical.md)_ — 0/15 tasks done
+
+| Done | Issue                                            | Title                                                            | Blocked by              |
+|------|--------------------------------------------------|------------------------------------------------------------------|-------------------------|
+| [ ]  | [#62](https://github.com/marmotz/ekoz/issues/62) | Conversations: creator becomes a member on room creation         | —                       |
+| [ ]  | [#63](https://github.com/marmotz/ekoz/issues/63) | Conversations: UserSummary and GET /me/room-invitations          | #103                    |
+| [ ]  | [#64](https://github.com/marmotz/ekoz/issues/64) | Conversations: GET /rooms/:id/preview for invite-only rooms      | —                       |
+| [ ]  | [#65](https://github.com/marmotz/ekoz/issues/65) | Client web: sidebar section slot and useMe                       | —                       |
+| [ ]  | [#79](https://github.com/marmotz/ekoz/issues/79) | Conversations: GET /rooms lists the caller's spaces and channels | #62                     |
+| [ ]  | [#80](https://github.com/marmotz/ekoz/issues/80) | Conversations: GET /rooms/:id/join-requests                      | #63                     |
+| [ ]  | [#81](https://github.com/marmotz/ekoz/issues/81) | SDK: rooms, room invitations and directory bindings              | #79, #63, #64, #80      |
+| [ ]  | [#82](https://github.com/marmotz/ekoz/issues/82) | Client web rooms: data layer (queries, mutations, error mapping) | #81                     |
+| [ ]  | [#83](https://github.com/marmotz/ekoz/issues/83) | Client web rooms: sidebar tree and /rooms route shell            | #65, #82                |
+| [ ]  | [#84](https://github.com/marmotz/ekoz/issues/84) | Client web rooms: invitations page (accept / decline)            | #83, #82                |
+| [ ]  | [#85](https://github.com/marmotz/ekoz/issues/85) | Client web rooms: RoomGate, RoomHeader and /rooms/$roomId        | #83, #82, #64           |
+| [ ]  | [#86](https://github.com/marmotz/ekoz/issues/86) | Client web rooms: create a space or a channel                    | #83, #82                |
+| [ ]  | [#87](https://github.com/marmotz/ekoz/issues/87) | Client web rooms: public directory (search and join)             | #83, #82                |
+| [ ]  | [#88](https://github.com/marmotz/ekoz/issues/88) | Client web rooms: join request moderation screen                 | #85, #80                |
+| [ ]  | [#89](https://github.com/marmotz/ekoz/issues/89) | Document the web client rooms design in docs/technical/          | #84, #85, #86, #87, #88 |

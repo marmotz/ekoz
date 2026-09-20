@@ -3,15 +3,15 @@
 Technical design for spaces, rooms, roles/permissions, messages, presence,
 retention, the per-room event log and local moderation. Builds on
 [server core](../server-core/technical.md) and
-[identity and profiles](../identity-and-profiles/technical.md). The `server`
+[identity and profiles](../../../features/identity-and-profiles/technical.md). The `server`
 repository is greenfield, so this document defines the initial module.
 
-Related: [conversation data model](../../../docs/technical/conversation-data-model.md),
-[event-log-and-ordering](../../../docs/technical/event-log-and-ordering.md),
-[realtime-transport](../../../docs/technical/realtime-transport.md),
-[retention-and-tombstones](../../../docs/technical/retention-and-tombstones.md),
-[api-conventions](../../../docs/technical/api-conventions.md),
-[permission-model](../../../docs/technical/permission-model.md).
+Related: [conversation data model](../../../../docs/technical/conversation-data-model.md),
+[event-log-and-ordering](../../../../docs/technical/event-log-and-ordering.md),
+[realtime-transport](../../../../docs/technical/realtime-transport.md),
+[retention-and-tombstones](../../../../docs/technical/retention-and-tombstones.md),
+[api-conventions](../../../../docs/technical/api-conventions.md),
+[permission-model](../../../../docs/technical/permission-model.md).
 
 ## 1. Scope
 
@@ -19,7 +19,7 @@ First increment:
 
 - hierarchy of `space` / `channel` / `dm` / `group_dm` rooms (single `room`
   concept), closure table, configurable soft depth limit;
-- capability-based ACL ([permission model](../../../docs/technical/permission-model.md)):
+- capability-based ACL ([permission model](../../../../docs/technical/permission-model.md)):
   roles, default capability matrix, per-node and per-user overrides, one resolver;
 - membership: join/leave public rooms, invitations, invite-only join requests,
   kick, ban/unban;
@@ -336,7 +336,7 @@ entirely.
 ### Resolver
 
 `PermissionService.can(userId, roomId, capability)` per
-[permission model](../../../docs/technical/permission-model.md):
+[permission model](../../../../docs/technical/permission-model.md):
 
 1. server owner → allow.
 2. effective role: `membership.role` on the room, else the role from the nearest
@@ -414,7 +414,7 @@ and upserts; returns the existing room if any.
 - Retention "delete" rewrites the original `message_created` event into a
   tombstone (`type = message_redacted`, `content = { reason: "retention" }`,
   `senderId` kept) — no new `seq`, no gap
-  ([retention and tombstones](../../../docs/technical/retention-and-tombstones.md)).
+  ([retention and tombstones](../../../../docs/technical/retention-and-tombstones.md)).
 - `originServer` on the room and on events is populated with `server.domain` now;
   it becomes meaningful with federation.
 
@@ -485,7 +485,7 @@ and upserts; returns the existing room if any.
 ## 15. Presence and typing
 
 - **Transport**: heartbeats over REST (`POST /presence/heartbeat`), fan-out over
-  the SSE stream ([real-time transport](../../../docs/technical/realtime-transport.md)).
+  the SSE stream ([real-time transport](../../../../docs/technical/realtime-transport.md)).
 - **State**: in-process `Map<userId, { lastBeat, status }>` (Redis hash on
   multi-instance). Derived status: `online` if `lastBeat` within
   `presence.away_after`, `away` until `presence.offline_after`, else `offline`.
@@ -506,7 +506,7 @@ and upserts; returns the existing room if any.
   row for each member with `room.read`; account-scoped events (room invitations,
   presence, join-request outcomes) are inserted directly.
 - **SSE**: `GET /events?ticket=<t>` (ticket from
-  [identity-and-profiles §12](../identity-and-profiles/technical.md)). Validates
+  [identity-and-profiles §12](../../../features/identity-and-profiles/technical.md)). Validates
   the ticket, binds to the session, streams `AccountFeedEvent`s as they are
   produced. `Last-Event-ID` = the last `feedSeq`; on reconnect the server may
   replay recent feed rows, but the SDK's contract is to reconcile per stale room
@@ -524,7 +524,7 @@ delete any message (`room.delete_any`), kick (`room.kick`), ban/unban
 (`room.ban`). Every moderation action writes an `audit_log` entry
 (`action = "moderation.<verb>"`, `target` = room/message/user) in addition to the
 `room_event`. Server-wide moderation (global bans, cross-room deletion) is
-[server administration](../../_archives/features/server-administration/overview.md).
+[server administration](../server-administration/overview.md).
 
 ## 18. Endpoint summary (non-exhaustive)
 
@@ -551,7 +551,7 @@ delete any message (`room.delete_any`), kick (`room.kick`), ban/unban
 
 | Point | Retained | Rejected | Why |
 |---|---|---|---|
-| Permission model | granular capability ACL from increment 1 | fixed role matrix + a few room flags | user choice; [permission model](../../../docs/technical/permission-model.md) |
+| Permission model | granular capability ACL from increment 1 | fixed role matrix + a few room flags | user choice; [permission model](../../../../docs/technical/permission-model.md) |
 | Hierarchy storage | closure table | recursive CTE per check, materialized path | ancestor chain + subtree in one indexed query; permission resolution is hot |
 | `seq` allocation | `UPDATE room … RETURNING last_seq` in-txn | per-room Postgres sequence, advisory lock, app-side counter | gap-free, simple, per-room serialisation is acceptable |
 | Message body | restricted Markdown source, validated allowlist | plain text; full Markdown + sanitised HTML | user choice; server-validated allowlist keeps rendering safe and portable |
@@ -560,7 +560,7 @@ delete any message (`room.delete_any`), kick (`room.kick`), ban/unban
 | Presence/typing | ephemeral in-process (Redis upgrade) | rows in the DB | high churn, no durability value, would bloat the event log |
 | Real-time stream | per-account feed projection + SSE, `/sync` as truth | encode the full per-room `seq` vector in `Last-Event-ID`; stream straight from `room_event` | one cursor for the socket, bounded reconnect logic, DB fan-out isolated from the write path |
 | Retention "hide" | terminal | reversible by moderation | user choice |
-| Directory search | PostgreSQL FTS + trigram | external search engine | one data dependency ([server stack](../../../docs/technical/server-stack.md)) |
+| Directory search | PostgreSQL FTS + trigram | external search engine | one data dependency ([server stack](../../../../docs/technical/server-stack.md)) |
 
 ## 20. Consequences
 

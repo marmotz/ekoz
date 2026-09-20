@@ -7,7 +7,7 @@ shadcn/ui, feature-first, network access only through `@ekozhq/sdk`). This page
 records the decisions taken when `apps/client-web` was bootstrapped: what runs the
 app, how the shell, theme, language and session are wired, and how CI guards it.
 The design lived in
-[`backlog/features/web-client-foundations/technical.md`](../../backlog/features/web-client-foundations/technical.md);
+[`backlog/_archives/features/web-client-foundations/technical.md`](../../backlog/_archives/features/web-client-foundations/technical.md);
 this is what shipped.
 
 ## Decision
