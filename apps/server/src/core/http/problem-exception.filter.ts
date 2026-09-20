@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { summarizeError } from '../observability/error-report.js';
 import { NestLoggerService } from '../observability/nest-logger.service.js';
 import { DomainError, ValidationFailedError } from './domain-error.js';
 import { PROBLEM_JSON_CONTENT_TYPE, type ProblemDetails } from './problem-details.js';
@@ -31,7 +32,7 @@ export class ProblemExceptionFilter implements ExceptionFilter {
 
     if (problem.status >= 500) {
       this.logger.error(
-        exception instanceof Error ? exception.message : 'Unhandled exception',
+        exception instanceof Error ? summarizeError(exception) : 'Unhandled exception',
         exception instanceof Error ? exception.stack : undefined,
         ProblemExceptionFilter.name,
       );

@@ -84,6 +84,17 @@ describe('ProblemExceptionFilter (unit)', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it('logs a one-line summary that includes the cause chain', () => {
+    const f = fakeHost();
+    const error = new Error('Database error', { cause: new Error('connect ECONNREFUSED') });
+    filter.catch(error, f.host);
+    expect(logger.error).toHaveBeenLastCalledWith(
+      'Database error (caused by: connect ECONNREFUSED)',
+      error.stack,
+      'ProblemExceptionFilter',
+    );
+  });
+
   it('stamps the requestId from the ambient context', () => {
     const f = fakeHost();
     runWithRequestContext({ requestId: 'req-42' }, () => {

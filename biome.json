@@ -19,7 +19,8 @@
       "!apps/server/openapi.json",
       "!apps/server/prisma/migrations",
       "!**/CHANGELOG.md",
-      "!apps/admin/src/routeTree.gen.ts"
+      "!apps/admin/src/routeTree.gen.ts",
+      "!apps/client-web/src/routeTree.gen.ts"
     ]
   },
   "formatter": {

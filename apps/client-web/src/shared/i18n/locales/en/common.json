@@ -1,0 +1,23 @@
+{
+  "appName": "Ekoz web client",
+  "nav": {
+    "home": "Home"
+  },
+  "pages": {
+    "home": {
+      "title": "Ekoz web client",
+      "description": "Demonstration client. Every server feature gets its testable counterpart here."
+    }
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "French"
+  }
+}
