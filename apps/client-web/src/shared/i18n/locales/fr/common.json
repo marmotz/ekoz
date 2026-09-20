@@ -1,12 +1,20 @@
 {
   "appName": "Client web Ekoz",
   "nav": {
-    "home": "Accueil"
+    "home": "Accueil",
+    "label": "Navigation principale",
+    "open": "Ouvrir la navigation"
   },
   "pages": {
     "home": {
       "title": "Client web Ekoz",
-      "description": "Client de démonstration. Chaque fonctionnalité du serveur y a sa contrepartie testable."
+      "description": "Client de démonstration. Chaque fonctionnalité du serveur y a sa contrepartie testable.",
+      "server": "Serveur API",
+      "serverUnreachable": "Le serveur est injoignable."
+    },
+    "login": {
+      "title": "Connexion",
+      "description": "Le formulaire de connexion arrive avec la fonctionnalité d'authentification."
     }
   },
   "theme": {

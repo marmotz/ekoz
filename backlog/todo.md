@@ -25,7 +25,7 @@ _[technical design](technical.md)_ — 14/14 tasks done
 
 ## web-client-foundations ·  [overview](features/web-client-foundations/overview.md)
 
-_technical design — see [technical.md](./technical.md)_ — 6/10 tasks done
+_technical design — see [technical.md](./technical.md)_ — 10/10 tasks done
 
 | Done | Issue                                            | Title                                                | Blocked by              |
 |------|--------------------------------------------------|------------------------------------------------------|-------------------------|
@@ -35,7 +35,7 @@ _technical design — see [technical.md](./technical.md)_ — 6/10 tasks done
 | [x]  | [#31](https://github.com/marmotz/ekoz/issues/31) | Intégration TanStack Query (SSR)                     | #28                     |
 | [x]  | [#32](https://github.com/marmotz/ekoz/issues/32) | Thème light/dark/system                              | #28, #30                |
 | [x]  | [#33](https://github.com/marmotz/ekoz/issues/33) | I18n react-i18next (SSR-safe)                        | #28, #30                |
-| [ ]  | [#34](https://github.com/marmotz/ekoz/issues/34) | Câblage SDK et session                               | #28, #31                |
-| [ ]  | [#35](https://github.com/marmotz/ekoz/issues/35) | Shell applicatif + root route + routes placeholder   | #30, #31, #32, #33, #34 |
-| [ ]  | [#36](https://github.com/marmotz/ekoz/issues/36) | CI — workflow GitHub Actions                         | #28, #29                |
-| [ ]  | [#37](https://github.com/marmotz/ekoz/issues/37) | Document the web client bootstrap in docs/technical/ | #35                     |
+| [x]  | [#34](https://github.com/marmotz/ekoz/issues/34) | Câblage SDK et session                               | #28, #31                |
+| [x]  | [#35](https://github.com/marmotz/ekoz/issues/35) | Shell applicatif + root route + routes placeholder   | #30, #31, #32, #33, #34 |
+| [x]  | [#36](https://github.com/marmotz/ekoz/issues/36) | CI — workflow GitHub Actions                         | #28, #29                |
+| [x]  | [#37](https://github.com/marmotz/ekoz/issues/37) | Document the web client bootstrap in docs/technical/ | #35                     |

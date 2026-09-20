@@ -1,12 +1,20 @@
 {
   "appName": "Ekoz web client",
   "nav": {
-    "home": "Home"
+    "home": "Home",
+    "label": "Main navigation",
+    "open": "Open navigation"
   },
   "pages": {
     "home": {
       "title": "Ekoz web client",
-      "description": "Demonstration client. Every server feature gets its testable counterpart here."
+      "description": "Demonstration client. Every server feature gets its testable counterpart here.",
+      "server": "API server",
+      "serverUnreachable": "The server could not be reached."
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "The sign-in form arrives with the authentication feature."
     }
   },
   "theme": {

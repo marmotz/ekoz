@@ -32,6 +32,16 @@ jobs:
       - run: bun run test
       - run: bun run test:server
 
+  changelog:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require a changelog entry when a workspace src/ changes
+        run: bash scripts/check-changelog.sh "origin/${{ github.base_ref }}"
+
   docker:
     runs-on: ubuntu-latest
     steps:
