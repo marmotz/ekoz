@@ -29,6 +29,7 @@ import { MessageViewDtoSchema, type MessageViewDtoDto } from './MessageViewDto.s
 import { MeViewDtoSchema, type MeViewDtoDto } from './MeViewDto.schema.js';
 import { ModerationLogEntryDtoSchema, type ModerationLogEntryDtoDto } from './ModerationLogEntryDto.schema.js';
 import { MyPermissionsResponseDtoSchema, type MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.schema.js';
+import { MyRoomInvitationListViewDtoSchema, type MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.schema.js';
 import { ProblemDetailsDtoSchema, type ProblemDetailsDtoDto } from './ProblemDetailsDto.schema.js';
 import { PublicProfileViewDtoSchema, type PublicProfileViewDtoDto } from './PublicProfileViewDto.schema.js';
 import { ReadMarkerViewDtoSchema, type ReadMarkerViewDtoDto } from './ReadMarkerViewDto.schema.js';
@@ -39,6 +40,7 @@ import { RequestPasswordResetDtoSchema, type RequestPasswordResetDtoDto } from '
 import { ResendVerificationDtoSchema, type ResendVerificationDtoDto } from './ResendVerificationDto.schema.js';
 import { RevokeAllSessionsResponseDtoSchema, type RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.schema.js';
 import { RoomInvitationViewDtoSchema, type RoomInvitationViewDtoDto } from './RoomInvitationViewDto.schema.js';
+import { RoomPreviewDtoSchema, type RoomPreviewDtoDto } from './RoomPreviewDto.schema.js';
 import { RoomRetentionViewDtoSchema, type RoomRetentionViewDtoDto } from './RoomRetentionViewDto.schema.js';
 import { RoomViewDtoSchema, type RoomViewDtoDto } from './RoomViewDto.schema.js';
 import { SessionViewDtoSchema, type SessionViewDtoDto } from './SessionViewDto.schema.js';
@@ -769,6 +771,12 @@ export type ModerationController_getModerationLog403ResponseProblemJson = z.infe
 export const ModerationController_getModerationLog404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type ModerationController_getModerationLog404ResponseProblemJson = z.infer<typeof ModerationController_getModerationLog404ResponseProblemJsonSchema>;
 
+export const MyRoomInvitationsController_list200ResponseJsonSchema = MyRoomInvitationListViewDtoSchema;
+export type MyRoomInvitationsController_list200ResponseJson = z.infer<typeof MyRoomInvitationsController_list200ResponseJsonSchema>;
+
+export const MyRoomInvitationsController_list401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MyRoomInvitationsController_list401ResponseProblemJson = z.infer<typeof MyRoomInvitationsController_list401ResponseProblemJsonSchema>;
+
 export const PasswordResetController_confirm401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type PasswordResetController_confirm401ResponseProblemJson = z.infer<typeof PasswordResetController_confirm401ResponseProblemJsonSchema>;
 
@@ -978,6 +986,15 @@ export type RoomsController_getChildren403ResponseProblemJson = z.infer<typeof R
 
 export const RoomsController_getChildren404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type RoomsController_getChildren404ResponseProblemJson = z.infer<typeof RoomsController_getChildren404ResponseProblemJsonSchema>;
+
+export const RoomsController_getPreview200ResponseJsonSchema = RoomPreviewDtoSchema;
+export type RoomsController_getPreview200ResponseJson = z.infer<typeof RoomsController_getPreview200ResponseJsonSchema>;
+
+export const RoomsController_getPreview401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getPreview401ResponseProblemJson = z.infer<typeof RoomsController_getPreview401ResponseProblemJsonSchema>;
+
+export const RoomsController_getPreview404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type RoomsController_getPreview404ResponseProblemJson = z.infer<typeof RoomsController_getPreview404ResponseProblemJsonSchema>;
 
 export const RoomsController_getRoom200ResponseJsonSchema = RoomViewDtoSchema;
 export type RoomsController_getRoom200ResponseJson = z.infer<typeof RoomsController_getRoom200ResponseJsonSchema>;

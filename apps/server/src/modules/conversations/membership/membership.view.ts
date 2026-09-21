@@ -1,7 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { entityIdSchema } from '../../../core/http/entity-id.schema.js';
 import { nullableString } from '../../../core/http/nullable.js';
-import { roomRoleSchema } from '../rooms/room.view.js';
+import { UserSummarySchema } from '../../../core/users/user-summary.js';
+import { roomRoleSchema, roomTypeSchema, roomVisibilitySchema } from '../rooms/room.view.js';
 
 /** `Membership`, as the API exposes it (technical.md §9). */
 export const MembershipViewSchema = z.object({
@@ -89,3 +91,25 @@ export interface JoinRequestRow {
 export function toJoinRequestView(row: JoinRequestRow): JoinRequestView {
   return { ...row };
 }
+
+/** A pending invitation of the caller, with enough of the room and the inviter to show it. */
+export const MyRoomInvitationViewSchema = z.object({
+  id: entityIdSchema,
+  role: roomRoleSchema,
+  createdAt: z.iso.datetime(),
+  room: z.object({
+    id: entityIdSchema,
+    type: roomTypeSchema,
+    name: nullableString(),
+    topic: nullableString(),
+    visibility: roomVisibilitySchema,
+  }),
+  invitedBy: UserSummarySchema,
+});
+export type MyRoomInvitationView = z.infer<typeof MyRoomInvitationViewSchema>;
+
+export const MyRoomInvitationListViewSchema = z.object({
+  items: z.array(MyRoomInvitationViewSchema),
+});
+export type MyRoomInvitationListView = z.infer<typeof MyRoomInvitationListViewSchema>;
+export class MyRoomInvitationListViewDto extends createZodDto(MyRoomInvitationListViewSchema) {}

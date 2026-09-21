@@ -49,9 +49,29 @@ export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "
 export const MyPermissionsResponseDtoCapabilitiesSchema = z.enum(MyPermissionsResponseDtoCapabilities);
 export type MyPermissionsResponseDtoCapabilities = (typeof MyPermissionsResponseDtoCapabilities)[number];
 
+export const MyRoomInvitationListViewDtoItemsRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export const MyRoomInvitationListViewDtoItemsRoleSchema = z.enum(MyRoomInvitationListViewDtoItemsRole);
+export type MyRoomInvitationListViewDtoItemsRole = (typeof MyRoomInvitationListViewDtoItemsRole)[number];
+
+export const MyRoomInvitationListViewDtoItemsRoomType = ["space", "channel", "dm", "group_dm"] as const;
+export const MyRoomInvitationListViewDtoItemsRoomTypeSchema = z.enum(MyRoomInvitationListViewDtoItemsRoomType);
+export type MyRoomInvitationListViewDtoItemsRoomType = (typeof MyRoomInvitationListViewDtoItemsRoomType)[number];
+
+export const MyRoomInvitationListViewDtoItemsRoomVisibility = ["public", "private", "invite"] as const;
+export const MyRoomInvitationListViewDtoItemsRoomVisibilitySchema = z.enum(MyRoomInvitationListViewDtoItemsRoomVisibility);
+export type MyRoomInvitationListViewDtoItemsRoomVisibility = (typeof MyRoomInvitationListViewDtoItemsRoomVisibility)[number];
+
 export const RoomInvitationViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export const RoomInvitationViewDtoRoleSchema = z.enum(RoomInvitationViewDtoRole);
 export type RoomInvitationViewDtoRole = (typeof RoomInvitationViewDtoRole)[number];
+
+export const RoomPreviewDtoJoinRequestStatus = ["pending", "rejected"] as const;
+export const RoomPreviewDtoJoinRequestStatusSchema = z.enum(RoomPreviewDtoJoinRequestStatus);
+export type RoomPreviewDtoJoinRequestStatus = (typeof RoomPreviewDtoJoinRequestStatus)[number];
+
+export const RoomPreviewDtoType = ["space", "channel", "dm", "group_dm"] as const;
+export const RoomPreviewDtoTypeSchema = z.enum(RoomPreviewDtoType);
+export type RoomPreviewDtoType = (typeof RoomPreviewDtoType)[number];
 
 export const RoomViewDtoDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export const RoomViewDtoDefaultRoleSchema = z.enum(RoomViewDtoDefaultRole);

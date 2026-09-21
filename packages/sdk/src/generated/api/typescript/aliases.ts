@@ -29,6 +29,7 @@ import type { MessageViewDtoDto } from './MessageViewDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
 import type { ModerationLogEntryDtoDto } from './ModerationLogEntryDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
+import type { MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
 import type { PublicProfileViewDtoDto } from './PublicProfileViewDto.type.js';
 import type { ReadMarkerViewDtoDto } from './ReadMarkerViewDto.type.js';
@@ -39,6 +40,7 @@ import type { RequestPasswordResetDtoDto } from './RequestPasswordResetDto.type.
 import type { ResendVerificationDtoDto } from './ResendVerificationDto.type.js';
 import type { RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.type.js';
 import type { RoomInvitationViewDtoDto } from './RoomInvitationViewDto.type.js';
+import type { RoomPreviewDtoDto } from './RoomPreviewDto.type.js';
 import type { RoomRetentionViewDtoDto } from './RoomRetentionViewDto.type.js';
 import type { RoomViewDtoDto } from './RoomViewDto.type.js';
 import type { SessionViewDtoDto } from './SessionViewDto.type.js';
@@ -467,6 +469,12 @@ export type RoomsController_updateRoom404ResponseProblemJson = ProblemDetailsDto
 
 export type RoomsController_updateRoom422ResponseProblemJson = ProblemDetailsDtoDto;
 
+export type RoomsController_getPreview200ResponseJson = RoomPreviewDtoDto;
+
+export type RoomsController_getPreview401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_getPreview404ResponseProblemJson = ProblemDetailsDtoDto;
+
 export type RoomsController_getChildren200ResponseJson = RoomViewDtoDto[];
 
 export type RoomsController_getChildren401ResponseProblemJson = ProblemDetailsDtoDto;
@@ -608,6 +616,10 @@ export type MembershipController_unban401ResponseProblemJson = ProblemDetailsDto
 export type MembershipController_unban403ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MembershipController_unban404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MyRoomInvitationsController_list200ResponseJson = MyRoomInvitationListViewDtoDto;
+
+export type MyRoomInvitationsController_list401ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type DirectoryController_list200ResponseJson = DirectoryListResponseDtoDto;
 

@@ -2,7 +2,7 @@ import { Menu } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
-import { Sidebar, SidebarNav } from '@/shared/layout/sidebar';
+import { Sidebar, SidebarNav, SidebarSections } from '@/shared/layout/sidebar';
 import type { ThemeChoice } from '@/shared/layout/theme-toggle';
 import { Topbar } from '@/shared/layout/topbar';
 import { Button } from '@/shared/ui/button';
@@ -31,8 +31,9 @@ export function AppShell({ theme, onThemeChange, userMenu, children }: AppShellP
       <SheetContent side="left">
         <SheetTitle>{t('appName')}</SheetTitle>
         <SheetDescription className="sr-only">{t('nav.label')}</SheetDescription>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-4">
           <SidebarNav onNavigate={() => setNavOpen(false)} />
+          <SidebarSections onNavigate={() => setNavOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

@@ -11,4 +11,4 @@ HTTP 201
 [Asserts]
 jsonpath "$.type" == "space"
 jsonpath "$.visibility" == "public"
-jsonpath "$.lastSeq" == "0"
+jsonpath "$.lastSeq" == "2"

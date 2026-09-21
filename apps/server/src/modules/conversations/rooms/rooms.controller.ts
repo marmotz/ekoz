@@ -20,7 +20,7 @@ import { ApiProblemResponses } from '../../../core/http/api-problem-responses.de
 import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
 import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
-import { type RoomView, RoomViewDto } from './room.view.js';
+import { type RoomPreview, RoomPreviewDto, type RoomView, RoomViewDto } from './room.view.js';
 import {
   type CreateChannel,
   CreateChannelDto,
@@ -72,6 +72,17 @@ export class RoomsController {
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<RoomView> {
     return this.rooms.getRoom(principal, params.id);
+  }
+
+  @Get('rooms/:id/preview')
+  @ApiOperation({ summary: 'Preview an invite-only room, to request to join it.' })
+  @ApiOkResponse({ type: RoomPreviewDto })
+  @ApiProblemResponses({ statuses: [404] })
+  getPreview(
+    @Param(new ZodValidationPipe(RoomIdParamSchema)) params: { id: string },
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<RoomPreview> {
+    return this.rooms.getPreview(principal, params.id);
   }
 
   @Get('rooms/:id/children')

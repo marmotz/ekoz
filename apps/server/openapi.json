@@ -2880,6 +2880,53 @@
         ]
       }
     },
+    "/rooms/{id}/preview": {
+      "get": {
+        "operationId": "RoomsController_getPreview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomPreviewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Preview an invite-only room, to request to join it.",
+        "tags": [
+          "Conversations — rooms"
+        ]
+      }
+    },
     "/rooms/{id}/children": {
       "get": {
         "operationId": "RoomsController_getChildren",
@@ -3875,6 +3922,43 @@
           }
         ],
         "summary": "Unban a user from a room (needs room.ban).",
+        "tags": [
+          "Conversations — membership"
+        ]
+      }
+    },
+    "/me/room-invitations": {
+      "get": {
+        "operationId": "MyRoomInvitationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRoomInvitationListViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pending room invitations of the caller, newest first.",
         "tags": [
           "Conversations — membership"
         ]
@@ -6602,6 +6686,64 @@
           "updatedAt"
         ]
       },
+      "RoomPreviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "space",
+              "channel",
+              "dm",
+              "group_dm"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "topic": {
+            "type": "string",
+            "nullable": true
+          },
+          "joinRequest": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "rejected"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "status"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "topic",
+          "joinRequest"
+        ]
+      },
       "MyPermissionsResponseDto": {
         "type": "object",
         "properties": {
@@ -6776,6 +6918,119 @@
           "resolvedAt",
           "resolvedById",
           "approved"
+        ]
+      },
+      "MyRoomInvitationListViewDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                  "description": "Crockford base32 entity identifier (ULID), 26 characters"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "space_admin",
+                    "room_admin",
+                    "moderator",
+                    "member",
+                    "reader"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "room": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Crockford base32 entity identifier (ULID), 26 characters"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "space",
+                        "channel",
+                        "dm",
+                        "group_dm"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "topic": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "visibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private",
+                        "invite"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "name",
+                    "topic",
+                    "visibility"
+                  ]
+                },
+                "invitedBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Crockford base32 entity identifier (ULID), 26 characters"
+                    },
+                    "identifier": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "displayName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "identifier",
+                    "displayName",
+                    "avatarUrl"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "createdAt",
+                "room",
+                "invitedBy"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "DirectoryListResponseDto": {

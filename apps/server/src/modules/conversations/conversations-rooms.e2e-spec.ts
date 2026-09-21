@@ -87,7 +87,8 @@ describe('conversations — rooms (integration)', () => {
       type: 'space',
       name: 'Engineering',
       visibility: 'public',
-      lastSeq: '0',
+      // `room_created` then the creator's `member_joined`.
+      lastSeq: '2',
     });
 
     const channel = await request(server())
@@ -253,5 +254,122 @@ describe('conversations — rooms (integration)', () => {
       .get(`/rooms/${space.id}`)
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(404);
+  });
+
+  describe('creator membership', () => {
+    const membersOf = async (roomId: string) =>
+      (
+        (await prisma.orm.public.Membership.where({ roomId }).all()) as Array<{
+          userId: string;
+          role: string;
+          invitedById: string | null;
+        }>
+      ).map((m) => ({ userId: m.userId, role: m.role, invitedById: m.invitedById }));
+
+    const eventsOf = async (roomId: string) =>
+      (
+        (await prisma.orm.public.RoomEvent.where({ roomId })
+          .orderBy((f) => f.seq.asc())
+          .all()) as Array<{ seq: bigint; type: string; senderId: string | null; content: unknown }>
+      ).map((e) => ({
+        seq: Number(e.seq),
+        type: e.type,
+        senderId: e.senderId,
+        content: e.content,
+      }));
+
+    const meId = async (token: string): Promise<string> =>
+      (await request(server()).get('/me').set('Authorization', `Bearer ${token}`).expect(200)).body
+        .id as string;
+
+    it('makes an owner creating a root space its space_admin', async () => {
+      const ownerToken = await login('owner');
+      const ownerId = await meId(ownerToken);
+
+      const space = (
+        await request(server())
+          .post('/spaces')
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ name: 'Owner root space' })
+          .expect(201)
+      ).body;
+
+      expect(await membersOf(space.id)).toEqual([
+        { userId: ownerId, role: 'space_admin', invitedById: null },
+      ]);
+    });
+
+    it('emits room_created then member_joined with consecutive seq values', async () => {
+      const ownerToken = await login('owner');
+      const ownerId = await meId(ownerToken);
+
+      const space = (
+        await request(server())
+          .post('/spaces')
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ name: 'Ordered events' })
+          .expect(201)
+      ).body;
+
+      expect(await eventsOf(space.id)).toEqual([
+        {
+          seq: 1,
+          type: 'room_created',
+          senderId: ownerId,
+          content: { type: 'space', parentId: null, visibility: 'private', name: 'Ordered events' },
+        },
+        {
+          seq: 2,
+          type: 'member_joined',
+          senderId: ownerId,
+          content: { userId: ownerId, role: 'space_admin' },
+        },
+      ]);
+    });
+
+    it('makes the creator of a channel its room_admin and lets them leave', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const aliceId = await meId(aliceToken);
+
+      const space = (
+        await request(server())
+          .post('/spaces')
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ name: 'Delegated space', visibility: 'public' })
+          .expect(201)
+      ).body;
+      await request(server())
+        .post(`/rooms/${space.id}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+      await request(server())
+        .patch(`/rooms/${space.id}/members/${aliceId}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ role: 'space_admin' })
+        .expect(200);
+
+      const channel = (
+        await request(server())
+          .post('/rooms')
+          .set('Authorization', `Bearer ${aliceToken}`)
+          .send({ parentId: space.id, name: 'alice-channel' })
+          .expect(201)
+      ).body;
+
+      expect(await membersOf(channel.id)).toEqual([
+        { userId: aliceId, role: 'room_admin', invitedById: null },
+      ]);
+      expect((await eventsOf(channel.id)).map((e) => e.type)).toEqual([
+        'room_created',
+        'member_joined',
+      ]);
+
+      await request(server())
+        .post(`/rooms/${channel.id}/leave`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(204);
+      expect(await membersOf(channel.id)).toEqual([]);
+    });
   });
 });

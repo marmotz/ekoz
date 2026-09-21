@@ -8,6 +8,8 @@ that does not touch this file.
 
 ### Fixed
 
+- Requesting to join a room again after a rejection, and inviting a user again after a decline, no longer fail with a 500. (#64)
+- Creating a space or channel returns its up-to-date `lastSeq` instead of `0`. (#62)
 - Boot failures and crashes print one readable report (cause, fix, hint) instead of a raw dump repeated per module.
 - 5xx log lines include the cause chain.
 
@@ -31,6 +33,9 @@ that does not touch this file.
 
 ### Added
 
+- The creator of a space or channel becomes its first member, and existing rooms are backfilled. (#62)
+- `GET /me/room-invitations` lists the caller's pending room invitations with the room and the inviter. (#63)
+- `GET /rooms/:id/preview` shows an invite-only room and the caller's join request to a non-member. (#64)
 - `POST /me/password` changes the password of the signed-in account and revokes its other sessions. (#101)
 - `GET /me/username` exposes the identifier change policy, cooldown end and pending request. (#102)
 - A pending identifier change request can be cancelled by its author, and only one can be pending at a time. (#102)
