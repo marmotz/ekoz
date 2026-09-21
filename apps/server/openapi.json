@@ -235,6 +235,28 @@
         ]
       }
     },
+    "/auth/policy": {
+      "get": {
+        "operationId": "AuthPolicyController_policy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthPolicyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Registration mode, verification requirement and password policy.",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/sessions": {
       "get": {
         "operationId": "SessionsController_list",
@@ -5252,6 +5274,32 @@
           "accessToken",
           "refreshToken",
           "expiresIn"
+        ]
+      },
+      "AuthPolicyDto": {
+        "type": "object",
+        "properties": {
+          "registrationMode": {
+            "type": "string",
+            "enum": [
+              "open",
+              "invite",
+              "admin"
+            ]
+          },
+          "emailVerificationRequired": {
+            "type": "boolean"
+          },
+          "passwordMinLength": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "registrationMode",
+          "emailVerificationRequired",
+          "passwordMinLength"
         ]
       },
       "SessionViewDto": {

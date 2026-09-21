@@ -5,6 +5,7 @@ import type { AddOwnerDtoDto } from './AddOwnerDto.type.js';
 import type { AdminCreateUserDtoDto } from './AdminCreateUserDto.type.js';
 import type { AdminUserDetailDtoDto } from './AdminUserDetailDto.type.js';
 import type { AdminUserListResponseDtoDto } from './AdminUserListResponseDto.type.js';
+import type { AuthPolicyDtoDto } from './AuthPolicyDto.type.js';
 import type { AvatarUploadedDtoDto } from './AvatarUploadedDto.type.js';
 import type { ChangeEmailDtoDto } from './ChangeEmailDto.type.js';
 import type { ChangeUsernameDtoDto } from './ChangeUsernameDto.type.js';
@@ -85,6 +86,8 @@ export type AuthController_refresh401ResponseProblemJson = ProblemDetailsDtoDto;
 export type AuthController_refresh422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type AuthController_logout401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AuthPolicyController_policy200ResponseJson = AuthPolicyDtoDto;
 
 export type SessionsController_list200ResponseJson = SessionViewDtoDto[];
 

@@ -19,7 +19,7 @@ header. Three kinds:
 
 - **Any state** — the error-path files that present a bogus token / bad
   credentials or a malformed body. These pass as-is, always
-  (`*-unauthenticated.hurl`, `login-invalid.hurl`, `refresh-invalid.hurl`,
+  (`policy.hurl`, `*-unauthenticated.hurl`, `login-invalid.hurl`, `refresh-invalid.hurl`,
   `register-needs-invitation.hurl`, `register-weak-password.hurl`,
   `verify-email-invalid.hurl`, `verify-email-resend.hurl`).
 - **A captured value** — happy paths and owner/not-found cases that need
@@ -57,6 +57,7 @@ http/
     create-owner-rejected.hurl        POST /setup/owner               403 · bad token / email
     create-owner-closed.hurl          POST /setup/owner               410 · owner already exists
   auth/
+    policy.hurl                       GET  /auth/policy               200 · public, any state
     login.hurl                        POST /auth/login                200 · needs an account
     login-invalid.hurl                POST /auth/login                401 auth.invalid_credentials
     login-unverified.hurl             POST /auth/login                403 identity.email_not_verified

@@ -11,6 +11,7 @@ import { buildOfflineOpenApiDocument, OPENAPI_JSON_PATH } from './emit.js';
  */
 const IN_SCOPE_PATHS = [
   '/auth/login',
+  '/auth/policy',
   '/auth/refresh',
   '/auth/register',
   '/auth/verify-email',

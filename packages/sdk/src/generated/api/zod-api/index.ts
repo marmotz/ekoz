@@ -10,6 +10,7 @@ export * from './LoginResponseDtoSession.schema.js';
 export * from './LoginResponseDto.schema.js';
 export * from './RefreshDto.schema.js';
 export * from './TokenBundleDto.schema.js';
+export * from './AuthPolicyDto.schema.js';
 export * from './SessionViewDto.schema.js';
 export * from './RenameSessionDto.schema.js';
 export * from './RevokeAllSessionsResponseDto.schema.js';

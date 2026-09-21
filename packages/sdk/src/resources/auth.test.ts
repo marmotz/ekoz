@@ -13,6 +13,23 @@ function resource(fetchImpl: typeof fetch) {
 }
 
 describe('auth resource', () => {
+  it('policy GETs /auth/policy without a bearer token', async () => {
+    const policy = {
+      registrationMode: 'open',
+      emailVerificationRequired: false,
+      passwordMinLength: 10,
+    };
+    const fetchMock = createFetchMock(jsonResponse({ body: policy }));
+    const { auth, session } = resource(fetchMock);
+
+    await expect(auth.policy()).resolves.toEqual(policy);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/auth/policy');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+    expect(new Headers(fetchMock.calls[0]?.init?.headers).has('authorization')).toBe(false);
+    expect(session.accessToken).toBeUndefined();
+  });
+
   it('register posts to /auth/register and does not populate the store', async () => {
     const fetchMock = createFetchMock(jsonResponse({ body: { id: 'u1', identifier: null } }));
     const { auth, session } = resource(fetchMock);

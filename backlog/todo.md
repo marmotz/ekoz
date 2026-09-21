@@ -4,12 +4,12 @@
 
 ## Auth ·  [overview](features/auth/overview.md)
 
-_[technical design](features/auth/technical.md)_ — 0/11 tasks done
+_[technical design](features/auth/technical.md)_ — 2/11 tasks done
 
 | Done | Issue                                              | Title                                                                       | Blocked by              |
 |------|----------------------------------------------------|-----------------------------------------------------------------------------|-------------------------|
-| [ ]  | [#90](https://github.com/marmotz/ekoz/issues/90)   | Auth server: public GET /auth/policy                                        | —                       |
-| [ ]  | [#91](https://github.com/marmotz/ekoz/issues/91)   | Auth SDK: auth.policy() binding                                             | #90                     |
+| [x]  | [#90](https://github.com/marmotz/ekoz/issues/90)   | Auth server: public GET /auth/policy                                        | —                       |
+| [x]  | [#91](https://github.com/marmotz/ekoz/issues/91)   | Auth SDK: auth.policy() binding                                             | #90                     |
 | [ ]  | [#92](https://github.com/marmotz/ekoz/issues/92)   | Auth client: route layouts (app shell vs auth pages), GuestOnly and UI base | —                       |
 | [ ]  | [#93](https://github.com/marmotz/ekoz/issues/93)   | Auth client: signed-in user menu with sign out                              | #92, #65                |
 | [ ]  | [#94](https://github.com/marmotz/ekoz/issues/94)   | Auth client: generated forms wiring, password input and error mapping       | #92                     |
