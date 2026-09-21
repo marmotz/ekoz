@@ -1,7 +1,6 @@
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { AppFrame } from '@/app/app-frame';
 import { createI18n } from '@/app/i18n';
 import { AppProviders } from '@/app/providers';
 import type { RouterContext } from '@/app/router-context';
@@ -39,9 +38,7 @@ function RootComponent() {
       </head>
       <body suppressHydrationWarning>
         <AppProviders queryClient={queryClient} i18nInstance={i18nInstance}>
-          <AppFrame>
-            <Outlet />
-          </AppFrame>
+          <Outlet />
           <Toaster />
         </AppProviders>
         <Scripts />

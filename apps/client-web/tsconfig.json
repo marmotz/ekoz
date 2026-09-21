@@ -11,7 +11,8 @@
     "declaration": false,
     "declarationMap": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "api/*": ["./src/generated/api/*"]
     }
   },
   "include": ["src", "test", "vite.config.ts", "vitest.config.ts"],

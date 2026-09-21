@@ -18,6 +18,8 @@ interface RenderOptions {
   route?: string;
   language?: string;
   queryClient?: QueryClient;
+  /** Router `state` of the initial history entry (what `navigate({ state })` would carry). */
+  state?: Record<string, unknown>;
 }
 
 /**
@@ -29,7 +31,7 @@ interface RenderOptions {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', language = 'en', queryClient }: RenderOptions = {},
+  { route = '/', language = 'en', queryClient, state }: RenderOptions = {},
 ) {
   const client = queryClient ?? new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const rootRoute = createRootRoute();
@@ -38,9 +40,11 @@ export function renderWithProviders(
     path: '$',
     component: () => ui,
   });
+  const history = createMemoryHistory({ initialEntries: [route] });
+  if (state) history.replace(route, state);
   const router = createRouter({
     routeTree: rootRoute.addChildren([catchAll]),
-    history: createMemoryHistory({ initialEntries: [route] }),
+    history,
   });
   const i18nInstance = createI18n(language);
 

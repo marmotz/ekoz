@@ -19,6 +19,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': new URL('./src', import.meta.url).pathname,
+      // The generated form hooks import their runtime and schemas as `api/react-tanstack/...`.
+      api: new URL('./src/generated/api', import.meta.url).pathname,
     },
   },
 });

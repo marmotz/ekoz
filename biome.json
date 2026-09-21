@@ -16,6 +16,7 @@
       "!apps/server/src/core/prisma/contract.json",
       "!apps/server/src/generated",
       "!packages/sdk/src/generated",
+      "!apps/client-web/src/generated",
       "!apps/server/openapi.json",
       "!apps/server/prisma/migrations",
       "!**/CHANGELOG.md",

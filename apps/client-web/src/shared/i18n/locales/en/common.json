@@ -11,10 +11,6 @@
       "description": "Demonstration client. Every server feature gets its testable counterpart here.",
       "server": "API server",
       "serverUnreachable": "The server could not be reached."
-    },
-    "login": {
-      "title": "Sign in",
-      "description": "The sign-in form arrives with the authentication feature."
     }
   },
   "theme": {
@@ -27,5 +23,108 @@
     "label": "Language",
     "en": "English",
     "fr": "French"
+  },
+  "auth": {
+    "userMenu": {
+      "label": "Account menu",
+      "signOut": "Sign out"
+    },
+    "password": {
+      "show": "Show password",
+      "hide": "Hide password"
+    },
+    "errors": {
+      "invalidCredentials": "Incorrect identifier or password.",
+      "accountSuspended": "This account is suspended.",
+      "emailNotVerified": "Your email address is not verified yet.",
+      "registrationClosed": "Registration is closed on this server. Contact the administrator.",
+      "invitationInvalid": "This invitation is invalid, expired, or reserved for another email address.",
+      "emailTaken": "This email address is already in use.",
+      "identifierInvalid": "This username is not valid.",
+      "passwordTooWeak": "This password does not meet the minimum requirements.",
+      "emailVerificationInvalid": "This verification link is invalid or has already been used.",
+      "passwordResetInvalid": "This reset link is invalid or has expired.",
+      "tooManyRequests_one": "Too many attempts. Try again in {{count}} second.",
+      "tooManyRequests_other": "Too many attempts. Try again in {{count}} seconds.",
+      "tooManyRequestsLater": "Too many attempts. Try again later.",
+      "network": "The server could not be reached. Check your connection and try again.",
+      "generic": "Something went wrong. Try again.",
+      "required": "This field is required.",
+      "invalid": "This value is not valid.",
+      "invalidEmail": "Enter a valid email address.",
+      "tooShort_one": "Use at least {{count}} character.",
+      "tooShort_other": "Use at least {{count}} characters.",
+      "tooLong_one": "Use at most {{count}} character.",
+      "tooLong_other": "Use at most {{count}} characters."
+    },
+    "fields": {
+      "email": "Email address",
+      "identifier": "Username or email",
+      "username": "Username",
+      "displayName": "Display name",
+      "password": "Password",
+      "newPassword": "New password",
+      "invitation": "Invitation code"
+    },
+    "resend": {
+      "submit": "Send the email again",
+      "sent": "If an account matches this address, a new email is on its way."
+    },
+    "checkEmail": {
+      "title": "Check your mailbox",
+      "sent": "We sent you a link to verify your email address.",
+      "sentTo": "We sent a link to verify your email address to {{email}}.",
+      "notReceived": "Nothing in your inbox? Check your spam folder, or send the email again.",
+      "createdTitle": "Account created",
+      "createdDescription": "Your account is ready. You can now sign in.",
+      "signIn": "Go to sign in",
+      "backToSignIn": "Back to sign in"
+    },
+    "policy": {
+      "retry": "Try again"
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "Sign in with your username or your email address.",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot your password?",
+      "register": "Create an account",
+      "resendVerification": "Send the verification email again"
+    },
+    "register": {
+      "title": "Create an account",
+      "description": "Choose a username, then sign in once your address is verified.",
+      "submit": "Create the account",
+      "haveAccount": "Already have an account? Sign in",
+      "passwordHint_one": "At least {{count}} character.",
+      "passwordHint_other": "At least {{count}} characters."
+    },
+    "verifyEmail": {
+      "title": "Verify your email",
+      "pending": "Verifying your email address...",
+      "successTitle": "Email verified",
+      "successDescription": "Your email address is verified. You can now sign in.",
+      "signIn": "Go to sign in",
+      "invalidTitle": "Link not valid",
+      "missingToken": "This link is incomplete. Request a new verification email below.",
+      "resendHint": "Enter your email address to receive a new link.",
+      "retry": "Try again"
+    },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "description": "Enter your email address and we will send you a link to choose a new password.",
+      "submit": "Send the link",
+      "sent": "If an account matches this address, a link to reset the password is on its way.",
+      "backToSignIn": "Back to sign in"
+    },
+    "resetPassword": {
+      "title": "Choose a new password",
+      "description": "Every device will be signed out once the password is changed.",
+      "submit": "Change the password",
+      "success": "Your password was changed. Sign in with the new one.",
+      "invalidTitle": "Link not valid",
+      "missingToken": "This link is incomplete. Request a new one.",
+      "requestNew": "Request a new link"
+    }
   }
 }

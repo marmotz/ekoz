@@ -2,14 +2,14 @@ import { screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
-import { Route } from '@/routes/index';
+import { Route } from '@/routes/_app/index';
 import { getNavEntries } from '@/shared/layout/nav-registry';
 import { SdkProvider } from '@/shared/sdk/provider';
-import { renderWithProviders } from '../../test/render';
-import { createClientMock, createFakeSdk } from '../../test/sdk-mock';
+import { renderWithProviders } from '../../../test/render';
+import { createClientMock, createFakeSdk } from '../../../test/sdk-mock';
 
 vi.mock('@ekozhq/sdk', async (importOriginal) =>
-  (await import('../../test/sdk-mock')).mockSdkModule(await importOriginal()),
+  (await import('../../../test/sdk-mock')).mockSdkModule(await importOriginal()),
 );
 
 beforeEach(() => {

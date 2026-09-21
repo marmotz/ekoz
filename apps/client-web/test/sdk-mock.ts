@@ -10,7 +10,7 @@ export interface FakeSession {
 
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery` and `setup`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth` and `me`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -46,7 +46,24 @@ export function createFakeSdk(initial?: FakeSession) {
       apiBaseUrl: vi.fn(async () => 'http://localhost:3010'),
     },
     setup: {
-      state: vi.fn(async () => ({ open: true })),
+      state: vi.fn(async () => ({ state: 'closed' })),
+    },
+    auth: {
+      policy: vi.fn(async () => ({
+        registrationMode: 'open',
+        emailVerificationRequired: true,
+        passwordMinLength: 12,
+      })),
+      register: vi.fn(async () => ({})),
+      login: vi.fn(async () => ({})),
+      logout: vi.fn(async () => {}),
+      verifyEmail: vi.fn(async () => ({ verified: true })),
+      resendVerification: vi.fn(async () => ({ accepted: true })),
+      requestPasswordReset: vi.fn(async () => ({ accepted: true })),
+      confirmPasswordReset: vi.fn(async () => {}),
+    },
+    me: {
+      get: vi.fn(async () => ({ id: '01ARZ3NDEKTSV4RRFFQ69G5FAV', displayName: 'Jane Doe' })),
     },
     on: vi.fn(on),
     off: vi.fn(off),

@@ -11,10 +11,6 @@
       "description": "Client de démonstration. Chaque fonctionnalité du serveur y a sa contrepartie testable.",
       "server": "Serveur API",
       "serverUnreachable": "Le serveur est injoignable."
-    },
-    "login": {
-      "title": "Connexion",
-      "description": "Le formulaire de connexion arrive avec la fonctionnalité d'authentification."
     }
   },
   "theme": {
@@ -27,5 +23,108 @@
     "label": "Langue",
     "en": "Anglais",
     "fr": "Français"
+  },
+  "auth": {
+    "userMenu": {
+      "label": "Menu du compte",
+      "signOut": "Se déconnecter"
+    },
+    "password": {
+      "show": "Afficher le mot de passe",
+      "hide": "Masquer le mot de passe"
+    },
+    "errors": {
+      "invalidCredentials": "Identifiant ou mot de passe incorrect.",
+      "accountSuspended": "Ce compte est suspendu.",
+      "emailNotVerified": "Votre adresse e-mail n'est pas encore vérifiée.",
+      "registrationClosed": "Les inscriptions sont fermées sur ce serveur. Contactez l'administrateur.",
+      "invitationInvalid": "Cette invitation est invalide, expirée ou réservée à une autre adresse e-mail.",
+      "emailTaken": "Cette adresse e-mail est déjà utilisée.",
+      "identifierInvalid": "Ce nom d'utilisateur n'est pas valide.",
+      "passwordTooWeak": "Ce mot de passe ne respecte pas les exigences minimales.",
+      "emailVerificationInvalid": "Ce lien de vérification est invalide ou a déjà été utilisé.",
+      "passwordResetInvalid": "Ce lien de réinitialisation est invalide ou a expiré.",
+      "tooManyRequests_one": "Trop de tentatives. Réessayez dans {{count}} seconde.",
+      "tooManyRequests_other": "Trop de tentatives. Réessayez dans {{count}} secondes.",
+      "tooManyRequestsLater": "Trop de tentatives. Réessayez plus tard.",
+      "network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
+      "generic": "Une erreur est survenue. Réessayez.",
+      "required": "Ce champ est obligatoire.",
+      "invalid": "Cette valeur n'est pas valide.",
+      "invalidEmail": "Saisissez une adresse e-mail valide.",
+      "tooShort_one": "Utilisez au moins {{count}} caractère.",
+      "tooShort_other": "Utilisez au moins {{count}} caractères.",
+      "tooLong_one": "Utilisez au plus {{count}} caractère.",
+      "tooLong_other": "Utilisez au plus {{count}} caractères."
+    },
+    "fields": {
+      "email": "Adresse e-mail",
+      "identifier": "Nom d'utilisateur ou e-mail",
+      "username": "Nom d'utilisateur",
+      "displayName": "Nom affiché",
+      "password": "Mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "invitation": "Code d'invitation"
+    },
+    "resend": {
+      "submit": "Renvoyer l'e-mail",
+      "sent": "Si un compte correspond à cette adresse, un nouvel e-mail est en route."
+    },
+    "checkEmail": {
+      "title": "Vérifiez votre boîte mail",
+      "sent": "Nous vous avons envoyé un lien pour vérifier votre adresse e-mail.",
+      "sentTo": "Nous avons envoyé un lien de vérification à {{email}}.",
+      "notReceived": "Rien dans votre boîte de réception ? Regardez dans vos courriers indésirables, ou renvoyez l'e-mail.",
+      "createdTitle": "Compte créé",
+      "createdDescription": "Votre compte est prêt. Vous pouvez maintenant vous connecter.",
+      "signIn": "Aller à la connexion",
+      "backToSignIn": "Retour à la connexion"
+    },
+    "policy": {
+      "retry": "Réessayer"
+    },
+    "login": {
+      "title": "Connexion",
+      "description": "Connectez-vous avec votre nom d'utilisateur ou votre adresse e-mail.",
+      "submit": "Se connecter",
+      "forgotPassword": "Mot de passe oublié ?",
+      "register": "Créer un compte",
+      "resendVerification": "Renvoyer l'e-mail de vérification"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "description": "Choisissez un nom d'utilisateur, puis connectez-vous une fois votre adresse vérifiée.",
+      "submit": "Créer le compte",
+      "haveAccount": "Déjà un compte ? Se connecter",
+      "passwordHint_one": "Au moins {{count}} caractère.",
+      "passwordHint_other": "Au moins {{count}} caractères."
+    },
+    "verifyEmail": {
+      "title": "Vérifier votre e-mail",
+      "pending": "Vérification de votre adresse e-mail...",
+      "successTitle": "E-mail vérifié",
+      "successDescription": "Votre adresse e-mail est vérifiée. Vous pouvez maintenant vous connecter.",
+      "signIn": "Aller à la connexion",
+      "invalidTitle": "Lien non valide",
+      "missingToken": "Ce lien est incomplet. Demandez un nouvel e-mail de vérification ci-dessous.",
+      "resendHint": "Saisissez votre adresse e-mail pour recevoir un nouveau lien.",
+      "retry": "Réessayer"
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié ?",
+      "description": "Saisissez votre adresse e-mail, nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+      "submit": "Envoyer le lien",
+      "sent": "Si un compte correspond à cette adresse, un lien de réinitialisation du mot de passe est en route.",
+      "backToSignIn": "Retour à la connexion"
+    },
+    "resetPassword": {
+      "title": "Choisir un nouveau mot de passe",
+      "description": "Tous vos appareils seront déconnectés une fois le mot de passe changé.",
+      "submit": "Changer le mot de passe",
+      "success": "Votre mot de passe a été changé. Connectez-vous avec le nouveau.",
+      "invalidTitle": "Lien non valide",
+      "missingToken": "Ce lien est incomplet. Demandez-en un nouveau.",
+      "requestNew": "Demander un nouveau lien"
+    }
   }
 }

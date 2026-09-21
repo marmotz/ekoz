@@ -54,4 +54,12 @@ describe('module boundaries', () => {
   it('lets routes import features and shared', async () => {
     expect(await lint('src/routes/page.ts')).toEqual([]);
   });
+
+  it('lets a feature import the generated code', async () => {
+    expect(await lint('src/features/a/uses-generated.ts')).toEqual([]);
+  });
+
+  it('rejects shared importing the generated code', async () => {
+    expect(await lint('src/shared/uses-generated.ts')).toHaveLength(1);
+  });
 });
