@@ -81,6 +81,6 @@ export const UsernameChangePendingDtoStatus = ["pending"] as const;
 export const UsernameChangePendingDtoStatusSchema = z.enum(UsernameChangePendingDtoStatus);
 export type UsernameChangePendingDtoStatus = (typeof UsernameChangePendingDtoStatus)[number];
 
-export const UsernameChangeRequestDtoStatus = ["pending", "approved", "rejected"] as const;
+export const UsernameChangeRequestDtoStatus = ["pending", "approved", "rejected", "cancelled"] as const;
 export const UsernameChangeRequestDtoStatusSchema = z.enum(UsernameChangeRequestDtoStatus);
 export type UsernameChangeRequestDtoStatus = (typeof UsernameChangeRequestDtoStatus)[number];

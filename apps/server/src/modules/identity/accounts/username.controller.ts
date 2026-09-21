@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -32,16 +33,32 @@ import {
   UsernameChangeAppliedDto,
   UsernameChangePendingDto,
   UsernameChangeRequestDto,
+  UsernameChangeStateDto,
 } from './username.dto.js';
-import { type UsernameChangeOutcome, UsernameService } from './username.service.js';
+import {
+  type UsernameChangeOutcome,
+  type UsernameChangeState,
+  UsernameService,
+} from './username.service.js';
 
-/** `PATCH /me/username` — policy-driven identifier change (technical.md §17). */
+/**
+ * `/me/username` — policy-driven identifier change (technical.md §17), its
+ * current state and the cancellation of a pending request.
+ */
 @ApiTags('Username')
 @ApiBearerAuth('bearer')
 @Controller('me/username')
 @UseGuards(AuthGuard)
 export class MeUsernameController {
   constructor(private readonly usernames: UsernameService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Policy, cooldown end and pending request of the calling account.' })
+  @ApiOkResponse({ type: UsernameChangeStateDto })
+  @ApiProblemResponses()
+  state(@CurrentPrincipal() principal: AuthPrincipal): Promise<UsernameChangeState> {
+    return this.usernames.stateOf(principal.userId);
+  }
 
   @Patch()
   @ApiOperation({ summary: 'Change the calling account’s identifier (policy-driven).' })
@@ -62,6 +79,15 @@ export class MeUsernameController {
   ): Promise<UsernameChangeOutcome> {
     return this.usernames.changeOwn(principal.userId, body.name);
   }
+
+  @Delete('request')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Cancel the calling account’s pending identifier change request.' })
+  @ApiNoContentResponse()
+  @ApiProblemResponses({ statuses: [404] })
+  cancelRequest(@CurrentPrincipal() principal: AuthPrincipal): Promise<void> {
+    return this.usernames.cancelOwnRequest(principal.userId);
+  }
 }
 
 /**
@@ -76,10 +102,14 @@ export class AdminUsernameRequestsController {
 
   @Get()
   @ApiOperation({ summary: 'List pending / resolved identifier-change requests.' })
-  @ApiQuery({ name: 'status', required: false, enum: ['pending', 'approved', 'rejected'] })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['pending', 'approved', 'rejected', 'cancelled'],
+  })
   @ApiOkResponse({ type: UsernameChangeRequestDto, isArray: true })
   @ApiProblemResponses({ statuses: [403] })
-  list(@Query('status') status?: 'pending' | 'approved' | 'rejected') {
+  list(@Query('status') status?: 'pending' | 'approved' | 'rejected' | 'cancelled') {
     return this.usernames.listRequests(status);
   }
 

@@ -10,6 +10,8 @@ import {
 } from './accounts/lifecycle.controller.js';
 import { LifecycleService } from './accounts/lifecycle.service.js';
 import { PasswordService } from './accounts/password.service.js';
+import { MePasswordController } from './accounts/password-change.controller.js';
+import { PasswordChangeService } from './accounts/password-change.service.js';
 import { PasswordResetController } from './accounts/password-reset.controller.js';
 import { PasswordResetService } from './accounts/password-reset.service.js';
 import {
@@ -72,6 +74,7 @@ import { ProfileService } from './profile/profile.service.js';
     AdminUserQueryController,
     EmailVerificationController,
     MeEmailController,
+    MePasswordController,
     InvitationsController,
     SetupController,
     SetupStateController,
@@ -100,6 +103,7 @@ import { ProfileService } from './profile/profile.service.js';
     InvitationService,
     SetupOwnerService,
     PasswordResetService,
+    PasswordChangeService,
     ProfileService,
     UsernameService,
     LifecycleService,

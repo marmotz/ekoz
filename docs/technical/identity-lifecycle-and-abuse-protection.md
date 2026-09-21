@@ -11,6 +11,13 @@ tasks and the features that build on identity, and are cheap to get wrong.
 
 ## Decision
 
+### Password change
+
+- `POST /me/password` re-authenticates with the current password, applies the
+  registration password policy (a new password equal to the current one is
+  refused), then revokes every other session of the account; the calling session
+  stays open. Audited as `auth.password_changed` with the revoked count.
+
 ### Password reset
 
 - `password_reset` row: opaque 32-byte token, only its `sha256` stored, TTL from
@@ -52,6 +59,11 @@ tasks and the features that build on identity, and are cheap to get wrong.
   (`identity.username_change_cooldown`, measured from the last
   `identity.username_changed` audit entry) → apply now; `approval` → create a
   `username_change_request` for an owner to approve or reject.
+- `GET /me/username` returns the policy, the end of the cooldown
+  (`available` only) and the caller's pending request. In `approval` mode a user
+  has at most one pending request (`409 identity.username_request_pending`) and
+  can cancel it with `DELETE /me/username/request` (status `cancelled`, audited as
+  `identity.username_change_cancelled`); an owner cannot resolve a cancelled one.
 - Applying a change (either path) reserves the freed `name`
   (`reason = "username_changed"`). History is unaffected: mentions and
   authorship key on the immutable `User.id`.
@@ -74,6 +86,11 @@ tasks and the features that build on identity, and are cheap to get wrong.
 - The real content type is sniffed from the magic bytes (`file-type`) and
   checked against `avatar.allowed_mime`; size is checked against
   `avatar.max_size_bytes`.
+- Every `avatarUrl` the server emits ends with `?v=<avatarBlobId>`. Blobs are
+  deduplicated by content, so the version changes exactly when the avatar does;
+  the route ignores it and keeps its `immutable` cache, now valid because the URL
+  changes with the content. The builders live in `core/http/user-links.ts` so
+  feature modules that cannot import `identity` emit the same URL.
 
 ### Credential-endpoint throttle
 

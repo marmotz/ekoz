@@ -59,5 +59,5 @@ export type UsernameChangeAppliedDtoStatus = (typeof UsernameChangeAppliedDtoSta
 export const UsernameChangePendingDtoStatus = ["pending"] as const;
 export type UsernameChangePendingDtoStatus = (typeof UsernameChangePendingDtoStatus)[number];
 
-export const UsernameChangeRequestDtoStatus = ["pending", "approved", "rejected"] as const;
+export const UsernameChangeRequestDtoStatus = ["pending", "approved", "rejected", "cancelled"] as const;
 export type UsernameChangeRequestDtoStatus = (typeof UsernameChangeRequestDtoStatus)[number];

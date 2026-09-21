@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { getRequestContext } from '../../../core/http/request-context.js';
+import { avatarUrl, userIdentifier } from '../../../core/http/user-links.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { type Blob, BlobService } from '../../../core/storage/blob.service.js';
 import { BlobAccessRegistry } from '../../../core/storage/blob-access.registry.js';
@@ -72,6 +73,7 @@ export class ProfileService implements OnModuleInit {
       ...view,
       bio: profile.bio,
       avatarUrl: this.avatarUrl(user.name, profile.avatarBlobId),
+      pendingEmail: await this.accounts.pendingEmailOf(userId),
     };
   }
 
@@ -87,7 +89,7 @@ export class ProfileService implements OnModuleInit {
     }
 
     return {
-      identifier: `${user.name}/${this.config.get('server.domain')}`,
+      identifier: userIdentifier(user.name, this.config.get('server.domain')),
       displayName: profile.displayName,
       bio: profile.bio,
       avatarUrl: this.avatarUrl(user.name, profile.avatarBlobId),
@@ -230,6 +232,6 @@ export class ProfileService implements OnModuleInit {
       return null;
     }
 
-    return `${this.config.get('server.api_url')}/users/${name}/avatar`;
+    return avatarUrl(this.config.get('server.api_url'), name, avatarBlobId);
   }
 }

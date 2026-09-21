@@ -13,6 +13,7 @@ export const MeViewDtoSchema = z.object({
   status: MeViewDtoStatusSchema,
   bio: z.string().nullable(),
   avatarUrl: z.url().nullable(),
+  pendingEmail: z.email().regex(new RegExp("^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$")).nullable(),
 });
 export type MeViewDtoDto = z.infer<typeof MeViewDtoSchema>;
 
@@ -26,6 +27,7 @@ export const MeViewDtoDeepSchema = z.object({
   status: MeViewDtoStatusSchema,
   bio: z.string().nullable(),
   avatarUrl: z.url().nullable(),
+  pendingEmail: z.email().regex(new RegExp("^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$")).nullable(),
 });
 export type MeViewDtoDeepDto = z.infer<typeof MeViewDtoDeepSchema>;
 
@@ -39,6 +41,7 @@ export const MeViewDtoCreateSchema = z.object({
   status: MeViewDtoStatusSchema,
   bio: z.string().nullable(),
   avatarUrl: z.url().nullable(),
+  pendingEmail: z.email().regex(new RegExp("^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$")).nullable(),
 });
 export type MeViewDtoCreateDto = z.infer<typeof MeViewDtoCreateSchema>;
 
@@ -52,6 +55,7 @@ export const MeViewDtoCreateDeepSchema = z.object({
   status: MeViewDtoStatusSchema,
   bio: z.string().nullable(),
   avatarUrl: z.url().nullable(),
+  pendingEmail: z.email().regex(new RegExp("^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$")).nullable(),
 });
 export type MeViewDtoCreateDeepDto = z.infer<typeof MeViewDtoCreateDeepSchema>;
 
@@ -65,6 +69,7 @@ export const MeViewDtoUpdateSchema = z.object({
   status: MeViewDtoStatusSchema,
   bio: z.string().nullable(),
   avatarUrl: z.url().nullable(),
+  pendingEmail: z.email().regex(new RegExp("^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$")).nullable(),
 }).partial();
 export type MeViewDtoUpdateDto = z.infer<typeof MeViewDtoUpdateSchema>;
 
@@ -78,6 +83,7 @@ export const MeViewDtoUpdateDeepSchema = z.object({
   status: MeViewDtoStatusSchema,
   bio: z.string().nullable(),
   avatarUrl: z.url().nullable(),
+  pendingEmail: z.email().regex(new RegExp("^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$")).nullable(),
 }).partial();
 export type MeViewDtoUpdateDeepDto = z.infer<typeof MeViewDtoUpdateDeepSchema>;
 
@@ -91,6 +97,7 @@ const MeViewDtoWhereSchemaBase = z.object({
   status: EnumMeViewDtoStatusFilter.optional(),
   bio: StringFilter.optional(),
   avatarUrl: StringFilter.optional(),
+  pendingEmail: StringFilter.optional(),
 });
 export const MeViewDtoWhereSchema: z.ZodType<MeViewDtoWhereDto> = z.lazy(() => MeViewDtoWhereSchemaBase.extend({
   AND: z.union([MeViewDtoWhereSchema, z.array(MeViewDtoWhereSchema)]).optional(),
@@ -109,6 +116,7 @@ const MeViewDtoWhereDeepSchemaBase = z.object({
   status: EnumMeViewDtoStatusFilter.optional(),
   bio: StringFilter.optional(),
   avatarUrl: StringFilter.optional(),
+  pendingEmail: StringFilter.optional(),
 });
 export const MeViewDtoWhereDeepSchema: z.ZodType<MeViewDtoWhereDeepDto> = z.lazy(() => MeViewDtoWhereDeepSchemaBase.extend({
   AND: z.union([MeViewDtoWhereDeepSchema, z.array(MeViewDtoWhereDeepSchema)]).optional(),
@@ -127,6 +135,7 @@ export const MeViewDtoSelectSchema = z.object({
   status: z.boolean().optional(),
   bio: z.boolean().optional(),
   avatarUrl: z.boolean().optional(),
+  pendingEmail: z.boolean().optional(),
 });
 export type MeViewDtoSelectDto = z.infer<typeof MeViewDtoSelectSchema>;
 
@@ -140,5 +149,6 @@ export const MeViewDtoSelectDeepSchema = z.object({
   status: z.boolean().optional(),
   bio: z.boolean().optional(),
   avatarUrl: z.boolean().optional(),
+  pendingEmail: z.boolean().optional(),
 });
 export type MeViewDtoSelectDeepDto = z.infer<typeof MeViewDtoSelectDeepSchema>;

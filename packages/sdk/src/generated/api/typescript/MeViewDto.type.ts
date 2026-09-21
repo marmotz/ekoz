@@ -26,6 +26,11 @@ export type MeViewDtoDto = {
    * @format url
    */
   avatarUrl: string | null;
+  /**
+   * @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   * @format email
+   */
+  pendingEmail: string | null;
 };
 
 export type MeViewDtoDeepDto = {
@@ -50,6 +55,11 @@ export type MeViewDtoDeepDto = {
    * @format url
    */
   avatarUrl: string | null;
+  /**
+   * @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   * @format email
+   */
+  pendingEmail: string | null;
 };
 
 export type MeViewDtoCreateDto = {
@@ -74,6 +84,11 @@ export type MeViewDtoCreateDto = {
    * @format url
    */
   avatarUrl: string | null;
+  /**
+   * @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   * @format email
+   */
+  pendingEmail: string | null;
 };
 
 export type MeViewDtoCreateDeepDto = {
@@ -98,6 +113,11 @@ export type MeViewDtoCreateDeepDto = {
    * @format url
    */
   avatarUrl: string | null;
+  /**
+   * @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   * @format email
+   */
+  pendingEmail: string | null;
 };
 
 export type MeViewDtoUpdateDto = Partial<{
@@ -122,6 +142,11 @@ export type MeViewDtoUpdateDto = Partial<{
    * @format url
    */
   avatarUrl: string | null;
+  /**
+   * @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   * @format email
+   */
+  pendingEmail: string | null;
 }>;
 
 export type MeViewDtoUpdateDeepDto = Partial<{
@@ -146,6 +171,11 @@ export type MeViewDtoUpdateDeepDto = Partial<{
    * @format url
    */
   avatarUrl: string | null;
+  /**
+   * @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+   * @format email
+   */
+  pendingEmail: string | null;
 }>;
 
 export type MeViewDtoWhereDto = {
@@ -158,6 +188,7 @@ export type MeViewDtoWhereDto = {
   status?: EnumMeViewDtoStatusFilter;
   bio?: StringFilter;
   avatarUrl?: StringFilter;
+  pendingEmail?: StringFilter;
   AND?: MeViewDtoWhereDto | MeViewDtoWhereDto[];
   OR?: MeViewDtoWhereDto | MeViewDtoWhereDto[];
   NOT?: MeViewDtoWhereDto | MeViewDtoWhereDto[];
@@ -173,6 +204,7 @@ export type MeViewDtoWhereDeepDto = {
   status?: EnumMeViewDtoStatusFilter;
   bio?: StringFilter;
   avatarUrl?: StringFilter;
+  pendingEmail?: StringFilter;
   AND?: MeViewDtoWhereDeepDto | MeViewDtoWhereDeepDto[];
   OR?: MeViewDtoWhereDeepDto | MeViewDtoWhereDeepDto[];
   NOT?: MeViewDtoWhereDeepDto | MeViewDtoWhereDeepDto[];
@@ -188,6 +220,7 @@ export type MeViewDtoSelectDto = {
   status?: boolean;
   bio?: boolean;
   avatarUrl?: boolean;
+  pendingEmail?: boolean;
 };
 
 export type MeViewDtoSelectDeepDto = {
@@ -200,4 +233,5 @@ export type MeViewDtoSelectDeepDto = {
   status?: boolean;
   bio?: boolean;
   avatarUrl?: boolean;
+  pendingEmail?: boolean;
 };

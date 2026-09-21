@@ -31,6 +31,11 @@ that does not touch this file.
 
 ### Added
 
+- `POST /me/password` changes the password of the signed-in account and revokes its other sessions. (#101)
+- `GET /me/username` exposes the identifier change policy, cooldown end and pending request. (#102)
+- A pending identifier change request can be cancelled by its author, and only one can be pending at a time. (#102)
+- `GET /me` and `PATCH /me/profile` expose the address of a pending email change. (#103)
+- Every `avatarUrl` carries a version that changes with the avatar content. (#103)
 - Public `GET /auth/policy` exposing the registration mode, the email-verification requirement and the minimum password length. (#90)
 - Local moderation: kick, ban/unban and delete-any-message now also write an
   audit trail, exposed at `GET /rooms/:id/moderation-log`. (#13)

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dropCheckConstraint.username_change_request.username_change_request_status_check_19a2b525",
+    "label": "Drop check constraint \"username_change_request_status_check_19a2b525\" on \"username_change_request\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "username_change_request_status_check_19a2b525",
+        "table": "username_change_request"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"username_change_request_status_check_19a2b525\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "username_change_request_status_check_19a2b525",
+          "public",
+          "\"public\".\"username_change_request\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"username_change_request_status_check_19a2b525\"",
+        "sql": "ALTER TABLE \"public\".\"username_change_request\" DROP CONSTRAINT \"username_change_request_status_check_19a2b525\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"username_change_request_status_check_19a2b525\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "username_change_request_status_check_19a2b525",
+          "public",
+          "\"public\".\"username_change_request\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.username_change_request.username_change_request_status_check_fc16580c",
+    "label": "Add check constraint \"username_change_request_status_check_fc16580c\" on \"username_change_request\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "username_change_request_status_check_fc16580c",
+        "table": "username_change_request"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"username_change_request_status_check_fc16580c\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "username_change_request_status_check_fc16580c",
+          "public",
+          "\"public\".\"username_change_request\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"username_change_request_status_check_fc16580c\"",
+        "sql": "ALTER TABLE \"public\".\"username_change_request\" ADD CONSTRAINT \"username_change_request_status_check_fc16580c\" CHECK (\"status\" IN ('pending', 'approved', 'rejected', 'cancelled'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"username_change_request_status_check_fc16580c\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "username_change_request_status_check_fc16580c",
+          "public",
+          "\"public\".\"username_change_request\""
+        ]
+      }
+    ]
+  }
+]
