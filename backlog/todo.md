@@ -59,14 +59,14 @@ _technical design, see [technical.md](features/web-client-chat/./technical.md)_ 
 
 ## Web client rooms ·  [overview](features/web-client-rooms/overview.md)
 
-_technical design, see [technical.md](features/web-client-rooms/./technical.md)_ — 0/15 tasks done
+_technical design, see [technical.md](features/web-client-rooms/./technical.md)_ — 4/15 tasks done
 
 | Done | Issue                                            | Title                                                            | Blocked by              |
 |------|--------------------------------------------------|------------------------------------------------------------------|-------------------------|
-| [ ]  | [#62](https://github.com/marmotz/ekoz/issues/62) | Conversations: creator becomes a member on room creation         | —                       |
-| [ ]  | [#63](https://github.com/marmotz/ekoz/issues/63) | Conversations: UserSummary and GET /me/room-invitations          | #103                    |
-| [ ]  | [#64](https://github.com/marmotz/ekoz/issues/64) | Conversations: GET /rooms/:id/preview for invite-only rooms      | —                       |
-| [ ]  | [#65](https://github.com/marmotz/ekoz/issues/65) | Client web: sidebar section slot and useMe                       | —                       |
+| [x]  | [#62](https://github.com/marmotz/ekoz/issues/62) | Conversations: creator becomes a member on room creation         | —                       |
+| [x]  | [#63](https://github.com/marmotz/ekoz/issues/63) | Conversations: UserSummary and GET /me/room-invitations          | #103                    |
+| [x]  | [#64](https://github.com/marmotz/ekoz/issues/64) | Conversations: GET /rooms/:id/preview for invite-only rooms      | —                       |
+| [x]  | [#65](https://github.com/marmotz/ekoz/issues/65) | Client web: sidebar section slot and useMe                       | —                       |
 | [ ]  | [#79](https://github.com/marmotz/ekoz/issues/79) | Conversations: GET /rooms lists the caller's spaces and channels | #62                     |
 | [ ]  | [#80](https://github.com/marmotz/ekoz/issues/80) | Conversations: GET /rooms/:id/join-requests                      | #63                     |
 | [ ]  | [#81](https://github.com/marmotz/ekoz/issues/81) | SDK: rooms, room invitations and directory bindings              | #79, #63, #64, #80      |

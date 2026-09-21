@@ -68,3 +68,62 @@ export function toRoomView(row: RoomRow): RoomView {
     updatedAt: row.updatedAt,
   };
 }
+
+/** The caller's own pending or rejected join request, as shown on a room preview. */
+export const RoomPreviewJoinRequestSchema = z.object({
+  id: z.string(),
+  createdAt: z.iso.datetime(),
+  status: z.enum(['pending', 'rejected']),
+});
+export type RoomPreviewJoinRequest = z.infer<typeof RoomPreviewJoinRequestSchema>;
+
+/**
+ * Minimum a non-member of an `invite` room may see to ask to join it
+ * (`GET /rooms/:id/preview`).
+ */
+export const RoomPreviewSchema = z.object({
+  id: z.string(),
+  type: roomTypeSchema,
+  name: nullableString(),
+  topic: nullableString(),
+  joinRequest: RoomPreviewJoinRequestSchema.nullable(),
+});
+export type RoomPreview = z.infer<typeof RoomPreviewSchema>;
+export class RoomPreviewDto extends createZodDto(RoomPreviewSchema) {}
+
+export interface RoomPreviewJoinRequestRow {
+  id: string;
+  createdAt: string;
+  approved: boolean | null;
+}
+
+/**
+ * `approved` `null` -> pending, `false` -> rejected, `true` -> no request
+ * (the caller is a member by now, there is nothing left to show).
+ */
+export function toPreviewJoinRequest(
+  row: RoomPreviewJoinRequestRow | null,
+): RoomPreviewJoinRequest | null {
+  if (!row || row.approved === true) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    createdAt: row.createdAt,
+    status: row.approved === null ? 'pending' : 'rejected',
+  };
+}
+
+export function toRoomPreview(
+  row: RoomRow,
+  joinRequest: RoomPreviewJoinRequestRow | null,
+): RoomPreview {
+  return {
+    id: row.id,
+    type: row.type,
+    name: row.name,
+    topic: row.topic,
+    joinRequest: toPreviewJoinRequest(joinRequest),
+  };
+}

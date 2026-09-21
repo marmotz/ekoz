@@ -16,3 +16,4 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Wire the SDK client and the session: `localStorage` session store, `SdkProvider`, `useSession()`, `RequireAuth` and sign-out on a lost session (#34).
 - Add the application shell: responsive sidebar fed by a navigation registry, top bar with page title, language switcher and theme toggle, and `/` and `/login` placeholder routes (#35).
 - Check in CI that a change under `src/` comes with a changelog entry (#36).
+- Add a sidebar section registry, rendered under the navigation in the fixed sidebar and the mobile sheet, and a `useMe()` hook over `GET /me` (#65).

@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -29,9 +39,27 @@ import {
   JoinRequestViewDto,
   type MembershipView,
   MembershipViewDto,
+  type MyRoomInvitationListView,
+  MyRoomInvitationListViewDto,
   type RoomInvitationView,
   RoomInvitationViewDto,
 } from './membership.view.js';
+
+@ApiTags('Conversations — membership')
+@ApiBearerAuth('bearer')
+@Controller('me/room-invitations')
+@UseGuards(AuthGuard)
+export class MyRoomInvitationsController {
+  constructor(private readonly membership: MembershipService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Pending room invitations of the caller, newest first.' })
+  @ApiOkResponse({ type: MyRoomInvitationListViewDto })
+  @ApiProblemResponses()
+  list(@CurrentPrincipal() principal: AuthPrincipal): Promise<MyRoomInvitationListView> {
+    return this.membership.listMyInvitations(principal);
+  }
+}
 
 @ApiTags('Conversations — membership')
 @ApiBearerAuth('bearer')

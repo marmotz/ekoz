@@ -1,0 +1,19 @@
+[
+  {
+    "id": "data.backfill-room-creator-membership",
+    "label": "Backfill creator memberships for existing spaces and channels",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Insert a membership for the creator of each room lacking one",
+        "sql": "INSERT INTO \"public\".\"membership\" (\"room_id\", \"user_id\", \"role\", \"joined_at\", \"invited_by_id\")\nSELECT r.\"id\", r.\"created_by_id\",\n  CASE r.\"type\" WHEN 'space' THEN 'space_admin' ELSE 'room_admin' END,\n  r.\"created_at\", NULL\nFROM \"public\".\"room\" r\nWHERE r.\"type\" IN ('space', 'channel')\n  AND r.\"deleted_at\" IS NULL\n  AND r.\"created_by_id\" IS NOT NULL\nON CONFLICT (\"room_id\", \"user_id\") DO NOTHING",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  }
+]

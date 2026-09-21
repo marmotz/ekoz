@@ -28,7 +28,7 @@ shared and ignore the `type`. The differences are rules conditioned on the
 | Attached to a space | yes (`space_id`) | no | no |
 | Name / description / avatar | yes | derived from participants | optional name |
 | Directory | per visibility | never | never |
-| Membership | managed by roles | fixed (2, at creation) | additions allowed |
+| Membership | managed by roles (the creator is the first member) | fixed (2, at creation) | additions allowed |
 | Roles | full | flattened (peer to peer) | flattened + light creator |
 | Creation | space admin | implicit, by a user | implicit |
 | Leaving | yes | hide / archive | leaving allowed |

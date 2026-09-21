@@ -4,6 +4,10 @@ import { beforeEach, expect, it, vi } from 'vitest';
 
 import { AppShell } from '@/shared/layout/app-shell';
 import { clearNavRegistry, registerNav } from '@/shared/layout/nav-registry';
+import {
+  clearSidebarSectionRegistry,
+  registerSidebarSection,
+} from '@/shared/layout/sidebar-section-registry';
 import { renderWithProviders } from '../../../test/render';
 
 vi.mock('@/shared/ui/dropdown-menu', () => import('../../../test/dropdown-menu-mock'));
@@ -18,6 +22,7 @@ function shell() {
 
 beforeEach(() => {
   clearNavRegistry();
+  clearSidebarSectionRegistry();
   registerNav({ id: 'home', to: '/', labelKey: 'nav.home' });
 });
 
@@ -61,4 +66,33 @@ it('puts the language switcher, the theme toggle and the user menu slot in the t
   expect(within(header).getByRole('button', { name: 'Language' })).toBeInTheDocument();
   expect(within(header).getByRole('button', { name: 'Theme' })).toBeInTheDocument();
   expect(within(header).getByRole('button', { name: 'me' })).toBeInTheDocument();
+});
+
+it('renders the registered sidebar sections in order, below the navigation', async () => {
+  registerSidebarSection({ id: 'second', order: 2, component: () => <p>second section</p> });
+  registerSidebarSection({ id: 'first', order: 1, component: () => <p>first section</p> });
+  renderWithProviders(shell());
+
+  const sidebar = (await screen.findByRole('complementary')) as HTMLElement;
+  const text = sidebar.textContent ?? '';
+  expect(text.indexOf('Home')).toBeLessThan(text.indexOf('first section'));
+  expect(text.indexOf('first section')).toBeLessThan(text.indexOf('second section'));
+});
+
+it('renders the registered sidebar sections in the sheet too, and lets them close it', async () => {
+  registerSidebarSection({
+    id: 'rooms',
+    component: ({ onNavigate }) => (
+      <button type="button" onClick={onNavigate}>
+        room link
+      </button>
+    ),
+  });
+  renderWithProviders(shell());
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Open navigation' }));
+  const sheet = await screen.findByRole('dialog');
+  await userEvent.click(within(sheet).getByRole('button', { name: 'room link' }));
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });

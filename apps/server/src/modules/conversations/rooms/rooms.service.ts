@@ -13,7 +13,14 @@ import {
 } from '../conversations.errors.js';
 import { EventLogService } from '../events/event-log.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
-import { type RoomRow, type RoomView, toRoomView } from './room.view.js';
+import {
+  type RoomPreview,
+  type RoomPreviewJoinRequestRow,
+  type RoomRow,
+  type RoomView,
+  toRoomPreview,
+  toRoomView,
+} from './room.view.js';
 import type { CreateChannel, CreateSpace, MoveRoom, UpdateRoom } from './rooms.dto.js';
 
 export interface RoomActor {
@@ -23,9 +30,9 @@ export interface RoomActor {
 
 /**
  * Room CRUD and hierarchy (technical.md §4-§5, §7, conversation-data-model.md,
- * issue #1). `Membership`, invitations, `dm` / `group_dm` creation and the
- * public directory each arrive with their own issue (#4-#6); this service only
- * ever creates `space` and `channel` rooms.
+ * issue #1). Invitations, `dm` / `group_dm` creation and the public directory
+ * each arrive with their own issue (#4-#6); this service only ever creates
+ * `space` and `channel` rooms, and enrols the creator as their first member.
  */
 @Injectable()
 export class RoomsService {
@@ -77,6 +84,25 @@ export class RoomsService {
     await this.permissions.assertCan(actor, id, 'room.read');
 
     return toRoomView(await this.findRoomOrThrow(id));
+  }
+
+  /**
+   * What a non-member of an `invite` room may see to ask to join it. Any other
+   * room (`public`, `private`, deleted, unknown) is a `404`, so a `private`
+   * room is never revealed.
+   */
+  async getPreview(actor: RoomActor, id: string): Promise<RoomPreview> {
+    const room = (await this.prisma.orm.public.Room.where({ id }).first()) as RoomRow | null;
+    if (!room || room.deletedAt || room.visibility !== 'invite') {
+      throw new RoomNotFoundError();
+    }
+
+    const joinRequest = (await this.prisma.orm.public.RoomJoinRequest.where({
+      roomId: id,
+      userId: actor.userId,
+    }).first()) as RoomPreviewJoinRequestRow | null;
+
+    return toRoomPreview(room, joinRequest);
   }
 
   async getChildren(actor: RoomActor, id: string): Promise<RoomView[]> {
@@ -353,9 +379,30 @@ export class RoomsService {
         },
       });
 
+      // The creator becomes a member so a membership-based `GET /rooms` lists
+      // the room to them (`space_admin` for a space, `room_admin` for a channel).
+      const creatorRole = input.type === 'space' ? 'space_admin' : 'room_admin';
+      await tx.orm.public.Membership.create({
+        roomId: room.id,
+        userId: actor.userId,
+        role: creatorRole,
+        invitedById: null,
+      });
+
+      await this.eventLog.append(tx, {
+        roomId: room.id,
+        type: 'member_joined',
+        senderId: actor.userId,
+        content: { userId: actor.userId, role: creatorRole },
+      });
+
       return room;
     })) as RoomRow;
 
-    return toRoomView(created);
+    await this.permissions.invalidateSubtree(created.id);
+
+    // Re-read: the row returned by the insert predates the two events just
+    // appended, so its `lastSeq` would be stale.
+    return toRoomView(await this.findRoomOrThrow(created.id));
   }
 }

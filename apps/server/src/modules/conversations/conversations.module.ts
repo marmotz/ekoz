@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
+import { UserSummaryReader } from '../../core/users/user-summary.reader.js';
 import { DirectoryController } from './directory/directory.controller.js';
 import { DirectoryService } from './directory/directory.service.js';
 import { DmController } from './dm/dm.controller.js';
 import { DmService } from './dm/dm.service.js';
 import { EventLogService } from './events/event-log.service.js';
-import { MembershipController } from './membership/membership.controller.js';
+import {
+  MembershipController,
+  MyRoomInvitationsController,
+} from './membership/membership.controller.js';
 import { MembershipService } from './membership/membership.service.js';
 import { MessagesController } from './messages/messages.controller.js';
 import { MessagesService } from './messages/messages.service.js';
@@ -49,6 +53,7 @@ import { SyncService } from './streaming/sync.service.js';
     RoomsController,
     PermissionsController,
     MembershipController,
+    MyRoomInvitationsController,
     DirectoryController,
     MessagesController,
     DmController,
@@ -67,6 +72,7 @@ import { SyncService } from './streaming/sync.service.js';
     RoomsService,
     RoleDefaultCapabilitiesSeeder,
     MembershipService,
+    UserSummaryReader,
     DirectoryService,
     MessagesService,
     ModerationService,

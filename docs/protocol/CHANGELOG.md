@@ -85,6 +85,16 @@ All notable changes to the Ekoz protocol. Format
   carry `roomId` folded into `data`, delivery is poll-based (not push) for the
   durable half with ephemeral presence/typing pushed live in-process, and
   feed pruning is age-only (no per-session acked-`feedSeq` floor yet).
+- Room creation makes the creator a member (`space_admin` for a space,
+  `room_admin` for a channel): `POST /spaces` and `POST /rooms` append
+  `member_joined` right after `room_created`. Behaviour change: a room now has
+  a member from its first event, so its `seq` values shift by one.
+- `GET /rooms/:id/preview` in [`rooms-and-permissions.md`](rooms-and-permissions.md):
+  name, topic and the caller's own join request state for an invite-only room a
+  non-member cannot read.
+- `GET /me/room-invitations` and the shared `UserSummary` object in
+  [`rooms-and-permissions.md`](rooms-and-permissions.md): the caller's pending
+  room invitations with the room and the inviter embedded.
 
 ### Fixed
 

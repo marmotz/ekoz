@@ -35,8 +35,23 @@ export type MeViewDtoStatus = (typeof MeViewDtoStatus)[number];
 export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "space.create_child", "space.manage", "directory.publish"] as const;
 export type MyPermissionsResponseDtoCapabilities = (typeof MyPermissionsResponseDtoCapabilities)[number];
 
+export const MyRoomInvitationListViewDtoItemsRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export type MyRoomInvitationListViewDtoItemsRole = (typeof MyRoomInvitationListViewDtoItemsRole)[number];
+
+export const MyRoomInvitationListViewDtoItemsRoomType = ["space", "channel", "dm", "group_dm"] as const;
+export type MyRoomInvitationListViewDtoItemsRoomType = (typeof MyRoomInvitationListViewDtoItemsRoomType)[number];
+
+export const MyRoomInvitationListViewDtoItemsRoomVisibility = ["public", "private", "invite"] as const;
+export type MyRoomInvitationListViewDtoItemsRoomVisibility = (typeof MyRoomInvitationListViewDtoItemsRoomVisibility)[number];
+
 export const RoomInvitationViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type RoomInvitationViewDtoRole = (typeof RoomInvitationViewDtoRole)[number];
+
+export const RoomPreviewDtoJoinRequestStatus = ["pending", "rejected"] as const;
+export type RoomPreviewDtoJoinRequestStatus = (typeof RoomPreviewDtoJoinRequestStatus)[number];
+
+export const RoomPreviewDtoType = ["space", "channel", "dm", "group_dm"] as const;
+export type RoomPreviewDtoType = (typeof RoomPreviewDtoType)[number];
 
 export const RoomViewDtoDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type RoomViewDtoDefaultRole = (typeof RoomViewDtoDefaultRole)[number];

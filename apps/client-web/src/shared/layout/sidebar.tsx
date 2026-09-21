@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { getNavEntries } from '@/shared/layout/nav-registry';
+import { getSidebarSections } from '@/shared/layout/sidebar-section-registry';
 import { cn } from '@/shared/lib/utils';
 
 /** The registered navigation entries. */
@@ -29,6 +30,13 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+/** The sections features registered, in order, below the navigation. */
+export function SidebarSections({ onNavigate }: { onNavigate?: () => void }) {
+  return getSidebarSections().map(({ id, component: Section }) => (
+    <Section key={id} onNavigate={onNavigate} />
+  ));
+}
+
 /** Fixed-width column shown from the `md` breakpoint up; below it the shell uses a `Sheet`. */
 export function Sidebar() {
   const { t } = useTranslation();
@@ -37,6 +45,7 @@ export function Sidebar() {
     <aside className="hidden w-60 shrink-0 flex-col gap-4 border-r p-4 md:flex">
       <span className="px-3 text-lg font-semibold">{t('appName')}</span>
       <SidebarNav />
+      <SidebarSections />
     </aside>
   );
 }

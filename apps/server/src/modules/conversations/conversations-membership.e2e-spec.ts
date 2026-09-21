@@ -17,13 +17,26 @@ describe('conversations — membership (integration)', () => {
   let accounts: AccountService;
 
   const password = 'a-perfectly-fine-passphrase';
+  // 1x1 transparent PNG.
+  const pngBytes = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64',
+  );
   const server = () => app.getHttpServer();
 
+  // Logins are rate limited: one token per account for the whole file.
+  const tokens = new Map<string, string>();
   const login = async (identifier: string): Promise<string> => {
+    const cached = tokens.get(identifier);
+    if (cached) {
+      return cached;
+    }
+
     const res = await request(server())
       .post('/auth/login')
       .send({ identifier, password })
       .expect(200);
+    tokens.set(identifier, res.body.accessToken as string);
 
     return res.body.accessToken as string;
   };
@@ -60,6 +73,22 @@ describe('conversations — membership (integration)', () => {
     ).body;
   };
 
+  const createInviteChannel = async (ownerToken: string, name: string) => {
+    const space = (
+      await request(server())
+        .post('/spaces')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ name: `${name}-space`, visibility: 'private' })
+    ).body;
+
+    return (
+      await request(server())
+        .post('/rooms')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ parentId: space.id, name, topic: `${name} topic`, visibility: 'invite' })
+    ).body;
+  };
+
   beforeAll(async () => {
     database = await startTestDatabase();
     process.env.DATABASE_URL = database.url;
@@ -79,7 +108,7 @@ describe('conversations — membership (integration)', () => {
       isOwner: true,
       emailVerified: true,
     });
-    for (const name of ['alice', 'bob', 'carol']) {
+    for (const name of ['alice', 'bob', 'carol', 'dave']) {
       await accounts.createAccount({
         name,
         email: `${name}@ekoz.example.com`,
@@ -286,5 +315,264 @@ describe('conversations — membership (integration)', () => {
       .delete(`/rooms/${channel.id}/members/${carol.id}`)
       .set('Authorization', `Bearer ${aliceToken}`)
       .expect(404);
+  });
+
+  describe('room preview', () => {
+    const preview = (roomId: string, token: string) =>
+      request(server()).get(`/rooms/${roomId}/preview`).set('Authorization', `Bearer ${token}`);
+
+    it('shows an invite room to a non-member, with the state of their join request', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const channel = await createInviteChannel(ownerToken, 'preview-invite');
+
+      // A non-member cannot read the room itself, but can preview it.
+      await request(server())
+        .get(`/rooms/${channel.id}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(403);
+
+      const none = await preview(channel.id, aliceToken).expect(200);
+      expect(none.body).toEqual({
+        id: channel.id,
+        type: 'channel',
+        name: 'preview-invite',
+        topic: 'preview-invite topic',
+        joinRequest: null,
+      });
+
+      const created = await request(server())
+        .post(`/rooms/${channel.id}/join-request`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+      const pending = await preview(channel.id, aliceToken).expect(200);
+      expect(pending.body.joinRequest).toEqual({
+        id: created.body.id,
+        createdAt: created.body.createdAt,
+        status: 'pending',
+      });
+
+      await request(server())
+        .post(`/rooms/${channel.id}/join-requests/${created.body.id}/reject`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+      const rejected = await preview(channel.id, aliceToken).expect(200);
+      expect(rejected.body.joinRequest).toMatchObject({ id: created.body.id, status: 'rejected' });
+
+      // Asking again resets the same request to pending.
+      await request(server())
+        .post(`/rooms/${channel.id}/join-request`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+      const again = await preview(channel.id, aliceToken).expect(200);
+      expect(again.body.joinRequest).toMatchObject({ id: created.body.id, status: 'pending' });
+
+      await request(server())
+        .post(`/rooms/${channel.id}/join-requests/${created.body.id}/approve`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(201);
+      const approved = await preview(channel.id, aliceToken).expect(200);
+      expect(approved.body.joinRequest).toBeNull();
+    });
+
+    it('answers a member and a banned user too', async () => {
+      const ownerToken = await login('owner');
+      const bobToken = await login('bob');
+      const bob = (await accounts.findByIdentifier('bob'))!;
+      const channel = await createInviteChannel(ownerToken, 'preview-member-banned');
+
+      await preview(channel.id, ownerToken).expect(200);
+
+      await request(server())
+        .post(`/rooms/${channel.id}/bans`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ userId: bob.id })
+        .expect(204);
+      const banned = await preview(channel.id, bobToken).expect(200);
+      expect(banned.body).toMatchObject({ id: channel.id, joinRequest: null });
+    });
+
+    it('answers 404 for a public, a private, a deleted and an unknown room', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+
+      const publicChannel = await createPublicChannel(ownerToken, 'preview-public');
+      const privateChannel = await createPrivateChannel(ownerToken, 'preview-private');
+      const deletedChannel = await createInviteChannel(ownerToken, 'preview-deleted');
+      await request(server())
+        .delete(`/rooms/${deletedChannel.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      for (const id of [
+        publicChannel.id,
+        privateChannel.id,
+        deletedChannel.id,
+        '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+      ]) {
+        const res = await preview(id, aliceToken).expect(404);
+        expect(res.body.code).toBe('room.not_found');
+      }
+    });
+
+    it('requires authentication', async () => {
+      await request(server()).get('/rooms/01ARZ3NDEKTSV4RRFFQ69G5FAV/preview').expect(401);
+    });
+  });
+
+  describe('my room invitations', () => {
+    const list = (token: string) =>
+      request(server()).get('/me/room-invitations').set('Authorization', `Bearer ${token}`);
+
+    const invite = (ownerToken: string, roomId: string, userId: string) =>
+      request(server())
+        .post(`/rooms/${roomId}/invitations`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ userId })
+        .expect(201);
+
+    it('requires authentication', async () => {
+      await request(server()).get('/me/room-invitations').expect(401);
+    });
+
+    it('lists only pending invitations of live rooms, newest first, with room and inviter', async () => {
+      const ownerToken = await login('owner');
+      const carolToken = await login('carol');
+      const carol = (await accounts.findByIdentifier('carol'))!;
+      const bob = (await accounts.findByIdentifier('bob'))!;
+
+      const owner = (
+        await request(server()).get('/me').set('Authorization', `Bearer ${ownerToken}`).expect(200)
+      ).body;
+      await request(server())
+        .put('/me/avatar')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .attach('file', pngBytes, 'a.png')
+        .expect(200);
+      const ownerAfterAvatar = (
+        await request(server()).get('/me').set('Authorization', `Bearer ${ownerToken}`).expect(200)
+      ).body;
+
+      const first = await createPrivateChannel(ownerToken, 'my-inv-first');
+      const second = await createInviteChannel(ownerToken, 'my-inv-second');
+      const accepted = await createPrivateChannel(ownerToken, 'my-inv-accepted');
+      const declined = await createPrivateChannel(ownerToken, 'my-inv-declined');
+      const deletedRoom = await createPrivateChannel(ownerToken, 'my-inv-deleted');
+      const others = await createPrivateChannel(ownerToken, 'my-inv-others');
+
+      const firstInvitation = (await invite(ownerToken, first.id, carol.id)).body;
+      const secondInvitation = (await invite(ownerToken, second.id, carol.id)).body;
+      const acceptedInvitation = (await invite(ownerToken, accepted.id, carol.id)).body;
+      const declinedInvitation = (await invite(ownerToken, declined.id, carol.id)).body;
+      await invite(ownerToken, deletedRoom.id, carol.id);
+      await invite(ownerToken, others.id, bob.id);
+
+      await request(server())
+        .post(`/invitations/${acceptedInvitation.id}/accept`)
+        .set('Authorization', `Bearer ${carolToken}`)
+        .expect(201);
+      await request(server())
+        .post(`/invitations/${declinedInvitation.id}/decline`)
+        .set('Authorization', `Bearer ${carolToken}`)
+        .expect(204);
+      await request(server())
+        .delete(`/rooms/${deletedRoom.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const res = await list(carolToken).expect(200);
+
+      expect(res.body.items.map((i: { id: string }) => i.id)).toEqual([
+        secondInvitation.id,
+        firstInvitation.id,
+      ]);
+      expect(res.body.items[0]).toEqual({
+        id: secondInvitation.id,
+        role: 'member',
+        createdAt: secondInvitation.createdAt,
+        room: {
+          id: second.id,
+          type: 'channel',
+          name: 'my-inv-second',
+          topic: 'my-inv-second topic',
+          visibility: 'invite',
+        },
+        // Same builders as `GET /me`, so the two cannot drift.
+        invitedBy: {
+          id: owner.id,
+          identifier: ownerAfterAvatar.identifier,
+          displayName: 'The Owner',
+          avatarUrl: ownerAfterAvatar.avatarUrl,
+        },
+      });
+      expect(ownerAfterAvatar.avatarUrl).toContain('?v=');
+    });
+
+    it('answers an empty list when nothing is pending', async () => {
+      const daveToken = await login('dave');
+      const res = await list(daveToken).expect(200);
+      expect(res.body).toEqual({ items: [] });
+    });
+
+    it('nulls the inviter fields once their account is deleted', async () => {
+      const ownerToken = await login('owner');
+      const carolToken = await login('carol');
+      const daveToken = await login('dave');
+      const carol = (await accounts.findByIdentifier('carol'))!;
+      const dave = (await accounts.findByIdentifier('dave'))!;
+      const channel = await createPrivateChannel(ownerToken, 'my-inv-deleted-inviter');
+
+      const daveInvitation = (
+        await request(server())
+          .post(`/rooms/${channel.id}/invitations`)
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ userId: dave.id, role: 'room_admin' })
+          .expect(201)
+      ).body;
+      await request(server())
+        .post(`/invitations/${daveInvitation.id}/accept`)
+        .set('Authorization', `Bearer ${daveToken}`)
+        .expect(201);
+      const carolInvitation = (
+        await request(server())
+          .post(`/rooms/${channel.id}/invitations`)
+          .set('Authorization', `Bearer ${daveToken}`)
+          .send({ userId: carol.id })
+          .expect(201)
+      ).body;
+
+      await request(server())
+        .delete(`/admin/users/${dave.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const res = await list(carolToken).expect(200);
+      const item = res.body.items.find((i: { id: string }) => i.id === carolInvitation.id);
+      expect(item.invitedBy).toEqual({
+        id: dave.id,
+        identifier: null,
+        displayName: null,
+        avatarUrl: null,
+      });
+    });
+
+    it('lets a declined invitee be invited again', async () => {
+      const ownerToken = await login('owner');
+      const carolToken = await login('carol');
+      const carol = (await accounts.findByIdentifier('carol'))!;
+      const channel = await createPrivateChannel(ownerToken, 'my-inv-reinvite');
+
+      const first = (await invite(ownerToken, channel.id, carol.id)).body;
+      await request(server())
+        .post(`/invitations/${first.id}/decline`)
+        .set('Authorization', `Bearer ${carolToken}`)
+        .expect(204);
+
+      const again = (await invite(ownerToken, channel.id, carol.id)).body;
+      expect(again.id).toBe(first.id);
+
+      const res = await list(carolToken).expect(200);
+      expect(res.body.items.map((i: { id: string }) => i.id)).toContain(first.id);
+    });
   });
 });

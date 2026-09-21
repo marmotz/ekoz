@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { and } from '@prisma/orm-postgres/orm-client';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
+import { UserSummaryReader } from '../../../core/users/user-summary.reader.js';
 import {
   InvitationAlreadyExistsError,
   InvitationAlreadyResolvedError,
@@ -19,6 +20,7 @@ import { EventLogService } from '../events/event-log.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import { ROLE_RANK, type RoomRole } from '../permissions/role-default-capabilities.js';
+import type { RoomRow } from '../rooms/room.view.js';
 import { FeedFanoutService } from '../streaming/feed-fanout.service.js';
 import type { BanMember, InviteMember } from './membership.dto.js';
 import {
@@ -26,12 +28,15 @@ import {
   type JoinRequestView,
   type MembershipRow,
   type MembershipView,
+  type MyRoomInvitationListView,
   type RoomInvitationRow,
   type RoomInvitationView,
   toJoinRequestView,
   toMembershipView,
   toRoomInvitationView,
 } from './membership.view.js';
+
+type InvitedRoomRow = Pick<RoomRow, 'id' | 'type' | 'name' | 'topic' | 'visibility'>;
 
 interface RoomLookup {
   id: string;
@@ -48,6 +53,7 @@ export class MembershipService {
     private readonly eventLog: EventLogService,
     private readonly permissions: PermissionsService,
     private readonly feedFanout: FeedFanoutService,
+    private readonly userSummaries: UserSummaryReader,
   ) {}
 
   async join(actor: PermissionPrincipal, roomId: string): Promise<MembershipView> {
@@ -125,27 +131,27 @@ export class MembershipService {
     }
 
     const row = await this.prisma.transaction(async (tx) => {
-      const invitation = (await tx.orm.public.RoomInvitation.where({
-        roomId,
-        userId: input.userId,
-      }).upsert({
-        create: {
-          roomId,
-          userId: input.userId,
-          invitedById: actor.userId,
-          role: input.role,
-          expiresAt: null,
-          acceptedAt: null,
-          declinedAt: null,
-        },
-        update: {
-          invitedById: actor.userId,
-          role: input.role,
-          expiresAt: null,
-          acceptedAt: null,
-          declinedAt: null,
-        },
-      })) as RoomInvitationRow;
+      // Re-inviting resets the standing invitation in place (the unique key is
+      // `(roomId, userId)`, which the ORM `upsert` does not target).
+      const invitation = (
+        existing
+          ? await tx.orm.public.RoomInvitation.where({ id: existing.id }).update({
+              invitedById: actor.userId,
+              role: input.role,
+              expiresAt: null,
+              acceptedAt: null,
+              declinedAt: null,
+            })
+          : await tx.orm.public.RoomInvitation.create({
+              roomId,
+              userId: input.userId,
+              invitedById: actor.userId,
+              role: input.role,
+              expiresAt: null,
+              acceptedAt: null,
+              declinedAt: null,
+            })
+      ) as RoomInvitationRow;
 
       await this.feedFanout.pushAccountEvent(tx, input.userId, roomId, {
         type: 'invitation_created',
@@ -158,6 +164,54 @@ export class MembershipService {
     });
 
     return toRoomInvitationView(row);
+  }
+
+  /**
+   * The caller's pending invitations, newest first. Pending = neither accepted
+   * nor declined (`expiresAt` is never written nor checked, like the resolver's
+   * `pendingInvitation`); an invitation to a deleted room is left out.
+   */
+  async listMyInvitations(actor: PermissionPrincipal): Promise<MyRoomInvitationListView> {
+    const invitations = (await this.prisma.orm.public.RoomInvitation.where((f) =>
+      and(f.userId.eq(actor.userId), f.acceptedAt.isNull(), f.declinedAt.isNull()),
+    )
+      .orderBy((f) => f.createdAt.desc())
+      .all()) as RoomInvitationRow[];
+    if (invitations.length === 0) {
+      return { items: [] };
+    }
+
+    const rooms = (await this.prisma.orm.public.Room.where((f) =>
+      and(f.id.in(invitations.map((i) => i.roomId)), f.deletedAt.isNull()),
+    ).all()) as InvitedRoomRow[];
+    const roomsById = new Map(rooms.map((r) => [r.id, r]));
+    const summaries = await this.userSummaries.readMany(invitations.map((i) => i.invitedById));
+
+    return {
+      items: invitations.flatMap((invitation) => {
+        const room = roomsById.get(invitation.roomId);
+        const invitedBy = summaries.get(invitation.invitedById);
+        if (!room || !invitedBy) {
+          return [];
+        }
+
+        return [
+          {
+            id: invitation.id,
+            role: invitation.role,
+            createdAt: invitation.createdAt,
+            room: {
+              id: room.id,
+              type: room.type,
+              name: room.name,
+              topic: room.topic,
+              visibility: room.visibility,
+            },
+            invitedBy,
+          },
+        ];
+      }),
+    };
   }
 
   async acceptInvitation(
@@ -220,19 +274,23 @@ export class MembershipService {
       throw new JoinRequestAlreadyExistsError();
     }
 
-    const row = (await this.prisma.orm.public.RoomJoinRequest.where({
-      roomId,
-      userId: actor.userId,
-    }).upsert({
-      create: {
-        roomId,
-        userId: actor.userId,
-        resolvedAt: null,
-        resolvedById: null,
-        approved: null,
-      },
-      update: { resolvedAt: null, resolvedById: null, approved: null },
-    })) as JoinRequestRow;
+    // A resolved request is reset to pending in place (the unique key is
+    // `(roomId, userId)`, which the ORM `upsert` does not target).
+    const row = (
+      existing
+        ? await this.prisma.orm.public.RoomJoinRequest.where({ id: existing.id }).update({
+            resolvedAt: null,
+            resolvedById: null,
+            approved: null,
+          })
+        : await this.prisma.orm.public.RoomJoinRequest.create({
+            roomId,
+            userId: actor.userId,
+            resolvedAt: null,
+            resolvedById: null,
+            approved: null,
+          })
+    ) as JoinRequestRow;
 
     return toJoinRequestView(row);
   }

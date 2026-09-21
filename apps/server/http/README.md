@@ -147,6 +147,8 @@ http/
     get.hurl                           GET    /rooms/:id               200 · needs access_token + room_id
     get-not-found.hurl                 GET    /rooms/:id               404 room.not_found
     get-forbidden.hurl                 GET    /rooms/:id               403 room.permission_denied (private, non-member)
+    preview.hurl                       GET    /rooms/:id/preview       200 · needs access_token + room_id (invite room)
+    preview-not-found.hurl             GET    /rooms/:id/preview       404 room.not_found (not an invite room)
     children.hurl                      GET    /rooms/:id/children      200 · needs access_token + room_id
     update.hurl                        PATCH  /rooms/:id               200 · owner + room_id
     move.hurl                          POST   /rooms/:id/move          200 · owner + room_id + parent_room_id
@@ -172,6 +174,7 @@ http/
     leave.hurl                         POST   /rooms/:id/leave                         204 · needs access_token + room_id
     invite.hurl                        POST   /rooms/:id/invitations                   201 · needs room.invite + target_user_id
     invite-forbidden.hurl              POST   /rooms/:id/invitations                   403 room.permission_denied
+    list-my-invitations.hurl           GET    /me/room-invitations                     200 · needs access_token (invitee)
     accept-invitation.hurl             POST   /invitations/:id/accept                  201 · needs invitation_id (invitee)
     decline-invitation.hurl            POST   /invitations/:id/decline                 204 · needs invitation_id (invitee)
     join-request.hurl                  POST   /rooms/:id/join-request                  201 · needs access_token + room_id

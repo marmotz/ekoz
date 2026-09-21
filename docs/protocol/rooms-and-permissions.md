@@ -62,6 +62,10 @@ Create a space (hierarchy node, holds no message).
 - Needs `space.create_child` on `parentId` when given. **Creating a root space
   (no `parentId`) is owner-only for now** — there is no parent node to check a
   capability against, and no server-wide `space.create_child` grant exists yet.
+- The creator becomes a member of the new space with the `space_admin` role
+  (`invitedById: null`), including a server owner creating a root space. Emits
+  `room_created` then `member_joined`; the returned `Room.lastSeq` already
+  accounts for both.
 - `201`: `Room`.
 - Errors: `room.permission_denied` (`403`), `room.parent_not_found` (`422`),
   `room.max_depth_exceeded` (`422`), validation (`422`).
@@ -73,6 +77,9 @@ Create a channel, attached to a space.
 - Body: `{ parentId, name, topic?, slug?, visibility? }`. `parentId` is
   required and must reference a `space`.
 - Needs `space.create_child` on `parentId`.
+- The creator becomes a member of the new channel with the `room_admin` role
+  (`invitedById: null`). Emits `room_created` then `member_joined`; the returned `Room.lastSeq` already
+  accounts for both.
 - `201`: `Room`.
 - Errors: `room.permission_denied` (`403`), `room.parent_not_found` (`422`),
   `room.invalid_parent_type` (`422`, `parentId` is not a space),
@@ -209,6 +216,22 @@ change (technical.md §9, issue #4).
 }
 ```
 
+### The `UserSummary` object
+
+The minimum needed to show a user next to some content. `identifier` is the
+canonical `name/server` (`null` without a username) and `avatarUrl` the
+versioned avatar URL, both built like in `GET /me`. For a deleted account
+`identifier`, `displayName` and `avatarUrl` are all `null`.
+
+```json
+{
+  "id": "01ARZ3NDEKTSV4RRFFQ69G5FAZ",
+  "identifier": "alice/ekoz.example.com",
+  "displayName": "Alice",
+  "avatarUrl": "https://api.ekoz.example.com/users/alice/avatar?v=01ARZ3NDEKTSV4RRFFQ69G5FB1"
+}
+```
+
 ### The `JoinRequest` object
 
 ```json
@@ -249,6 +272,16 @@ Invite a user to the room. Needs `room.invite`.
 - Errors: `room.not_found` (`404`), `room.permission_denied` (`403`),
   `room.invitation_already_exists` (`409`), validation (`422`).
 
+### `GET /me/room-invitations`
+
+The caller's pending room invitations, newest first. Pending means neither
+accepted nor declined (`expiresAt` is not enforced). An invitation to a deleted
+room is left out.
+
+- `200`: `{ items: [{ id, role, createdAt, room, invitedBy }] }` where `room` is
+  `{ id, type, name, topic, visibility }` and `invitedBy` a
+  [`UserSummary`](#the-usersummary-object).
+
 ### `POST /invitations/:id/accept`
 
 Accept a pending invitation (invitee only). Creates/updates the `Membership`
@@ -266,9 +299,25 @@ Decline a pending invitation (invitee only).
 - Errors: `room.invitation_not_found` (`404`),
   `room.invitation_already_resolved` (`409`).
 
+### `GET /rooms/:id/preview`
+
+What a non-member of an invite-only room may see to ask to join it. Needs no
+capability, only authentication.
+
+- `200`: `{ id, type, name, topic, joinRequest }` where `joinRequest` is `null`
+  or `{ id, createdAt, status }` — the caller's own request, `status` being
+  `pending` (unresolved) or `rejected`. An approved request is not shown
+  (`joinRequest` is `null`: the caller is a member by then).
+- Only a room whose `visibility` is `invite` and that is not deleted answers;
+  a `public`, `private`, deleted or unknown room is `404`, so a `private`
+  room is never revealed. A member or a banned user of an `invite` room gets
+  the same `200`.
+- Errors: `room.not_found` (`404`).
+
 ### `POST /rooms/:id/join-request`
 
-Request to join an invite-only room.
+Request to join an invite-only room. Requesting again after a rejection resets
+the same request to pending.
 
 - `201`: `JoinRequest`.
 - Errors: `room.not_found` (`404`), `room.banned` (`403`),
@@ -409,7 +458,7 @@ implements it (#12) — its payload shape is not fixed yet.
 | `room_moved` | `{ oldParentId, newParentId }` |
 | `room_deleted` | `{}` |
 | `permission_override_changed` | `{ scope: "role", role, capability, effect }` or `{ scope: "user", userId, capability, effect }` |
-| `member_joined` | `{ userId, role }` |
+| `member_joined` | `{ userId, role }` — also appended right after `room_created` for the creator |
 | `member_left` | `{ userId }` |
 | `member_kicked` | `{ userId }` |
 | `member_banned` | `{ userId, reason }` |

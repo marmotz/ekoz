@@ -23,6 +23,10 @@ A capability-based ACL layered on named roles.
   `room_admin`, `moderator`, `member`, `reader`. Each role has a **default
   capability set** seeded in `role_default_capability` (server scope; editable by
   an owner later, effectively fixed for the first increment).
+- **Creator membership**: whoever creates a space or a channel is enrolled as its
+  first member (`space_admin` for a space, `room_admin` for a channel), owner
+  included. Without it the creator would hold no role on what they just created,
+  and a membership-based room list would not show it to them.
 - **Overrides**, from least to most specific, each an explicit `allow` / `deny`:
   1. `role_default_capability` (server-wide defaults per role);
   2. `room_permission_override(node_id, role, capability, effect)` on any node
