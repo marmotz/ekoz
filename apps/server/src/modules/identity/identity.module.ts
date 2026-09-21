@@ -27,6 +27,7 @@ import {
 import { UsernameService } from './accounts/username.service.js';
 import { AuthController } from './auth/auth.controller.js';
 import { AuthService } from './auth/auth.service.js';
+import { AuthPolicyController } from './auth/auth-policy.controller.js';
 import { RefreshTokenService } from './auth/refresh-token.service.js';
 import { RevokedSessionRegistry } from './auth/revoked-session.registry.js';
 import { SensitiveThrottleGuard } from './auth/sensitive-throttle.guard.js';
@@ -63,6 +64,7 @@ import { ProfileService } from './profile/profile.service.js';
 @Module({
   controllers: [
     AuthController,
+    AuthPolicyController,
     SessionsController,
     StreamController,
     RegistrationController,

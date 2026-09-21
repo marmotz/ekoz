@@ -8,6 +8,9 @@ export type AdminUserDetailDtoStatus = (typeof AdminUserDetailDtoStatus)[number]
 export const AdminUserListResponseDtoItemsStatus = ["active", "suspended", "deleted"] as const;
 export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseDtoItemsStatus)[number];
 
+export const AuthPolicyDtoRegistrationMode = ["open", "invite", "admin"] as const;
+export type AuthPolicyDtoRegistrationMode = (typeof AuthPolicyDtoRegistrationMode)[number];
+
 export const DirectoryListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type DirectoryListResponseDtoItemsDefaultRole = (typeof DirectoryListResponseDtoItemsDefaultRole)[number];
 

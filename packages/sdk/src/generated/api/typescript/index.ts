@@ -10,6 +10,7 @@ export type * from './LoginResponseDtoSession.type.js';
 export type * from './LoginResponseDto.type.js';
 export type * from './RefreshDto.type.js';
 export type * from './TokenBundleDto.type.js';
+export type * from './AuthPolicyDto.type.js';
 export type * from './SessionViewDto.type.js';
 export type * from './RenameSessionDto.type.js';
 export type * from './RevokeAllSessionsResponseDto.type.js';

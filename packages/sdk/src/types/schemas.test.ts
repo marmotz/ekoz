@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AdminCreateUserBodySchema, LoginBodySchema } from './schemas.js';
+import { AdminCreateUserBodySchema, AuthPolicySchema, LoginBodySchema } from './schemas.js';
 
 describe('schemas', () => {
   it('accepts a valid AdminCreateUserBody payload', () => {
@@ -46,6 +46,32 @@ describe('schemas', () => {
       identifier: 'jdoe@example.com',
       password: '',
     });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a valid AuthPolicy payload', () => {
+    const result = AuthPolicySchema.safeParse({
+      registrationMode: 'invite',
+      emailVerificationRequired: true,
+      passwordMinLength: 10,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an AuthPolicy payload with an unknown registration mode', () => {
+    const result = AuthPolicySchema.safeParse({
+      registrationMode: 'anyone',
+      emailVerificationRequired: true,
+      passwordMinLength: 10,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an AuthPolicy payload missing required fields', () => {
+    const result = AuthPolicySchema.safeParse({ registrationMode: 'open' });
 
     expect(result.success).toBe(false);
   });

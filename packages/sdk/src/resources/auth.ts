@@ -7,6 +7,7 @@ import type { SessionManager } from '../session/session-manager.js';
 import type { HttpClient } from '../transport/http-client.js';
 import type {
   AccountView,
+  AuthPolicy,
   ConfirmPasswordResetBody,
   EmailAcceptedResponse,
   EmailVerifiedResponse,
@@ -19,6 +20,8 @@ import type {
 } from '../types/wire.js';
 
 export interface AuthResource {
+  /** `GET /auth/policy` (unauthenticated): registration mode, verification requirement, password minimum. */
+  policy(): Promise<AuthPolicy>;
   register(body: RegisterBody): Promise<AccountView>;
   login(body: LoginBody): Promise<LoginResponse>;
   logout(): Promise<void>;
@@ -30,6 +33,10 @@ export interface AuthResource {
 
 export function createAuthResource(http: HttpClient, session: SessionManager): AuthResource {
   return {
+    policy() {
+      return http.request<AuthPolicy>('GET', '/auth/policy');
+    },
+
     register(body) {
       return http.request<AccountView>('POST', '/auth/register', { body });
     },

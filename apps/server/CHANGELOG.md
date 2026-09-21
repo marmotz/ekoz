@@ -31,6 +31,7 @@ that does not touch this file.
 
 ### Added
 
+- Public `GET /auth/policy` exposing the registration mode, the email-verification requirement and the minimum password length. (#90)
 - Local moderation: kick, ban/unban and delete-any-message now also write an
   audit trail, exposed at `GET /rooms/:id/moderation-log`. (#13)
 - Retention policies (server default, space/room overrides) with a periodic

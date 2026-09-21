@@ -24,6 +24,9 @@ All notable changes to the Ekoz protocol. Format
 - Identity surface (draft): `name/server` identifier rules, auth token model
   (JWT access + rotating opaque refresh, reuse detection), session objects,
   SSE stream ticket.
+- Public `GET /auth/policy` in [`identity.md`](identity.md): registration mode,
+  email-verification requirement and minimum password length, read live and
+  never cached.
 - [Identity and profiles](identity.md) fully specified: setup, registration
   (`open` / `invite` / `admin`), login / refresh / logout, sessions, email
   verification, password reset, own and public profiles, invitations, owner

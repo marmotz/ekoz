@@ -39,6 +39,21 @@ reachable while server setup is open; once an owner exists the route is
 
 ## Registration
 
+### `GET /auth/policy`
+
+Public and unauthenticated, never cached (`Cache-Control: no-store`). Tells a
+client how to present the sign-up and sign-in flows before anyone types
+anything. Read live from the server settings, so a change made by the owner
+shows on the next call.
+
+- `200`: `{ registrationMode, emailVerificationRequired, passwordMinLength }`.
+  - `registrationMode`: `open` | `invite` | `admin` (the current
+    `registration.mode`).
+  - `emailVerificationRequired`: boolean. When `false`, a registered account is
+    created already verified and no verification mail is sent.
+  - `passwordMinLength`: integer, the minimum length the server accepts for a
+    password.
+
 ### `POST /auth/register`
 
 - Body: `{ name, email, password, displayName, invitationToken? }`.

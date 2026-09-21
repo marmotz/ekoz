@@ -20,6 +20,7 @@ export type {
   AdminUserListResponseDtoDto as AdminUserListResponse,
   AdminUserListResponseDtoItemsDto as AdminUserListItem,
   AdminUsernameRequestsController_list200ResponseJson as UsernameRequestsListResponse,
+  AuthPolicyDtoDto as AuthPolicy,
   AvatarUploadedDtoDto as AvatarUploaded,
   ChangeEmailDtoDto as ChangeEmailBody,
   ChangeUsernameDtoDto as ChangeUsernameBody,

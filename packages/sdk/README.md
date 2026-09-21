@@ -54,7 +54,7 @@ per-resource constructors:
 | Namespace                 | Covers                                                         |
 | -------------------------- | --------------------------------------------------------------- |
 | `client.setup`             | Setup-state probe, first-owner setup (`state`, `createOwner`)    |
-| `client.auth`              | Register, login, logout, email verification, password reset     |
+| `client.auth`              | Policy, register, login, logout, email verification, password reset |
 | `client.me`                | Own profile, avatar, email, username, account deletion           |
 | `client.users`             | Public profile lookup by identifier                              |
 | `client.sessions`          | List / rename / revoke the caller's own sessions                 |

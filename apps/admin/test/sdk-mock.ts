@@ -27,6 +27,7 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       createOwner: vi.fn(),
     },
     auth: {
+      policy: vi.fn(),
       register: vi.fn(),
       login: vi.fn(),
       logout: vi.fn(),

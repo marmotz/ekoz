@@ -5,6 +5,7 @@ import { AddOwnerDtoSchema, type AddOwnerDtoDto } from './AddOwnerDto.schema.js'
 import { AdminCreateUserDtoSchema, type AdminCreateUserDtoDto } from './AdminCreateUserDto.schema.js';
 import { AdminUserDetailDtoSchema, type AdminUserDetailDtoDto } from './AdminUserDetailDto.schema.js';
 import { AdminUserListResponseDtoSchema, type AdminUserListResponseDtoDto } from './AdminUserListResponseDto.schema.js';
+import { AuthPolicyDtoSchema, type AuthPolicyDtoDto } from './AuthPolicyDto.schema.js';
 import { AvatarUploadedDtoSchema, type AvatarUploadedDtoDto } from './AvatarUploadedDto.schema.js';
 import { ChangeEmailDtoSchema, type ChangeEmailDtoDto } from './ChangeEmailDto.schema.js';
 import { ChangeUsernameDtoSchema, type ChangeUsernameDtoDto } from './ChangeUsernameDto.schema.js';
@@ -279,6 +280,9 @@ export type AuthController_refresh422ResponseProblemJson = z.infer<typeof AuthCo
 
 export const AuthController_refreshRequestSchema = RefreshDtoSchema;
 export type AuthController_refreshRequest = z.infer<typeof AuthController_refreshRequestSchema>;
+
+export const AuthPolicyController_policy200ResponseJsonSchema = AuthPolicyDtoSchema;
+export type AuthPolicyController_policy200ResponseJson = z.infer<typeof AuthPolicyController_policy200ResponseJsonSchema>;
 
 export const BlobController_download200ResponseOctetStreamSchema = z.string();
 export type BlobController_download200ResponseOctetStream = z.infer<typeof BlobController_download200ResponseOctetStreamSchema>;

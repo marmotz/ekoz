@@ -23,6 +23,7 @@ export {
   AdminUserListResponseDtoItemsSchema as AdminUserListItemSchema,
   AdminUserListResponseDtoSchema as AdminUserListResponseSchema,
   AdminUsernameRequestsController_list200ResponseJsonSchema as UsernameRequestsListResponseSchema,
+  AuthPolicyDtoSchema as AuthPolicySchema,
   AvatarUploadedDtoSchema as AvatarUploadedSchema,
   ChangeEmailDtoSchema as ChangeEmailBodySchema,
   ChangeUsernameDtoSchema as ChangeUsernameBodySchema,

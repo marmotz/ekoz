@@ -20,6 +20,7 @@ has its own page with full context, alternatives and consequences:
 - [User identifier](user-identifier.md) — `name/server`.
 - [Authentication and sessions](auth-and-sessions.md).
 - [Shared auth guard](shared-auth-guard.md) — `AuthGuard` / `OwnerGuard` in `core/http`.
+- [Auth policy endpoint](auth-policy-endpoint.md) — public `GET /auth/policy`.
 - [Identity account and token mechanics](identity-account-and-token-mechanics.md).
 - [Identity lifecycle and abuse protection](identity-lifecycle-and-abuse-protection.md).
 - [Configuration model](configuration-model.md).

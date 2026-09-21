@@ -13,6 +13,10 @@ export const AdminUserListResponseDtoItemsStatus = ["active", "suspended", "dele
 export const AdminUserListResponseDtoItemsStatusSchema = z.enum(AdminUserListResponseDtoItemsStatus);
 export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseDtoItemsStatus)[number];
 
+export const AuthPolicyDtoRegistrationMode = ["open", "invite", "admin"] as const;
+export const AuthPolicyDtoRegistrationModeSchema = z.enum(AuthPolicyDtoRegistrationMode);
+export type AuthPolicyDtoRegistrationMode = (typeof AuthPolicyDtoRegistrationMode)[number];
+
 export const DirectoryListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export const DirectoryListResponseDtoItemsDefaultRoleSchema = z.enum(DirectoryListResponseDtoItemsDefaultRole);
 export type DirectoryListResponseDtoItemsDefaultRole = (typeof DirectoryListResponseDtoItemsDefaultRole)[number];
