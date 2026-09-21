@@ -22,3 +22,5 @@ export const DropdownMenuItem = ({
     {children}
   </button>
 );
+export const DropdownMenuLabel = ({ children }: { children: ReactNode }) => <div>{children}</div>;
+export const DropdownMenuSeparator = () => <hr />;

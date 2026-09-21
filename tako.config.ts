@@ -1,3 +1,4 @@
+import { reactTanstackGenerator } from '@kurotako/gen-react-tanstack';
 import { typescriptGenerator } from '@kurotako/gen-typescript';
 import { zodGenerator } from '@kurotako/gen-zod';
 import { openapiParser } from '@kurotako/parser-openapi';
@@ -60,6 +61,42 @@ const zodApiGenerator = {
   },
 };
 
+// Request bodies of the authentication forms in `apps/client-web`, one generated
+// TanStack Form hook each.
+const CLIENT_WEB_FORMS = [
+  'LoginDto',
+  'RegisterDto',
+  'ResendVerificationDto',
+  'RequestPasswordResetDto',
+  'ConfirmPasswordResetDto',
+];
+
+// `reactTanstackGenerator` runs its own private copy of `zodGenerator` (into
+// `<ns>/react-tanstack/zod/`), which has the same nested-object bug as above. The
+// copy is swapped for a wrapper that adds the missing `type` imports; its name and
+// options stay as declared by the driver.
+const zodPrivateGenerator = {
+  ...zodGenerator,
+  generate: async (...args: Parameters<typeof zodGenerator.generate>) => {
+    const output = await zodGenerator.generate(...args);
+    return {
+      ...output,
+      files: output.files.map((file) => ({
+        ...file,
+        content: importMissingEnumTypes(file.content),
+      })),
+    };
+  },
+};
+
+const reactTanstackFormsGenerator = {
+  ...reactTanstackGenerator,
+  dependsOn: (options: Parameters<typeof reactTanstackGenerator.dependsOn>[0]) =>
+    reactTanstackGenerator
+      .dependsOn(options)
+      .map((dependency) => ({ ...dependency, use: zodPrivateGenerator })),
+};
+
 export default defineConfig({
   sources: {
     db: {
@@ -81,9 +118,16 @@ export default defineConfig({
     { use: zodGenerator, namespaces: ['db'] },
     { use: typescriptGenerator, namespaces: ['api'] },
     { use: zodApiGenerator, namespaces: ['api'] },
+    {
+      use: reactTanstackFormsGenerator,
+      namespaces: ['api'],
+      // Only the request bodies the client web forms submit.
+      options: { include: CLIENT_WEB_FORMS },
+    },
   ],
   outputs: [
     { dir: './apps/server/src/generated', generators: ['zod'] },
     { dir: './packages/sdk/src/generated', generators: ['typescript', 'zod-api'] },
+    { dir: './apps/client-web/src/generated', generators: ['react-tanstack'] },
   ],
 });

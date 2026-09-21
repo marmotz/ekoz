@@ -9,7 +9,7 @@ import { Skeleton } from '@/shared/ui/skeleton';
 
 registerNav({ id: 'home', to: '/', labelKey: 'nav.home', icon: Home, order: 0 });
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_app/')({
   staticData: { title: 'nav.home' },
   component: HomePage,
 });
