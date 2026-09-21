@@ -333,6 +333,10 @@
               {
                 "name": "rejected",
                 "value": "rejected"
+              },
+              {
+                "name": "cancelled",
+                "value": "cancelled"
               }
             ]
           }
@@ -4982,8 +4986,8 @@
             "username_change_request": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('pending', 'approved', 'rejected')",
-                  "name": "username_change_request_status_check_19a2b525",
+                  "expression": "\"status\" IN ('pending', 'approved', 'rejected', 'cancelled')",
+                  "name": "username_change_request_status_check_fc16580c",
                   "prefix": "username_change_request_status_check"
                 }
               ],
@@ -5131,7 +5135,8 @@
               "values": [
                 "pending",
                 "approved",
-                "rejected"
+                "rejected",
+                "cancelled"
               ]
             }
           }
@@ -5140,7 +5145,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "5c906b8f045aa6a6276b19679d29a61e79af27f7b16bbef50fc8daa7a1c15f94"
+    "storageHash": "95a39466e21c08137e0ada8e9e33d167e796d292028bb01861340feb846865fa"
   },
   "execution": {
     "executionHash": "97287832eef1065781f34394e3048bb70ea6956ebc227fa85c0eb92bba8af219",

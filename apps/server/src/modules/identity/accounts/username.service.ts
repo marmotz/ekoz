@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuditService } from '../../../core/audit/audit.service.js';
 import { ConfigService } from '../../../core/config/config.service.js';
+import { userIdentifier } from '../../../core/http/user-links.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import {
   UserNotFoundError,
@@ -8,18 +9,21 @@ import {
   UsernameChangeRequestNotFoundError,
   UsernameChangeRequestResolvedError,
   UsernameImmutableError,
+  UsernameRequestPendingError,
 } from '../identity.errors.js';
 import { AccountService, type AccountTx } from './account.service.js';
 import { IdentifierService } from './identifier.service.js';
-import type { UsernameChangeOutcome } from './username.dto.js';
+import type { UsernameChangeOutcome, UsernameChangeState } from './username.dto.js';
 
-export type { UsernameChangeOutcome };
+export type { UsernameChangeOutcome, UsernameChangeState };
+
+type UsernameChangeRequestStatus = UsernameChangeRequestRow['status'];
 
 interface UsernameChangeRequestRow {
   id: string;
   userId: string;
   requestedName: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   createdAt: string;
   resolvedAt: string | null;
   resolvedByUserId: string | null;
@@ -30,8 +34,9 @@ interface UsernameChangeRequestRow {
  *
  * `identity.username_change_policy` selects the behaviour: `immutable` refuses,
  * `available` applies immediately (subject to a cooldown), `approval` queues a
- * {@link UsernameChangeRequestRow} for an owner. Applying a change reserves the
- * freed name for `identity.username_release_delay`.
+ * {@link UsernameChangeRequestRow} for an owner (one pending request per user,
+ * cancellable by its author). Applying a change reserves the freed name for
+ * `identity.username_release_delay`.
  */
 @Injectable()
 export class UsernameService {
@@ -60,6 +65,10 @@ export class UsernameService {
     }
 
     if (policy === 'approval') {
+      if (await this.findPendingRequest(userId)) {
+        throw new UsernameRequestPendingError();
+      }
+
       const row = (await this.prisma.orm.public.UsernameChangeRequest.create({
         userId,
         requestedName: name,
@@ -85,9 +94,38 @@ export class UsernameService {
     return { status: 'applied', identifier: this.identifierOf(name) };
   }
 
-  async listRequests(
-    status?: 'pending' | 'approved' | 'rejected',
-  ): Promise<UsernameChangeRequestRow[]> {
+  /** What a client needs to render the change form (`GET /me/username`). */
+  async stateOf(userId: string): Promise<UsernameChangeState> {
+    const policy = this.config.get('identity.username_change_policy');
+    const pending = await this.findPendingRequest(userId);
+
+    return {
+      policy,
+      nextChangeAt: policy === 'available' ? await this.nextChangeAt(userId) : null,
+      pendingRequest: pending
+        ? { id: pending.id, requestedName: pending.requestedName, createdAt: pending.createdAt }
+        : null,
+    };
+  }
+
+  /** Cancel the caller's pending request, whatever the current policy. */
+  async cancelOwnRequest(userId: string): Promise<void> {
+    const pending = await this.findPendingRequest(userId);
+    if (!pending) {
+      throw new UsernameChangeRequestNotFoundError();
+    }
+
+    await this.resolve(pending.id, 'cancelled', userId);
+    await this.audit.record({
+      action: 'identity.username_change_cancelled',
+      actorUserId: userId,
+      targetType: 'username_change_request',
+      targetId: pending.id,
+      metadata: { requestedName: pending.requestedName },
+    });
+  }
+
+  async listRequests(status?: UsernameChangeRequestStatus): Promise<UsernameChangeRequestRow[]> {
     const rows = (
       status
         ? await this.prisma.orm.public.UsernameChangeRequest.where({ status }).all()
@@ -150,11 +188,30 @@ export class UsernameService {
   }
 
   private async assertCooldownClear(userId: string): Promise<void> {
+    if (await this.nextChangeAt(userId)) {
+      throw new UsernameChangeCooldownError();
+    }
+  }
+
+  /** End of the running cooldown (ISO), or `null` when the user may change now. */
+  private async nextChangeAt(userId: string): Promise<string | null> {
     const cooldown = this.config.get('identity.username_change_cooldown');
     if (cooldown <= 0) {
-      return;
+      return null;
     }
 
+    const last = await this.lastChangeAt(userId);
+    if (last === null) {
+      return null;
+    }
+
+    const next = Date.parse(last) + cooldown * 1000;
+
+    return next > Date.now() ? new Date(next).toISOString() : null;
+  }
+
+  /** Timestamp of the user's last applied identifier change, or `null`. */
+  private async lastChangeAt(userId: string): Promise<string | null> {
     const last = (await this.prisma.orm.public.AuditLog.where({
       actorUserId: userId,
       action: 'identity.username_changed',
@@ -162,9 +219,14 @@ export class UsernameService {
       .orderBy((a) => a.at.desc())
       .first()) as { at: string } | null;
 
-    if (last && Date.parse(last.at) + cooldown * 1000 > Date.now()) {
-      throw new UsernameChangeCooldownError();
-    }
+    return last?.at ?? null;
+  }
+
+  private async findPendingRequest(userId: string): Promise<UsernameChangeRequestRow | null> {
+    return (await this.prisma.orm.public.UsernameChangeRequest.where({
+      userId,
+      status: 'pending',
+    }).first()) as UsernameChangeRequestRow | null;
   }
 
   private async pendingRequest(requestId: string): Promise<UsernameChangeRequestRow> {
@@ -183,7 +245,7 @@ export class UsernameService {
 
   private async resolve(
     requestId: string,
-    status: 'approved' | 'rejected',
+    status: Exclude<UsernameChangeRequestStatus, 'pending'>,
     ownerId: string,
   ): Promise<void> {
     await this.prisma.orm.public.UsernameChangeRequest.where({ id: requestId }).update({
@@ -194,6 +256,6 @@ export class UsernameService {
   }
 
   private identifierOf(name: string): string {
-    return `${name}/${this.config.get('server.domain')}`;
+    return userIdentifier(name, this.config.get('server.domain'));
   }
 }

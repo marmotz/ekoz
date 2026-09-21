@@ -87,7 +87,13 @@ http/
     profile.hurl                      PATCH  /me/profile              200 · needs access_token
     avatar.hurl                       PUT    /me/avatar               200 · multipart, needs access_token
     avatar-delete.hurl                DELETE /me/avatar               204 · needs access_token
+    password.hurl                     POST   /me/password             204 · needs access_token, changes the password
+    password-wrong.hurl               POST   /me/password             401 auth.invalid_credentials
+    password-weak.hurl                POST   /me/password             422 identity.password_too_weak
     username.hurl                     PATCH  /me/username             200/403 · policy-driven
+    username-state.hurl               GET    /me/username             200 · needs access_token
+    username-cancel.hurl              DELETE /me/username/request     204 · needs a pending request
+    username-cancel-none.hurl         DELETE /me/username/request     404 identity.username_request_not_found
     delete.hurl                       DELETE /me                      204 · re-auth, throwaway account
   users/
     profile.hurl                      GET    /users/:identifier       200 · needs access_token

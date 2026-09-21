@@ -162,6 +162,12 @@ export class UsernameChangeRequestResolvedError extends DomainError {
   }
 }
 
+export class UsernameRequestPendingError extends DomainError {
+  constructor(detail = 'You already have an identifier change request awaiting a decision.') {
+    super('identity.username_request_pending', detail, 409, 'Conflict');
+  }
+}
+
 export class AccountDeletedError extends DomainError {
   constructor(detail = 'This account has been deleted.') {
     super('identity.account_deleted', detail, 409, 'Conflict');

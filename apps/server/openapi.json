@@ -1144,6 +1144,56 @@
         ]
       }
     },
+    "/me/password": {
+      "post": {
+        "operationId": "MePasswordController_change",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the password (requires the current one); revokes the other sessions.",
+        "tags": [
+          "Account"
+        ]
+      }
+    },
     "/invitations": {
       "post": {
         "operationId": "InvitationsController_create",
@@ -1884,6 +1934,41 @@
       }
     },
     "/me/username": {
+      "get": {
+        "operationId": "MeUsernameController_state",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsernameChangeStateDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Policy, cooldown end and pending request of the calling account.",
+        "tags": [
+          "Username"
+        ]
+      },
       "patch": {
         "operationId": "MeUsernameController_change",
         "parameters": [],
@@ -1967,6 +2052,46 @@
         ]
       }
     },
+    "/me/username/request": {
+      "delete": {
+        "operationId": "MeUsernameController_cancelRequest",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel the calling account’s pending identifier change request.",
+        "tags": [
+          "Username"
+        ]
+      }
+    },
     "/admin/username-requests": {
       "get": {
         "operationId": "AdminUsernameRequestsController_list",
@@ -1979,7 +2104,8 @@
               "enum": [
                 "pending",
                 "approved",
-                "rejected"
+                "rejected",
+                "cancelled"
               ],
               "type": "string"
             }
@@ -5754,6 +5880,25 @@
           "password"
         ]
       },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
       "CreateInvitationDto": {
         "type": "object",
         "properties": {
@@ -6097,6 +6242,12 @@
             "type": "string",
             "format": "uri",
             "nullable": true
+          },
+          "pendingEmail": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "nullable": true
           }
         },
         "required": [
@@ -6108,7 +6259,8 @@
           "emailVerified",
           "status",
           "bio",
-          "avatarUrl"
+          "avatarUrl",
+          "pendingEmail"
         ]
       },
       "UpdateProfileDto": {
@@ -6161,6 +6313,49 @@
           "displayName",
           "bio",
           "avatarUrl"
+        ]
+      },
+      "UsernameChangeStateDto": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "type": "string"
+          },
+          "nextChangeAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "nullable": true
+          },
+          "pendingRequest": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                "description": "Crockford base32 entity identifier (ULID), 26 characters"
+              },
+              "requestedName": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "id",
+              "requestedName",
+              "createdAt"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "policy",
+          "nextChangeAt",
+          "pendingRequest"
         ]
       },
       "UsernameChangeAppliedDto": {
@@ -6235,7 +6430,8 @@
             "enum": [
               "pending",
               "approved",
-              "rejected"
+              "rejected",
+              "cancelled"
             ]
           },
           "createdAt": {

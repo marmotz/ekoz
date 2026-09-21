@@ -8,6 +8,7 @@ import { applyTestInfraConfig } from '../../core/config/testing/test-infra-confi
 import { MailService } from '../../core/mail/mail.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from './accounts/account.service.js';
+import { EmailVerificationService } from './email-verification/email-verification.service.js';
 
 /**
  * Password reset (#17), profile and avatar (#19), policy-driven identifier
@@ -211,6 +212,96 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .expect(404);
   });
 
+  it('versions avatarUrl with the blob id: stable for the same content, new for a new one', async () => {
+    const token = await login('alice');
+    const auth = { Authorization: `Bearer ${token}` };
+    const upload = async (bytes: Buffer): Promise<string> =>
+      (
+        await request(server())
+          .put('/me/avatar')
+          .set(auth)
+          .attach('file', bytes, 'a.png')
+          .expect(200)
+      ).body.avatarUrl as string;
+
+    const first = await upload(pngBytes);
+    expect(first).toMatch(/\/users\/alice\/avatar\?v=[^&]+$/);
+
+    // Every emitter carries the same versioned URL.
+    const me = await request(server()).get('/me').set(auth).expect(200);
+    expect(me.body.avatarUrl).toBe(first);
+    const pub = await request(server()).get('/users/alice').set(auth).expect(200);
+    expect(pub.body.avatarUrl).toBe(first);
+
+    // Identical content deduplicates to the same blob, hence the same URL.
+    expect(await upload(pngBytes)).toBe(first);
+
+    // New content (magic bytes still a PNG) yields a new version.
+    const second = await upload(Buffer.concat([pngBytes, Buffer.from('trailing bytes')]));
+    expect(second).not.toBe(first);
+
+    // The avatar route ignores `v` and keeps serving.
+    const path = new URL(second).pathname + new URL(second).search;
+    const served = await request(server()).get(path).set(auth).expect(200);
+    expect(served.headers['content-type']).toBe('image/png');
+    expect(served.headers['cache-control']).toContain('immutable');
+
+    await request(server()).delete('/me/avatar').set(auth).expect(204);
+    const cleared = await request(server()).get('/me').set(auth).expect(200);
+    expect(cleared.body.avatarUrl).toBeNull();
+  });
+
+  // ── #103 pending email ────────────────────────────────────────────────────
+
+  it('exposes a pending email change in GET /me and PATCH /me/profile until it is verified', async () => {
+    const token = await login('alice');
+    const auth = { Authorization: `Bearer ${token}` };
+    const pendingEmail = async (): Promise<string | null> =>
+      (await request(server()).get('/me').set(auth).expect(200)).body.pendingEmail;
+
+    // The initial verification row (same address as the account) is not a pending change.
+    const alice = (await accounts.findByIdentifier('alice'))!;
+    await app.get(EmailVerificationService).startVerification(alice.id, alice.email!);
+    expect(await pendingEmail()).toBeNull();
+
+    await request(server())
+      .post('/me/email')
+      .set(auth)
+      .send({ newEmail: 'alice.new@ekoz.example.com', password: 'wrong-password' })
+      .expect(401);
+    expect(await pendingEmail()).toBeNull();
+
+    await request(server())
+      .post('/me/email')
+      .set(auth)
+      .send({ newEmail: 'Alice.New@ekoz.example.com', password })
+      .expect(202);
+    expect(await pendingEmail()).toBe('alice.new@ekoz.example.com');
+
+    const patched = await request(server())
+      .patch('/me/profile')
+      .set(auth)
+      .send({ displayName: 'Alice A.' })
+      .expect(200);
+    expect(patched.body.pendingEmail).toBe('alice.new@ekoz.example.com');
+
+    // Requesting another address replaces the pending one.
+    await request(server())
+      .post('/me/email')
+      .set(auth)
+      .send({ newEmail: 'alice.other@ekoz.example.com', password })
+      .expect(202);
+    expect(await pendingEmail()).toBe('alice.other@ekoz.example.com');
+
+    const mail = [...sentMail].reverse().find((m) => m.template === 'email-verification');
+    const verifyToken = new URL(String(mail?.vars.verifyUrl)).searchParams.get('token');
+    await request(server()).post('/auth/verify-email').send({ token: verifyToken }).expect(200);
+
+    const verified = await request(server()).get('/me').set(auth).expect(200);
+    expect(verified.body.email).toBe('alice.other@ekoz.example.com');
+    expect(verified.body.pendingEmail).toBeNull();
+  });
+
   // ── #20 identifier change ─────────────────────────────────────────────────
 
   it('honours the username change policy', async () => {
@@ -262,6 +353,120 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
     expect((await accounts.findByIdentifier('alice-final'))?.name).toBe('alice-final');
 
     await config.set('identity.username_change_policy', 'immutable', null);
+  });
+
+  it('exposes the username change state, allows one pending request and cancels it', async () => {
+    const token = await login('alice-final');
+    const auth = { Authorization: `Bearer ${token}` };
+    const state = async () =>
+      (await request(server()).get('/me/username').set(auth).expect(200)).body;
+    const ownerAuth = { Authorization: `Bearer ${await login('owner')}` };
+
+    await config.set('identity.username_change_policy', 'approval', null);
+    try {
+      expect(await state()).toEqual({
+        policy: 'approval',
+        nextChangeAt: null,
+        pendingRequest: null,
+      });
+      const none = await request(server()).delete('/me/username/request').set(auth).expect(404);
+      expect(none.body.code).toBe('identity.username_request_not_found');
+
+      const pending = await request(server())
+        .patch('/me/username')
+        .set(auth)
+        .send({ name: 'alice-wanted' })
+        .expect(200);
+      const second = await request(server())
+        .patch('/me/username')
+        .set(auth)
+        .send({ name: 'alice-other' })
+        .expect(409);
+      expect(second.body.code).toBe('identity.username_request_pending');
+      expect((await state()).pendingRequest).toMatchObject({
+        id: pending.body.requestId,
+        requestedName: 'alice-wanted',
+      });
+
+      // The pending request stays visible (and cancellable) after a policy change.
+      await config.set('identity.username_change_policy', 'immutable', null);
+      expect(await state()).toMatchObject({
+        policy: 'immutable',
+        pendingRequest: { id: pending.body.requestId },
+      });
+
+      await request(server()).delete('/me/username/request').set(auth).expect(204);
+      expect((await state()).pendingRequest).toBeNull();
+
+      // An owner cannot approve or reject a cancelled request.
+      for (const action of ['approve', 'reject']) {
+        const refused = await request(server())
+          .post(`/admin/username-requests/${pending.body.requestId}/${action}`)
+          .set(ownerAuth)
+          .expect(409);
+        expect(refused.body.code).toBe('identity.username_request_resolved');
+      }
+      const cancelled = await request(server())
+        .get('/admin/username-requests?status=cancelled')
+        .set(ownerAuth)
+        .expect(200);
+      expect(cancelled.body).toHaveLength(1);
+      expect(cancelled.body[0]).toMatchObject({
+        id: pending.body.requestId,
+        status: 'cancelled',
+        resolvedByUserId: (await accounts.findByIdentifier('alice-final'))!.id,
+      });
+
+      // A new request can be made once the previous one is cancelled.
+      await config.set('identity.username_change_policy', 'approval', null);
+      await request(server())
+        .patch('/me/username')
+        .set(auth)
+        .send({ name: 'alice-again' })
+        .expect(200);
+      await request(server()).delete('/me/username/request').set(auth).expect(204);
+    } finally {
+      await config.set('identity.username_change_policy', 'immutable', null);
+    }
+  });
+
+  it('reports the cooldown end while `available` changes are rate-limited', async () => {
+    await accounts.createAccount({
+      name: 'carol',
+      email: 'carol@ekoz.example.com',
+      password,
+      displayName: 'Carol',
+      emailVerified: true,
+    });
+    const auth = { Authorization: `Bearer ${await login('carol')}` };
+    const state = async () =>
+      (await request(server()).get('/me/username').set(auth).expect(200)).body;
+
+    await config.set('identity.username_change_policy', 'available', null);
+    await config.set('identity.username_change_cooldown', 3600, null);
+    try {
+      expect(await state()).toEqual({
+        policy: 'available',
+        nextChangeAt: null,
+        pendingRequest: null,
+      });
+
+      await request(server())
+        .patch('/me/username')
+        .set(auth)
+        .send({ name: 'carol-renamed' })
+        .expect(200);
+      const after = await state();
+      expect(Date.parse(after.nextChangeAt)).toBeGreaterThan(Date.now() + 3_000_000);
+      await request(server())
+        .patch('/me/username')
+        .set(auth)
+        .send({ name: 'carol-again' })
+        .expect(409);
+    } finally {
+      await config.set('identity.username_change_policy', 'immutable', null);
+      await config.set('identity.username_change_cooldown', 0, null);
+    }
   });
 
   // ── #21 suspension, deletion, owners ──────────────────────────────────────

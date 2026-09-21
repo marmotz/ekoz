@@ -33,6 +33,28 @@ export const UsernameChangeOutcomeSchema = z.union([
 ]);
 export type UsernameChangeOutcome = z.infer<typeof UsernameChangeOutcomeSchema>;
 
+/** `GET /me/username` response: what a client needs to render the change form. */
+export const UsernameChangeStateSchema = z.object({
+  /**
+   * `immutable` | `available` | `approval` (`identity.username_change_policy`).
+   * Typed as a plain string on purpose: tako emits an unresolved enum type import
+   * for a DTO that mixes an inline enum with a nested object, which breaks the
+   * generated SDK types.
+   */
+  policy: z.string(),
+  /** End of the cooldown; non-null only for `available` while it runs. */
+  nextChangeAt: z.iso.datetime().nullable(),
+  pendingRequest: z
+    .object({
+      id: entityIdSchema,
+      requestedName: z.string(),
+      createdAt: z.iso.datetime(),
+    })
+    .nullable(),
+});
+export type UsernameChangeState = z.infer<typeof UsernameChangeStateSchema>;
+export class UsernameChangeStateDto extends createZodDto(UsernameChangeStateSchema) {}
+
 /** `POST /admin/username-requests/:id/approve` response. */
 export const UsernameApprovedSchema = z.object({ identifier: z.string() });
 export class UsernameApprovedDto extends createZodDto(UsernameApprovedSchema) {}
@@ -42,7 +64,7 @@ export const UsernameChangeRequestSchema = z.object({
   id: entityIdSchema,
   userId: entityIdSchema,
   requestedName: z.string(),
-  status: z.enum(['pending', 'approved', 'rejected']),
+  status: z.enum(['pending', 'approved', 'rejected', 'cancelled']),
   createdAt: z.iso.datetime(),
   resolvedAt: z.iso.datetime().nullable(),
   resolvedByUserId: entityIdSchema.nullable(),

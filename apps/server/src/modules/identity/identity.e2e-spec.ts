@@ -3,7 +3,10 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
+import { expectAuditEntry } from '../../core/audit/testing/audit-assertions.js';
+import { ConfigService } from '../../core/config/config.service.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from './accounts/account.service.js';
 import { IdentifierService } from './accounts/identifier.service.js';
@@ -180,6 +183,84 @@ describe('identity — accounts, auth, sessions (integration)', () => {
       .send({ refreshToken: s.refreshToken })
       .expect(401);
   });
+
+  it('changes the password, keeping the current session and revoking the others', async () => {
+    // This file logs in often enough to trip the credential throttle.
+    const config = app.get(ConfigService);
+    const throttle = config.get('auth.sensitive_throttle');
+    await config.set('auth.sensitive_throttle', { ...throttle, max: 1000 }, null);
+    try {
+      await changePasswordFlow();
+    } finally {
+      await config.set('auth.sensitive_throttle', throttle, null);
+    }
+  });
+
+  async function changePasswordFlow(): Promise<void> {
+    const current = await login('Change current');
+    const other = await login('Change other');
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+    const newPassword = 'a-brand-new-passphrase';
+
+    await request(server())
+      .post('/me/password')
+      .send({ currentPassword: password, newPassword })
+      .expect(401);
+
+    // Wrong current password, weak new password and an unchanged password are all refused.
+    const wrong = await request(server())
+      .post('/me/password')
+      .set(auth(current.accessToken))
+      .send({ currentPassword: 'not-the-password', newPassword })
+      .expect(401);
+    expect(wrong.body.code).toBe('auth.invalid_credentials');
+    for (const refused of ['short', password]) {
+      const weak = await request(server())
+        .post('/me/password')
+        .set(auth(current.accessToken))
+        .send({ currentPassword: password, newPassword: refused })
+        .expect(422);
+      expect(weak.body.code).toBe('identity.password_too_weak');
+    }
+    await request(server()).get('/sessions').set(auth(other.accessToken)).expect(200);
+
+    await request(server())
+      .post('/me/password')
+      .set(auth(current.accessToken))
+      .send({ currentPassword: password, newPassword })
+      .expect(204);
+
+    // The other session is cut, its refresh token included; the current one still works.
+    await request(server()).get('/sessions').set(auth(other.accessToken)).expect(401);
+    await request(server())
+      .post('/auth/refresh')
+      .send({ refreshToken: other.refreshToken })
+      .expect(401);
+    await request(server()).get('/sessions').set(auth(current.accessToken)).expect(200);
+
+    // Only the new password logs in now.
+    await request(server()).post('/auth/login').send({ identifier: 'alice', password }).expect(401);
+    await request(server())
+      .post('/auth/login')
+      .send({ identifier: 'alice', password: newPassword })
+      .expect(200);
+
+    // The change is audited with the number of revoked sessions.
+    const alice = (await app.get(AccountService).findByIdentifier('alice'))!;
+    const entry = await expectAuditEntry(app.get(PrismaService), 'auth.password_changed', {
+      actorUserId: alice.id,
+    });
+    expect((entry.metadata as { revokedSessions: number }).revokedSessions).toBeGreaterThanOrEqual(
+      1,
+    );
+
+    // Restore the shared password for the other tests of this file.
+    await request(server())
+      .post('/me/password')
+      .set(auth(current.accessToken))
+      .send({ currentPassword: newPassword, newPassword: password })
+      .expect(204);
+  }
 
   async function login(deviceName: string): Promise<{
     accessToken: string;

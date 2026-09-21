@@ -290,9 +290,10 @@ model PasswordReset {
 /// row; only the queued-for-owner path does.
 enum UsernameChangeStatus {
   @@type("pg/text@1")
-  pending  = "pending"
-  approved = "approved"
-  rejected = "rejected"
+  pending   = "pending"
+  approved  = "approved"
+  rejected  = "rejected"
+  cancelled = "cancelled"
 }
 
 /// A queued identifier change awaiting an owner decision (technical.md §17,

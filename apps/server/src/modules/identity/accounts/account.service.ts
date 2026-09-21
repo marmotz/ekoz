@@ -183,6 +183,26 @@ export class AccountService {
     return (await this.getProfile(userId))?.displayName ?? 'there';
   }
 
+  /**
+   * The address of an email change still awaiting verification: the user's
+   * unconsumed, unexpired `EmailVerification` row whose `email` differs from
+   * `User.email` (a row equal to it is the initial verification). `startVerification`
+   * keeps at most one unconsumed row per user.
+   */
+  async pendingEmailOf(userId: string): Promise<string | null> {
+    const user = await this.findById(userId);
+    const rows = (await this.prisma.orm.public.EmailVerification.where({ userId })
+      .where((v) => v.consumedAt.isNull())
+      .all()) as Array<{ email: string; expiresAt: string }>;
+
+    const now = Date.now();
+    const pending = rows.find(
+      (row) => Date.parse(row.expiresAt) > now && row.email !== user?.email,
+    );
+
+    return pending?.email ?? null;
+  }
+
   /** Look up by primary key. */
   async findById(id: string): Promise<UserRecord | null> {
     const row = (await this.prisma.orm.public.User.first({ id })) as UserRow | null;

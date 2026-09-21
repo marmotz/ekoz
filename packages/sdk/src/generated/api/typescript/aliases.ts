@@ -8,6 +8,7 @@ import type { AdminUserListResponseDtoDto } from './AdminUserListResponseDto.typ
 import type { AuthPolicyDtoDto } from './AuthPolicyDto.type.js';
 import type { AvatarUploadedDtoDto } from './AvatarUploadedDto.type.js';
 import type { ChangeEmailDtoDto } from './ChangeEmailDto.type.js';
+import type { ChangePasswordDtoDto } from './ChangePasswordDto.type.js';
 import type { ChangeUsernameDtoDto } from './ChangeUsernameDto.type.js';
 import type { ConfirmPasswordResetDtoDto } from './ConfirmPasswordResetDto.type.js';
 import type { CreatedInvitationDtoDto } from './CreatedInvitationDto.type.js';
@@ -53,6 +54,7 @@ import type { UsernameApprovedDtoDto } from './UsernameApprovedDto.type.js';
 import type { UsernameChangeAppliedDtoDto } from './UsernameChangeAppliedDto.type.js';
 import type { UsernameChangePendingDtoDto } from './UsernameChangePendingDto.type.js';
 import type { UsernameChangeRequestDtoDto } from './UsernameChangeRequestDto.type.js';
+import type { UsernameChangeStateDtoDto } from './UsernameChangeStateDto.type.js';
 import type { VerifyEmailDtoDto } from './VerifyEmailDto.type.js';
 
 export type BlobController_download200ResponseOctetStream = Uint8Array;
@@ -223,6 +225,12 @@ export type MeEmailController_change409ResponseProblemJson = ProblemDetailsDtoDt
 
 export type MeEmailController_change422ResponseProblemJson = ProblemDetailsDtoDto;
 
+export type MePasswordController_changeRequest = ChangePasswordDtoDto;
+
+export type MePasswordController_change401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MePasswordController_change422ResponseProblemJson = ProblemDetailsDtoDto;
+
 export type InvitationsController_list200ResponseJson = InvitationViewDtoDto[];
 
 export type InvitationsController_list401ResponseProblemJson = ProblemDetailsDtoDto;
@@ -325,6 +333,10 @@ export type UsersController_avatar404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type UsersController_avatarPathIdentifier = string;
 
+export type MeUsernameController_state200ResponseJson = UsernameChangeStateDtoDto;
+
+export type MeUsernameController_state401ResponseProblemJson = ProblemDetailsDtoDto;
+
 export type MeUsernameController_changeRequest = ChangeUsernameDtoDto;
 
 export type MeUsernameController_change200ResponseJson = UsernameChangeAppliedDtoDto | UsernameChangePendingDtoDto;
@@ -336,6 +348,10 @@ export type MeUsernameController_change403ResponseProblemJson = ProblemDetailsDt
 export type MeUsernameController_change409ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MeUsernameController_change422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MeUsernameController_cancelRequest401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MeUsernameController_cancelRequest404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type AdminUsernameRequestsController_list200ResponseJson = UsernameChangeRequestDtoDto[];
 

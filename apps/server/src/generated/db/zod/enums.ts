@@ -21,7 +21,7 @@ export const RoomVisibility = ["public", "private", "invite"] as const;
 export const RoomVisibilitySchema = z.enum(RoomVisibility);
 export type RoomVisibility = (typeof RoomVisibility)[number];
 
-export const UsernameChangeStatus = ["pending", "approved", "rejected"] as const;
+export const UsernameChangeStatus = ["pending", "approved", "rejected", "cancelled"] as const;
 export const UsernameChangeStatusSchema = z.enum(UsernameChangeStatus);
 export type UsernameChangeStatus = (typeof UsernameChangeStatus)[number];
 

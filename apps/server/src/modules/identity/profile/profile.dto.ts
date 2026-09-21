@@ -23,6 +23,8 @@ export class UpdateProfileDto extends createZodDto(UpdateProfileSchema) {}
 export const MeViewSchema = AccountViewSchema.extend({
   bio: nullableString(),
   avatarUrl: z.url().nullable(),
+  /** Address of an email change awaiting verification; `null` when none. */
+  pendingEmail: z.email().nullable(),
 });
 export class MeViewDto extends createZodDto(MeViewSchema) {}
 

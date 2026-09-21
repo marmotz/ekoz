@@ -8,6 +8,7 @@ import { AdminUserListResponseDtoSchema, type AdminUserListResponseDtoDto } from
 import { AuthPolicyDtoSchema, type AuthPolicyDtoDto } from './AuthPolicyDto.schema.js';
 import { AvatarUploadedDtoSchema, type AvatarUploadedDtoDto } from './AvatarUploadedDto.schema.js';
 import { ChangeEmailDtoSchema, type ChangeEmailDtoDto } from './ChangeEmailDto.schema.js';
+import { ChangePasswordDtoSchema, type ChangePasswordDtoDto } from './ChangePasswordDto.schema.js';
 import { ChangeUsernameDtoSchema, type ChangeUsernameDtoDto } from './ChangeUsernameDto.schema.js';
 import { ConfirmPasswordResetDtoSchema, type ConfirmPasswordResetDtoDto } from './ConfirmPasswordResetDto.schema.js';
 import { CreatedInvitationDtoSchema, type CreatedInvitationDtoDto } from './CreatedInvitationDto.schema.js';
@@ -53,6 +54,7 @@ import { UsernameApprovedDtoSchema, type UsernameApprovedDtoDto } from './Userna
 import { UsernameChangeAppliedDtoSchema, type UsernameChangeAppliedDtoDto } from './UsernameChangeAppliedDto.schema.js';
 import { UsernameChangePendingDtoSchema, type UsernameChangePendingDtoDto } from './UsernameChangePendingDto.schema.js';
 import { UsernameChangeRequestDtoSchema, type UsernameChangeRequestDtoDto } from './UsernameChangeRequestDto.schema.js';
+import { UsernameChangeStateDtoSchema, type UsernameChangeStateDtoDto } from './UsernameChangeStateDto.schema.js';
 import { VerifyEmailDtoSchema, type VerifyEmailDtoDto } from './VerifyEmailDto.schema.js';
 import { z } from 'zod';
 
@@ -629,6 +631,15 @@ export type MembershipController_unban403ResponseProblemJson = z.infer<typeof Me
 export const MembershipController_unban404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MembershipController_unban404ResponseProblemJson = z.infer<typeof MembershipController_unban404ResponseProblemJsonSchema>;
 
+export const MePasswordController_change401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MePasswordController_change401ResponseProblemJson = z.infer<typeof MePasswordController_change401ResponseProblemJsonSchema>;
+
+export const MePasswordController_change422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MePasswordController_change422ResponseProblemJson = z.infer<typeof MePasswordController_change422ResponseProblemJsonSchema>;
+
+export const MePasswordController_changeRequestSchema = ChangePasswordDtoSchema;
+export type MePasswordController_changeRequest = z.infer<typeof MePasswordController_changeRequestSchema>;
+
 export const MessagesController_deleteMessage401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MessagesController_deleteMessage401ResponseProblemJson = z.infer<typeof MessagesController_deleteMessage401ResponseProblemJsonSchema>;
 
@@ -716,6 +727,12 @@ export type MessagesController_unpin403ResponseProblemJson = z.infer<typeof Mess
 export const MessagesController_unpin404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MessagesController_unpin404ResponseProblemJson = z.infer<typeof MessagesController_unpin404ResponseProblemJsonSchema>;
 
+export const MeUsernameController_cancelRequest401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MeUsernameController_cancelRequest401ResponseProblemJson = z.infer<typeof MeUsernameController_cancelRequest401ResponseProblemJsonSchema>;
+
+export const MeUsernameController_cancelRequest404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MeUsernameController_cancelRequest404ResponseProblemJson = z.infer<typeof MeUsernameController_cancelRequest404ResponseProblemJsonSchema>;
+
 export const MeUsernameController_change200ResponseJsonSchema = z.union([UsernameChangeAppliedDtoSchema, UsernameChangePendingDtoSchema]);
 export type MeUsernameController_change200ResponseJson = z.infer<typeof MeUsernameController_change200ResponseJsonSchema>;
 
@@ -733,6 +750,12 @@ export type MeUsernameController_change422ResponseProblemJson = z.infer<typeof M
 
 export const MeUsernameController_changeRequestSchema = ChangeUsernameDtoSchema;
 export type MeUsernameController_changeRequest = z.infer<typeof MeUsernameController_changeRequestSchema>;
+
+export const MeUsernameController_state200ResponseJsonSchema = UsernameChangeStateDtoSchema;
+export type MeUsernameController_state200ResponseJson = z.infer<typeof MeUsernameController_state200ResponseJsonSchema>;
+
+export const MeUsernameController_state401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MeUsernameController_state401ResponseProblemJson = z.infer<typeof MeUsernameController_state401ResponseProblemJsonSchema>;
 
 export const ModerationController_getModerationLog200ResponseJsonSchema = z.array(ModerationLogEntryDtoSchema);
 export type ModerationController_getModerationLog200ResponseJson = z.infer<typeof ModerationController_getModerationLog200ResponseJsonSchema>;

@@ -27,6 +27,14 @@ All notable changes to the Ekoz protocol. Format
 - Public `GET /auth/policy` in [`identity.md`](identity.md): registration mode,
   email-verification requirement and minimum password length, read live and
   never cached.
+- `POST /me/password` in [`identity.md`](identity.md): change the password of the
+  signed-in account, keeping the calling session and revoking the others.
+- `GET /me/username` and `DELETE /me/username/request`: identifier change state
+  (policy, cooldown end, pending request) and cancellation; new `cancelled`
+  request status and `identity.username_request_pending` error (`409`).
+- `MeView.pendingEmail`: the unverified address of a requested email change.
+- Every `avatarUrl` ends with `?v=<avatarBlobId>`, an opaque version that changes
+  with the avatar content.
 - [Identity and profiles](identity.md) fully specified: setup, registration
   (`open` / `invite` / `admin`), login / refresh / logout, sessions, email
   verification, password reset, own and public profiles, invitations, owner
@@ -77,3 +85,8 @@ All notable changes to the Ekoz protocol. Format
   carry `roomId` folded into `data`, delivery is poll-based (not push) for the
   durable half with ephemeral presence/typing pushed live in-process, and
   feed pruning is age-only (no per-session acked-`feedSeq` floor yet).
+
+### Fixed
+
+- A wrong password on `POST /me/email` and `DELETE /me` is documented as `401`
+  `auth.invalid_credentials`, as the server has always answered (was `403`).

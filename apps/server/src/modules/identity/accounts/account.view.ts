@@ -2,6 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { entityIdSchema } from '../../../core/http/entity-id.schema.js';
 import { nullableString } from '../../../core/http/nullable.js';
+import { userIdentifier } from '../../../core/http/user-links.js';
 import type { UserRecord } from './account.service.js';
 
 export const accountStatusSchema = z.enum(['active', 'suspended', 'deleted']);
@@ -30,7 +31,7 @@ export function toAccountView(
 ): AccountView {
   return {
     id: user.id,
-    identifier: user.name ? `${user.name}/${serverDomain}` : null,
+    identifier: user.name ? userIdentifier(user.name, serverDomain) : null,
     email: user.email,
     displayName,
     isOwner: user.isOwner,

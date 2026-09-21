@@ -154,7 +154,10 @@ Requests an email-address change; applies once its verification token is
 consumed.
 
 - Body: `{ newEmail, password }`. `202`: `{ accepted: true }`.
-- Errors: `identity.email_taken` (`409`), `auth.invalid_credentials` (`403`,
+- While the change awaits verification, `GET /me` exposes the new address as
+  `pendingEmail`. Calling again replaces the pending change and re-sends the
+  verification mail.
+- Errors: `identity.email_taken` (`409`), `auth.invalid_credentials` (`401`,
   wrong password).
 
 ### `POST /auth/password-reset/request`
@@ -172,8 +175,26 @@ consumed.
 
 ### `GET /me`
 
-`200`: `MeView` — `AccountView` extended with `bio: string | null` and
-`avatarUrl: string | null`.
+`200`: `MeView` — `AccountView` extended with `bio: string | null`,
+`avatarUrl: string | null` and `pendingEmail: string | null`.
+
+- `pendingEmail`: the address of an email change requested through
+  `POST /me/email` that is not verified yet and whose token has not expired;
+  `null` otherwise.
+- `avatarUrl` (here and in every payload that carries one) ends with
+  `?v=<avatarBlobId>`. The value is an opaque version that changes exactly when
+  the avatar content changes; the avatar route ignores it. A client can cache
+  the image under the full URL.
+
+### `POST /me/password`
+
+Changes the password of the signed-in account. Every other session of the
+account is revoked; the calling session stays open.
+
+- Body: `{ currentPassword, newPassword }`. `204`.
+- Errors: `auth.invalid_credentials` (`401`, wrong current password),
+  `identity.password_too_weak` (`422`, including a new password equal to the
+  current one), validation (`422`).
 
 ### `PATCH /me/profile`
 
@@ -200,14 +221,32 @@ Policy-driven identifier change (`identity.username_change_policy`:
 - Body: `{ name }`.
 - `200`: `{ status: 'applied', identifier }` or `{ status: 'pending', requestId }`.
 - Errors: `identity.username_immutable` (`403`),
-  `identity.username_taken` (`409`), `identity.username_change_cooldown` (`409`).
+  `identity.username_taken` (`409`), `identity.username_change_cooldown` (`409`),
+  `identity.username_request_pending` (`409`, a request of the caller already
+  awaits a decision).
+
+### `GET /me/username`
+
+State of the identifier change for the calling account.
+
+- `200`: `{ policy, nextChangeAt, pendingRequest }`.
+  - `policy`: `immutable` | `available` | `approval`.
+  - `nextChangeAt`: string (ISO) | `null`. Non-null only for `available` while
+    the cooldown runs.
+  - `pendingRequest`: `{ id, requestedName, createdAt }` | `null`. The caller's
+    request awaiting a decision, whatever the current policy.
+
+### `DELETE /me/username/request`
+
+Cancels the caller's pending identifier change request. `204`. Errors:
+`identity.username_request_not_found` (`404`, no pending request).
 
 ### `DELETE /me`
 
 Self-service deletion; re-authenticates.
 
 - Body: `{ password }`. `204`.
-- Errors: `auth.invalid_credentials` (`403`), `identity.last_owner` (`409`,
+- Errors: `auth.invalid_credentials` (`401`, wrong password), `identity.last_owner` (`409`,
   the sole remaining owner cannot delete their own account).
 
 ### `AccountView`
@@ -228,7 +267,8 @@ Self-service deletion; re-authenticates.
 
 Authenticated (the profile itself is public; the endpoint is not anonymous).
 
-- `200`: `{ identifier, displayName, bio: string | null, avatarUrl: string | null }`.
+- `200`: `{ identifier, displayName, bio: string | null, avatarUrl: string | null }`
+  (`avatarUrl` is versioned, see `GET /me`).
 - Errors: `identity.profile_not_found` (`404`).
 
 ## Invitations (owner)
@@ -284,7 +324,7 @@ Body: `{ userId }`. `204`. Errors: `identity.user_not_found` (`404`).
 
 ### `GET /admin/username-requests?status=`
 
-`status`: `pending` | `approved` | `rejected` (optional). `200`:
+`status`: `pending` | `approved` | `rejected` | `cancelled` (optional). `200`:
 `UsernameChangeRequest[]`.
 
 ### `POST /admin/username-requests/:id/approve`
@@ -305,7 +345,7 @@ Body: `{ userId }`. `204`. Errors: `identity.user_not_found` (`404`).
 | `id`               | string (ULID)                        |
 | `userId`           | string (ULID)                        |
 | `requestedName`    | string                               |
-| `status`           | `pending` \| `approved` \| `rejected` |
+| `status`           | `pending` \| `approved` \| `rejected` \| `cancelled` |
 | `createdAt`        | string (ISO)                         |
 | `resolvedAt`       | string \| null (ISO)                 |
 | `resolvedByUserId` | string \| null (ULID)                |
@@ -326,7 +366,8 @@ Body: `{ userId }`. `204`. Errors: `identity.user_not_found` (`404`).
 | `identity.username_immutable`               | 403    | `username_change_policy = immutable`.                   |
 | `identity.username_change_cooldown`         | 409    | Too soon after a previous change.                       |
 | `identity.username_request_not_found`       | 404    |                                                          |
-| `identity.username_request_resolved`        | 409    | Already approved/rejected.                              |
+| `identity.username_request_resolved`        | 409    | Already approved/rejected/cancelled.                    |
+| `identity.username_request_pending`         | 409    | The account already has a pending identifier change.    |
 | `identity.account_suspended`                | 403    | Server has revoked every session.                       |
 | `identity.email_not_verified`               | 403    | Login blocked pending verification.                     |
 | `identity.email_verification_invalid`       | 422    |                                                          |
