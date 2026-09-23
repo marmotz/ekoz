@@ -29,6 +29,12 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   /** Explicit `X-Request-Id`; generated when omitted. */
   requestId?: string;
+  /**
+   * How a 2xx body is decoded. `json` (default) parses JSON and sends
+   * `Accept: application/json`; `blob` sends `Accept: image/*` and returns the
+   * raw body as a `Blob`. Non-2xx responses are problem+json in both modes.
+   */
+  responseType?: 'json' | 'blob';
 }
 
 export interface HttpClientOptions {
@@ -76,7 +82,8 @@ export class HttpClient {
     const requestId = options.requestId ?? newRequestId();
 
     const headers = new Headers(options.headers);
-    headers.set('Accept', 'application/json');
+    const blobMode = options.responseType === 'blob';
+    headers.set('Accept', blobMode ? 'image/*' : 'application/json');
     headers.set(PROTOCOL_HEADER, this.#protocolVersion);
     if (!headers.has(REQUEST_ID_HEADER)) {
       headers.set(REQUEST_ID_HEADER, requestId);
@@ -108,6 +115,7 @@ export class HttpClient {
       throw await decodeProblem(response, requestId);
     }
 
+    if (blobMode) return (await response.blob()) as T;
     if (response.status === 204) return undefined as T;
     const text = await response.text();
     if (text.length === 0) return undefined as T;

@@ -23,14 +23,14 @@ _[technical design](features/auth/technical.md)_ — 11/11 tasks done
 ## Identity and profiles ·  [overview](features/identity-and-profiles/overview.md)
 
 _[technical design](features/identity-and-profiles/technical.md) (§1 to §20 server layer as shipped, §21 to §28 client
-scope)_ — 3/9 tasks done
+scope)_ — 4/9 tasks done
 
 | Done | Issue                                              | Title                                                                                  | Blocked by               |
 |------|----------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------|
 | [x]  | [#101](https://github.com/marmotz/ekoz/issues/101) | Identity server: POST /me/password to change the password                              | —                        |
 | [x]  | [#102](https://github.com/marmotz/ekoz/issues/102) | Identity server: username change state, single pending request and cancellation        | —                        |
 | [x]  | [#103](https://github.com/marmotz/ekoz/issues/103) | Identity server: pendingEmail in MeView and versioned avatarUrl                        | —                        |
-| [ ]  | [#104](https://github.com/marmotz/ekoz/issues/104) | Identity SDK: password, username state and avatar blob bindings                        | #101, #102, #103         |
+| [x]  | [#104](https://github.com/marmotz/ekoz/issues/104) | Identity SDK: password, username state and avatar blob bindings                        | #101, #102, #103         |
 | [ ]  | [#105](https://github.com/marmotz/ekoz/issues/105) | Profile client: shared pieces (menu entries, avatar, UI base, generated hooks, errors) | #104, #65, #92, #93, #94 |
 | [ ]  | [#106](https://github.com/marmotz/ekoz/issues/106) | Profile client: /account route, profile and avatar sections                            | #105                     |
 | [ ]  | [#107](https://github.com/marmotz/ekoz/issues/107) | Profile client: identifier, email and password sections                                | #106                     |

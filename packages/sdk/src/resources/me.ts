@@ -7,12 +7,14 @@ import type { SessionManager } from '../session/session-manager.js';
 import type {
   AvatarUploaded,
   ChangeEmailBody,
+  ChangePasswordBody,
   ChangeUsernameBody,
   DeleteMeBody,
   EmailAcceptedResponse,
   MeView,
   UpdateProfileBody,
   UsernameChangeOutcome,
+  UsernameChangeState,
 } from '../types/wire.js';
 
 export interface MeResource {
@@ -22,6 +24,9 @@ export interface MeResource {
   deleteAvatar(): Promise<void>;
   changeEmail(body: ChangeEmailBody): Promise<EmailAcceptedResponse>;
   changeUsername(body: ChangeUsernameBody): Promise<UsernameChangeOutcome>;
+  usernameState(): Promise<UsernameChangeState>;
+  cancelUsernameRequest(): Promise<void>;
+  changePassword(body: ChangePasswordBody): Promise<void>;
   deleteAccount(body: DeleteMeBody): Promise<void>;
 }
 
@@ -51,6 +56,18 @@ export function createMeResource(session: SessionManager): MeResource {
 
     changeUsername(body) {
       return session.request<UsernameChangeOutcome>('PATCH', '/me/username', { body });
+    },
+
+    usernameState() {
+      return session.request<UsernameChangeState>('GET', '/me/username');
+    },
+
+    cancelUsernameRequest() {
+      return session.request<void>('DELETE', '/me/username/request');
+    },
+
+    changePassword(body) {
+      return session.request<void>('POST', '/me/password', { body });
     },
 
     async deleteAccount(body) {

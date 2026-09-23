@@ -55,8 +55,8 @@ per-resource constructors:
 | -------------------------- | --------------------------------------------------------------- |
 | `client.setup`             | Setup-state probe, first-owner setup (`state`, `createOwner`)    |
 | `client.auth`              | Policy, register, login, logout, email verification, password reset |
-| `client.me`                | Own profile, avatar, email, username, account deletion           |
-| `client.users`             | Public profile lookup by identifier                              |
+| `client.me`                | Own profile, avatar, email, password, username (state, cancel), account deletion |
+| `client.users`             | Public profile lookup by identifier, avatar blob                 |
 | `client.sessions`          | List / rename / revoke the caller's own sessions                 |
 | `client.invitations`       | Owner-only registration invitations                              |
 | `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset), owner and username-request administration |

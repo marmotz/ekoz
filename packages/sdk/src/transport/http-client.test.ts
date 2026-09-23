@@ -119,4 +119,43 @@ describe('HttpClient', () => {
     const c = client(createFetchMock(jsonResponse({ body: {} })));
     expect(c.baseUrl).toBe('https://api.example.com/v0');
   });
+
+  describe('blob mode', () => {
+    it('sends Accept: image/* and returns the body as a Blob', async () => {
+      const fetchMock = createFetchMock(
+        new Response(new Uint8Array([1, 2, 3]), {
+          status: 200,
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      );
+      const result = await client(fetchMock, { getAuthToken: () => 'tok' }).request<Blob>(
+        'GET',
+        '/users/bob/avatar',
+        { responseType: 'blob' },
+      );
+
+      const headers = new Headers(fetchMock.calls[0]?.init?.headers);
+      expect(headers.get('Accept')).toBe('image/*');
+      expect(headers.get('Authorization')).toBe('Bearer tok');
+      expect(headers.get('X-Ekoz-Protocol')).toBe('0');
+      expect(result).toBeInstanceOf(Blob);
+      expect(result.type).toBe('image/png');
+      expect(result.size).toBe(3);
+    });
+
+    it('still decodes a problem response into a typed error', async () => {
+      const fetchMock = createFetchMock(
+        jsonResponse({ status: 404, body: { code: 'http_404', status: 404 } }),
+      );
+      await expect(
+        client(fetchMock).request('GET', '/users/x/avatar', { responseType: 'blob' }),
+      ).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    it('keeps Accept: application/json when responseType is json', async () => {
+      const fetchMock = createFetchMock(jsonResponse({ body: {} }));
+      await client(fetchMock).request('GET', '/me', { responseType: 'json' });
+      expect(new Headers(fetchMock.calls[0]?.init?.headers).get('Accept')).toBe('application/json');
+    });
+  });
 });

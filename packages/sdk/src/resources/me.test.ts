@@ -81,4 +81,41 @@ describe('me resource', () => {
     expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
     expect(session.accessToken).toBeUndefined();
   });
+
+  it('changePassword() hits POST /me/password with the body', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const { me } = await resource(fetchMock);
+
+    await expect(
+      me.changePassword({ currentPassword: 'old', newPassword: 'new-password-1' }),
+    ).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/me/password');
+    expect(fetchMock.calls[0]?.init?.method).toBe('POST');
+    expect(JSON.parse(String(fetchMock.calls[0]?.init?.body))).toEqual({
+      currentPassword: 'old',
+      newPassword: 'new-password-1',
+    });
+  });
+
+  it('usernameState() hits GET /me/username', async () => {
+    const state = { pendingRequest: null };
+    const fetchMock = createFetchMock(jsonResponse({ body: state }));
+    const { me } = await resource(fetchMock);
+
+    await expect(me.usernameState()).resolves.toEqual(state);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/me/username');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+  });
+
+  it('cancelUsernameRequest() hits DELETE /me/username/request', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const { me } = await resource(fetchMock);
+
+    await expect(me.cancelUsernameRequest()).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/me/username/request');
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
 });

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { AdminCreateUserBodySchema, AuthPolicySchema, LoginBodySchema } from './schemas.js';
+import {
+  AdminCreateUserBodySchema,
+  AuthPolicySchema,
+  ChangePasswordBodySchema,
+  LoginBodySchema,
+  UsernameChangeStateSchema,
+} from './schemas.js';
 
 describe('schemas', () => {
   it('accepts a valid AdminCreateUserBody payload', () => {
@@ -74,5 +80,43 @@ describe('schemas', () => {
     const result = AuthPolicySchema.safeParse({ registrationMode: 'open' });
 
     expect(result.success).toBe(false);
+  });
+
+  it('validates ChangePasswordBody and rejects an empty current password', () => {
+    expect(
+      ChangePasswordBodySchema.safeParse({ currentPassword: 'old', newPassword: 'new-pass-123' })
+        .success,
+    ).toBe(true);
+    expect(
+      ChangePasswordBodySchema.safeParse({ currentPassword: '', newPassword: 'new-pass-123' })
+        .success,
+    ).toBe(false);
+  });
+
+  it('validates UsernameChangeState with and without a pending request', () => {
+    const pending = UsernameChangeStateSchema.safeParse({
+      policy: 'approval',
+      nextChangeAt: null,
+      pendingRequest: {
+        id: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+        requestedName: 'bob',
+        createdAt: '2026-09-23T10:00:00.000Z',
+      },
+    });
+    expect(pending.success).toBe(true);
+    expect(
+      UsernameChangeStateSchema.safeParse({
+        policy: 'free',
+        nextChangeAt: null,
+        pendingRequest: null,
+      }).success,
+    ).toBe(true);
+    expect(
+      UsernameChangeStateSchema.safeParse({
+        policy: 'free',
+        nextChangeAt: null,
+        pendingRequest: { id: 'x' },
+      }).success,
+    ).toBe(false);
   });
 });

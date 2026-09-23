@@ -23,6 +23,7 @@ export type {
   AuthPolicyDtoDto as AuthPolicy,
   AvatarUploadedDtoDto as AvatarUploaded,
   ChangeEmailDtoDto as ChangeEmailBody,
+  ChangePasswordDtoDto as ChangePasswordBody,
   ChangeUsernameDtoDto as ChangeUsernameBody,
   ConfirmPasswordResetDtoDto as ConfirmPasswordResetBody,
   CreatedInvitationDtoDto as CreatedInvitation,
@@ -54,5 +55,7 @@ export type {
   UsernameChangeAppliedDtoDto as UsernameChangeApplied,
   UsernameChangePendingDtoDto as UsernameChangePending,
   UsernameChangeRequestDtoDto as UsernameChangeRequest,
+  UsernameChangeStateDtoDto as UsernameChangeState,
+  UsernameChangeStateDtoPendingRequestDto as UsernameChangePendingRequest,
   VerifyEmailDtoDto as VerifyEmailBody,
 } from '../generated/api/index.js';
