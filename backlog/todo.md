@@ -4,7 +4,7 @@
 
 ## Auth ·  [overview](features/auth/overview.md)
 
-_[technical design](features/auth/technical.md)_ — 10/11 tasks done
+_[technical design](features/auth/technical.md)_ — 11/11 tasks done
 
 | Done | Issue                                              | Title                                                                       | Blocked by              |
 |------|----------------------------------------------------|-----------------------------------------------------------------------------|-------------------------|
@@ -18,7 +18,7 @@ _[technical design](features/auth/technical.md)_ — 10/11 tasks done
 | [x]  | [#97](https://github.com/marmotz/ekoz/issues/97)   | Auth client: registration page (open, invite and admin modes)               | #94, #95                |
 | [x]  | [#98](https://github.com/marmotz/ekoz/issues/98)   | Auth client: email verification page                                        | #94, #95                |
 | [x]  | [#99](https://github.com/marmotz/ekoz/issues/99)   | Auth client: forgot and reset password pages                                | #94, #95                |
-| [ ]  | [#100](https://github.com/marmotz/ekoz/issues/100) | Document the web client auth design in docs/technical/                      | #96, #97, #98, #99, #93 |
+| [x]  | [#100](https://github.com/marmotz/ekoz/issues/100) | Document the web client auth design in docs/technical/                      | #96, #97, #98, #99, #93 |
 
 ## Identity and profiles ·  [overview](features/identity-and-profiles/overview.md)
 
