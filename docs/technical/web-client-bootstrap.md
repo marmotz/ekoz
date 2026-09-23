@@ -7,7 +7,8 @@ shadcn/ui, feature-first, network access only through `@ekozhq/sdk`). This page
 records the decisions taken when `apps/client-web` was bootstrapped: what runs the
 app, how the shell, theme, language and session are wired, and how CI guards it.
 The design lived in
-[`backlog/_archives/features/web-client-foundations/technical.md`](../../backlog/_archives/features/web-client-foundations/technical.md);
+[
+`backlog/_archives/features/web-client-foundations/technical.md`](../../backlog/_archives/features/web-client-foundations/technical.md);
 this is what shipped.
 
 ## Decision
@@ -25,15 +26,15 @@ is settled: the scaffold is Start, like `apps/admin`. File routes live in
 
 `eslint-plugin-boundaries` (`bun run lint:boundaries`) enforces:
 
-| From | May import |
-| ---- | ---------- |
-| `features/<x>` | `shared`, itself (never another feature) |
-| `shared` | `shared` |
-| `routes` | `shared`, `features`, `app`, `server` |
-| `app`, `server` | `shared`, `app`, `server` |
+| From            | May import                               |
+|-----------------|------------------------------------------|
+| `features/<x>`  | `shared`, itself (never another feature) |
+| `shared`        | `shared`                                 |
+| `routes`        | `shared`, `features`, `app`, `server`    |
+| `app`, `server` | `shared`, `app`, `server`                |
 
-Consequence: `shared` cannot read app-level state. The shell is presentational
-(`AppShell` takes `theme` / `onThemeChange` / `userMenu` as props) and
+Consequence: `shared` cannot read app-level state. The shell is presentational (`AppShell` takes `theme` /
+`onThemeChange` / `userMenu` as props) and
 `app/app-frame.tsx` binds it to `useTheme()`.
 
 ### App shell and navigation
@@ -91,9 +92,9 @@ browser, so there is no server-side session guard.
   `unknown` (no client yet), `anonymous` or `authenticated`, following the SDK
   `session:*` events.
 - `RequireAuth` renders a skeleton while `unknown`, redirects to `/login` when
-  `anonymous`, and renders its children when `authenticated`. Protected routes
-  (under `routes/_app/`) wrap their component in it; there is no loader-level
-  guard. No page uses it yet.
+  `anonymous`, and renders its children when `authenticated`. The `_app` layout
+  wraps its outlet in it, so every route under `routes/_app/` is protected; there
+  is no loader-level guard.
 - `useSession()` consumers: `RequireAuth`; `GuestOnly`, the inverse guard of the
   anonymous pages, which also completes a sign-in by redirecting to `/` once the
   status turns `authenticated`; and `UserMenu`, which renders nothing for an
@@ -125,17 +126,17 @@ requests, running `scripts/check-changelog.sh`: a change under a workspace's
 
 ## Alternatives
 
-| Topic | Chosen | Rejected | Why |
-| ----- | ------ | -------- | --- |
-| Foundation | TanStack Start | Plain Vite SPA + TanStack Router | Same routing API, server functions available (language detection), same base as `apps/admin`. The Node runtime cost is accepted; the SPA stays the fallback. |
-| SDK execution | Client only | Also in server functions | The session store is `localStorage` and refresh is in memory; running it server-side would require an httpOnly-cookie model nobody needs yet. |
-| Session guard | `RequireAuth` component | Loader `beforeLoad` guard | The session is not readable on the server. |
-| Shell placement | Pathless `_app` layout route | Shell in the root route | Anonymous pages must render without it, and the layout can compose a feature (`UserMenu`). |
-| Language detection | `Accept-Language` on the server + stored choice on the client | Client-side detection only | Avoids a language flash and a hydration mismatch. |
-| Navigation | `registerNav()` registry | Hand-edited central list | Keeps features from importing the shell or each other. |
-| Test network boundary | Mock the `@ekozhq/sdk` module | MSW | The client performs no `fetch` of its own; the SDK API is the useful seam. |
-| SDK in CI | `workspace:*` | `bun link` from a sibling checkout, tarball | The SDK is in the same repository. |
-| Changelog check | Shell script, tested with Vitest | Third-party action | A few lines of `git diff`, and it also covers changesets. |
+| Topic                 | Chosen                                                        | Rejected                                    | Why                                                                                                                                                          |
+|-----------------------|---------------------------------------------------------------|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Foundation            | TanStack Start                                                | Plain Vite SPA + TanStack Router            | Same routing API, server functions available (language detection), same base as `apps/admin`. The Node runtime cost is accepted; the SPA stays the fallback. |
+| SDK execution         | Client only                                                   | Also in server functions                    | The session store is `localStorage` and refresh is in memory; running it server-side would require an httpOnly-cookie model nobody needs yet.                |
+| Session guard         | `RequireAuth` component                                       | Loader `beforeLoad` guard                   | The session is not readable on the server.                                                                                                                   |
+| Shell placement       | Pathless `_app` layout route                                  | Shell in the root route                     | Anonymous pages must render without it, and the layout can compose a feature (`UserMenu`).                                                                   |
+| Language detection    | `Accept-Language` on the server + stored choice on the client | Client-side detection only                  | Avoids a language flash and a hydration mismatch.                                                                                                            |
+| Navigation            | `registerNav()` registry                                      | Hand-edited central list                    | Keeps features from importing the shell or each other.                                                                                                       |
+| Test network boundary | Mock the `@ekozhq/sdk` module                                 | MSW                                         | The client performs no `fetch` of its own; the SDK API is the useful seam.                                                                                   |
+| SDK in CI             | `workspace:*`                                                 | `bun link` from a sibling checkout, tarball | The SDK is in the same repository.                                                                                                                           |
+| Changelog check       | Shell script, tested with Vitest                              | Third-party action                          | A few lines of `git diff`, and it also covers changesets.                                                                                                    |
 
 ## Consequences
 

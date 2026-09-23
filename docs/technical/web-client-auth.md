@@ -2,8 +2,8 @@
 
 ## Context
 
-The [web client bootstrap](web-client-bootstrap.md) wired the session
-(`SdkProvider`, `useSession()`, `RequireAuth`, `SessionGuard`) but shipped only a
+The [web client bootstrap](web-client-bootstrap.md) wired the session (`SdkProvider`, `useSession()`, `RequireAuth`,
+`SessionGuard`) but shipped only a
 placeholder `/login`, and every route was rendered inside the full application
 shell, so an anonymous visitor would have seen a sidebar on the sign-in page.
 The `auth` feature adds the anonymous flows of `apps/client-web`: sign in,
@@ -32,9 +32,9 @@ this page records what shipped and why.
 The root route (`routes/__root.tsx`) renders only the document, the providers,
 the `Toaster` and an `<Outlet />`. Two pathless layout routes choose the frame:
 
-| Layout | Renders | Children |
-| ------ | ------- | -------- |
-| `routes/_app.tsx` | `AppFrame` (sidebar, top bar) with `<UserMenu />` in the top bar `user-menu` slot | `routes/_app/**`: the home page and every later page of the application |
+| Layout             | Renders                                                                                                                | Children                                                                                    |
+|--------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `routes/_app.tsx`  | `AppFrame` (sidebar, top bar) with `<UserMenu />` in the top bar `user-menu` slot                                      | `routes/_app/**`: the home page and every later page of the application                     |
 | `routes/_auth.tsx` | `AuthLayout` (`features/auth/components`): a centered card with the language switcher and the theme toggle, no sidebar | `routes/_auth/{login,register,check-email,forgot-password,verify-email,reset-password}.tsx` |
 
 Both layouts live in `routes` because `app` may not import a feature while
@@ -86,23 +86,23 @@ policy.
 ### Error mapping by code
 
 SDK errors are mapped by their stable `code`, not by SDK error class, in one
-table (`features/auth/api/errors.ts`): not every code has a dedicated class
-(`identity.identifier_invalid` surfaces as a plain `EkozError`). Each code is
+table (`features/auth/api/errors.ts`): not every code has a dedicated class (`identity.identifier_invalid` surfaces as a
+plain `EkozError`). Each code is
 placed either on the form as a whole or on a named request-body field:
 
-| Code | Placement |
-| ---- | --------- |
-| `auth.invalid_credentials`, `identity.account_suspended` | form (the credentials message never says which part was wrong) |
-| `identity.email_not_verified` | form, plus a link to `/check-email` on the sign-in page |
-| `identity.registration_closed` | form; the register page switches to the closed message and refetches the policy |
-| `identity.invitation_invalid` | `invitationToken` field |
-| `identity.email_taken` | `email` field |
-| `identity.identifier_invalid` | `name` field |
-| `identity.password_too_weak` | `password` field |
-| `identity.email_verification_invalid`, `auth.password_reset_invalid` | page-level message (with a resend form, or a link to `/forgot-password`) |
-| `auth.too_many_requests` (`RateLimitError`) | form, with the `retryAfter` seconds when known |
-| `ValidationError` with `issues` | per field, by `path` |
-| `NetworkError`, anything else | generic form message |
+| Code                                                                 | Placement                                                                       |
+|----------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| `auth.invalid_credentials`, `identity.account_suspended`             | form (the credentials message never says which part was wrong)                  |
+| `identity.email_not_verified`                                        | form, plus a link to `/check-email` on the sign-in page                         |
+| `identity.registration_closed`                                       | form; the register page switches to the closed message and refetches the policy |
+| `identity.invitation_invalid`                                        | `invitationToken` field                                                         |
+| `identity.email_taken`                                               | `email` field                                                                   |
+| `identity.identifier_invalid`                                        | `name` field                                                                    |
+| `identity.password_too_weak`                                         | `password` field                                                                |
+| `identity.email_verification_invalid`, `auth.password_reset_invalid` | page-level message (with a resend form, or a link to `/forgot-password`)        |
+| `auth.too_many_requests` (`RateLimitError`)                          | form, with the `retryAfter` seconds when known                                  |
+| `ValidationError` with `issues`                                      | per field, by `path`                                                            |
+| `NetworkError`, anything else                                        | generic form message                                                            |
 
 `useAuthError({ fields })` turns a mapped error into translated form and field
 messages. A field error for a field the form does not render falls back to the
@@ -131,32 +131,35 @@ submit. The output lands in `apps/client-web/src/generated` (marked
   `LoginDtoSchema.omit({ deviceName: true })` drops the device name, which the
   server derives from the User-Agent.
 - The generator runs its own copy of the Zod generator next to the hooks rather
-  than importing the SDK's schemas: the SDK re-exports them under wire names
-  (`LoginBodySchema`) a generic generator cannot guess. The output is
+  than importing the SDK's schemas: the SDK re-exports them under wire names (`LoginBodySchema`) a generic generator
+  cannot guess. The output is
   duplicated, the source (`openapi.json`) is not.
 - Submitting still goes through `@ekozhq/sdk` (one `useMutation` hook per SDK
   call in `features/auth/api`); the generated hooks hold form state only.
 
 ## Alternatives
 
-| Topic | Chosen | Rejected | Why |
-| ----- | ------ | -------- | --- |
-| Shell vs auth pages | Two pathless layouts under `routes` | Conditional shell in `__root.tsx`, or in `AppFrame` | A pathless layout is the router's own tool for it; `app` cannot import the `auth` feature that fills the user menu. |
-| Completing sign-in | `GuestOnly` reacts to the session | `navigate('/')` in the login handler | A single mechanism; no race between the navigation and `session:authenticated`. |
-| Mail-link pages | Reachable while signed in | Guest-only like the others | The token is single-use; a redirect would waste it. |
-| Registration and verification policy | Read from `GET /auth/policy` | Try and read the error; build-time config | Cannot show the right form or the password length beforehand; the settings are hot-reloadable. |
-| Error mapping | One table keyed by `code` | `instanceof` per SDK class; per-page handling | Some codes have no class; one table keeps placements consistent and testable. |
-| Email to `/check-email` | Router history `state` | `?email=` query parameter | Keeps the address out of the URL, logs and history. |
-| Forms | Generated TanStack Form hooks | Hand-written forms; React Hook Form | The DTO schemas already exist; TanStack Form matches the Start / Router / Query stack. |
-| Generated JSX | None (headless hooks) | Generated field components | Fields need shadcn/ui, i18n and per-page layout; generated markup would be overridden everywhere. |
+| Topic                                | Chosen                                 | Rejected                                             | Why                                                                                                                 |
+|--------------------------------------|----------------------------------------|------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| Shell vs auth pages                  | Two pathless layouts under `routes`    | Conditional shell in `__root.tsx`, or in `AppFrame`  | A pathless layout is the router's own tool for it; `app` cannot import the `auth` feature that fills the user menu. |
+| Completing sign-in                   | `GuestOnly` reacts to the session      | `navigate('/')` in the login handler                 | A single mechanism; no race between the navigation and `session:authenticated`.                                     |
+| Protecting the shell                 | `RequireAuth` around the `_app` outlet | Per page `RequireAuth`; sign-in links in the top bar | One guard for every page in the shell; a chat client has nothing to show an anonymous visitor.                      |
+| Mail-link pages                      | Reachable while signed in              | Guest-only like the others                           | The token is single-use; a redirect would waste it.                                                                 |
+| Registration and verification policy | Read from `GET /auth/policy`           | Try and read the error; build-time config            | Cannot show the right form or the password length beforehand; the settings are hot-reloadable.                      |
+| Error mapping                        | One table keyed by `code`              | `instanceof` per SDK class; per-page handling        | Some codes have no class; one table keeps placements consistent and testable.                                       |
+| Email to `/check-email`              | Router history `state`                 | `?email=` query parameter                            | Keeps the address out of the URL, logs and history.                                                                 |
+| Forms                                | Generated TanStack Form hooks          | Hand-written forms; React Hook Form                  | The DTO schemas already exist; TanStack Form matches the Start / Router / Query stack.                              |
+| Generated JSX                        | None (headless hooks)                  | Generated field components                           | Fields need shadcn/ui, i18n and per-page layout; generated markup would be overridden everywhere.                   |
 
 ## Consequences
 
 - Every page that needs the shell lives under `routes/_app/`; a page added at the
-  top level of `routes` renders without sidebar or top bar. Protected pages still
-  wrap their component in `RequireAuth` (no page does yet).
-- The sign-in and registration pages wait for one extra round trip
-  (`GET /auth/policy`) on the pages that need it, and show a retry if the server
+  top level of `routes` renders without sidebar or top bar. The `_app` layout
+  wraps its outlet in `RequireAuth`, so every page under it (the home page
+  included) is protected: an anonymous visitor lands on `/login`, which is the
+  only way into the auth pages since the shell shows no sign-in link.
+- The sign-in and registration pages wait for one extra round trip (`GET /auth/policy`) on the pages that need it, and
+  show a retry if the server
   is unreachable.
 - A new server error code shown by an auth form needs a row in the error table
   and a key in both `auth.errors.*` catalogues; an unmapped code degrades to the
