@@ -23,7 +23,9 @@ import { InvitationViewDtoSchema, type InvitationViewDtoDto } from './Invitation
 import { JoinRequestViewDtoSchema, type JoinRequestViewDtoDto } from './JoinRequestViewDto.schema.js';
 import { LoginDtoSchema, type LoginDtoDto } from './LoginDto.schema.js';
 import { LoginResponseDtoSchema, type LoginResponseDtoDto } from './LoginResponseDto.schema.js';
+import { MemberListViewDtoSchema, type MemberListViewDtoDto } from './MemberListViewDto.schema.js';
 import { MembershipViewDtoSchema, type MembershipViewDtoDto } from './MembershipViewDto.schema.js';
+import { MessagePageDtoSchema, type MessagePageDtoDto } from './MessagePageDto.schema.js';
 import { MessagePinViewDtoSchema, type MessagePinViewDtoDto } from './MessagePinViewDto.schema.js';
 import { MessageViewDtoSchema, type MessageViewDtoDto } from './MessageViewDto.schema.js';
 import { MeViewDtoSchema, type MeViewDtoDto } from './MeViewDto.schema.js';
@@ -612,6 +614,21 @@ export type MembershipController_leave401ResponseProblemJson = z.infer<typeof Me
 export const MembershipController_leave404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MembershipController_leave404ResponseProblemJson = z.infer<typeof MembershipController_leave404ResponseProblemJsonSchema>;
 
+export const MembershipController_listMembers200ResponseJsonSchema = MemberListViewDtoSchema;
+export type MembershipController_listMembers200ResponseJson = z.infer<typeof MembershipController_listMembers200ResponseJsonSchema>;
+
+export const MembershipController_listMembers401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MembershipController_listMembers401ResponseProblemJson = z.infer<typeof MembershipController_listMembers401ResponseProblemJsonSchema>;
+
+export const MembershipController_listMembers403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MembershipController_listMembers403ResponseProblemJson = z.infer<typeof MembershipController_listMembers403ResponseProblemJsonSchema>;
+
+export const MembershipController_listMembers404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MembershipController_listMembers404ResponseProblemJson = z.infer<typeof MembershipController_listMembers404ResponseProblemJsonSchema>;
+
+export const MembershipController_listMembers422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MembershipController_listMembers422ResponseProblemJson = z.infer<typeof MembershipController_listMembers422ResponseProblemJsonSchema>;
+
 export const MembershipController_rejectJoinRequest401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MembershipController_rejectJoinRequest401ResponseProblemJson = z.infer<typeof MembershipController_rejectJoinRequest401ResponseProblemJsonSchema>;
 
@@ -677,6 +694,21 @@ export type MessagesController_getMessage403ResponseProblemJson = z.infer<typeof
 
 export const MessagesController_getMessage404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MessagesController_getMessage404ResponseProblemJson = z.infer<typeof MessagesController_getMessage404ResponseProblemJsonSchema>;
+
+export const MessagesController_listMessages200ResponseJsonSchema = MessagePageDtoSchema;
+export type MessagesController_listMessages200ResponseJson = z.infer<typeof MessagesController_listMessages200ResponseJsonSchema>;
+
+export const MessagesController_listMessages401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MessagesController_listMessages401ResponseProblemJson = z.infer<typeof MessagesController_listMessages401ResponseProblemJsonSchema>;
+
+export const MessagesController_listMessages403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MessagesController_listMessages403ResponseProblemJson = z.infer<typeof MessagesController_listMessages403ResponseProblemJsonSchema>;
+
+export const MessagesController_listMessages404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MessagesController_listMessages404ResponseProblemJson = z.infer<typeof MessagesController_listMessages404ResponseProblemJsonSchema>;
+
+export const MessagesController_listMessages422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MessagesController_listMessages422ResponseProblemJson = z.infer<typeof MessagesController_listMessages422ResponseProblemJsonSchema>;
 
 export const MessagesController_listPins200ResponseJsonSchema = z.array(MessagePinViewDtoSchema);
 export type MessagesController_listPins200ResponseJson = z.infer<typeof MessagesController_listPins200ResponseJsonSchema>;

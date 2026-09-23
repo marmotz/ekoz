@@ -403,6 +403,13 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: true,
     secret: false,
   },
+  'messages.max_page': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 100,
+    hotReloadable: true,
+    secret: false,
+  },
   'messages.edit_window': {
     kind: 'runtime',
     schema: z.union([durationSeconds, z.null()]),

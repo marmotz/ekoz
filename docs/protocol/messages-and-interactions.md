@@ -75,6 +75,31 @@ Needs `room.post` and the room not read-only (or `room.edit_any`).
   `message.reply_not_in_room` (`422`), `message.mention_not_member` (`422`),
   validation (`422`).
 
+### `GET /rooms/:id/messages`
+
+Paginated history, newest page first. Needs `room.read`.
+
+- Query: `?before=&limit=`. `before` is an exclusive decimal `seq` (omitted:
+  start from the newest message). `limit` defaults to `50` and is capped at
+  `messages.max_page` (default `100`) regardless of what is requested.
+  Paging goes backwards on the room's log, which is why `before` is a `seq` and
+  not an opaque cursor.
+- `200`: `{ items: Message[], lastSeq: string, hasMore: boolean }`. `items` are
+  the messages with `seq < before`, the newest `limit` of them, ordered by
+  `seq` **ascending** inside the page. Redacted messages are included as
+  tombstones (`redactedAt` set, `body: ""`). `hasMore` is `true` when older
+  messages exist. `mentions` is filled for every item.
+- `lastSeq` is the room's `Room.lastSeq`, read **before** the messages in the
+  same request: the returned messages are at least as recent as `lastSeq`, so a
+  client that then applies events with `seq > lastSeq` (`GET /sync`,
+  `GET /events`) is safe and idempotent.
+- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
+  validation (`422`, e.g. a non-numeric `before` or `limit` below `1`).
+
+`seq` counts every room event (joins, reactions, pins, ...), so a page may hold
+fewer than `limit` messages only on the last page: the window is taken over
+messages, not over events.
+
 ### `GET /rooms/:id/messages/:messageId`
 
 Needs `room.read`.
@@ -86,7 +111,7 @@ Needs `room.read`.
 
 Needs `room.edit_own` (author, within `messages.edit_window` if set) or
 `room.edit_any`. Sets `editedAt`; the previous body is not retained. Emits
-`message_edited` with `{ editedAt }` only — never the previous body.
+`message_edited` with `{ messageId, editedAt }` only — never the previous body.
 
 - Body: `{ body }` — validated the same way as `POST`.
 - `200`: `Message`.
@@ -99,8 +124,13 @@ Needs `room.edit_own` (author, within `messages.edit_window` if set) or
 Needs `room.delete_own` (author) or `room.delete_any`. Sets `redactedAt` /
 `redactedById`, clears `body`, cascades: removes `reaction`, `message_mention`
 and `message_pin` rows. Rewrites the original `message_created` room_event
-into a tombstone (same `seq`, `type: "message_redacted"`) rather than
-appending a new one — the deleted body never lingers in the append-only log.
+into a tombstone (same `seq`, `type: "message_redacted"`), so the deleted body
+never lingers in the append-only log, **and** appends a `message_deleted` event
+(new `seq`, fanned out, served by `GET /sync` and `GET /events`) so connected
+clients learn about the deletion. In the same transaction the account feed rows
+that mirrored the original `message_created` are rewritten to the same
+tombstone, so `GET /events` cannot replay the deleted body. Retention deletions
+go through the same path and emit one `message_deleted` per message.
 
 - `204`.
 - Errors: `room.permission_denied` (`403`), `message.not_found` (`404`, also
@@ -192,8 +222,9 @@ deleter, reactor, pinner); `content` only ever carries the delta.
 | type | payload |
 |---|---|
 | `message_created` | `{ messageId, body, replyToId, mentions }` |
-| `message_edited` | `{ editedAt }` — never the previous body |
+| `message_edited` | `{ messageId, editedAt }` — never the previous body |
 | `message_redacted` | `{ reason: "user" \| "retention" }` — this REWRITES the original `message_created` row (same `seq`); it is not a new event |
+| `message_deleted` | `{ messageId, messageSeq, reason: "user" \| "retention" }` — the live notification of a deletion, appended with its own `seq`; `messageSeq` is the `seq` of the original (now tombstoned) row |
 | `message_hidden` | reserved for the retention worker (issue #12); no payload shape fixed yet |
 | `reaction_added` | `{ messageId, emoji }` |
 | `reaction_removed` | `{ messageId, emoji }` |

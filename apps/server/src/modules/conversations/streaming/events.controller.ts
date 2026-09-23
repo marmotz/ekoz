@@ -33,7 +33,8 @@ const PAGE_SIZE = 100;
  *   "in-process now" simplification the presence store documents (technical.md
  *   §15) — and consistent with the protocol's "best-effort-live, `/sync` is
  *   the source of truth" contract. `Last-Event-ID` is honoured, falling back
- *   to `?lastEventId=`.
+ *   to `?lastEventId=`; with neither, the stream starts at the current head
+ *   of the account's feed (live frames only, no replay).
  * - Ephemeral: presence and typing signals (technical.md §15, issue #10),
  *   pushed live through `EphemeralBroadcaster` — never persisted, so there is
  *   no replay if a connection misses one.
@@ -97,7 +98,8 @@ export class EventsController {
     const lastEventId =
       (Array.isArray(lastEventIdHeader) ? lastEventIdHeader[0] : lastEventIdHeader) ??
       lastEventIdQuery;
-    let cursor = parseCursor(lastEventId);
+    // No cursor: start at the current head, live frames only (synchronisation.md).
+    let cursor = parseCursor(lastEventId) ?? (await this.feed.head(binding.userId));
 
     const push = async (): Promise<void> => {
       const rows = await this.feed.since(binding.userId, cursor, PAGE_SIZE);
@@ -157,9 +159,9 @@ export class EventsController {
   }
 }
 
-function parseCursor(raw: string | undefined): bigint {
+function parseCursor(raw: string | undefined): bigint | null {
   if (!raw || !/^\d+$/.test(raw)) {
-    return 0n;
+    return null;
   }
   return BigInt(raw);
 }

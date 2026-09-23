@@ -1,9 +1,11 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { ulid } from 'ulid';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from '../identity/accounts/account.service.js';
 
@@ -15,6 +17,7 @@ describe('conversations — membership (integration)', () => {
   let app: INestApplication;
   let restoreConfig: () => void;
   let accounts: AccountService;
+  let prisma: PrismaService;
 
   const password = 'a-perfectly-fine-passphrase';
   // 1x1 transparent PNG.
@@ -100,6 +103,7 @@ describe('conversations — membership (integration)', () => {
     await app.init();
 
     accounts = app.get(AccountService);
+    prisma = app.get(PrismaService);
     await accounts.createAccount({
       name: 'owner',
       email: 'owner@ekoz.example.com',
@@ -573,6 +577,147 @@ describe('conversations — membership (integration)', () => {
 
       const res = await list(carolToken).expect(200);
       expect(res.body.items.map((i: { id: string }) => i.id)).toContain(first.id);
+    });
+  });
+
+  describe('GET /rooms/:id/members', () => {
+    const listMembers = (token: string, roomId: string, query: Record<string, string> = {}) =>
+      request(server())
+        .get(`/rooms/${roomId}/members`)
+        .query(query)
+        .set('Authorization', `Bearer ${token}`);
+
+    const join = (token: string, roomId: string) =>
+      request(server())
+        .post(`/rooms/${roomId}/join`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(201);
+
+    type MemberItem = { role: string; joinedAt: string; user: { id: string; displayName: string } };
+
+    it('lists explicit and inherited members once each, the nearest role winning', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const bobToken = await login('bob');
+      const carolToken = await login('carol');
+      const alice = (await accounts.findByIdentifier('alice'))!;
+      const bob = (await accounts.findByIdentifier('bob'))!;
+      const carol = (await accounts.findByIdentifier('carol'))!;
+      const owner = (await accounts.findByIdentifier('owner'))!;
+      const channel = await createPublicChannel(ownerToken, 'members-room');
+      const spaceId = channel.parentId as string;
+
+      // alice: space member promoted to moderator, then also an explicit channel member.
+      await join(aliceToken, spaceId);
+      await request(server())
+        .patch(`/rooms/${spaceId}/members/${alice.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ role: 'moderator' })
+        .expect(200);
+      await join(aliceToken, channel.id);
+      // bob: inherited only (space member, never joined the channel).
+      await join(bobToken, spaceId);
+      // carol: explicit channel member only.
+      await join(carolToken, channel.id);
+
+      const res = await listMembers(aliceToken, channel.id).expect(200);
+      expect(res.body.nextCursor).toBeNull();
+      const items = res.body.items as MemberItem[];
+      const ids = items.map((i) => i.user.id);
+      expect(ids).toEqual([...ids].sort());
+      expect(new Set(ids)).toEqual(new Set([owner.id, alice.id, bob.id, carol.id]));
+      expect(ids).toHaveLength(4);
+
+      const roleOf = (id: string) => items.find((i) => i.user.id === id)?.role;
+      expect(roleOf(owner.id)).toBe('room_admin'); // explicit on the channel beats space_admin
+      expect(roleOf(alice.id)).toBe('member'); // explicit channel role beats the space's moderator
+      expect(roleOf(bob.id)).toBe('member'); // inherited from the space
+      expect(roleOf(carol.id)).toBe('member');
+
+      const bobItem = items.find((i) => i.user.id === bob.id)!;
+      expect(bobItem.user).toEqual({
+        id: bob.id,
+        identifier: expect.stringMatching(/^bob\//),
+        displayName: 'bob',
+        avatarUrl: null,
+      });
+      expect(new Date(bobItem.joinedAt).toString()).not.toBe('Invalid Date');
+    });
+
+    it('paginates with an opaque cursor', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'members-page-room');
+      const spaceId = channel.parentId as string;
+      for (const name of ['alice', 'bob', 'carol']) {
+        await join(await login(name), spaceId);
+      }
+
+      const seen: string[] = [];
+      let cursor: string | null = null;
+      let pages = 0;
+      do {
+        const query: Record<string, string> = { limit: '2' };
+        if (cursor) {
+          query.cursor = cursor;
+        }
+        const res = await listMembers(ownerToken, channel.id, query).expect(200);
+        expect(res.body.items.length).toBeLessThanOrEqual(2);
+        seen.push(...res.body.items.map((i: MemberItem) => i.user.id));
+        cursor = res.body.nextCursor;
+        pages += 1;
+      } while (cursor);
+
+      expect(pages).toBe(2);
+      expect(seen).toHaveLength(4);
+      expect(new Set(seen).size).toBe(4);
+      expect(seen).toEqual([...seen].sort());
+    });
+
+    it('summarises a deleted account with null profile fields', async () => {
+      const ownerToken = await login('owner');
+      await accounts.createAccount({
+        name: 'erin',
+        email: 'erin@ekoz.example.com',
+        password,
+        displayName: 'erin',
+        emailVerified: true,
+      });
+      const erin = (await accounts.findByIdentifier('erin'))!;
+      const channel = await createPublicChannel(ownerToken, 'members-deleted-room');
+      await join(await login('erin'), channel.id);
+      await prisma.orm.public.User.where({ id: erin.id }).update({ status: 'deleted' });
+
+      const res = await listMembers(ownerToken, channel.id).expect(200);
+      const item = (res.body.items as MemberItem[]).find((i) => i.user.id === erin.id);
+      expect(item?.user).toEqual({
+        id: erin.id,
+        identifier: null,
+        displayName: null,
+        avatarUrl: null,
+      });
+    });
+
+    it('treats a malformed cursor as a first page', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'members-bad-cursor-room');
+
+      const first = await listMembers(ownerToken, channel.id).expect(200);
+      const res = await listMembers(ownerToken, channel.id, { cursor: 'not-a-cursor' }).expect(200);
+      expect(res.body).toEqual(first.body);
+    });
+
+    it('refuses a non-reader, an unknown room and invalid query values', async () => {
+      const ownerToken = await login('owner');
+      const carolToken = await login('carol');
+      const channel = await createPrivateChannel(ownerToken, 'members-private-room');
+
+      const denied = await listMembers(carolToken, channel.id).expect(403);
+      expect(denied.body.code).toBe('room.permission_denied');
+
+      const missing = await listMembers(carolToken, ulid()).expect(404);
+      expect(missing.body.code).toBe('room.not_found');
+
+      await listMembers(ownerToken, channel.id, { limit: '0' }).expect(422);
     });
   });
 });

@@ -37,6 +37,10 @@ export const InvitationViewDtoStatus = ["pending", "accepted", "revoked", "expir
 export const InvitationViewDtoStatusSchema = z.enum(InvitationViewDtoStatus);
 export type InvitationViewDtoStatus = (typeof InvitationViewDtoStatus)[number];
 
+export const MemberListViewDtoItemsRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export const MemberListViewDtoItemsRoleSchema = z.enum(MemberListViewDtoItemsRole);
+export type MemberListViewDtoItemsRole = (typeof MemberListViewDtoItemsRole)[number];
+
 export const MembershipViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export const MembershipViewDtoRoleSchema = z.enum(MembershipViewDtoRole);
 export type MembershipViewDtoRole = (typeof MembershipViewDtoRole)[number];

@@ -7,6 +7,7 @@ export type RoomEventType =
   | 'message_created'
   | 'message_edited'
   | 'message_redacted'
+  | 'message_deleted'
   | 'message_hidden'
   | 'reaction_added'
   | 'reaction_removed'
@@ -104,8 +105,15 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   // (same `seq`, no new event) so the deleted body never lingers in the
   // event log — the retention worker (#12) reuses the same rewrite for
   // `reason: "retention"`.
-  message_edited: z.object({ editedAt: z.iso.datetime() }),
+  message_edited: z.object({ messageId: z.string(), editedAt: z.iso.datetime() }),
   message_redacted: z.object({ reason: z.enum(['user', 'retention']) }),
+  // Live notification of a deletion, appended next to the in-place tombstone
+  // with its own `seq`; `messageSeq` is the `seq` of the original row.
+  message_deleted: z.object({
+    messageId: z.string(),
+    messageSeq: z.string(),
+    reason: z.enum(['user', 'retention']),
+  }),
 
   // Fixed shape (technical.md §11, §14, issue #9). `senderId` carries the
   // reactor / the user whose marker moved.

@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -27,7 +28,11 @@ import { type MessageView, MessageViewDto } from './message.view.js';
 import {
   type EditMessage,
   EditMessageDto,
+  type ListMessagesQuery,
+  ListMessagesQueryDto,
   MessageIdParamSchema,
+  type MessagePage,
+  MessagePageDto,
   type SendMessage,
   SendMessageDto,
 } from './messages.dto.js';
@@ -54,6 +59,20 @@ export class MessagesController {
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<MessageView> {
     return this.messages.sendMessage(principal, params.id, body);
+  }
+
+  @Get('rooms/:id/messages')
+  @ApiOperation({
+    summary: 'List messages, newest page first, ascending inside the page (needs room.read).',
+  })
+  @ApiOkResponse({ type: MessagePageDto })
+  @ApiProblemResponses({ validation: true, statuses: [403, 404] })
+  listMessages(
+    @Param(new ZodValidationPipe(RoomIdParamSchema)) params: { id: string },
+    @Query(new ZodValidationPipe(ListMessagesQueryDto)) query: ListMessagesQuery,
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<MessagePage> {
+    return this.messages.listMessages(principal, params.id, query);
   }
 
   @Get('rooms/:id/messages/:messageId')

@@ -26,6 +26,9 @@ export type HeartbeatResponseDtoStatus = (typeof HeartbeatResponseDtoStatus)[num
 export const InvitationViewDtoStatus = ["pending", "accepted", "revoked", "expired"] as const;
 export type InvitationViewDtoStatus = (typeof InvitationViewDtoStatus)[number];
 
+export const MemberListViewDtoItemsRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export type MemberListViewDtoItemsRole = (typeof MemberListViewDtoItemsRole)[number];
+
 export const MembershipViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type MembershipViewDtoRole = (typeof MembershipViewDtoRole)[number];
 

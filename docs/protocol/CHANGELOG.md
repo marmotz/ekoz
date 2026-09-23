@@ -96,6 +96,27 @@ All notable changes to the Ekoz protocol. Format
   [`rooms-and-permissions.md`](rooms-and-permissions.md): the caller's pending
   room invitations with the room and the inviter embedded.
 
+- `GET /rooms/:id/messages` in [`messages-and-interactions.md`](messages-and-interactions.md):
+  paginated history, newest page first, with a `before` `seq` cursor.
+- `GET /rooms/:id/members` in [`rooms-and-permissions.md`](rooms-and-permissions.md):
+  the effective members of a room, ancestor spaces included, each with a
+  `UserSummary`.
+- `message_deleted` room event, appended when a message is deleted (by its
+  author, a moderator or retention) so connected clients see the deletion.
+  `message_edited` now carries `messageId`.
+
+### Changed
+
+- Deleting a message also rewrites the account feed rows that mirrored the
+  original `message_created`, so `GET /events` no longer replays the deleted
+  body.
+- `GET /events` without `Last-Event-ID` or `?lastEventId=` starts at the
+  current head of the account's feed instead of replaying the retained feed.
+  Behaviour change for clients that relied on a full replay: they must read
+  `GET /sync` (or `GET /rooms/:id/messages`) for history.
+- Room events are fanned out to the effective members of the room, ancestor
+  spaces included, instead of the explicit members only.
+
 ### Fixed
 
 - A wrong password on `POST /me/email` and `DELETE /me` is documented as `401`

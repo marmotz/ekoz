@@ -22,10 +22,11 @@ import { PermissionsService } from '../permissions/permissions.service.js';
 import { ROLE_RANK, type RoomRole } from '../permissions/role-default-capabilities.js';
 import type { RoomRow } from '../rooms/room.view.js';
 import { FeedFanoutService } from '../streaming/feed-fanout.service.js';
-import type { BanMember, InviteMember } from './membership.dto.js';
+import type { BanMember, InviteMember, ListMembersQuery } from './membership.dto.js';
 import {
   type JoinRequestRow,
   type JoinRequestView,
+  type MemberListView,
   type MembershipRow,
   type MembershipView,
   type MyRoomInvitationListView,
@@ -45,6 +46,30 @@ interface RoomLookup {
   defaultRole: RoomRole;
 }
 
+const MEMBERS_DEFAULT_LIMIT = 100;
+const MEMBERS_MAX_LIMIT = 200;
+
+/** Opaque `GET /rooms/:id/members` cursor: the last `userId` of the previous page. */
+function encodeMemberCursor(userId: string): string {
+  return Buffer.from(JSON.stringify({ userId }), 'utf8').toString('base64url');
+}
+
+function decodeMemberCursor(token: string): string | null {
+  try {
+    const parsed: unknown = JSON.parse(Buffer.from(token, 'base64url').toString('utf8'));
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      typeof (parsed as { userId?: unknown }).userId === 'string'
+    ) {
+      return (parsed as { userId: string }).userId;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /** Membership lifecycle: join/leave, invitations, join requests, kick, ban/unban, role change (technical.md §9, issue #4). */
 @Injectable()
 export class MembershipService {
@@ -55,6 +80,60 @@ export class MembershipService {
     private readonly feedFanout: FeedFanoutService,
     private readonly userSummaries: UserSummaryReader,
   ) {}
+
+  /**
+   * The effective members of a room: explicit memberships plus those of its
+   * ancestor spaces, one entry per distinct user, the nearest membership
+   * (smallest `room_closure` depth) winning, ordered by `userId`.
+   */
+  async listMembers(
+    actor: PermissionPrincipal,
+    roomId: string,
+    query: ListMembersQuery,
+  ): Promise<MemberListView> {
+    await this.permissions.assertCan(actor, roomId, 'room.read');
+    await this.findRoomOrThrow(roomId);
+
+    const limit = Math.min(query.limit ?? MEMBERS_DEFAULT_LIMIT, MEMBERS_MAX_LIMIT);
+    const cursorUserId = query.cursor ? decodeMemberCursor(query.cursor) : null;
+    const hasCursor = cursorUserId !== null;
+
+    const plan = this.prisma.raw.sql`
+      SELECT DISTINCT ON (m.user_id) m.user_id AS "userId", m.role AS "role",
+             m.joined_at AS "joinedAt"
+      FROM membership m
+      LEFT JOIN room_closure c ON c.ancestor_id = m.room_id AND c.descendant_id = ${roomId}
+      WHERE (m.room_id = ${roomId} OR c.ancestor_id IS NOT NULL)
+        AND (${hasCursor} = false OR m.user_id > ${cursorUserId ?? ''})
+      ORDER BY m.user_id ASC, coalesce(c.depth, 0) ASC
+      LIMIT ${limit + 1}
+    `
+      .returnsRow({
+        userId: { codecId: 'pg/text@1', nullable: false },
+        role: { codecId: 'pg/text@1', nullable: false },
+        joinedAt: { codecId: 'pg/timestamptz-string@1', nullable: false },
+      })
+      .build();
+
+    const rows = (await this.prisma.runtime().query(plan)) as Array<{
+      userId: string;
+      role: RoomRole;
+      joinedAt: string;
+    }>;
+    const hasNextPage = rows.length > limit;
+    const page = hasNextPage ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+    const summaries = await this.userSummaries.readMany(page.map((row) => row.userId));
+
+    return {
+      items: page.flatMap((row) => {
+        const user = summaries.get(row.userId);
+
+        return user ? [{ role: row.role, joinedAt: row.joinedAt, user }] : [];
+      }),
+      nextCursor: hasNextPage && last ? encodeMemberCursor(last.userId) : null,
+    };
+  }
 
   async join(actor: PermissionPrincipal, roomId: string): Promise<MembershipView> {
     const room = await this.findRoomOrThrow(roomId);
