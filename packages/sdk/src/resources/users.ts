@@ -4,16 +4,36 @@
  */
 
 import type { SessionManager } from '../session/session-manager.js';
+import type { RequestOptions } from '../transport/http-client.js';
 import type { PublicProfileView } from '../types/wire.js';
+
+export interface AvatarOptions {
+  /** Cache-busting version, taken from the `v` query of `avatarUrl`. */
+  version?: string | number;
+  signal?: AbortSignal;
+}
 
 export interface UsersResource {
   getProfile(identifier: string): Promise<PublicProfileView>;
+  /** Fetch the avatar image; the route needs a Bearer token so `<img src>` cannot load it. */
+  avatar(identifier: string, options?: AvatarOptions): Promise<Blob>;
 }
 
 export function createUsersResource(session: SessionManager): UsersResource {
   return {
     getProfile(identifier) {
       return session.request<PublicProfileView>('GET', `/users/${encodeURIComponent(identifier)}`);
+    },
+
+    avatar(identifier, options = {}) {
+      const request: RequestOptions = { responseType: 'blob' };
+      if (options.version !== undefined) request.query = { v: options.version };
+      if (options.signal) request.signal = options.signal;
+      return session.request<Blob>(
+        'GET',
+        `/users/${encodeURIComponent(identifier)}/avatar`,
+        request,
+      );
     },
   };
 }

@@ -43,10 +43,14 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       deleteAvatar: vi.fn(),
       changeEmail: vi.fn(),
       changeUsername: vi.fn(),
+      usernameState: vi.fn(),
+      cancelUsernameRequest: vi.fn(),
+      changePassword: vi.fn(),
       deleteAccount: vi.fn(),
     },
     users: {
       getProfile: vi.fn(),
+      avatar: vi.fn(),
     },
     sessions: {
       list: vi.fn(),

@@ -26,6 +26,7 @@ export {
   AuthPolicyDtoSchema as AuthPolicySchema,
   AvatarUploadedDtoSchema as AvatarUploadedSchema,
   ChangeEmailDtoSchema as ChangeEmailBodySchema,
+  ChangePasswordDtoSchema as ChangePasswordBodySchema,
   ChangeUsernameDtoSchema as ChangeUsernameBodySchema,
   ConfirmPasswordResetDtoSchema as ConfirmPasswordResetBodySchema,
   CreatedInvitationDtoSchema as CreatedInvitationSchema,
@@ -57,5 +58,7 @@ export {
   UsernameChangeAppliedDtoSchema as UsernameChangeAppliedSchema,
   UsernameChangePendingDtoSchema as UsernameChangePendingSchema,
   UsernameChangeRequestDtoSchema as UsernameChangeRequestSchema,
+  UsernameChangeStateDtoPendingRequestSchema as UsernameChangePendingRequestSchema,
+  UsernameChangeStateDtoSchema as UsernameChangeStateSchema,
   VerifyEmailDtoSchema as VerifyEmailBodySchema,
 } from '../generated/api/zod-api/index.js';
