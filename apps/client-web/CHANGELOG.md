@@ -25,3 +25,8 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Add the registration page at `/register` for the `open`, `invite` and `admin` registration modes (#97).
 - Add the email verification page at `/verify-email` (#98).
 - Add the `/forgot-password` and `/reset-password` pages (#99).
+- Add shared profile pieces: a user menu entry registry (`registerUserMenuItem`) rendered by the user menu, `useAvatarSrc` and `UserAvatar` (avatar fetched through the SDK and shown as an object URL), shadcn/ui `textarea` and `dialog`, `sessions` and `users` stubs in the SDK test double, generated forms for the account request bodies, and the account error table (#105).
+- Move `PasswordInput` and the form field wrappers (`FormTextField`, `FormError`) from `features/auth` to `shared/ui`, and the validation message mapping to `shared/i18n` (#105).
+- Add the `/account` page with the profile and avatar sections (#106).
+- Add the identifier (with its change policy, cooldown and pending request), email (with pending verification and resend) and password sections to `/account` (#107).
+- Add the sessions list (rename, revoke, sign out other sessions) and the account deletion dialog to `/account` (#108).

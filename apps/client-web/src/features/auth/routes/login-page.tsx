@@ -4,12 +4,11 @@ import { LoginDtoSchema } from 'api/react-tanstack/zod/LoginDto.schema';
 import { useState } from 'react';
 
 import { useLogin } from '@/features/auth/api/use-login';
-import { AuthTextField } from '@/features/auth/components/auth-text-field';
-import { FormError } from '@/features/auth/components/form-error';
 import { useAuthError } from '@/features/auth/hooks/use-auth-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card';
+import { FormError, FormTextField } from '@/shared/ui/form-field';
 
 const FIELDS = ['identifier', 'password'] as const;
 
@@ -61,7 +60,7 @@ export function LoginPage() {
         >
           <form.Field name="identifier">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.identifier')}
                 autoComplete="username"
@@ -72,7 +71,7 @@ export function LoginPage() {
           </form.Field>
           <form.Field name="password">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.password')}
                 type="password"

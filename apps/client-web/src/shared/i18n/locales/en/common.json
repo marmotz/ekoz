@@ -126,5 +126,104 @@
       "missingToken": "This link is incomplete. Request a new one.",
       "requestNew": "Request a new link"
     }
+  },
+  "account": {
+    "title": "Account",
+    "menu": "Account",
+    "fields": {
+      "displayName": "Display name",
+      "bio": "Biography",
+      "username": "Username",
+      "newEmail": "New email address",
+      "currentPassword": "Current password",
+      "newPassword": "New password"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "What other people see about you.",
+      "submit": "Save",
+      "saved": "Profile saved."
+    },
+    "avatar": {
+      "title": "Avatar",
+      "description": "PNG, JPEG, WebP or GIF.",
+      "file": "Avatar image",
+      "upload": "Upload",
+      "remove": "Remove",
+      "saved": "Avatar updated.",
+      "removed": "Avatar removed."
+    },
+    "username": {
+      "title": "Username",
+      "immutable": "The username of this account cannot be changed.",
+      "approvalNote": "A change must be approved by an administrator before it applies.",
+      "cooldown": "You can change your username again on {{date}}.",
+      "submit": "Change the username",
+      "applied": "Username changed.",
+      "submitted": "Change requested, awaiting approval.",
+      "awaiting": "Awaiting approval for {{name}}.",
+      "cancel": "Cancel the request"
+    },
+    "email": {
+      "title": "Email address",
+      "verified": "Verified",
+      "unverified": "Not verified",
+      "pending": "Verification pending for {{email}}.",
+      "resend": "Resend",
+      "resent": "Verification email sent again.",
+      "submit": "Change the email address",
+      "submitted": "A verification email was sent to {{email}}."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Changing it signs out every other device.",
+      "submit": "Change the password",
+      "changed": "Password changed. Your other devices were signed out."
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Devices signed in to your account.",
+      "current": "This device",
+      "lastSeen": "Last active {{date}}",
+      "deviceName": "Device name",
+      "rename": "Rename",
+      "renameNamed": "Rename {{name}}",
+      "save": "Save",
+      "cancel": "Cancel",
+      "revoke": "Revoke",
+      "revokeNamed": "Revoke {{name}}",
+      "revokeOthers": "Sign out other sessions",
+      "revokedOthers_one": "{{count}} session signed out.",
+      "revokedOthers_other": "{{count}} sessions signed out."
+    },
+    "danger": {
+      "title": "Danger zone",
+      "description": "Deleting your account cannot be undone.",
+      "open": "Delete my account",
+      "dialogTitle": "Delete your account?",
+      "consequences": "Your profile will be erased and your messages anonymised. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete the account",
+      "deleted": "Your account was deleted."
+    },
+    "errors": {
+      "invalidCredentials": "Incorrect password.",
+      "passwordTooWeak": "This password does not meet the minimum requirements.",
+      "emailTaken": "This email address is already in use.",
+      "identifierInvalid": "Use lowercase letters, digits, and the characters _ . - only, at most 64 characters.",
+      "usernameTaken": "This username is not available.",
+      "usernameImmutable": "The username of this account cannot be changed.",
+      "usernameChangeCooldown": "You changed your username recently. Try again later.",
+      "usernameRequestPending": "A username change is already awaiting approval.",
+      "profileInvalid": "The biography is too long, or the display name is not valid.",
+      "avatarTooLarge": "This image is too large.",
+      "avatarRejected": "This image could not be used. Choose a PNG, JPEG, WebP or GIF file.",
+      "lastOwner": "You are the only owner: promote another owner in the admin console first.",
+      "tooManyRequests_one": "Too many attempts. Try again in {{count}} second.",
+      "tooManyRequests_other": "Too many attempts. Try again in {{count}} seconds.",
+      "tooManyRequestsLater": "Too many attempts. Try again later.",
+      "network": "The server could not be reached. Check your connection and try again.",
+      "generic": "Something went wrong. Try again."
+    }
   }
 }

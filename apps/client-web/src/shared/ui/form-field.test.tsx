@@ -4,9 +4,8 @@ import { useRegisterDtoForm } from 'api/react-tanstack/RegisterDto.form';
 import { RegisterDtoSchema } from 'api/react-tanstack/zod/RegisterDto.schema';
 import { expect, it } from 'vitest';
 import { z } from 'zod';
-import { AuthTextField } from '@/features/auth/components/auth-text-field';
-import { FormError } from '@/features/auth/components/form-error';
-import { renderWithProviders } from '../../../../test/render';
+import { FormError, FormTextField } from '@/shared/ui/form-field';
+import { renderWithProviders } from '../../../test/render';
 
 const MIN_LENGTH = 12;
 const schema = RegisterDtoSchema.extend({ password: z.string().min(MIN_LENGTH) });
@@ -24,11 +23,11 @@ function RegisterForm({ serverError }: { serverError?: string }) {
     >
       <form.Field name="email">
         {(field) => (
-          <AuthTextField field={field} label="Email" type="email" serverError={serverError} />
+          <FormTextField field={field} label="Email" type="email" serverError={serverError} />
         )}
       </form.Field>
       <form.Field name="password">
-        {(field) => <AuthTextField field={field} label="Password" type="password" />}
+        {(field) => <FormTextField field={field} label="Password" type="password" />}
       </form.Field>
       <button type="submit">Send</button>
     </form>

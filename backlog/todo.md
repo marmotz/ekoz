@@ -23,7 +23,7 @@ _[technical design](features/auth/technical.md)_ — 11/11 tasks done
 ## Identity and profiles ·  [overview](features/identity-and-profiles/overview.md)
 
 _[technical design](features/identity-and-profiles/technical.md) (§1 to §20 server layer as shipped, §21 to §28 client
-scope)_ — 4/9 tasks done
+scope)_ — 8/9 tasks done
 
 | Done | Issue                                              | Title                                                                                  | Blocked by               |
 |------|----------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------|
@@ -31,10 +31,10 @@ scope)_ — 4/9 tasks done
 | [x]  | [#102](https://github.com/marmotz/ekoz/issues/102) | Identity server: username change state, single pending request and cancellation        | —                        |
 | [x]  | [#103](https://github.com/marmotz/ekoz/issues/103) | Identity server: pendingEmail in MeView and versioned avatarUrl                        | —                        |
 | [x]  | [#104](https://github.com/marmotz/ekoz/issues/104) | Identity SDK: password, username state and avatar blob bindings                        | #101, #102, #103         |
-| [ ]  | [#105](https://github.com/marmotz/ekoz/issues/105) | Profile client: shared pieces (menu entries, avatar, UI base, generated hooks, errors) | #104, #65, #92, #93, #94 |
-| [ ]  | [#106](https://github.com/marmotz/ekoz/issues/106) | Profile client: /account route, profile and avatar sections                            | #105                     |
-| [ ]  | [#107](https://github.com/marmotz/ekoz/issues/107) | Profile client: identifier, email and password sections                                | #106                     |
-| [ ]  | [#108](https://github.com/marmotz/ekoz/issues/108) | Profile client: sessions and danger zone                                               | #106                     |
+| [x]  | [#105](https://github.com/marmotz/ekoz/issues/105) | Profile client: shared pieces (menu entries, avatar, UI base, generated hooks, errors) | #104, #65, #92, #93, #94 |
+| [x]  | [#106](https://github.com/marmotz/ekoz/issues/106) | Profile client: /account route, profile and avatar sections                            | #105                     |
+| [x]  | [#107](https://github.com/marmotz/ekoz/issues/107) | Profile client: identifier, email and password sections                                | #106                     |
+| [x]  | [#108](https://github.com/marmotz/ekoz/issues/108) | Profile client: sessions and danger zone                                               | #106                     |
 | [ ]  | [#109](https://github.com/marmotz/ekoz/issues/109) | Profile docs: docs/technical/web-client-account.md                                     | #107, #108               |
 
 ## Web client chat ·  [overview](features/web-client-chat/overview.md)

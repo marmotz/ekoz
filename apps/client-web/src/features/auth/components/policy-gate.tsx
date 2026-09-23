@@ -2,10 +2,10 @@ import type { AuthPolicy } from '@ekozhq/sdk';
 import type { ReactNode } from 'react';
 
 import { useAuthPolicy } from '@/features/auth/api/use-auth-policy';
-import { FormError } from '@/features/auth/components/form-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { FormError } from '@/shared/ui/form-field';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 /**

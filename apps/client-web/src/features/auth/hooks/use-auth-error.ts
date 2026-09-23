@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 
-import { type AuthMessage, type MappedAuthError, mapAuthError } from '@/features/auth/api/errors';
+import { type MappedAuthError, mapAuthError } from '@/features/auth/api/errors';
 import { useTranslation } from '@/shared/i18n/use-translation';
+import type { Message } from '@/shared/i18n/validation-message';
 
 export interface UseAuthErrorOptions {
   /** Names of the fields the form renders. A field error for another field becomes a form error. */
@@ -39,7 +40,7 @@ export function useAuthError({ fields, rename = {} }: UseAuthErrorOptions): Auth
 
   const apply = useCallback(
     (error: unknown) => {
-      const translate = (message: AuthMessage) =>
+      const translate = (message: Message) =>
         'text' in message ? message.text : t(message.key, message.values);
       const mapped = mapAuthError(error);
 

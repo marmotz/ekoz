@@ -1,31 +1,34 @@
 import type { AnyFieldApi } from '@tanstack/react-form';
 import type { ComponentProps, ReactNode } from 'react';
 
-import { validationMessage } from '@/features/auth/api/errors';
-import { PasswordInput } from '@/features/auth/components/password-input';
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { validationMessage } from '@/shared/i18n/validation-message';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
+import { PasswordInput } from '@/shared/ui/password-input';
+import { Textarea } from '@/shared/ui/textarea';
 
-export interface AuthTextFieldProps
+export interface FormTextFieldProps
   extends Omit<ComponentProps<typeof Input>, 'name' | 'value' | 'onChange' | 'onBlur' | 'type'> {
   /** The field of a generated form hook, from `form.Field`. */
   field: AnyFieldApi;
   label: ReactNode;
-  type?: 'text' | 'email' | 'password';
+  type?: 'text' | 'email' | 'password' | 'textarea';
   /** A message reported by the server for this field (see `useAuthError`). */
   serverError?: string;
+  /** Visible lines of a `textarea`. */
+  rows?: number;
 }
 
 /** Label, input and error text for one field of a generated form. */
-export function AuthTextField({
+export function FormTextField({
   field,
   label,
   type = 'text',
   serverError,
   id,
   ...props
-}: AuthTextFieldProps) {
+}: FormTextFieldProps) {
   const { t } = useTranslation();
   const inputId = id ?? `field-${field.name}`;
   const errorId = `${inputId}-error`;
@@ -52,6 +55,8 @@ export function AuthTextField({
       <Label htmlFor={inputId}>{label}</Label>
       {type === 'password' ? (
         <PasswordInput {...inputProps} />
+      ) : type === 'textarea' ? (
+        <Textarea {...(inputProps as ComponentProps<'textarea'>)} />
       ) : (
         <Input type={type} {...inputProps} />
       )}
@@ -61,5 +66,19 @@ export function AuthTextField({
         </p>
       ) : null}
     </div>
+  );
+}
+
+/** Form-level error message, `null` renders nothing. */
+export function FormError({ children }: { children: ReactNode }) {
+  if (!children) return null;
+
+  return (
+    <p
+      role="alert"
+      className="rounded-md border border-destructive/50 p-3 text-sm text-destructive"
+    >
+      {children}
+    </p>
   );
 }
