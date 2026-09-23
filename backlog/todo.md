@@ -23,7 +23,7 @@ _[technical design](features/auth/technical.md)_ — 11/11 tasks done
 ## Identity and profiles ·  [overview](features/identity-and-profiles/overview.md)
 
 _[technical design](features/identity-and-profiles/technical.md) (§1 to §20 server layer as shipped, §21 to §28 client
-scope)_ — 8/9 tasks done
+scope)_ — 9/9 tasks done
 
 | Done | Issue                                              | Title                                                                                  | Blocked by               |
 |------|----------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------|
@@ -35,7 +35,7 @@ scope)_ — 8/9 tasks done
 | [x]  | [#106](https://github.com/marmotz/ekoz/issues/106) | Profile client: /account route, profile and avatar sections                            | #105                     |
 | [x]  | [#107](https://github.com/marmotz/ekoz/issues/107) | Profile client: identifier, email and password sections                                | #106                     |
 | [x]  | [#108](https://github.com/marmotz/ekoz/issues/108) | Profile client: sessions and danger zone                                               | #106                     |
-| [ ]  | [#109](https://github.com/marmotz/ekoz/issues/109) | Profile docs: docs/technical/web-client-account.md                                     | #107, #108               |
+| [x]  | [#109](https://github.com/marmotz/ekoz/issues/109) | Profile docs: docs/technical/web-client-account.md                                     | #107, #108               |
 
 ## Web client chat ·  [overview](features/web-client-chat/overview.md)
 

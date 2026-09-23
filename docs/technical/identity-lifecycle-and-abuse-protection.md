@@ -90,7 +90,9 @@ tasks and the features that build on identity, and are cheap to get wrong.
   deduplicated by content, so the version changes exactly when the avatar does;
   the route ignores it and keeps its `immutable` cache, now valid because the URL
   changes with the content. The builders live in `core/http/user-links.ts` so
-  feature modules that cannot import `identity` emit the same URL.
+  feature modules that cannot import `identity` emit the same URL. The route needs
+  a Bearer token, so the web client fetches it as a blob through the SDK; see
+  [web client account](web-client-account.md).
 
 ### Credential-endpoint throttle
 
