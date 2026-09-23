@@ -421,6 +421,7 @@ enum RoomEventType {
   message_created           = "message_created"
   message_edited            = "message_edited"
   message_redacted          = "message_redacted"
+  message_deleted           = "message_deleted"
   message_hidden            = "message_hidden"
   reaction_added            = "reaction_added"
   reaction_removed          = "reaction_removed"

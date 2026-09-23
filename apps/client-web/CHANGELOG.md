@@ -16,6 +16,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Wire the SDK client and the session: `localStorage` session store, `SdkProvider`, `useSession()`, `RequireAuth` and sign-out on a lost session (#34).
 - Add the application shell: responsive sidebar fed by a navigation registry, top bar with page title, language switcher and theme toggle, and `/` and `/login` placeholder routes (#35).
 - Check in CI that a change under `src/` comes with a changelog entry (#36).
+- Regenerate the API types from the server contract: message page and effective member list shapes (#66, #67).
 - Add a sidebar section registry, rendered under the navigation in the fixed sidebar and the mobile sheet, and a `useMe()` hook over `GET /me` (#65).
 - Add the `_app` and `_auth` route layouts: every page inside the application shell lives under `routes/_app/`, anonymous pages get a centered card without sidebar (`AuthLayout`), plus `GuestOnly`, shadcn/ui `input`, `label` and `card`, and `auth` and `me` stubs in the SDK test double (#92).
 - Add the signed-in user menu in the top bar: display name with initials, and sign out (#93).

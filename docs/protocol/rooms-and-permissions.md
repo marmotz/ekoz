@@ -377,6 +377,25 @@ Emits `role_changed`.
   `room.membership_not_found` (`404`), `room.role_above_authority` (`403`),
   validation (`422`).
 
+### `GET /rooms/:id/members`
+
+The **effective** members of a room: those with an explicit `Membership` on the
+room plus those of its ancestor spaces, one entry per distinct user. Access is
+inherited from ancestor spaces (see [Permissions](#permissions)), so explicit
+memberships alone would miss a space member who never joined the channel. When a
+user has several, the nearest one wins (the room itself, then its parent, ...),
+resolved through the room hierarchy like the effective role. Needs `room.read`.
+
+- Query: `?cursor=&limit=`. `limit` defaults to `100` and is capped at `200`.
+  `cursor` is an opaque token from a previous response's `nextCursor`.
+- `200`: `{ items: Member[], nextCursor: string | null }`, ordered by user `id`.
+- `Member` is `{ role, joinedAt, user: UserSummary }` (see
+  [The `UserSummary` object](#the-usersummary-object)); `role` and `joinedAt`
+  come from the winning membership. For a deleted account the nullable
+  `UserSummary` fields are `null`.
+- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
+  validation (`422`).
+
 ## Direct and group conversations
 
 `dm` and `group_dm` rooms (technical.md §7, issue #5): outside the hierarchy

@@ -5,7 +5,7 @@ export const OverrideEffect = ["allow", "deny"] as const;
 export const OverrideEffectSchema = z.enum(OverrideEffect);
 export type OverrideEffect = (typeof OverrideEffect)[number];
 
-export const RoomEventType = ["message_created", "message_edited", "message_redacted", "message_hidden", "reaction_added", "reaction_removed", "member_joined", "member_left", "member_kicked", "member_banned", "member_unbanned", "role_changed", "permission_override_changed", "room_created", "room_updated", "room_moved", "room_deleted", "pin_added", "pin_removed", "retention_changed", "receipt_updated"] as const;
+export const RoomEventType = ["message_created", "message_edited", "message_redacted", "message_deleted", "message_hidden", "reaction_added", "reaction_removed", "member_joined", "member_left", "member_kicked", "member_banned", "member_unbanned", "role_changed", "permission_override_changed", "room_created", "room_updated", "room_moved", "room_deleted", "pin_added", "pin_removed", "retention_changed", "receipt_updated"] as const;
 export const RoomEventTypeSchema = z.enum(RoomEventType);
 export type RoomEventType = (typeof RoomEventType)[number];
 

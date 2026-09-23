@@ -25,6 +25,8 @@ const IN_SCOPE_PATHS = [
   '/setup/owner',
   '/.well-known/ekoz',
   '/blobs/{id}',
+  '/rooms/{id}/messages',
+  '/rooms/{id}/members',
 ];
 
 describe('openapi:emit (offline)', () => {

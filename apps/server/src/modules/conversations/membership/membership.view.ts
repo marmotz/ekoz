@@ -113,3 +113,18 @@ export const MyRoomInvitationListViewSchema = z.object({
 });
 export type MyRoomInvitationListView = z.infer<typeof MyRoomInvitationListViewSchema>;
 export class MyRoomInvitationListViewDto extends createZodDto(MyRoomInvitationListViewSchema) {}
+
+/** An effective member of a room: its role and join date come from the nearest membership. */
+export const MemberViewSchema = z.object({
+  role: roomRoleSchema,
+  joinedAt: z.iso.datetime(),
+  user: UserSummarySchema,
+});
+export type MemberView = z.infer<typeof MemberViewSchema>;
+
+export const MemberListViewSchema = z.object({
+  items: z.array(MemberViewSchema),
+  nextCursor: nullableString(),
+});
+export type MemberListView = z.infer<typeof MemberListViewSchema>;
+export class MemberListViewDto extends createZodDto(MemberListViewSchema) {}

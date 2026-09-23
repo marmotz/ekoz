@@ -39,15 +39,15 @@ scope)_ — 9/9 tasks done
 
 ## Web client chat ·  [overview](features/web-client-chat/overview.md)
 
-_technical design, see [technical.md](features/web-client-chat/./technical.md)_ — 0/13 tasks done
+_technical design, see [technical.md](features/web-client-chat/./technical.md)_ — 5/13 tasks done
 
 | Done | Issue                                            | Title                                                                           | Blocked by         |
 |------|--------------------------------------------------|---------------------------------------------------------------------------------|--------------------|
-| [ ]  | [#66](https://github.com/marmotz/ekoz/issues/66) | Web chat server: paginated GET /rooms/:id/messages                              | —                  |
-| [ ]  | [#67](https://github.com/marmotz/ekoz/issues/67) | Web chat server: GET /rooms/:id/members with effective members                  | —                  |
-| [ ]  | [#68](https://github.com/marmotz/ekoz/issues/68) | Web chat server: live edit and delete events (message_deleted)                  | —                  |
-| [ ]  | [#69](https://github.com/marmotz/ekoz/issues/69) | Web chat server: GET /events starts at the feed head without a cursor           | —                  |
-| [ ]  | [#70](https://github.com/marmotz/ekoz/issues/70) | Web chat server: feed fan-out to effective members                              | —                  |
+| [x]  | [#66](https://github.com/marmotz/ekoz/issues/66) | Web chat server: paginated GET /rooms/:id/messages                              | —                  |
+| [x]  | [#67](https://github.com/marmotz/ekoz/issues/67) | Web chat server: GET /rooms/:id/members with effective members                  | —                  |
+| [x]  | [#68](https://github.com/marmotz/ekoz/issues/68) | Web chat server: live edit and delete events (message_deleted)                  | —                  |
+| [x]  | [#69](https://github.com/marmotz/ekoz/issues/69) | Web chat server: GET /events starts at the feed head without a cursor           | —                  |
+| [x]  | [#70](https://github.com/marmotz/ekoz/issues/70) | Web chat server: feed fan-out to effective members                              | —                  |
 | [ ]  | [#71](https://github.com/marmotz/ekoz/issues/71) | Web chat SDK: messages, sync and rooms.members bindings, RoomEvent union        | #66, #67, #68      |
 | [ ]  | [#72](https://github.com/marmotz/ekoz/issues/72) | Web chat SDK: RoomStream (SSE with fresh-ticket reconnection)                   | #69, #71           |
 | [ ]  | [#73](https://github.com/marmotz/ekoz/issues/73) | Web chat client: shared/realtime (stream provider, subscriptions, unseen store) | #72                |

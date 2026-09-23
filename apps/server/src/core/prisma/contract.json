@@ -166,6 +166,10 @@
                 "value": "message_redacted"
               },
               {
+                "name": "message_deleted",
+                "value": "message_deleted"
+              },
+              {
                 "name": "message_hidden",
                 "value": "message_hidden"
               },
@@ -4209,8 +4213,8 @@
             "room_event": {
               "checks": [
                 {
-                  "expression": "\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated')",
-                  "name": "room_event_type_check_869a5b2b",
+                  "expression": "\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated')",
+                  "name": "room_event_type_check_eaaedd9c",
                   "prefix": "room_event_type_check"
                 }
               ],
@@ -5075,6 +5079,7 @@
                 "message_created",
                 "message_edited",
                 "message_redacted",
+                "message_deleted",
                 "message_hidden",
                 "reaction_added",
                 "reaction_removed",
@@ -5145,7 +5150,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "95a39466e21c08137e0ada8e9e33d167e796d292028bb01861340feb846865fa"
+    "storageHash": "40480fe9c202bda5aa0d8d492c66e054d8d335ea5d506f0de3faa39865e2adc4"
   },
   "execution": {
     "executionHash": "97287832eef1065781f34394e3048bb70ea6956ebc227fa85c0eb92bba8af219",

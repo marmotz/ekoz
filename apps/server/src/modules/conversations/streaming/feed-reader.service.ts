@@ -25,4 +25,14 @@ export class FeedReaderService {
       .limit(limit)
       .all()) as AccountFeedEventRow[];
   }
+
+  /** Highest `feedSeq` of the account, `0` when its feed is empty. */
+  async head(userId: string): Promise<bigint> {
+    const rows = (await this.prisma.orm.public.AccountFeedEvent.where((f) => f.userId.eq(userId))
+      .orderBy((f) => f.feedSeq.desc())
+      .limit(1)
+      .all()) as AccountFeedEventRow[];
+
+    return rows[0]?.feedSeq ?? 0n;
+  }
 }

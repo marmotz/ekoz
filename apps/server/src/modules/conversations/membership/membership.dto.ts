@@ -25,3 +25,10 @@ export class ChangeRoleDto extends createZodDto(ChangeRoleSchema) {}
 
 export const RoomMemberParamSchema = z.object({ id: entityIdSchema, userId: entityIdSchema });
 export const JoinRequestParamSchema = z.object({ id: entityIdSchema, requestId: entityIdSchema });
+
+export const ListMembersQuerySchema = z.object({
+  cursor: z.string().min(1).optional(),
+  limit: z.coerce.number().int().min(1).optional(),
+});
+export type ListMembersQuery = z.infer<typeof ListMembersQuerySchema>;
+export class ListMembersQueryDto extends createZodDto(ListMembersQuerySchema) {}

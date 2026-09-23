@@ -53,6 +53,10 @@ connection carries everything, distinguished by the SSE `event:` field
   it automatically) or `?lastEventId=` as a fallback: the last `feedSeq` the
   client acked. Only the durable `room_event` / `account` frames replay from
   there — presence and typing are live-only and are simply gone if missed.
+  With **neither** given, the stream starts at the current head of the
+  account's feed: live frames only, nothing from before the connection is
+  replayed. A client that needs history reads `GET /rooms/:id/messages` and
+  `GET /sync`.
 - `200`: `text/event-stream`. A durable frame's `id:` field is its `feedSeq`
   (decimal string); `data:` is the row's `payload` with `roomId` folded in
   (`{ roomId, ...payload }`) so a `room_event` frame is attributable to its
@@ -70,6 +74,13 @@ typing are pushed live through an in-process broadcaster instead, since they
 are never persisted. A keepalive comment (`: keepalive`) is sent periodically
 to hold the connection open through a buffering reverse proxy; the server also
 sets `X-Accel-Buffering: no` for nginx.
+
+A room event is fanned out to the **effective** members of its room: those with
+an explicit `Membership` on it and those of its ancestor spaces, one feed row
+per distinct user. A member of a space therefore receives the live events of
+its channels without having joined each one. The fan-out checks that a
+membership exists, not the `room.read` capability: a `deny` override on
+`room.read` is not honoured by the feed (`GET /sync` still enforces it).
 
 The account feed (`AccountFeedEvent`, server-internal) is a fan-out projection
 with its own `feedSeq`, populated in the same transaction as the `room_event`

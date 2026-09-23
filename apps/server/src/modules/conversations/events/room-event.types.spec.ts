@@ -116,4 +116,23 @@ describe('ROOM_EVENT_PAYLOAD_SCHEMAS (unit)', () => {
       ROOM_EVENT_PAYLOAD_SCHEMAS.retention_changed.safeParse({ rule: { mode: 'delete' } }).success,
     ).toBe(false);
   });
+
+  it('requires messageId in message_edited', () => {
+    const editedAt = '2026-01-01T00:00:00.000Z';
+    expect(ROOM_EVENT_PAYLOAD_SCHEMAS.message_edited.safeParse({ editedAt }).success).toBe(false);
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.message_edited.safeParse({ messageId: 'm', editedAt }).success,
+    ).toBe(true);
+  });
+
+  it('accepts a message_deleted payload and rejects an unknown reason', () => {
+    const valid = { messageId: 'm', messageSeq: '4', reason: 'user' };
+    expect(ROOM_EVENT_PAYLOAD_SCHEMAS.message_deleted.safeParse(valid).success).toBe(true);
+    expect(
+      ROOM_EVENT_PAYLOAD_SCHEMAS.message_deleted.safeParse({ ...valid, reason: 'other' }).success,
+    ).toBe(false);
+    expect(ROOM_EVENT_PAYLOAD_SCHEMAS.message_deleted.safeParse({ messageId: 'm' }).success).toBe(
+      false,
+    );
+  });
 });

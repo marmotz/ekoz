@@ -74,3 +74,26 @@ increment rather than design changes:
 The presence/typing half **is** pushed live, through the in-process event bus
 this page already called for (`EphemeralBroadcaster`) — that part matches the
 original design as planned.
+
+## Fan-out scope and cost (web chat server tasks)
+
+The synchronous fan-out targets the **effective** members of a room: explicit
+`Membership` rows on the room plus those of its ancestor spaces (resolved
+through `room_closure`, one feed row per distinct user). Alternatives rejected:
+a client-side `/sync` fallback for inherited rooms (no unseen state, no
+catch-up on the stream) and explicit memberships in every channel (duplicates
+the permission model).
+
+Consequences:
+
+- The cost of `fanOutRoomEvent`, which runs inside the transaction of the event
+  append, is now proportional to the effective members (every member of the
+  ancestor spaces), not only to the explicit ones. A message in a channel of a
+  large space writes one feed row per space member. The asynchronous worker
+  named above remains the evolution if that becomes measurable.
+- The fan-out checks that a membership exists, not the `room.read` capability:
+  a `deny` override on `room.read` is not honoured (unchanged limitation).
+- Feed volume grows accordingly; pruning is unchanged.
+- `GET /events` without a cursor starts at the current head of the feed, so a
+  fresh connection does not replay the retained feed (see
+  [Synchronisation](../protocol/synchronisation.md)).

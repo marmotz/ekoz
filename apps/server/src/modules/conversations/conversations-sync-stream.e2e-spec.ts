@@ -4,8 +4,10 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from '../identity/accounts/account.service.js';
+import { FeedReaderService } from './streaming/feed-reader.service.js';
 
 /**
  * Sync endpoint, account feed fan-out, and the SSE stream ticket handshake
@@ -16,6 +18,8 @@ describe('conversations — sync and stream (integration)', () => {
   let app: INestApplication;
   let restoreConfig: () => void;
   let accounts: AccountService;
+  let prisma: PrismaService;
+  let feedReader: FeedReaderService;
 
   const password = 'a-perfectly-fine-passphrase';
   const server = () => app.getHttpServer();
@@ -56,6 +60,8 @@ describe('conversations — sync and stream (integration)', () => {
     await app.init();
 
     accounts = app.get(AccountService);
+    prisma = app.get(PrismaService);
+    feedReader = app.get(FeedReaderService);
     await accounts.createAccount({
       name: 'owner',
       email: 'owner@ekoz.example.com',
@@ -162,5 +168,95 @@ describe('conversations — sync and stream (integration)', () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     await request(server()).get('/events').query({ ticket: ticket.body.ticket }).expect(401);
+  });
+
+  describe('fan-out to effective members', () => {
+    const feedRowsFor = async (userId: string, roomId: string) =>
+      (await prisma.orm.public.AccountFeedEvent.where({
+        userId,
+        roomId,
+      }).all()) as unknown as Array<{ roomSeq: bigint | null; payload: { type: string } }>;
+
+    it('reaches a member of the parent space that never joined the channel', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const alice = (await accounts.findByIdentifier('alice'))!;
+      const channel = await createPublicChannel(ownerToken, 'inherited-fanout-room');
+
+      await request(server())
+        .post(`/rooms/${channel.parentId}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+      await request(server())
+        .post(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ body: 'hello space members' })
+        .expect(201);
+
+      const rows = await feedRowsFor(alice.id, channel.id);
+      expect(rows.map((r) => r.payload.type)).toEqual(['message_created']);
+    });
+
+    it('writes one row per distinct user when a user is both explicit and inherited', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const owner = (await accounts.findByIdentifier('owner'))!;
+      const alice = (await accounts.findByIdentifier('alice'))!;
+      const channel = await createPublicChannel(ownerToken, 'both-fanout-room');
+
+      await request(server())
+        .post(`/rooms/${channel.parentId}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+      await request(server())
+        .post(`/rooms/${channel.id}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+      const message = await request(server())
+        .post(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ body: 'once per user' })
+        .expect(201);
+
+      for (const user of [owner, alice]) {
+        const rows = await feedRowsFor(user.id, channel.id);
+        const forMessage = rows.filter((r) => r.roomSeq === BigInt(message.body.seq));
+        expect(forMessage).toHaveLength(1);
+      }
+    });
+
+    it('does not reach a user with no membership on the room or its ancestors', async () => {
+      const ownerToken = await login('owner');
+      const alice = (await accounts.findByIdentifier('alice'))!;
+      const channel = await createPublicChannel(ownerToken, 'no-fanout-room');
+
+      await request(server())
+        .post(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ body: 'nobody else here' })
+        .expect(201);
+
+      expect(await feedRowsFor(alice.id, channel.id)).toEqual([]);
+    });
+  });
+
+  it('reads the head of an account feed, 0 when it is empty', async () => {
+    const ownerToken = await login('owner');
+    const owner = (await accounts.findByIdentifier('owner'))!;
+    const channel = await createPublicChannel(ownerToken, 'head-room');
+    await request(server())
+      .post(`/rooms/${channel.id}/messages`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ body: 'moves the head' })
+      .expect(201);
+
+    const rows = (await prisma.orm.public.AccountFeedEvent.where({
+      userId: owner.id,
+    }).all()) as Array<{ feedSeq: bigint }>;
+    const highest = rows.reduce((max, row) => (row.feedSeq > max ? row.feedSeq : max), 0n);
+
+    expect(highest).toBeGreaterThan(0n);
+    expect(await feedReader.head(owner.id)).toBe(highest);
+    expect(await feedReader.head('01ARZ3NDEKTSV4RRFFQ69G5FAV')).toBe(0n);
   });
 });

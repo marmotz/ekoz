@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -31,12 +32,16 @@ import {
   type InviteMember,
   InviteMemberDto,
   JoinRequestParamSchema,
+  type ListMembersQuery,
+  ListMembersQueryDto,
   RoomMemberParamSchema,
 } from './membership.dto.js';
 import { MembershipService } from './membership.service.js';
 import {
   type JoinRequestView,
   JoinRequestViewDto,
+  type MemberListView,
+  MemberListViewDto,
   type MembershipView,
   MembershipViewDto,
   type MyRoomInvitationListView,
@@ -70,6 +75,20 @@ export class MembershipController {
     private readonly membership: MembershipService,
     private readonly moderation: ModerationService,
   ) {}
+
+  @Get('rooms/:id/members')
+  @ApiOperation({
+    summary: 'List the effective members of a room, ancestor spaces included (needs room.read).',
+  })
+  @ApiOkResponse({ type: MemberListViewDto })
+  @ApiProblemResponses({ validation: true, statuses: [403, 404] })
+  listMembers(
+    @Param(new ZodValidationPipe(RoomIdParamSchema)) params: { id: string },
+    @Query(new ZodValidationPipe(ListMembersQueryDto)) query: ListMembersQuery,
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<MemberListView> {
+    return this.membership.listMembers(principal, params.id, query);
+  }
 
   @Post('rooms/:id/join')
   @ApiOperation({ summary: 'Join a public room.' })

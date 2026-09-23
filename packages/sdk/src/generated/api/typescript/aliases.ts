@@ -23,7 +23,9 @@ import type { InvitationViewDtoDto } from './InvitationViewDto.type.js';
 import type { JoinRequestViewDtoDto } from './JoinRequestViewDto.type.js';
 import type { LoginDtoDto } from './LoginDto.type.js';
 import type { LoginResponseDtoDto } from './LoginResponseDto.type.js';
+import type { MemberListViewDtoDto } from './MemberListViewDto.type.js';
 import type { MembershipViewDtoDto } from './MembershipViewDto.type.js';
+import type { MessagePageDtoDto } from './MessagePageDto.type.js';
 import type { MessagePinViewDtoDto } from './MessagePinViewDto.type.js';
 import type { MessageViewDtoDto } from './MessageViewDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
@@ -515,6 +517,16 @@ export type PermissionsController_setMemberPermission404ResponseProblemJson = Pr
 
 export type PermissionsController_setMemberPermission422ResponseProblemJson = ProblemDetailsDtoDto;
 
+export type MembershipController_listMembers200ResponseJson = MemberListViewDtoDto;
+
+export type MembershipController_listMembers401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listMembers403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listMembers404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listMembers422ResponseProblemJson = ProblemDetailsDtoDto;
+
 export type MembershipController_join201ResponseJson = MembershipViewDtoDto;
 
 export type MembershipController_join401ResponseProblemJson = ProblemDetailsDtoDto;
@@ -642,6 +654,16 @@ export type DirectoryController_unpublish401ResponseProblemJson = ProblemDetails
 export type DirectoryController_unpublish403ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type DirectoryController_unpublish404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listMessages200ResponseJson = MessagePageDtoDto;
+
+export type MessagesController_listMessages401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listMessages403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listMessages404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listMessages422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MessagesController_sendMessage201ResponseJson = MessageViewDtoDto;
 

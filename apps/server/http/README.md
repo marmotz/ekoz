@@ -140,6 +140,8 @@ http/
   stream/
     ticket.hurl                       POST   /stream/ticket           200 · needs access_token
     ticket-unauthenticated.hurl       POST   /stream/ticket           401 auth.unauthenticated
+  messages/
+    list.hurl                          GET    /rooms/:id/messages      200 · needs access_token + room_id
   rooms/
     create-space.hurl                  POST   /spaces                  201 · needs owner access_token
     create-space-forbidden.hurl        POST   /spaces                  403 room.permission_denied (non-owner)
@@ -150,6 +152,7 @@ http/
     preview.hurl                       GET    /rooms/:id/preview       200 · needs access_token + room_id (invite room)
     preview-not-found.hurl             GET    /rooms/:id/preview       404 room.not_found (not an invite room)
     children.hurl                      GET    /rooms/:id/children      200 · needs access_token + room_id
+    members.hurl                       GET    /rooms/:id/members       200 · needs access_token + room_id
     update.hurl                        PATCH  /rooms/:id               200 · owner + room_id
     move.hurl                          POST   /rooms/:id/move          200 · owner + room_id + parent_room_id
     move-cycle.hurl                    POST   /rooms/:id/move          422 room.cycle

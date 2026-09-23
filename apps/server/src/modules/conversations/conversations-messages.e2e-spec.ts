@@ -1,9 +1,12 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { ulid } from 'ulid';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
+import { ConfigService } from '../../core/config/config.service.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from '../identity/accounts/account.service.js';
 
@@ -16,6 +19,8 @@ describe('conversations — messages (integration)', () => {
   let app: INestApplication;
   let restoreConfig: () => void;
   let accounts: AccountService;
+  let config: ConfigService;
+  let prisma: PrismaService;
 
   const password = 'a-perfectly-fine-passphrase';
   const server = () => app.getHttpServer();
@@ -56,6 +61,8 @@ describe('conversations — messages (integration)', () => {
     await app.init();
 
     accounts = app.get(AccountService);
+    config = app.get(ConfigService);
+    prisma = app.get(PrismaService);
     await accounts.createAccount({
       name: 'owner',
       email: 'owner@ekoz.example.com',
@@ -217,6 +224,20 @@ describe('conversations — messages (integration)', () => {
       .expect(200); // alice is still the author, allowed
 
     expect(res.body.body).toBe('bad');
+
+    const sync = await request(server())
+      .get('/sync')
+      .query({ room: channel.id, since: '0' })
+      .set('Authorization', `Bearer ${aliceToken}`)
+      .expect(200);
+    const editEvents = sync.body.events.filter(
+      (e: { type: string }) => e.type === 'message_edited',
+    );
+    expect(editEvents).toHaveLength(2);
+    expect(editEvents[0].content).toEqual({
+      messageId: message.body.id,
+      editedAt: expect.any(String),
+    });
   });
 
   it('deletes a message: clears body, removes pins/mentions, tombstones the event', async () => {
@@ -250,5 +271,191 @@ describe('conversations — messages (integration)', () => {
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(200);
     expect(pins.body.map((p: { messageId: string }) => p.messageId)).not.toContain(message.body.id);
+  });
+
+  it('appends message_deleted on delete and scrubs the body from the account feed', async () => {
+    const ownerToken = await login('owner');
+    const owner = (await accounts.findByIdentifier('owner'))!;
+    const channel = await createPublicChannel(ownerToken, 'delete-event-room');
+
+    const message = await request(server())
+      .post(`/rooms/${channel.id}/messages`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ body: 'a very secret sentence' })
+      .expect(201);
+
+    const feedRows = async () =>
+      (await prisma.orm.public.AccountFeedEvent.where({
+        userId: owner.id,
+        roomId: channel.id,
+      }).all()) as unknown as Array<{ roomSeq: bigint | null; payload: Record<string, unknown> }>;
+
+    const before = (await feedRows()).find((r) => r.roomSeq === BigInt(message.body.seq));
+    expect(JSON.stringify(before?.payload)).toContain('a very secret sentence');
+
+    await request(server())
+      .delete(`/rooms/${channel.id}/messages/${message.body.id}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
+
+    const sync = await request(server())
+      .get('/sync')
+      .query({ room: channel.id, since: '0' })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    const deleted = sync.body.events.find((e: { type: string }) => e.type === 'message_deleted');
+    expect(deleted.content).toEqual({
+      messageId: message.body.id,
+      messageSeq: message.body.seq,
+      reason: 'user',
+    });
+    expect(BigInt(deleted.seq)).toBeGreaterThan(BigInt(message.body.seq));
+    expect(deleted.senderId).toBe(owner.id);
+
+    const rows = await feedRows();
+    const scrubbed = rows.find((r) => r.roomSeq === BigInt(message.body.seq));
+    expect(scrubbed?.payload).toMatchObject({
+      type: 'message_redacted',
+      content: { reason: 'user' },
+    });
+    expect(JSON.stringify(rows.map((r) => r.payload))).not.toContain('a very secret sentence');
+    // The deletion itself was fanned out, like any other event.
+    expect(rows.some((r) => (r.payload as { type: string }).type === 'message_deleted')).toBe(true);
+  });
+
+  describe('GET /rooms/:id/messages', () => {
+    const list = (token: string, roomId: string, query: Record<string, string> = {}) =>
+      request(server())
+        .get(`/rooms/${roomId}/messages`)
+        .query(query)
+        .set('Authorization', `Bearer ${token}`);
+
+    const post = async (token: string, roomId: string, body: string, mentions?: string[]) =>
+      (
+        await request(server())
+          .post(`/rooms/${roomId}/messages`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ body, mentions })
+          .expect(201)
+      ).body as { id: string; seq: string };
+
+    it('pages backwards, ascending inside each page, with hasMore and lastSeq', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'list-room');
+      const sent = [];
+      for (const body of ['m1', 'm2', 'm3', 'm4', 'm5']) {
+        sent.push(await post(ownerToken, channel.id, body));
+      }
+
+      const first = await list(ownerToken, channel.id, { limit: '2' }).expect(200);
+      expect(first.body.items.map((m: { body: string }) => m.body)).toEqual(['m4', 'm5']);
+      expect(first.body.hasMore).toBe(true);
+      const room = await request(server())
+        .get(`/rooms/${channel.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      expect(first.body.lastSeq).toBe(room.body.lastSeq);
+
+      const second = await list(ownerToken, channel.id, {
+        limit: '2',
+        before: first.body.items[0].seq,
+      }).expect(200);
+      expect(second.body.items.map((m: { body: string }) => m.body)).toEqual(['m2', 'm3']);
+      expect(second.body.hasMore).toBe(true);
+
+      const last = await list(ownerToken, channel.id, {
+        limit: '2',
+        before: second.body.items[0].seq,
+      }).expect(200);
+      expect(last.body.items.map((m: { body: string }) => m.body)).toEqual(['m1']);
+      expect(last.body.hasMore).toBe(false);
+
+      // `before` is exclusive, and an unbounded page defaults to everything (< 50).
+      const all = await list(ownerToken, channel.id).expect(200);
+      expect(all.body.items.map((m: { id: string }) => m.id)).toEqual(sent.map((m) => m.id));
+      expect(all.body.hasMore).toBe(false);
+      const empty = await list(ownerToken, channel.id, { before: sent[0]?.seq ?? '0' }).expect(200);
+      expect(empty.body.items).toEqual([]);
+      expect(empty.body.hasMore).toBe(false);
+    });
+
+    it('returns tombstones for deleted messages and the mentions of each message', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const alice = (await accounts.findByIdentifier('alice'))!;
+      const channel = await createPublicChannel(ownerToken, 'list-tombstone-room');
+      await request(server())
+        .post(`/rooms/${channel.id}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+
+      const plain = await post(ownerToken, channel.id, 'plain');
+      const mentioning = await post(ownerToken, channel.id, 'hello @alice', [alice.id]);
+      const doomed = await post(ownerToken, channel.id, 'to delete');
+      await request(server())
+        .delete(`/rooms/${channel.id}/messages/${doomed.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const res = await list(aliceToken, channel.id).expect(200);
+      const byId = new Map(res.body.items.map((m: { id: string }) => [m.id, m] as const)) as Map<
+        string,
+        { mentions: string[]; body: string; redactedAt: string | null }
+      >;
+      expect(res.body.items.map((m: { id: string }) => m.id)).toEqual([
+        plain.id,
+        mentioning.id,
+        doomed.id,
+      ]);
+      expect(byId.get(plain.id)?.mentions).toEqual([]);
+      expect(byId.get(mentioning.id)?.mentions).toEqual([alice.id]);
+      expect(byId.get(doomed.id)).toMatchObject({ body: '' });
+      expect(byId.get(doomed.id)?.redactedAt).not.toBeNull();
+    });
+
+    it('caps limit at messages.max_page', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'list-cap-room');
+      for (const body of ['a', 'b', 'c']) {
+        await post(ownerToken, channel.id, body);
+      }
+
+      await config.set('messages.max_page', 2, null);
+      try {
+        const res = await list(ownerToken, channel.id, { limit: '50' }).expect(200);
+        expect(res.body.items.map((m: { body: string }) => m.body)).toEqual(['b', 'c']);
+        expect(res.body.hasMore).toBe(true);
+      } finally {
+        await config.clear('messages.max_page');
+      }
+    });
+
+    it('refuses a non-reader, an unknown room and invalid query values', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const space = (
+        await request(server())
+          .post('/spaces')
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ name: 'list-private-space', visibility: 'private' })
+          .expect(201)
+      ).body;
+      const channel = (
+        await request(server())
+          .post('/rooms')
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ parentId: space.id, name: 'list-private', visibility: 'private' })
+          .expect(201)
+      ).body;
+
+      const denied = await list(aliceToken, channel.id).expect(403);
+      expect(denied.body.code).toBe('room.permission_denied');
+
+      const missing = await list(aliceToken, ulid()).expect(404);
+      expect(missing.body.code).toBe('room.not_found');
+
+      await list(ownerToken, channel.id, { before: 'abc' }).expect(422);
+      await list(ownerToken, channel.id, { limit: '0' }).expect(422);
+    });
   });
 });

@@ -27,6 +27,9 @@ that does not touch this file.
 
 ### Changed
 
+- `GET /events` without a cursor starts at the current head of the feed instead of replaying it. (#69)
+- Room events reach the members of the ancestor spaces, not only the explicit members. (#70)
+- Deleting a message scrubs its body from the account feed. (#68)
 - Capability resolution now reads real `Membership` rows (own or inherited
   from an ancestor space) instead of the provisional public-room-only rule. (#4)
 - `AuthGuard` / `OwnerGuard` moved to `core/http`, usable by any feature
@@ -34,6 +37,9 @@ that does not touch this file.
 
 ### Added
 
+- `GET /rooms/:id/messages` lists a room's history, newest page first. (#66)
+- `GET /rooms/:id/members` lists the effective members of a room, ancestor spaces included. (#67)
+- Deleting a message appends a `message_deleted` event, and `message_edited` names the edited message. (#68)
 - The server logs its resolved configuration at boot, with secrets masked.
 - The creator of a space or channel becomes its first member, and existing rooms are backfilled. (#62)
 - `GET /me/room-invitations` lists the caller's pending room invitations with the room and the inviter. (#63)

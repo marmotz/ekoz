@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dropCheckConstraint.room_event.room_event_type_check_869a5b2b",
+    "label": "Drop check constraint \"room_event_type_check_869a5b2b\" on \"room_event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "room_event_type_check_869a5b2b",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_event_type_check_869a5b2b\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_869a5b2b",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"room_event_type_check_869a5b2b\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" DROP CONSTRAINT \"room_event_type_check_869a5b2b\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_event_type_check_869a5b2b\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_869a5b2b",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.room_event.room_event_type_check_eaaedd9c",
+    "label": "Add check constraint \"room_event_type_check_eaaedd9c\" on \"room_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "room_event_type_check_eaaedd9c",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_event_type_check_eaaedd9c\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_eaaedd9c",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"room_event_type_check_eaaedd9c\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" ADD CONSTRAINT \"room_event_type_check_eaaedd9c\" CHECK (\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_event_type_check_eaaedd9c\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_eaaedd9c",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  }
+]

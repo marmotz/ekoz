@@ -14,13 +14,16 @@ import {
   RoomNotFoundError,
   RoomReadOnlyError,
 } from '../conversations.errors.js';
-import { EventLogService } from '../events/event-log.service.js';
+import { EventLogService, type RoomTx } from '../events/event-log.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import { type MessageRow, type MessageView, toMessageView } from './message.view.js';
-import type { SendMessage } from './messages.dto.js';
+import type { ListMessagesQuery, MessagePage, SendMessage } from './messages.dto.js';
 import type { MessagePinRow, MessagePinView } from './pin.view.js';
 import { RestrictedMarkdownError, validateRestrictedMarkdown } from './restricted-markdown.js';
+
+/** Default `limit` of `GET /rooms/:id/messages`, capped by `messages.max_page`. */
+const DEFAULT_PAGE_SIZE = 50;
 
 /** Messages: send, restricted Markdown, mentions, replies, pins (technical.md §11, issue #7). */
 @Injectable()
@@ -101,7 +104,7 @@ export class MessagesService {
   /**
    * Edit a message's body (technical.md §12, issue #8). `room.edit_own` (the
    * author, within `messages.edit_window` if set) or `room.edit_any`. Emits
-   * `message_edited { editedAt }` — never the previous body; no version
+   * `message_edited { messageId, editedAt }` — never the previous body; no version
    * history is retained.
    */
   async editMessage(
@@ -128,7 +131,7 @@ export class MessagesService {
         roomId,
         type: 'message_edited',
         senderId: actor.userId,
-        content: { editedAt: now },
+        content: { messageId, editedAt: now },
       });
 
       return row;
@@ -168,7 +171,12 @@ export class MessagesService {
     return { authorId: message.authorId, viaCapability };
   }
 
-  /** Shared redact core (technical.md §12-§13): also the retention worker's delete-mode helper. */
+  /**
+   * Shared redact core (technical.md §12-§13): also the retention worker's delete-mode helper.
+   * Besides rewriting the original event in place, it appends `message_deleted` (so
+   * connected clients and `/sync` see the deletion) and scrubs the account feed rows
+   * that mirrored the original `message_created`, all in one transaction.
+   */
   async redactMessage(
     roomId: string,
     message: MessageRow,
@@ -189,7 +197,55 @@ export class MessagesService {
         type: 'message_redacted',
         content: { reason },
       });
+      await this.scrubFeedRows(tx, roomId, message.seq, reason);
+      await this.eventLog.append(tx, {
+        roomId,
+        type: 'message_deleted',
+        senderId: redactedById,
+        content: { messageId: message.id, messageSeq: message.seq.toString(), reason },
+      });
     });
+  }
+
+  /**
+   * One page of history: the newest `limit` messages with `seq < before`,
+   * ascending inside the page. `lastSeq` is read first so the page is at least
+   * as recent as it; mentions are loaded in one query for the whole page.
+   */
+  async listMessages(
+    actor: PermissionPrincipal,
+    roomId: string,
+    query: ListMessagesQuery,
+  ): Promise<MessagePage> {
+    await this.permissions.assertCan(actor, roomId, 'room.read');
+    const room = (await this.prisma.orm.public.Room.where({ id: roomId }).first()) as {
+      lastSeq: bigint;
+      deletedAt: string | null;
+    } | null;
+    if (!room || room.deletedAt) {
+      throw new RoomNotFoundError();
+    }
+
+    const maxPage = this.config.get('messages.max_page');
+    const limit = Math.min(query.limit ?? DEFAULT_PAGE_SIZE, maxPage);
+    const before = query.before === undefined ? null : BigInt(query.before);
+
+    const rows = (await this.prisma.orm.public.Message.where((f) =>
+      before === null ? f.roomId.eq(roomId) : and(f.roomId.eq(roomId), f.seq.lt(before)),
+    )
+      .orderBy((f) => f.seq.desc())
+      .limit(limit + 1)
+      .all()) as MessageRow[];
+
+    const hasMore = rows.length > limit;
+    const page = rows.slice(0, limit).reverse();
+    const mentionsByMessage = await this.mentionsForMany(page.map((row) => row.id));
+
+    return {
+      items: page.map((row) => toMessageView(row, mentionsByMessage.get(row.id) ?? [])),
+      lastSeq: room.lastSeq.toString(),
+      hasMore,
+    };
   }
 
   async getMessage(
@@ -272,6 +328,27 @@ export class MessagesService {
     return rows;
   }
 
+  /** Rewrite the feed rows of the original event to the same tombstone as the room event row. */
+  private async scrubFeedRows(
+    tx: RoomTx,
+    roomId: string,
+    seq: bigint,
+    reason: 'user' | 'retention',
+  ): Promise<void> {
+    const feedRows = (await tx.orm.public.AccountFeedEvent.where((f) =>
+      and(f.roomId.eq(roomId), f.roomSeq.eq(seq)),
+    ).all()) as Array<{ userId: string; feedSeq: bigint; payload: Record<string, unknown> }>;
+
+    for (const row of feedRows) {
+      await tx.orm.public.AccountFeedEvent.where({
+        userId: row.userId,
+        feedSeq: row.feedSeq,
+      }).update({
+        payload: { ...row.payload, type: 'message_redacted', content: { reason } },
+      });
+    }
+  }
+
   private async findRoomOrThrow(id: string): Promise<{ id: string; readOnly: boolean }> {
     const row = (await this.prisma.orm.public.Room.where({ id }).first()) as {
       id: string;
@@ -329,6 +406,22 @@ export class MessagesService {
     }
 
     await this.permissions.assertCan(actor, roomId, 'room.edit_any');
+  }
+
+  private async mentionsForMany(messageIds: string[]): Promise<Map<string, string[]>> {
+    const byMessage = new Map<string, string[]>();
+    if (messageIds.length === 0) {
+      return byMessage;
+    }
+
+    const rows = (await this.prisma.orm.public.MessageMention.where((f) =>
+      f.messageId.in(messageIds),
+    ).all()) as Array<{ messageId: string; userId: string }>;
+    for (const row of rows) {
+      byMessage.set(row.messageId, [...(byMessage.get(row.messageId) ?? []), row.userId]);
+    }
+
+    return byMessage;
   }
 
   private async mentionsFor(messageId: string): Promise<string[]> {

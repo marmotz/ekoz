@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../../app.module.js';
 import { ConfigService } from '../../core/config/config.service.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
 import { AccountService } from '../identity/accounts/account.service.js';
 import { RetentionWorkerService } from './retention/retention-worker.service.js';
@@ -20,6 +21,7 @@ describe('conversations — retention (integration)', () => {
   let accounts: AccountService;
   let config: ConfigService;
   let worker: RetentionWorkerService;
+  let prisma: PrismaService;
 
   const password = 'a-perfectly-fine-passphrase';
   const server = () => app.getHttpServer();
@@ -64,6 +66,7 @@ describe('conversations — retention (integration)', () => {
     accounts = app.get(AccountService);
     config = app.get(ConfigService);
     worker = app.get(RetentionWorkerService);
+    prisma = app.get(PrismaService);
 
     await accounts.createAccount({
       name: 'owner',
@@ -212,10 +215,53 @@ describe('conversations — retention (integration)', () => {
       .expect(200);
     const event = sync.body.events.find((e: { type: string }) => e.type === 'message_redacted');
     expect(event).toMatchObject({ content: { reason: 'retention' } });
+    // The deletion is also announced live, one event per message.
+    const deleted = sync.body.events.find((e: { type: string }) => e.type === 'message_deleted');
+    expect(deleted.content).toEqual({
+      messageId: message.id,
+      messageSeq: message.seq,
+      reason: 'retention',
+    });
+    expect(deleted.senderId).toBeNull();
     // Reused seq: the tombstone rewrites `message_created`, no new event.
     expect(
       sync.body.events.filter((e: { type: string }) => e.type === 'message_created'),
     ).toHaveLength(0);
+  });
+
+  it('a retention deletion is fanned out to inherited members too', async () => {
+    const ownerToken = await login('owner');
+    const aliceToken = await login('alice');
+    const alice = (await accounts.findByIdentifier('alice'))!;
+    const { space, channel } = await createPublicChannel(ownerToken, 'retention-inherited');
+    await request(server())
+      .post(`/rooms/${space.id}/join`)
+      .set('Authorization', `Bearer ${aliceToken}`)
+      .expect(201);
+
+    const message = (
+      await request(server())
+        .post(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ body: 'retained secret' })
+    ).body;
+    await request(server())
+      .put(`/rooms/${channel.id}/retention`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ mode: 'delete', after: 0 })
+      .expect(200);
+    await worker.sweep();
+
+    const rows = (await prisma.orm.public.AccountFeedEvent.where({
+      userId: alice.id,
+      roomId: channel.id,
+    }).all()) as unknown as Array<{ roomSeq: bigint | null; payload: { type: string } }>;
+    const types = rows.map((r) => r.payload.type);
+    expect(types).toContain('message_deleted');
+    expect(JSON.stringify(rows.map((r) => r.payload))).not.toContain('retained secret');
+    expect(rows.find((r) => r.roomSeq === BigInt(message.seq))?.payload.type).toBe(
+      'message_redacted',
+    );
   });
 
   it('an ancestor space rule applies to a channel that inherits', async () => {
