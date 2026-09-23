@@ -225,5 +225,49 @@
       "network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
       "generic": "Une erreur est survenue. Réessayez."
     }
+  },
+  "chat": {
+    "title": "Discussion",
+    "list": {
+      "label": "Messages",
+      "loading": "Chargement des messages",
+      "empty": "Aucun message pour le moment.",
+      "loadOlder": "Charger les messages plus anciens",
+      "loadingOlder": "Chargement des messages plus anciens",
+      "loadOlderFailed": "Impossible de charger les messages plus anciens. Réessayer",
+      "error": "Les messages n'ont pas pu être chargés.",
+      "retry": "Réessayer"
+    },
+    "message": {
+      "deleted": "Message supprimé",
+      "edited": "modifié",
+      "deletedAccount": "Compte supprimé",
+      "unknownUser": "Utilisateur inconnu",
+      "sending": "Envoi en cours",
+      "failed": "Non envoyé",
+      "retry": "Réessayer"
+    },
+    "composer": {
+      "label": "Message",
+      "placeholder": "Écrire un message",
+      "send": "Envoyer",
+      "disabled": {
+        "join": "Rejoignez le salon pour écrire.",
+        "readOnly": "Ce salon est en lecture seule.",
+        "permission": "Vous n'avez pas la permission d'écrire dans ce salon."
+      },
+      "errors": {
+        "readOnly": "Ce salon est en lecture seule.",
+        "permissionDenied": "Vous n'avez pas la permission d'écrire dans ce salon.",
+        "bodyTooLong": "Ce message est trop long.",
+        "bodyInvalid": "Ce message n'est pas valide.",
+        "network": "Le serveur est injoignable.",
+        "generic": "Le message n'a pas pu être envoyé."
+      }
+    },
+    "connection": {
+      "reconnecting": "Reconnexion...",
+      "offline": "Hors ligne"
+    }
   }
 }

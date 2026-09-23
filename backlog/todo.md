@@ -39,7 +39,7 @@ scope)_ — 9/9 tasks done
 
 ## Web client chat ·  [overview](features/web-client-chat/overview.md)
 
-_technical design, see [technical.md](features/web-client-chat/./technical.md)_ — 7/13 tasks done
+_technical design, see [technical.md](features/web-client-chat/./technical.md)_ — 12/13 tasks done
 
 | Done | Issue                                            | Title                                                                           | Blocked by         |
 |------|--------------------------------------------------|---------------------------------------------------------------------------------|--------------------|
@@ -50,11 +50,11 @@ _technical design, see [technical.md](features/web-client-chat/./technical.md)_ 
 | [x]  | [#70](https://github.com/marmotz/ekoz/issues/70) | Web chat server: feed fan-out to effective members                              | —                  |
 | [x]  | [#71](https://github.com/marmotz/ekoz/issues/71) | Web chat SDK: messages, sync and rooms.members bindings, RoomEvent union        | #66, #67, #68      |
 | [x]  | [#72](https://github.com/marmotz/ekoz/issues/72) | Web chat SDK: RoomStream (SSE with fresh-ticket reconnection)                   | #69, #71           |
-| [ ]  | [#73](https://github.com/marmotz/ekoz/issues/73) | Web chat client: shared/realtime (stream provider, subscriptions, unseen store) | #72                |
-| [ ]  | [#74](https://github.com/marmotz/ekoz/issues/74) | Web chat client: timeline reducer, queries and Markdown allow-list              | #71                |
-| [ ]  | [#75](https://github.com/marmotz/ekoz/issues/75) | Web chat client: history view, authors and route composition                    | #71, #74           |
-| [ ]  | [#76](https://github.com/marmotz/ekoz/issues/76) | Web chat client: live sync, reconnection catch-up and connection banner         | #68, #70, #73, #75 |
-| [ ]  | [#77](https://github.com/marmotz/ekoz/issues/77) | Web chat client: composer with optimistic send and read-only states             | #75                |
+| [x]  | [#73](https://github.com/marmotz/ekoz/issues/73) | Web chat client: shared/realtime (stream provider, subscriptions, unseen store) | #72                |
+| [x]  | [#74](https://github.com/marmotz/ekoz/issues/74) | Web chat client: timeline reducer, queries and Markdown allow-list              | #71                |
+| [x]  | [#75](https://github.com/marmotz/ekoz/issues/75) | Web chat client: history view, authors and route composition                    | #71, #74           |
+| [x]  | [#76](https://github.com/marmotz/ekoz/issues/76) | Web chat client: live sync, reconnection catch-up and connection banner         | #68, #70, #73, #75 |
+| [x]  | [#77](https://github.com/marmotz/ekoz/issues/77) | Web chat client: composer with optimistic send and read-only states             | #75                |
 | [ ]  | [#78](https://github.com/marmotz/ekoz/issues/78) | Web chat docs: docs/technical/web-client-chat.md                                | #75, #77, #76      |
 
 ## Web client rooms ·  [overview](features/web-client-rooms/overview.md)
