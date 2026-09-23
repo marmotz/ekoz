@@ -22,14 +22,50 @@ export const defaultMe = {
   bio: null as string | null,
 };
 
+type StreamEventName = 'room_event' | 'account' | 'presence' | 'typing' | 'status' | 'reconnected';
+
+/** A controllable `RoomStream`: tests push events with `emit()` and change `status`. */
+export function createFakeStream() {
+  const listeners = new Map<string, Set<Listener>>();
+  const stream = {
+    status: 'idle' as 'idle' | 'connecting' | 'open' | 'reconnecting',
+    connect: vi.fn(() => {}),
+    disconnect: vi.fn(() => {}),
+    on: vi.fn((name: string, listener: Listener) => {
+      let set = listeners.get(name);
+      if (!set) {
+        set = new Set();
+        listeners.set(name, set);
+      }
+      set.add(listener);
+      return () => {
+        listeners.get(name)?.delete(listener);
+      };
+    }),
+  };
+
+  return {
+    stream,
+    emit(name: StreamEventName, ...args: unknown[]) {
+      for (const listener of [...(listeners.get(name) ?? [])]) listener(...args);
+    },
+    setStatus(status: typeof stream.status) {
+      stream.status = status;
+      for (const listener of [...(listeners.get('status') ?? [])]) listener(status);
+    },
+    listenerCount: (name: StreamEventName) => listeners.get(name)?.size ?? 0,
+  };
+}
+
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions` and `users`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `rooms`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
   let session: FakeSession | undefined = initial;
   const listeners = new Map<string, Set<Listener>>();
+  const fakeStream = createFakeStream();
 
   const off = (name: string, listener: Listener) => {
     listeners.get(name)?.delete(listener);
@@ -102,6 +138,18 @@ export function createFakeSdk(initial?: FakeSession) {
       getProfile: vi.fn(async () => ({})),
       avatar: vi.fn(async () => new Blob(['avatar'], { type: 'image/png' })),
     },
+    messages: {
+      list: vi.fn(async () => ({ items: [], lastSeq: '0', hasMore: false })),
+      get: vi.fn(async () => ({})),
+      send: vi.fn(async () => ({})),
+    },
+    rooms: {
+      members: vi.fn(async () => ({ items: [], nextCursor: null })),
+    },
+    sync: {
+      get: vi.fn(async () => ({ events: [], lastSeq: '0' })),
+    },
+    stream: fakeStream.stream,
     on: vi.fn(on),
     off: vi.fn(off),
     once: vi.fn(on),
@@ -112,6 +160,8 @@ export function createFakeSdk(initial?: FakeSession) {
     /** The raw stubs, for assertions. */
     stubs: sdk,
     emit,
+    /** The fake `sdk.stream`: `emit('room_event', ...)`, `setStatus('open')`, ... */
+    streamControl: fakeStream,
     setSession(next: FakeSession | undefined) {
       session = next;
     },

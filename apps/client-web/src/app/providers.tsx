@@ -8,6 +8,7 @@ import { I18nextProvider } from 'react-i18next';
 import { SessionGuard } from '@/app/session-guard';
 import { ThemeProvider } from '@/app/theme';
 import { readStoredLanguage, setHtmlLanguage } from '@/shared/i18n/config';
+import { RealtimeProvider } from '@/shared/realtime/realtime-provider';
 import { SdkProvider } from '@/shared/sdk/provider';
 
 /**
@@ -42,6 +43,7 @@ export function AppProviders({
           <SdkProvider>
             <StoredLanguageSync i18nInstance={i18nInstance} />
             <SessionGuard />
+            <RealtimeProvider />
             {children}
           </SdkProvider>
         </ThemeProvider>

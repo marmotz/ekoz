@@ -225,5 +225,49 @@
       "network": "The server could not be reached. Check your connection and try again.",
       "generic": "Something went wrong. Try again."
     }
+  },
+  "chat": {
+    "title": "Chat",
+    "list": {
+      "label": "Messages",
+      "loading": "Loading messages",
+      "empty": "No messages yet.",
+      "loadOlder": "Load older messages",
+      "loadingOlder": "Loading older messages",
+      "loadOlderFailed": "Could not load older messages. Retry",
+      "error": "The messages could not be loaded.",
+      "retry": "Retry"
+    },
+    "message": {
+      "deleted": "Message deleted",
+      "edited": "edited",
+      "deletedAccount": "Deleted account",
+      "unknownUser": "Unknown user",
+      "sending": "Sending",
+      "failed": "Not sent",
+      "retry": "Retry"
+    },
+    "composer": {
+      "label": "Message",
+      "placeholder": "Write a message",
+      "send": "Send",
+      "disabled": {
+        "join": "Join the room to write.",
+        "readOnly": "This room is read-only.",
+        "permission": "You do not have permission to write in this room."
+      },
+      "errors": {
+        "readOnly": "This room is read-only.",
+        "permissionDenied": "You do not have permission to write in this room.",
+        "bodyTooLong": "This message is too long.",
+        "bodyInvalid": "This message is not valid.",
+        "network": "The server could not be reached.",
+        "generic": "The message could not be sent."
+      }
+    },
+    "connection": {
+      "reconnecting": "Reconnecting...",
+      "offline": "Offline"
+    }
   }
 }
