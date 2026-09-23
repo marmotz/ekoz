@@ -10,8 +10,12 @@ import { type AdminResource, createAdminResource } from './resources/admin.js';
 import { type AuthResource, createAuthResource } from './resources/auth.js';
 import { createInvitationsResource, type InvitationsResource } from './resources/invitations.js';
 import { createMeResource, type MeResource } from './resources/me.js';
+import { createMessagesResource, type MessagesResource } from './resources/messages.js';
+import { createRoomsResource, type RoomsResource } from './resources/rooms.js';
 import { createSessionsResource, type SessionsResource } from './resources/sessions.js';
 import { createSetupResource, type SetupResource } from './resources/setup.js';
+import { createRoomStream, type RoomStream } from './resources/stream.js';
+import { createSyncResource, type SyncResource } from './resources/sync.js';
 import { createUsersResource, type UsersResource } from './resources/users.js';
 import type { SessionEventMap, SessionEventName } from './session/events.js';
 import { SessionEventEmitter } from './session/events.js';
@@ -33,6 +37,10 @@ export interface EkozClient {
   sessions: SessionsResource;
   invitations: InvitationsResource;
   admin: AdminResource;
+  rooms: RoomsResource;
+  messages: MessagesResource;
+  sync: SyncResource;
+  stream: RoomStream;
   discovery: Discovery;
   session: SessionController;
   on<Name extends SessionEventName>(
@@ -91,6 +99,15 @@ export function createClient(config: ClientConfig): EkozClient {
     sessions: createSessionsResource(session),
     invitations: createInvitationsResource(session),
     admin: createAdminResource(session),
+    rooms: createRoomsResource(session),
+    messages: createMessagesResource(session),
+    sync: createSyncResource(session),
+    stream: createRoomStream({
+      session,
+      discovery,
+      emitter,
+      eventSource: normalised.eventSource,
+    }),
     discovery,
     session: {
       getState: () => session.getState(),

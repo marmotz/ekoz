@@ -2,6 +2,7 @@
  * `createClient(config)` input (technical.md §10).
  */
 
+import type { EventSourceConstructor } from './resources/stream.js';
 import type { SessionStore } from './session/session-store.js';
 
 export interface ClientConfig {
@@ -13,6 +14,8 @@ export interface ClientConfig {
   resolveApiUrl?: () => string | Promise<string>;
   /** `fetch` implementation; defaults to the global. */
   fetch?: typeof fetch;
+  /** `EventSource` implementation for `client.stream`; defaults to the global. */
+  eventSource?: EventSourceConstructor;
 }
 
 export interface NormalisedClientConfig {
@@ -20,6 +23,7 @@ export interface NormalisedClientConfig {
   store: SessionStore | undefined;
   resolveApiUrl: (() => string | Promise<string>) | undefined;
   fetch: typeof fetch | undefined;
+  eventSource: EventSourceConstructor | undefined;
 }
 
 export function normaliseConfig(config: ClientConfig): NormalisedClientConfig {
@@ -31,5 +35,6 @@ export function normaliseConfig(config: ClientConfig): NormalisedClientConfig {
     store: config.store,
     resolveApiUrl: config.resolveApiUrl,
     fetch: config.fetch,
+    eventSource: config.eventSource,
   };
 }

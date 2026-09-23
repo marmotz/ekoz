@@ -4,6 +4,10 @@ import {
   AuthPolicySchema,
   ChangePasswordBodySchema,
   LoginBodySchema,
+  MembersPageSchema,
+  MessageSchema,
+  MessagesPageSchema,
+  StreamTicketSchema,
   UsernameChangeStateSchema,
 } from './schemas.js';
 
@@ -118,5 +122,29 @@ describe('schemas', () => {
         pendingRequest: { id: 'x' },
       }).success,
     ).toBe(false);
+  });
+
+  it('validates the web chat wire schemas', () => {
+    const message = {
+      id: '01HZX0000000000000000000AA',
+      roomId: '01HZX0000000000000000000BB',
+      seq: '3',
+      authorId: null,
+      body: 'hello',
+      replyToId: null,
+      mentions: [],
+      editedAt: null,
+      redactedAt: null,
+      hiddenAt: null,
+      createdAt: '2026-09-23T10:00:00.000Z',
+    };
+    expect(MessageSchema.safeParse(message).success).toBe(true);
+    expect(MessageSchema.safeParse({ ...message, seq: 3 }).success).toBe(false);
+    expect(
+      MessagesPageSchema.safeParse({ items: [message], lastSeq: '3', hasMore: false }).success,
+    ).toBe(true);
+    expect(MembersPageSchema.safeParse({ items: [], nextCursor: null }).success).toBe(true);
+    expect(StreamTicketSchema.safeParse({ ticket: 't', expiresIn: 30 }).success).toBe(true);
+    expect(StreamTicketSchema.safeParse({ ticket: 't' }).success).toBe(false);
   });
 });

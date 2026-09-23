@@ -24,6 +24,10 @@ describe('createClient', () => {
     expect(client.sessions).toBeDefined();
     expect(client.invitations).toBeDefined();
     expect(client.admin).toBeDefined();
+    expect(client.rooms).toBeDefined();
+    expect(client.messages).toBeDefined();
+    expect(client.sync).toBeDefined();
+    expect(client.stream.status).toBe('idle');
     expect(client.discovery).toBeDefined();
     expect(client.session).toBeDefined();
     expect(client.session.getState()).toBeUndefined();

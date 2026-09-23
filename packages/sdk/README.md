@@ -60,8 +60,32 @@ per-resource constructors:
 | `client.sessions`          | List / rename / revoke the caller's own sessions                 |
 | `client.invitations`       | Owner-only registration invitations                              |
 | `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset), owner and username-request administration |
+| `client.rooms`             | Room members page (`members`); more arrive with `web-client-rooms` |
+| `client.messages`          | Room messages (`list` / `get` / `send`)                          |
+| `client.sync`              | Per-room catch-up (`get`), events typed as `RoomEvent`           |
+| `client.stream`            | Account SSE stream (`connect` / `disconnect` / `status` / `on`) with fresh-ticket reconnection |
 | `client.discovery`         | The resolved discovery document (`get` / `refresh`)              |
 | `client.session`           | Local session state (`getState`, `resume`, `clear`)              |
+
+## Realtime stream
+
+`client.stream` wraps `GET /events`. The stream ticket is single use, so the SDK
+closes the `EventSource` on every error and mints a fresh ticket before
+reconnecting (jittered backoff, 1 s doubling to 30 s), resuming from the last
+`feedSeq` it saw. The runtime needs a global `EventSource` (browsers), or pass
+one with `createClient({ eventSource })`.
+
+```ts
+client.stream.on('room_event', ({ roomId, feedSeq, event }) => {
+  if (event.type === 'message_created') console.log(event.content.body);
+});
+client.stream.on('reconnected', () => {/* catch up with client.sync.get(...) */});
+client.stream.connect();
+```
+
+Note: the generated `Message` / `Member` types declare timestamps as `Date`, but
+the wire carries ISO strings and the SDK does not parse responses; treat them as
+strings.
 
 ## Errors
 
