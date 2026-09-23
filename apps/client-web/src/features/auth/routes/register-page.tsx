@@ -6,13 +6,12 @@ import { useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { useRegister } from '@/features/auth/api/use-register';
-import { AuthTextField } from '@/features/auth/components/auth-text-field';
-import { FormError } from '@/features/auth/components/form-error';
 import { PolicyGate } from '@/features/auth/components/policy-gate';
 import { useAuthError } from '@/features/auth/hooks/use-auth-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card';
+import { FormError, FormTextField } from '@/shared/ui/form-field';
 
 const OPEN_FIELDS = ['name', 'email', 'displayName', 'password'] as const;
 const INVITE_FIELDS = ['invitationToken', ...OPEN_FIELDS] as const;
@@ -116,7 +115,7 @@ function RegisterForm({
           {mode === 'invite' ? (
             <form.Field name="invitationToken">
               {(field) => (
-                <AuthTextField
+                <FormTextField
                   field={field}
                   label={t('auth.fields.invitation')}
                   autoComplete="off"
@@ -127,7 +126,7 @@ function RegisterForm({
           ) : null}
           <form.Field name="name">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.username')}
                 autoComplete="username"
@@ -137,7 +136,7 @@ function RegisterForm({
           </form.Field>
           <form.Field name="email">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.email')}
                 type="email"
@@ -148,7 +147,7 @@ function RegisterForm({
           </form.Field>
           <form.Field name="displayName">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.displayName')}
                 autoComplete="name"
@@ -158,7 +157,7 @@ function RegisterForm({
           </form.Field>
           <form.Field name="password">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.password')}
                 type="password"

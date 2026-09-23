@@ -1,16 +1,15 @@
 import { EkozError, NetworkError, RateLimitError, ValidationError } from '@ekozhq/sdk';
 import type { ParseKeys } from 'i18next';
 
-/** A message to show: an i18n key (with its values), or text that came from the server. */
-export type AuthMessage = { key: ParseKeys; values?: Record<string, number> } | { text: string };
+import type { Message } from '@/shared/i18n/validation-message';
 
 export interface MappedAuthError {
   /** Stable error code, `unknown` for anything that is not an SDK error. */
   code: string;
   /** Message for the form as a whole. */
-  form?: AuthMessage;
+  form?: Message;
   /** Messages for single fields, keyed by the request body field name. */
-  fields: { field: string; message: AuthMessage }[];
+  fields: { field: string; message: Message }[];
 }
 
 type Placement =
@@ -54,7 +53,7 @@ export const AUTH_ERROR_TABLE: Record<string, Placement> = {
 
 const RATE_LIMIT_CODE = 'auth.too_many_requests';
 
-function rateLimitMessage(error: RateLimitError): AuthMessage {
+function rateLimitMessage(error: RateLimitError): Message {
   return error.retryAfter === undefined
     ? { key: 'auth.errors.tooManyRequestsLater' }
     : { key: 'auth.errors.tooManyRequests', values: { count: Math.ceil(error.retryAfter) } };
@@ -91,35 +90,4 @@ export function mapAuthError(error: unknown): MappedAuthError {
     return { code: error.code, form: { key: 'auth.errors.generic' }, fields: [] };
   }
   return { code: 'unknown', form: { key: 'auth.errors.generic' }, fields: [] };
-}
-
-/**
- * Message for a schema issue reported by the generated Zod schemas. The issues are
- * Zod's own (`code`, `origin`, `minimum`, ...); they are translated instead of showing
- * Zod's English text. A custom message (a refinement written at the call site) is kept.
- */
-export function validationMessage(issue: unknown): AuthMessage {
-  if (typeof issue === 'string') return { text: issue };
-  if (typeof issue !== 'object' || issue === null) return { key: 'auth.errors.invalid' };
-
-  const { code, origin, minimum, maximum, format, message } = issue as {
-    code?: string;
-    origin?: string;
-    minimum?: number;
-    maximum?: number;
-    format?: string;
-    message?: string;
-  };
-
-  if (code === 'too_small' && origin === 'string') {
-    return minimum !== undefined && minimum > 1
-      ? { key: 'auth.errors.tooShort', values: { count: minimum } }
-      : { key: 'auth.errors.required' };
-  }
-  if (code === 'too_big' && origin === 'string' && maximum !== undefined) {
-    return { key: 'auth.errors.tooLong', values: { count: maximum } };
-  }
-  if (code === 'invalid_format' && format === 'email') return { key: 'auth.errors.invalidEmail' };
-  if (code === 'invalid_type') return { key: 'auth.errors.required' };
-  return message ? { text: message } : { key: 'auth.errors.invalid' };
 }

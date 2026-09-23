@@ -3,12 +3,11 @@ import { useRequestPasswordResetDtoForm } from 'api/react-tanstack/RequestPasswo
 import { useState } from 'react';
 
 import { useRequestPasswordReset } from '@/features/auth/api/use-request-password-reset';
-import { AuthTextField } from '@/features/auth/components/auth-text-field';
-import { FormError } from '@/features/auth/components/form-error';
 import { useAuthError } from '@/features/auth/hooks/use-auth-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card';
+import { FormError, FormTextField } from '@/shared/ui/form-field';
 
 const FIELDS = ['email'] as const;
 
@@ -54,7 +53,7 @@ export function ForgotPasswordPage() {
           >
             <form.Field name="email">
               {(field) => (
-                <AuthTextField
+                <FormTextField
                   field={field}
                   label={t('auth.fields.email')}
                   type="email"

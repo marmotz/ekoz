@@ -69,6 +69,12 @@ const CLIENT_WEB_FORMS = [
   'ResendVerificationDto',
   'RequestPasswordResetDto',
   'ConfirmPasswordResetDto',
+  'UpdateProfileDto',
+  'ChangeEmailDto',
+  'ChangeUsernameDto',
+  'ChangePasswordDto',
+  'RenameSessionDto',
+  'DeleteMeDto',
 ];
 
 // `reactTanstackGenerator` runs its own private copy of `zodGenerator` (into

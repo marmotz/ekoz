@@ -1,10 +1,11 @@
+import { Link } from '@tanstack/react-router';
 import { LogOut } from 'lucide-react';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { getUserMenuItems } from '@/shared/layout/user-menu-items';
 import { useSession } from '@/shared/sdk/session';
 import { useMe } from '@/shared/sdk/use-me';
 import { useSdk } from '@/shared/sdk/use-sdk';
-import { Avatar, AvatarFallback } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
 import {
   DropdownMenu,
@@ -15,17 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { Skeleton } from '@/shared/ui/skeleton';
-
-/** Up to two initials of a display name, `?` when there is none to read. */
-function initials(name: string | undefined): string {
-  const letters = (name ?? '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => Array.from(word)[0]?.toUpperCase() ?? '');
-
-  return letters.join('') || '?';
-}
+import { UserAvatar } from '@/shared/ui/user-avatar';
 
 function SignedInMenu() {
   const { t } = useTranslation();
@@ -42,9 +33,11 @@ function SignedInMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="gap-2 px-2" aria-label={t('auth.userMenu.label')}>
-          <Avatar>
-            <AvatarFallback>{initials(displayName)}</AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            identifier={me.data?.identifier}
+            avatarUrl={me.data?.avatarUrl}
+            displayName={displayName}
+          />
           {displayName ? (
             <span className="hidden max-w-40 truncate sm:inline">{displayName}</span>
           ) : null}
@@ -57,6 +50,13 @@ function SignedInMenu() {
             <DropdownMenuSeparator />
           </>
         ) : null}
+        {getUserMenuItems().map(({ id, to, labelKey, icon: Icon }) => (
+          <DropdownMenuItem key={id} asChild>
+            <Link to={to}>
+              {Icon ? <Icon className="size-4" /> : null} {t(labelKey)}
+            </Link>
+          </DropdownMenuItem>
+        ))}
         {/* No navigation here: `logout()` emits `session:invalid`, which `SessionGuard` turns into a redirect to `/login`. */}
         <DropdownMenuItem onSelect={() => void sdk?.auth.logout()}>
           <LogOut className="size-4" /> {t('auth.userMenu.signOut')}

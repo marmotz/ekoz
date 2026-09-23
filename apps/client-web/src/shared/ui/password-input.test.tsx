@@ -2,8 +2,8 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, it } from 'vitest';
 
-import { PasswordInput } from '@/features/auth/components/password-input';
-import { renderWithProviders } from '../../../../test/render';
+import { PasswordInput } from '@/shared/ui/password-input';
+import { renderWithProviders } from '../../../test/render';
 
 it('hides the password by default', async () => {
   renderWithProviders(<PasswordInput aria-label="Password" />);

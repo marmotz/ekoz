@@ -8,9 +8,23 @@ export interface FakeSession {
   sessionId: string;
 }
 
+/** The account `me.get` answers with unless a test overrides it. */
+export const defaultMe = {
+  id: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+  identifier: 'jane/example.test',
+  email: 'jane@example.test',
+  displayName: 'Jane Doe',
+  isOwner: false,
+  emailVerified: true,
+  status: 'active',
+  avatarUrl: null as string | null,
+  pendingEmail: null as string | null,
+  bio: null as string | null,
+};
+
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth` and `me`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions` and `users`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -63,7 +77,30 @@ export function createFakeSdk(initial?: FakeSession) {
       confirmPasswordReset: vi.fn(async () => {}),
     },
     me: {
-      get: vi.fn(async () => ({ id: '01ARZ3NDEKTSV4RRFFQ69G5FAV', displayName: 'Jane Doe' })),
+      get: vi.fn(async () => ({ ...defaultMe })),
+      updateProfile: vi.fn(async (body: Record<string, unknown>) => ({ ...defaultMe, ...body })),
+      setAvatar: vi.fn(async () => ({ avatarUrl: 'http://localhost:3010/users/jane/avatar?v=2' })),
+      deleteAvatar: vi.fn(async () => {}),
+      changeEmail: vi.fn(async () => ({ accepted: true })),
+      changeUsername: vi.fn(async () => ({ status: 'applied', identifier: 'jane/example.test' })),
+      usernameState: vi.fn(async () => ({
+        policy: 'available',
+        nextChangeAt: null,
+        pendingRequest: null,
+      })),
+      cancelUsernameRequest: vi.fn(async () => {}),
+      changePassword: vi.fn(async () => {}),
+      deleteAccount: vi.fn(async () => {}),
+    },
+    sessions: {
+      list: vi.fn(async () => []),
+      rename: vi.fn(async (id: string, body: { deviceName: string }) => ({ id, ...body })),
+      revoke: vi.fn(async () => {}),
+      revokeAllOthers: vi.fn(async () => ({ revoked: 0 })),
+    },
+    users: {
+      getProfile: vi.fn(async () => ({})),
+      avatar: vi.fn(async () => new Blob(['avatar'], { type: 'image/png' })),
     },
     on: vi.fn(on),
     off: vi.fn(off),

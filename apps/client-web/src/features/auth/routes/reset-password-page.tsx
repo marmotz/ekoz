@@ -6,13 +6,12 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { useConfirmPasswordReset } from '@/features/auth/api/use-confirm-password-reset';
-import { AuthTextField } from '@/features/auth/components/auth-text-field';
-import { FormError } from '@/features/auth/components/form-error';
 import { PolicyGate } from '@/features/auth/components/policy-gate';
 import { useAuthError } from '@/features/auth/hooks/use-auth-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { FormError, FormTextField } from '@/shared/ui/form-field';
 
 const FIELDS = ['newPassword'] as const;
 // The server reports a weak password on `password`; this form calls it `newPassword`.
@@ -87,7 +86,7 @@ function ResetForm({ token, passwordMinLength }: { token: string; passwordMinLen
         >
           <form.Field name="newPassword">
             {(field) => (
-              <AuthTextField
+              <FormTextField
                 field={field}
                 label={t('auth.fields.newPassword')}
                 type="password"

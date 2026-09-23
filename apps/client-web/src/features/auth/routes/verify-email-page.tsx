@@ -2,13 +2,13 @@ import { Link } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 
 import { useVerifyEmail } from '@/features/auth/api/use-verify-email';
-import { FormError } from '@/features/auth/components/form-error';
 import { ResendVerificationForm } from '@/features/auth/components/resend-verification-form';
 import { useAuthError } from '@/features/auth/hooks/use-auth-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { useSdk } from '@/shared/sdk/use-sdk';
 import { Button } from '@/shared/ui/button';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { FormError } from '@/shared/ui/form-field';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 const NO_FIELDS: readonly string[] = [];

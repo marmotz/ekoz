@@ -126,5 +126,104 @@
       "missingToken": "Ce lien est incomplet. Demandez-en un nouveau.",
       "requestNew": "Demander un nouveau lien"
     }
+  },
+  "account": {
+    "title": "Compte",
+    "menu": "Compte",
+    "fields": {
+      "displayName": "Nom affiché",
+      "bio": "Biographie",
+      "username": "Identifiant",
+      "newEmail": "Nouvelle adresse e-mail",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe"
+    },
+    "profile": {
+      "title": "Profil",
+      "description": "Ce que les autres voient de vous.",
+      "submit": "Enregistrer",
+      "saved": "Profil enregistré."
+    },
+    "avatar": {
+      "title": "Avatar",
+      "description": "PNG, JPEG, WebP ou GIF.",
+      "file": "Image de l'avatar",
+      "upload": "Téléverser",
+      "remove": "Supprimer",
+      "saved": "Avatar mis à jour.",
+      "removed": "Avatar supprimé."
+    },
+    "username": {
+      "title": "Identifiant",
+      "immutable": "L'identifiant de ce compte ne peut pas être modifié.",
+      "approvalNote": "Un changement doit être approuvé par un administrateur avant d'être appliqué.",
+      "cooldown": "Vous pourrez changer d'identifiant à nouveau le {{date}}.",
+      "submit": "Changer l'identifiant",
+      "applied": "Identifiant modifié.",
+      "submitted": "Changement demandé, en attente d'approbation.",
+      "awaiting": "En attente d'approbation pour {{name}}.",
+      "cancel": "Annuler la demande"
+    },
+    "email": {
+      "title": "Adresse e-mail",
+      "verified": "Vérifiée",
+      "unverified": "Non vérifiée",
+      "pending": "Vérification en attente pour {{email}}.",
+      "resend": "Renvoyer",
+      "resent": "E-mail de vérification renvoyé.",
+      "submit": "Changer l'adresse e-mail",
+      "submitted": "Un e-mail de vérification a été envoyé à {{email}}."
+    },
+    "password": {
+      "title": "Mot de passe",
+      "description": "Le modifier déconnecte tous les autres appareils.",
+      "submit": "Changer le mot de passe",
+      "changed": "Mot de passe modifié. Vos autres appareils ont été déconnectés."
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Appareils connectés à votre compte.",
+      "current": "Cet appareil",
+      "lastSeen": "Dernière activité {{date}}",
+      "deviceName": "Nom de l'appareil",
+      "rename": "Renommer",
+      "renameNamed": "Renommer {{name}}",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "revoke": "Révoquer",
+      "revokeNamed": "Révoquer {{name}}",
+      "revokeOthers": "Déconnecter les autres sessions",
+      "revokedOthers_one": "{{count}} session déconnectée.",
+      "revokedOthers_other": "{{count}} sessions déconnectées."
+    },
+    "danger": {
+      "title": "Zone de danger",
+      "description": "La suppression de votre compte est irréversible.",
+      "open": "Supprimer mon compte",
+      "dialogTitle": "Supprimer votre compte ?",
+      "consequences": "Votre profil sera effacé et vos messages anonymisés. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer le compte",
+      "deleted": "Votre compte a été supprimé."
+    },
+    "errors": {
+      "invalidCredentials": "Mot de passe incorrect.",
+      "passwordTooWeak": "Ce mot de passe ne respecte pas les exigences minimales.",
+      "emailTaken": "Cette adresse e-mail est déjà utilisée.",
+      "identifierInvalid": "Utilisez uniquement des minuscules, des chiffres et les caractères _ . -, 64 caractères au plus.",
+      "usernameTaken": "Cet identifiant n'est pas disponible.",
+      "usernameImmutable": "L'identifiant de ce compte ne peut pas être modifié.",
+      "usernameChangeCooldown": "Vous avez changé d'identifiant récemment. Réessayez plus tard.",
+      "usernameRequestPending": "Un changement d'identifiant est déjà en attente d'approbation.",
+      "profileInvalid": "La biographie est trop longue, ou le nom affiché n'est pas valide.",
+      "avatarTooLarge": "Cette image est trop volumineuse.",
+      "avatarRejected": "Cette image n'a pas pu être utilisée. Choisissez un fichier PNG, JPEG, WebP ou GIF.",
+      "lastOwner": "Vous êtes l'unique propriétaire : promouvez d'abord un autre propriétaire dans la console d'administration.",
+      "tooManyRequests_one": "Trop de tentatives. Réessayez dans {{count}} seconde.",
+      "tooManyRequests_other": "Trop de tentatives. Réessayez dans {{count}} secondes.",
+      "tooManyRequestsLater": "Trop de tentatives. Réessayez plus tard.",
+      "network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
   }
 }

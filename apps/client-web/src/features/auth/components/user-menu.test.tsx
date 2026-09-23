@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 import { UserMenu } from '@/features/auth/components/user-menu';
+import { clearUserMenuItems, registerUserMenuItem } from '@/shared/layout/user-menu-items';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { renderWithProviders } from '../../../../test/render';
 import { createClientMock, createFakeSdk } from '../../../../test/sdk-mock';
@@ -24,6 +25,7 @@ function menu() {
 
 beforeEach(() => {
   createClientMock.mockReset();
+  clearUserMenuItems();
 });
 
 it('shows the display name and its initials', async () => {
@@ -89,4 +91,40 @@ it('shows French labels', async () => {
   renderWithProviders(menu(), { language: 'fr' });
 
   expect(await screen.findByRole('menuitem', { name: 'Se déconnecter' })).toBeInTheDocument();
+});
+
+it('lists the registered entries above "Sign out", in order, as links', async () => {
+  registerUserMenuItem({ id: 'settings', to: '/settings', labelKey: 'account.menu', order: 2 });
+  registerUserMenuItem({ id: 'account', to: '/account', labelKey: 'account.title', order: 1 });
+  createClientMock.mockReturnValue(createFakeSdk(signedIn).sdk);
+
+  renderWithProviders(menu());
+
+  const items = await screen.findAllByRole('menuitem');
+  expect(items.map((item) => item.textContent?.trim())).toEqual(['Account', 'Account', 'Sign out']);
+  expect(items[0]).toHaveAttribute('href', '/account');
+  expect(items[1]).toHaveAttribute('href', '/settings');
+});
+
+it('shows no entry but "Sign out" when none is registered', async () => {
+  createClientMock.mockReturnValue(createFakeSdk(signedIn).sdk);
+
+  renderWithProviders(menu());
+
+  expect(await screen.findAllByRole('menuitem')).toHaveLength(1);
+});
+
+it('shows the avatar of the account, fetched with its versioned url', async () => {
+  const fake = createFakeSdk(signedIn);
+  fake.stubs.me.get.mockResolvedValue({
+    ...(await fake.stubs.me.get()),
+    avatarUrl: 'http://localhost:3010/users/jane/avatar?v=3',
+  });
+  createClientMock.mockReturnValue(fake.sdk);
+
+  renderWithProviders(menu());
+
+  await waitFor(() =>
+    expect(fake.stubs.users.avatar).toHaveBeenCalledWith('jane/example.test', { version: '3' }),
+  );
 });

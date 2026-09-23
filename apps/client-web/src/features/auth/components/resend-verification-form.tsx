@@ -2,11 +2,10 @@ import { useResendVerificationDtoForm } from 'api/react-tanstack/ResendVerificat
 import { useState } from 'react';
 
 import { useResendVerification } from '@/features/auth/api/use-resend-verification';
-import { AuthTextField } from '@/features/auth/components/auth-text-field';
-import { FormError } from '@/features/auth/components/form-error';
 import { useAuthError } from '@/features/auth/hooks/use-auth-error';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
+import { FormError, FormTextField } from '@/shared/ui/form-field';
 
 const FIELDS = ['email'] as const;
 
@@ -48,7 +47,7 @@ export function ResendVerificationForm({ email }: { email?: string }) {
       {email === undefined ? (
         <form.Field name="email">
           {(field) => (
-            <AuthTextField
+            <FormTextField
               field={field}
               label={t('auth.fields.email')}
               type="email"
