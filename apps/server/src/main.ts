@@ -3,6 +3,7 @@ import { SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import { AppModule } from './app.module.js';
 import { ConfigService } from './core/config/config.service.js';
+import { buildConfigSummary } from './core/config/config-summary.js';
 import { buildCorsOptions } from './core/http/cors.js';
 import {
   createFatalReporter,
@@ -48,6 +49,12 @@ async function main(): Promise<void> {
     format: config.get('observability.log_format'),
   });
   app.useLogger(logger);
+
+  // Resolved configuration, secrets masked — lets an operator check at a glance
+  // which SMTP relay, storage backend, database… this process actually uses.
+  for (const line of buildConfigSummary(config)) {
+    logger.log(line, 'Config');
+  }
 
   const tracing = startTracing({
     otlpEndpoint: config.get('observability.otlp_endpoint'),

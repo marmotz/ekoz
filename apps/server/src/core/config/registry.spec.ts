@@ -28,6 +28,11 @@ describe('parameter registry (unit)', () => {
     expect(PARAMETER_REGISTRY['database.url'].secret).toBe(true);
     expect(PARAMETER_REGISTRY['secret.key'].secret).toBe(true);
     expect(PARAMETER_REGISTRY['observability.metrics_token'].secret).toBe(true);
+    expect(PARAMETER_REGISTRY['email.smtp.pass'].secret).toBe(true);
+    expect(PARAMETER_REGISTRY['storage.s3.secret_access_key'].secret).toBe(true);
+    // Connection targets are not credentials: shown in the boot summary / admin UI.
+    expect(PARAMETER_REGISTRY['email.smtp.host'].secret).toBe(false);
+    expect(PARAMETER_REGISTRY['storage.s3.endpoint'].secret).toBe(false);
     expect(PARAMETER_REGISTRY['observability.log_level'].kind).toBe('runtime');
     expect(PARAMETER_REGISTRY['observability.log_format'].kind).toBe('infra');
   });

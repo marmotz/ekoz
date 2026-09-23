@@ -25,6 +25,7 @@ has its own page with full context, alternatives and consequences:
 - [Identity account and token mechanics](identity-account-and-token-mechanics.md).
 - [Identity lifecycle and abuse protection](identity-lifecycle-and-abuse-protection.md).
 - [Configuration model](configuration-model.md).
+- [Boot configuration summary](boot-config-summary.md) — resolved config logged at boot, secrets masked.
 - [Server initialization](server-initialization.md).
 - [Server secret box and signing keys](server-secret-box-and-signing-keys.md).
 - [File storage and quotas](file-storage-and-quotas.md).

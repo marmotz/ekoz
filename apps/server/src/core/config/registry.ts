@@ -14,6 +14,12 @@ export interface ParameterSpec {
   readonly hotReloadable: boolean;
   /** Value is a secret: never logged, masked in `describe()` for the admin UI. */
   readonly secret: boolean;
+  /**
+   * How the boot summary may show a secret instead of masking it whole. `url`:
+   * the URL with its password and query string stripped (host, port, user and
+   * path stay visible). The admin UI (`describe()`) always masks the full value.
+   */
+  readonly redactAs?: 'url';
   /** `true` = a comma-separated string from env is split into a list before parsing. */
   readonly list?: boolean;
 }
@@ -85,7 +91,13 @@ export const PARAMETER_REGISTRY = {
     secret: false,
     list: true,
   },
-  'database.url': { kind: 'infra', schema: z.string().min(1), hotReloadable: false, secret: true },
+  'database.url': {
+    kind: 'infra',
+    schema: z.string().min(1),
+    hotReloadable: false,
+    secret: true,
+    redactAs: 'url',
+  },
   'secret.key': {
     kind: 'infra',
     schema: z.string().refine((v) => Buffer.from(v, 'base64').length === 32, {
@@ -119,19 +131,19 @@ export const PARAMETER_REGISTRY = {
     kind: 'infra',
     schema: z.string().optional(),
     hotReloadable: false,
-    secret: true,
+    secret: false,
   },
   'storage.s3.region': {
     kind: 'infra',
     schema: z.string().optional(),
     hotReloadable: false,
-    secret: true,
+    secret: false,
   },
   'storage.s3.bucket': {
     kind: 'infra',
     schema: z.string().optional(),
     hotReloadable: false,
-    secret: true,
+    secret: false,
   },
   'storage.s3.access_key_id': {
     kind: 'infra',
@@ -157,21 +169,21 @@ export const PARAMETER_REGISTRY = {
     schema: z.string().min(1),
     default: 'localhost',
     hotReloadable: false,
-    secret: true,
+    secret: false,
   },
   'email.smtp.port': {
     kind: 'infra',
     schema: port,
     default: 1025,
     hotReloadable: false,
-    secret: true,
+    secret: false,
   },
   'email.smtp.secure': {
     kind: 'infra',
     schema: bool,
     default: false,
     hotReloadable: false,
-    secret: true,
+    secret: false,
   },
   'email.smtp.user': {
     kind: 'infra',

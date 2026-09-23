@@ -1,4 +1,4 @@
-import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { readEnvOverrides } from './env-overrides.js';
 import {
   INFRA_KEYS,
@@ -40,9 +40,13 @@ const HOT_RELOAD_TTL_MS = 5_000;
  *
  * `infra` keys never read the settings table. An env override on a `runtime`
  * key also *locks* it. Boot aborts on any missing / invalid `infra` parameter.
+ *
+ * {@link init} must run before any `get()`: until then every key resolves to its
+ * code default. `ConfigModule` awaits it in its factory, so no provider that
+ * reads the configuration while being constructed sees defaults.
  */
 @Injectable()
-export class ConfigService implements OnModuleInit {
+export class ConfigService {
   private readonly logger = new Logger(ConfigService.name);
   private toml: FlatConfig = new Map();
   private envOverrides = new Map<ParameterKey, string>();
@@ -53,10 +57,6 @@ export class ConfigService implements OnModuleInit {
     private readonly settingsRepo: SettingsRepository | null = null,
     private readonly options: { tomlPath?: string; env?: NodeJS.ProcessEnv } = {},
   ) {}
-
-  async onModuleInit(): Promise<void> {
-    await this.init();
-  }
 
   /** Load file + env, refresh the settings cache, and validate every infra key. */
   async init(): Promise<void> {

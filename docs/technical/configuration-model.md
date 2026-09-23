@@ -33,3 +33,10 @@ edits). YAML has too many footguns for a file handled by operators.
   rest without touching disk.
 - A central registry of parameters is needed (key, `infra`/`runtime` type,
   default, hot-applicable or not).
+- `ConfigService` resolves every key to its code default until `init()` ran.
+  `ConfigModule` therefore awaits `init()` in its provider factory rather than in
+  `onModuleInit`: Nest builds providers before running any `onModuleInit`, so a
+  provider reading a parameter in its constructor or factory (the SMTP mailer,
+  the storage driver) silently got the defaults, and mail went to
+  `localhost:1025` whatever the file or env said. Reading the `settings` table
+  that early is fine because the Prisma client connects lazily.

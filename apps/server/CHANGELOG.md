@@ -8,6 +8,7 @@ that does not touch this file.
 
 ### Fixed
 
+- The SMTP transport and the storage driver use the configured `email.*` / `storage.*` values instead of the code defaults: the configuration is loaded before the providers built from it.
 - Requesting to join a room again after a rejection, and inviting a user again after a decline, no longer fail with a 500. (#64)
 - Creating a space or channel returns its up-to-date `lastSeq` instead of `0`. (#62)
 - Boot failures and crashes print one readable report (cause, fix, hint) instead of a raw dump repeated per module.
@@ -33,6 +34,7 @@ that does not touch this file.
 
 ### Added
 
+- The server logs its resolved configuration at boot, with secrets masked.
 - The creator of a space or channel becomes its first member, and existing rooms are backfilled. (#62)
 - `GET /me/room-invitations` lists the caller's pending room invitations with the room and the inviter. (#63)
 - `GET /rooms/:id/preview` shows an invite-only room and the caller's join request to a non-member. (#64)
