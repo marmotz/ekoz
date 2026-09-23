@@ -83,6 +83,23 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
         reject: vi.fn(),
       },
     },
+    rooms: {
+      members: vi.fn(),
+    },
+    messages: {
+      list: vi.fn(),
+      get: vi.fn(),
+      send: vi.fn(),
+    },
+    sync: {
+      get: vi.fn(),
+    },
+    stream: {
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      status: 'idle',
+      on: vi.fn(() => () => {}),
+    },
     discovery: {} as EkozClient['discovery'],
     session: {
       getState: vi.fn(() => ({ identifier: 'owner', sessionId: 's1' })),

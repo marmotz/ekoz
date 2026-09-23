@@ -12,6 +12,26 @@ export {
   WELL_KNOWN_PATH,
 } from './discovery/discovery.js';
 export type {
+  ListMessagesParams,
+  MessagesResource,
+  SendMessageBody,
+} from './resources/messages.js';
+export type { ListMembersParams, RoomsResource } from './resources/rooms.js';
+export type {
+  AccountStreamEvent,
+  EventSourceConstructor,
+  EventSourceLike,
+  EventSourceMessageLike,
+  PresenceStreamEvent,
+  RoomStream,
+  RoomStreamEventMap,
+  RoomStreamEventName,
+  RoomStreamRoomEvent,
+  RoomStreamStatus,
+  TypingStreamEvent,
+} from './resources/stream.js';
+export type { SyncParams, SyncResource } from './resources/sync.js';
+export type {
   SessionEventMap,
   SessionEventName,
   SessionInvalidReason,
@@ -65,6 +85,17 @@ export {
   REQUEST_ID_HEADER,
   resolveRequestId,
 } from './transport/request-context.js';
+export type {
+  MessageCreatedEvent,
+  MessageDeletedEvent,
+  MessageEditedEvent,
+  MessageRedactedEvent,
+  OtherRoomEventType,
+  RoomEvent,
+  RoomEventBase,
+  SyncResponse,
+  UnknownRoomEvent,
+} from './types/events.js';
 export {
   AcceptedResponseSchema,
   AccountViewSchema,
@@ -88,6 +119,10 @@ export {
   InvitationViewSchema,
   LoginBodySchema,
   LoginResponseSchema,
+  MemberSchema,
+  MembersPageSchema,
+  MessageSchema,
+  MessagesPageSchema,
   MeViewSchema,
   PublicProfileViewSchema,
   RegisterBodySchema,
@@ -100,6 +135,7 @@ export {
   SetupOwnerBodySchema,
   SetupOwnerResponseSchema,
   SetupStateResponseSchema,
+  StreamTicketSchema,
   SuspendUserBodySchema,
   TokenBundleSchema,
   UpdateProfileBodySchema,
@@ -136,6 +172,10 @@ export type {
   InvitationView,
   LoginBody,
   LoginResponse,
+  Member,
+  MembersPage,
+  Message,
+  MessagesPage,
   MeView,
   PublicProfileView,
   RegisterBody,
@@ -148,6 +188,7 @@ export type {
   SetupOwnerBody,
   SetupOwnerResponse,
   SetupStateResponse,
+  StreamTicket,
   SuspendUserBody,
   TokenBundle,
   UpdateProfileBody,
