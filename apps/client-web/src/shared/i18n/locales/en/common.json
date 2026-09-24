@@ -395,6 +395,26 @@
       "requestedAt": "Requested on {{date}}",
       "approve": "Approve",
       "reject": "Reject"
+    },
+    "invitations": {
+      "title": "Invitations",
+      "loading": "Loading invitations",
+      "empty": "No pending invitation.",
+      "error": "The invitations could not be loaded.",
+      "retry": "Retry",
+      "deletedAccount": "Deleted account",
+      "invitedBy": "Invited by {{name}}",
+      "asRole": "as {{role}}",
+      "invitedAt": "on {{date}}",
+      "accept": "Accept",
+      "decline": "Decline",
+      "role": {
+        "spaceAdmin": "space admin",
+        "roomAdmin": "room admin",
+        "moderator": "moderator",
+        "member": "member",
+        "reader": "reader"
+      }
     }
   }
 }

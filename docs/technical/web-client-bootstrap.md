@@ -55,7 +55,11 @@ route), the language switcher, the theme toggle and the `user-menu` slot.
 
 The sidebar renders `shared/layout/nav-registry`: a module-level, de-duplicated
 list filled by `registerNav()`. Each feature (or route file) registers its entries
-at import time, so the shell never imports a feature. Only "Home" exists for now.
+at import time, so the shell never imports a feature. "Home" is the only
+navigation link; features that need more than a link (the rooms tree) register a
+component with `registerSidebarSection()` from
+`shared/layout/sidebar-section-registry`, rendered under the navigation in both the
+fixed sidebar and the mobile sheet (see [web client rooms](web-client-rooms.md)).
 
 ### Theme
 
