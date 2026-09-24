@@ -313,6 +313,88 @@
       "membershipNotFound": "You are not a member of this room.",
       "network": "The server could not be reached. Check your connection and try again.",
       "generic": "Something went wrong. Try again."
+    },
+    "gate": {
+      "loading": "Loading the room",
+      "error": "The room could not be loaded.",
+      "retry": "Retry",
+      "invited": {
+        "message": "You are invited to join {{name}}.",
+        "accept": "Accept",
+        "decline": "Decline"
+      },
+      "joinable": {
+        "message": "{{name}} is a public room: join it to take part.",
+        "join": "Join"
+      },
+      "request": {
+        "message": "This room is invite-only. You can ask its moderators to let you in.",
+        "send": "Request to join",
+        "pending": "Request pending: a moderator will review it.",
+        "declined": "Your request to join was declined."
+      },
+      "unavailable": {
+        "title": "Room unavailable",
+        "message": "This room does not exist or is not accessible.",
+        "back": "Back to rooms"
+      }
+    },
+    "header": {
+      "type": {
+        "space": "Space",
+        "channel": "Channel",
+        "dm": "Direct message",
+        "groupDm": "Group conversation"
+      },
+      "leave": "Leave",
+      "channels": "Channels",
+      "noChannels": "No channels in this space yet.",
+      "requests": "Requests"
+    },
+    "create": {
+      "title": "Create a space or a channel",
+      "loading": "Loading the spaces you can create in",
+      "notAllowed": "You cannot create a space or a channel: that needs the right to create inside a space you belong to.",
+      "type": "Type",
+      "typeSpace": "Space",
+      "typeChannel": "Channel",
+      "parent": "Parent space",
+      "chooseParent": "Choose a space",
+      "noParent": "No parent (root space)",
+      "parentRequired": "Choose a parent space.",
+      "name": "Name",
+      "topic": "Topic",
+      "visibility": "Visibility",
+      "visibilityPrivate": "Private",
+      "visibilityPublic": "Public",
+      "visibilityInvite": "Invite only",
+      "submit": "Create"
+    },
+    "directory": {
+      "title": "Directory",
+      "search": "Search public channels",
+      "loading": "Loading public channels",
+      "empty": "No public channel yet.",
+      "noMatch": "No public channel matches this search.",
+      "error": "The directory could not be loaded.",
+      "retry": "Retry",
+      "loadMore": "Load more",
+      "open": "Open",
+      "join": "Join"
+    },
+    "requests": {
+      "title": "Join requests",
+      "back": "Back to the room",
+      "loading": "Loading join requests",
+      "empty": "No pending request.",
+      "error": "The join requests could not be loaded.",
+      "retry": "Retry",
+      "loadMore": "Load more",
+      "forbidden": "You are not allowed to review the join requests of this room.",
+      "deletedAccount": "Deleted account",
+      "requestedAt": "Requested on {{date}}",
+      "approve": "Approve",
+      "reject": "Reject"
     }
   }
 }

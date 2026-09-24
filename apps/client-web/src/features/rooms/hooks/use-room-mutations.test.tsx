@@ -113,6 +113,7 @@ const cases: Case[] = [
       ['rooms', 'list'],
       ['rooms', 'invitations'],
       ['rooms', 'permissions', 'r1'],
+      ['rooms', 'detail', 'r1'],
     ],
   },
   {

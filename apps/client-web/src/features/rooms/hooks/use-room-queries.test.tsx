@@ -80,3 +80,20 @@ describe.each(cases)('%s', (_name, useHook, assertCall) => {
     expect(result.current.fetchStatus).toBe('idle');
   });
 });
+
+describe.each<[string, () => { fetchStatus: string }]>([
+  ['useRoom', () => useRoom('r1', { enabled: false })],
+  ['useRoomPreview', () => useRoomPreview('r1', { enabled: false })],
+  ['useMyPermissions', () => useMyPermissions('r1', { enabled: false })],
+])('%s', (_name, useHook) => {
+  it('stays idle while disabled', () => {
+    const fake = createFakeSdk();
+
+    const { result } = renderHook(useHook, { wrapper: wrapper(fake.sdk) });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(fake.stubs.rooms.get).not.toHaveBeenCalled();
+    expect(fake.stubs.rooms.preview).not.toHaveBeenCalled();
+    expect(fake.stubs.rooms.myPermissions).not.toHaveBeenCalled();
+  });
+});

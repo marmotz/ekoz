@@ -59,7 +59,7 @@ _technical design, see [technical.md](features/web-client-chat/./technical.md)_ 
 
 ## Web client rooms ·  [overview](features/web-client-rooms/overview.md)
 
-_technical design, see [technical.md](features/web-client-rooms/./technical.md)_ — 9/15 tasks done
+_technical design, see [technical.md](features/web-client-rooms/./technical.md)_ — 13/15 tasks done
 
 | Done | Issue                                            | Title                                                            | Blocked by              |
 |------|--------------------------------------------------|------------------------------------------------------------------|-------------------------|
@@ -73,8 +73,8 @@ _technical design, see [technical.md](features/web-client-rooms/./technical.md)_
 | [x]  | [#82](https://github.com/marmotz/ekoz/issues/82) | Client web rooms: data layer (queries, mutations, error mapping) | #81                     |
 | [x]  | [#83](https://github.com/marmotz/ekoz/issues/83) | Client web rooms: sidebar tree and /rooms route shell            | #65, #82                |
 | [ ]  | [#84](https://github.com/marmotz/ekoz/issues/84) | Client web rooms: invitations page (accept / decline)            | #83, #82                |
-| [ ]  | [#85](https://github.com/marmotz/ekoz/issues/85) | Client web rooms: RoomGate, RoomHeader and /rooms/$roomId        | #83, #82, #64           |
-| [ ]  | [#86](https://github.com/marmotz/ekoz/issues/86) | Client web rooms: create a space or a channel                    | #83, #82                |
-| [ ]  | [#87](https://github.com/marmotz/ekoz/issues/87) | Client web rooms: public directory (search and join)             | #83, #82                |
-| [ ]  | [#88](https://github.com/marmotz/ekoz/issues/88) | Client web rooms: join request moderation screen                 | #85, #80                |
+| [x]  | [#85](https://github.com/marmotz/ekoz/issues/85) | Client web rooms: RoomGate, RoomHeader and /rooms/$roomId        | #83, #82, #64           |
+| [x]  | [#86](https://github.com/marmotz/ekoz/issues/86) | Client web rooms: create a space or a channel                    | #83, #82                |
+| [x]  | [#87](https://github.com/marmotz/ekoz/issues/87) | Client web rooms: public directory (search and join)             | #83, #82                |
+| [x]  | [#88](https://github.com/marmotz/ekoz/issues/88) | Client web rooms: join request moderation screen                 | #85, #80                |
 | [ ]  | [#89](https://github.com/marmotz/ekoz/issues/89) | Document the web client rooms design in docs/technical/          | #84, #85, #86, #87, #88 |

@@ -313,6 +313,88 @@
       "membershipNotFound": "Vous n'êtes pas membre de ce salon.",
       "network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
       "generic": "Une erreur est survenue. Réessayez."
+    },
+    "gate": {
+      "loading": "Chargement du salon",
+      "error": "Le salon n'a pas pu être chargé.",
+      "retry": "Réessayer",
+      "invited": {
+        "message": "Vous êtes invité à rejoindre {{name}}.",
+        "accept": "Accepter",
+        "decline": "Refuser"
+      },
+      "joinable": {
+        "message": "{{name}} est un salon public : rejoignez-le pour participer.",
+        "join": "Rejoindre"
+      },
+      "request": {
+        "message": "Ce salon est sur invitation. Vous pouvez demander à ses modérateurs de vous y admettre.",
+        "send": "Demander à rejoindre",
+        "pending": "Demande en attente : un modérateur va l'examiner.",
+        "declined": "Votre demande pour rejoindre ce salon a été refusée."
+      },
+      "unavailable": {
+        "title": "Salon indisponible",
+        "message": "Ce salon n'existe pas ou n'est pas accessible.",
+        "back": "Retour aux salons"
+      }
+    },
+    "header": {
+      "type": {
+        "space": "Espace",
+        "channel": "Salon",
+        "dm": "Message direct",
+        "groupDm": "Conversation de groupe"
+      },
+      "leave": "Quitter",
+      "channels": "Salons",
+      "noChannels": "Aucun salon dans cet espace pour l'instant.",
+      "requests": "Demandes"
+    },
+    "create": {
+      "title": "Créer un espace ou un salon",
+      "loading": "Chargement des espaces où vous pouvez créer",
+      "notAllowed": "Vous ne pouvez pas créer d'espace ni de salon : il faut le droit de créer dans un espace dont vous êtes membre.",
+      "type": "Type",
+      "typeSpace": "Espace",
+      "typeChannel": "Salon",
+      "parent": "Espace parent",
+      "chooseParent": "Choisissez un espace",
+      "noParent": "Aucun parent (espace racine)",
+      "parentRequired": "Choisissez un espace parent.",
+      "name": "Nom",
+      "topic": "Sujet",
+      "visibility": "Visibilité",
+      "visibilityPrivate": "Privé",
+      "visibilityPublic": "Public",
+      "visibilityInvite": "Sur invitation",
+      "submit": "Créer"
+    },
+    "directory": {
+      "title": "Annuaire",
+      "search": "Rechercher des salons publics",
+      "loading": "Chargement des salons publics",
+      "empty": "Aucun salon public pour l'instant.",
+      "noMatch": "Aucun salon public ne correspond à cette recherche.",
+      "error": "L'annuaire n'a pas pu être chargé.",
+      "retry": "Réessayer",
+      "loadMore": "Charger plus",
+      "open": "Ouvrir",
+      "join": "Rejoindre"
+    },
+    "requests": {
+      "title": "Demandes d'adhésion",
+      "back": "Retour au salon",
+      "loading": "Chargement des demandes d'adhésion",
+      "empty": "Aucune demande en attente.",
+      "error": "Les demandes d'adhésion n'ont pas pu être chargées.",
+      "retry": "Réessayer",
+      "loadMore": "Charger plus",
+      "forbidden": "Vous n'avez pas le droit d'examiner les demandes d'adhésion de ce salon.",
+      "deletedAccount": "Compte supprimé",
+      "requestedAt": "Demandé le {{date}}",
+      "approve": "Accepter",
+      "reject": "Refuser"
     }
   }
 }

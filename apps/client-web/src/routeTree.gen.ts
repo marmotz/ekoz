@@ -22,6 +22,9 @@ import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-pass
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as AppRoomsIndexRouteImport } from './routes/_app/rooms/index'
 import { Route as AppRoomsRoomIdRouteImport } from './routes/_app/rooms/$roomId'
+import { Route as AppRoomsDirectoryRouteImport } from './routes/_app/rooms/directory'
+import { Route as AppRoomsNewRouteImport } from './routes/_app/rooms/new'
+import { Route as AppRoomsRoomIdRequestsRouteImport } from './routes/_app/rooms/$roomId/requests'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -86,6 +89,21 @@ const AppRoomsRoomIdRoute = AppRoomsRoomIdRouteImport.update({
   path: '/$roomId',
   getParentRoute: () => AppRoomsRoute,
 } as any)
+const AppRoomsDirectoryRoute = AppRoomsDirectoryRouteImport.update({
+  id: '/directory',
+  path: '/directory',
+  getParentRoute: () => AppRoomsRoute,
+} as any)
+const AppRoomsNewRoute = AppRoomsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppRoomsRoute,
+} as any)
+const AppRoomsRoomIdRequestsRoute = AppRoomsRoomIdRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AppRoomsRoomIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -97,8 +115,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
-  '/rooms/$roomId': typeof AppRoomsRoomIdRoute
+  '/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
+  '/rooms/directory': typeof AppRoomsDirectoryRoute
+  '/rooms/new': typeof AppRoomsNewRoute
   '/rooms/': typeof AppRoomsIndexRoute
+  '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -109,8 +130,11 @@ export interface FileRoutesByTo {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
-  '/rooms/$roomId': typeof AppRoomsRoomIdRoute
+  '/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
+  '/rooms/directory': typeof AppRoomsDirectoryRoute
+  '/rooms/new': typeof AppRoomsNewRoute
   '/rooms': typeof AppRoomsIndexRoute
+  '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,8 +149,11 @@ export interface FileRoutesById {
   '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
   '/_app/': typeof AppIndexRoute
-  '/_app/rooms/$roomId': typeof AppRoomsRoomIdRoute
+  '/_app/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
+  '/_app/rooms/directory': typeof AppRoomsDirectoryRoute
+  '/_app/rooms/new': typeof AppRoomsNewRoute
   '/_app/rooms/': typeof AppRoomsIndexRoute
+  '/_app/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,7 +168,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/rooms/$roomId'
+    | '/rooms/directory'
+    | '/rooms/new'
     | '/rooms/'
+    | '/rooms/$roomId/requests'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,7 +183,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/rooms/$roomId'
+    | '/rooms/directory'
+    | '/rooms/new'
     | '/rooms'
+    | '/rooms/$roomId/requests'
   id:
     | '__root__'
     | '/_app'
@@ -168,7 +201,10 @@ export interface FileRouteTypes {
     | '/_auth/verify-email'
     | '/_app/'
     | '/_app/rooms/$roomId'
+    | '/_app/rooms/directory'
+    | '/_app/rooms/new'
     | '/_app/rooms/'
+    | '/_app/rooms/$roomId/requests'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -269,16 +305,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoomsRoomIdRouteImport
       parentRoute: typeof AppRoomsRoute
     }
+    '/_app/rooms/directory': {
+      id: '/_app/rooms/directory'
+      path: '/directory'
+      fullPath: '/rooms/directory'
+      preLoaderRoute: typeof AppRoomsDirectoryRouteImport
+      parentRoute: typeof AppRoomsRoute
+    }
+    '/_app/rooms/new': {
+      id: '/_app/rooms/new'
+      path: '/new'
+      fullPath: '/rooms/new'
+      preLoaderRoute: typeof AppRoomsNewRouteImport
+      parentRoute: typeof AppRoomsRoute
+    }
+    '/_app/rooms/$roomId/requests': {
+      id: '/_app/rooms/$roomId/requests'
+      path: '/requests'
+      fullPath: '/rooms/$roomId/requests'
+      preLoaderRoute: typeof AppRoomsRoomIdRequestsRouteImport
+      parentRoute: typeof AppRoomsRoomIdRoute
+    }
   }
 }
 
+interface AppRoomsRoomIdRouteChildren {
+  AppRoomsRoomIdRequestsRoute: typeof AppRoomsRoomIdRequestsRoute
+}
+
+const AppRoomsRoomIdRouteChildren: AppRoomsRoomIdRouteChildren = {
+  AppRoomsRoomIdRequestsRoute: AppRoomsRoomIdRequestsRoute,
+}
+
+const AppRoomsRoomIdRouteWithChildren = AppRoomsRoomIdRoute._addFileChildren(
+  AppRoomsRoomIdRouteChildren,
+)
+
 interface AppRoomsRouteChildren {
-  AppRoomsRoomIdRoute: typeof AppRoomsRoomIdRoute
+  AppRoomsRoomIdRoute: typeof AppRoomsRoomIdRouteWithChildren
+  AppRoomsDirectoryRoute: typeof AppRoomsDirectoryRoute
+  AppRoomsNewRoute: typeof AppRoomsNewRoute
   AppRoomsIndexRoute: typeof AppRoomsIndexRoute
 }
 
 const AppRoomsRouteChildren: AppRoomsRouteChildren = {
-  AppRoomsRoomIdRoute: AppRoomsRoomIdRoute,
+  AppRoomsRoomIdRoute: AppRoomsRoomIdRouteWithChildren,
+  AppRoomsDirectoryRoute: AppRoomsDirectoryRoute,
+  AppRoomsNewRoute: AppRoomsNewRoute,
   AppRoomsIndexRoute: AppRoomsIndexRoute,
 }
 
