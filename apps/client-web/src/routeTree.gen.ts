@@ -13,12 +13,14 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppRoomsRouteImport } from './routes/_app/rooms'
 import { Route as AuthCheckEmailRouteImport } from './routes/_auth/check-email'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
+import { Route as AppRoomsIndexRouteImport } from './routes/_app/rooms/index'
 import { Route as AppRoomsRoomIdRouteImport } from './routes/_app/rooms/$roomId'
 
 const AppRoute = AppRouteImport.update({
@@ -37,6 +39,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAccountRoute = AppAccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRoomsRoute = AppRoomsRouteImport.update({
+  id: '/rooms',
+  path: '/rooms',
   getParentRoute: () => AppRoute,
 } as any)
 const AuthCheckEmailRoute = AuthCheckEmailRouteImport.update({
@@ -69,15 +76,21 @@ const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppRoomsIndexRoute = AppRoomsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoomsRoute,
+} as any)
 const AppRoomsRoomIdRoute = AppRoomsRoomIdRouteImport.update({
-  id: '/rooms/$roomId',
-  path: '/rooms/$roomId',
-  getParentRoute: () => AppRoute,
+  id: '/$roomId',
+  path: '/$roomId',
+  getParentRoute: () => AppRoomsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/account': typeof AppAccountRoute
+  '/rooms': typeof AppRoomsRouteWithChildren
   '/check-email': typeof AuthCheckEmailRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
@@ -85,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
   '/rooms/$roomId': typeof AppRoomsRoomIdRoute
+  '/rooms/': typeof AppRoomsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -96,12 +110,14 @@ export interface FileRoutesByTo {
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
   '/rooms/$roomId': typeof AppRoomsRoomIdRoute
+  '/rooms': typeof AppRoomsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_app/account': typeof AppAccountRoute
+  '/_app/rooms': typeof AppRoomsRouteWithChildren
   '/_auth/check-email': typeof AuthCheckEmailRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/login': typeof AuthLoginRoute
@@ -110,12 +126,14 @@ export interface FileRoutesById {
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
   '/_app/': typeof AppIndexRoute
   '/_app/rooms/$roomId': typeof AppRoomsRoomIdRoute
+  '/_app/rooms/': typeof AppRoomsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/account'
+    | '/rooms'
     | '/check-email'
     | '/forgot-password'
     | '/login'
@@ -123,6 +141,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/rooms/$roomId'
+    | '/rooms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,11 +153,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/rooms/$roomId'
+    | '/rooms'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
     | '/_app/account'
+    | '/_app/rooms'
     | '/_auth/check-email'
     | '/_auth/forgot-password'
     | '/_auth/login'
@@ -147,6 +168,7 @@ export interface FileRouteTypes {
     | '/_auth/verify-email'
     | '/_app/'
     | '/_app/rooms/$roomId'
+    | '/_app/rooms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -182,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/rooms': {
+      id: '/_app/rooms'
+      path: '/rooms'
+      fullPath: '/rooms'
+      preLoaderRoute: typeof AppRoomsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_auth/check-email': {
@@ -226,26 +255,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthVerifyEmailRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/rooms/': {
+      id: '/_app/rooms/'
+      path: '/'
+      fullPath: '/rooms/'
+      preLoaderRoute: typeof AppRoomsIndexRouteImport
+      parentRoute: typeof AppRoomsRoute
+    }
     '/_app/rooms/$roomId': {
       id: '/_app/rooms/$roomId'
-      path: '/rooms/$roomId'
+      path: '/$roomId'
       fullPath: '/rooms/$roomId'
       preLoaderRoute: typeof AppRoomsRoomIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRoomsRoute
     }
   }
 }
 
+interface AppRoomsRouteChildren {
+  AppRoomsRoomIdRoute: typeof AppRoomsRoomIdRoute
+  AppRoomsIndexRoute: typeof AppRoomsIndexRoute
+}
+
+const AppRoomsRouteChildren: AppRoomsRouteChildren = {
+  AppRoomsRoomIdRoute: AppRoomsRoomIdRoute,
+  AppRoomsIndexRoute: AppRoomsIndexRoute,
+}
+
+const AppRoomsRouteWithChildren = AppRoomsRoute._addFileChildren(
+  AppRoomsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
+  AppRoomsRoute: typeof AppRoomsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
-  AppRoomsRoomIdRoute: typeof AppRoomsRoomIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
+  AppRoomsRoute: AppRoomsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
-  AppRoomsRoomIdRoute: AppRoomsRoomIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
