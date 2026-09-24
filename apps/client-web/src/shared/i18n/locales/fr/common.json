@@ -269,5 +269,50 @@
       "reconnecting": "Reconnexion...",
       "offline": "Hors ligne"
     }
+  },
+  "rooms": {
+    "title": "Salons",
+    "sidebar": {
+      "label": "Salons",
+      "new": "Nouveau",
+      "directory": "Annuaire",
+      "invitations": "Invitations",
+      "pendingInvitations_one": "{{count}} invitation en attente",
+      "pendingInvitations_other": "{{count}} invitations en attente",
+      "collapse": "Replier {{name}}",
+      "expand": "Déplier {{name}}",
+      "loading": "Chargement des salons",
+      "error": "Les salons n'ont pas pu être chargés.",
+      "empty": "Aucun salon pour l'instant."
+    },
+    "unnamed": "Salon sans nom",
+    "welcome": {
+      "title": "Bienvenue",
+      "empty": "Vous n'êtes encore dans aucun salon. Parcourez l'annuaire pour trouver un salon public à rejoindre.",
+      "openDirectory": "Parcourir l'annuaire",
+      "createHint": "Vous pouvez aussi créer votre propre espace.",
+      "create": "Créer un espace",
+      "pick": "Choisissez un salon dans la barre latérale pour discuter.",
+      "invitations_one": "Vous avez {{count}} invitation en attente.",
+      "invitations_other": "Vous avez {{count}} invitations en attente.",
+      "openInvitations": "Voir les invitations"
+    },
+    "errors": {
+      "permissionDenied": "Vous n'avez pas le droit de faire cela dans ce salon.",
+      "parentNotFound": "L'espace parent n'existe plus.",
+      "maxDepthExceeded": "Les espaces ne peuvent pas être imbriqués plus profondément.",
+      "invalidParentType": "Un salon ne peut être placé que dans un espace.",
+      "notFound": "Ce salon n'existe pas ou n'est pas accessible.",
+      "alreadyMember": "Vous êtes déjà membre de ce salon.",
+      "banned": "Vous êtes banni de ce salon.",
+      "notJoinable": "Ce salon ne peut pas être rejoint directement.",
+      "joinRequestAlreadyExists": "Vous avez déjà demandé à rejoindre ce salon.",
+      "joinRequestAlreadyResolved": "Cette demande a déjà été traitée.",
+      "invitationAlreadyResolved": "Cette invitation a déjà reçu une réponse.",
+      "invitationNotFound": "Cette invitation n'existe plus.",
+      "membershipNotFound": "Vous n'êtes pas membre de ce salon.",
+      "network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
   }
 }

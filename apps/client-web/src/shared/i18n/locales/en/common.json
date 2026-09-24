@@ -269,5 +269,50 @@
       "reconnecting": "Reconnecting...",
       "offline": "Offline"
     }
+  },
+  "rooms": {
+    "title": "Rooms",
+    "sidebar": {
+      "label": "Rooms",
+      "new": "New",
+      "directory": "Directory",
+      "invitations": "Invitations",
+      "pendingInvitations_one": "{{count}} pending invitation",
+      "pendingInvitations_other": "{{count}} pending invitations",
+      "collapse": "Collapse {{name}}",
+      "expand": "Expand {{name}}",
+      "loading": "Loading rooms",
+      "error": "The rooms could not be loaded.",
+      "empty": "No rooms yet."
+    },
+    "unnamed": "Unnamed room",
+    "welcome": {
+      "title": "Welcome",
+      "empty": "You are not in any room yet. Browse the directory to find a public channel to join.",
+      "openDirectory": "Browse the directory",
+      "createHint": "You can also create a space of your own.",
+      "create": "Create a space",
+      "pick": "Pick a room in the sidebar to start chatting.",
+      "invitations_one": "You have {{count}} pending invitation.",
+      "invitations_other": "You have {{count}} pending invitations.",
+      "openInvitations": "See the invitations"
+    },
+    "errors": {
+      "permissionDenied": "You are not allowed to do this in this room.",
+      "parentNotFound": "The parent space no longer exists.",
+      "maxDepthExceeded": "Spaces cannot be nested any deeper.",
+      "invalidParentType": "A room can only be placed inside a space.",
+      "notFound": "This room does not exist or is not accessible.",
+      "alreadyMember": "You are already a member of this room.",
+      "banned": "You are banned from this room.",
+      "notJoinable": "This room cannot be joined directly.",
+      "joinRequestAlreadyExists": "You already asked to join this room.",
+      "joinRequestAlreadyResolved": "This join request has already been handled.",
+      "invitationAlreadyResolved": "This invitation has already been answered.",
+      "invitationNotFound": "This invitation no longer exists.",
+      "membershipNotFound": "You are not a member of this room.",
+      "network": "The server could not be reached. Check your connection and try again.",
+      "generic": "Something went wrong. Try again."
+    }
   }
 }

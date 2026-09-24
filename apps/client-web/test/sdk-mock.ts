@@ -59,7 +59,7 @@ export function createFakeStream() {
 
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `rooms`, `sync` and `stream`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -144,7 +144,27 @@ export function createFakeSdk(initial?: FakeSession) {
       send: vi.fn(async () => ({})),
     },
     rooms: {
+      list: vi.fn(async () => ({ items: [] as unknown[] })),
+      get: vi.fn(async (id: string) => ({ id })),
+      preview: vi.fn(async (id: string) => ({ id, joinRequest: null })),
+      myPermissions: vi.fn(async () => ({ capabilities: [] as string[] })),
+      createSpace: vi.fn(async (body: Record<string, unknown>) => ({ id: 'space', ...body })),
+      createChannel: vi.fn(async (body: Record<string, unknown>) => ({ id: 'channel', ...body })),
+      join: vi.fn(async () => ({})),
+      leave: vi.fn(async () => {}),
+      requestToJoin: vi.fn(async () => ({})),
+      listJoinRequests: vi.fn(async () => ({ items: [], nextCursor: null as string | null })),
+      approveJoinRequest: vi.fn(async () => ({})),
+      rejectJoinRequest: vi.fn(async () => {}),
       members: vi.fn(async () => ({ items: [], nextCursor: null })),
+    },
+    roomInvitations: {
+      listMine: vi.fn(async () => ({ items: [] as unknown[] })),
+      accept: vi.fn(async () => ({})),
+      decline: vi.fn(async () => {}),
+    },
+    directory: {
+      list: vi.fn(async () => ({ items: [], nextCursor: null as string | null })),
     },
     sync: {
       get: vi.fn(async () => ({ events: [], lastSeq: '0' })),
