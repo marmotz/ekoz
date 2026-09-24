@@ -84,7 +84,28 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       },
     },
     rooms: {
+      list: vi.fn(),
+      get: vi.fn(),
+      preview: vi.fn(),
+      children: vi.fn(),
+      myPermissions: vi.fn(),
+      createSpace: vi.fn(),
+      createChannel: vi.fn(),
+      join: vi.fn(),
+      leave: vi.fn(),
+      requestToJoin: vi.fn(),
+      listJoinRequests: vi.fn(),
+      approveJoinRequest: vi.fn(),
+      rejectJoinRequest: vi.fn(),
       members: vi.fn(),
+    },
+    roomInvitations: {
+      listMine: vi.fn(),
+      accept: vi.fn(),
+      decline: vi.fn(),
+    },
+    directory: {
+      list: vi.fn(),
     },
     messages: {
       list: vi.fn(),

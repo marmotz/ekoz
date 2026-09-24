@@ -20,11 +20,19 @@ describe('conversations — rooms (integration)', () => {
 
   const password = 'a-perfectly-fine-passphrase';
 
+  // Logins are rate limited: one token per account for the whole file.
+  const tokens = new Map<string, string>();
   const login = async (identifier: string): Promise<string> => {
+    const cached = tokens.get(identifier);
+    if (cached) {
+      return cached;
+    }
+
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ identifier, password })
       .expect(200);
+    tokens.set(identifier, res.body.accessToken as string);
 
     return res.body.accessToken as string;
   };
@@ -58,6 +66,15 @@ describe('conversations — rooms (integration)', () => {
       displayName: 'Alice',
       emailVerified: true,
     });
+    for (const name of ['bob', 'carol', 'dave', 'erin']) {
+      await accounts.createAccount({
+        name,
+        email: `${name}@ekoz.example.com`,
+        password,
+        displayName: name,
+        emailVerified: true,
+      });
+    }
   }, 180_000);
 
   afterAll(async () => {
@@ -370,6 +387,189 @@ describe('conversations — rooms (integration)', () => {
         .set('Authorization', `Bearer ${aliceToken}`)
         .expect(204);
       expect(await membersOf(channel.id)).toEqual([]);
+    });
+  });
+
+  describe('GET /rooms', () => {
+    type ListItem = { id: string; parentId: string | null; role: string | null; access: string };
+
+    const listRooms = async (token: string): Promise<ListItem[]> =>
+      (await request(server()).get('/rooms').set('Authorization', `Bearer ${token}`).expect(200))
+        .body.items as ListItem[];
+
+    const createSpace = async (token: string, name: string, parentId?: string) =>
+      (
+        await request(server())
+          .post('/spaces')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name, ...(parentId && { parentId }) })
+          .expect(201)
+      ).body as { id: string };
+
+    const createChannel = async (
+      token: string,
+      name: string,
+      parentId: string,
+      visibility = 'private',
+    ) =>
+      (
+        await request(server())
+          .post('/rooms')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ name, parentId, visibility })
+          .expect(201)
+      ).body as { id: string };
+
+    const userIdOf = async (name: string): Promise<string> =>
+      (await accounts.findByIdentifier(name))?.id as string;
+
+    /** Owner invites `name` to `roomId` with `role`, `name` accepts. */
+    const addMember = async (name: string, roomId: string, role = 'member') => {
+      const ownerToken = await login('owner');
+      const invitation = await request(server())
+        .post(`/rooms/${roomId}/invitations`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ userId: await userIdOf(name), role })
+        .expect(201);
+      await request(server())
+        .post(`/invitations/${invitation.body.id}/accept`)
+        .set('Authorization', `Bearer ${await login(name)}`)
+        .expect(201);
+    };
+
+    const pick = (items: ListItem[]) =>
+      items.map(({ id, parentId, role, access }) => ({ id, parentId, role, access }));
+
+    it('requires authentication', async () => {
+      await request(server()).get('/rooms').expect(401);
+    });
+
+    it('answers an empty list for a user without rooms', async () => {
+      expect(await listRooms(await login('dave'))).toEqual([]);
+    });
+
+    it('lists direct, inherited and context rooms in creation order', async () => {
+      const ownerToken = await login('owner');
+      const root = await createSpace(ownerToken, 'List root');
+      const team = await createSpace(ownerToken, 'List team', root.id);
+      const teamGeneral = await createChannel(ownerToken, 'team-general', team.id);
+      const teamRandom = await createChannel(ownerToken, 'team-random', team.id);
+      await createChannel(ownerToken, 'root-only', root.id);
+      const other = await createSpace(ownerToken, 'List other');
+      const lone = await createChannel(ownerToken, 'lone', other.id, 'public');
+      await createChannel(ownerToken, 'other-unrelated', other.id, 'public');
+
+      await addMember('bob', team.id);
+      await request(server())
+        .post(`/rooms/${lone.id}/join`)
+        .set('Authorization', `Bearer ${await login('bob')}`)
+        .expect(201);
+
+      expect(pick(await listRooms(await login('bob')))).toEqual([
+        { id: root.id, parentId: null, role: null, access: 'context' },
+        { id: team.id, parentId: root.id, role: 'member', access: 'member' },
+        { id: teamGeneral.id, parentId: team.id, role: 'member', access: 'inherited' },
+        { id: teamRandom.id, parentId: team.id, role: 'member', access: 'inherited' },
+        { id: other.id, parentId: null, role: null, access: 'context' },
+        { id: lone.id, parentId: other.id, role: 'member', access: 'member' },
+      ]);
+    });
+
+    it('returns every Room field on each item', async () => {
+      const ownerToken = await login('owner');
+      const space = await createSpace(ownerToken, 'Shape space');
+      const [item] = (await listRooms(ownerToken)).filter((i) => i.id === space.id);
+
+      expect(item).toEqual({
+        id: space.id,
+        type: 'space',
+        parentId: null,
+        visibility: 'private',
+        slug: null,
+        name: 'Shape space',
+        topic: null,
+        avatarBlobId: null,
+        defaultRole: 'member',
+        readOnly: false,
+        originServer: expect.any(String),
+        lastSeq: '2',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        role: 'space_admin',
+        access: 'member',
+      });
+    });
+
+    it("lists a root space its owner created, with the creator's role", async () => {
+      const ownerToken = await login('owner');
+      const space = await createSpace(ownerToken, 'Owner listed space');
+
+      const items = await listRooms(ownerToken);
+      expect(items.find((i) => i.id === space.id)).toMatchObject({
+        role: 'space_admin',
+        access: 'member',
+      });
+    });
+
+    it('excludes dm and group_dm rooms', async () => {
+      const carolToken = await login('carol');
+      const dm = await request(server())
+        .post('/dms')
+        .set('Authorization', `Bearer ${carolToken}`)
+        .send({ userId: await userIdOf('erin') })
+        .expect(201);
+
+      const ids = (await listRooms(carolToken)).map((i) => i.id);
+      expect(ids).not.toContain(dm.body.id);
+      expect(await listRooms(await login('erin'))).toEqual([]);
+    });
+
+    it('excludes a deleted room and the context it no longer needs', async () => {
+      const ownerToken = await login('owner');
+      const space = await createSpace(ownerToken, 'Deleted parent');
+      const channel = await createChannel(ownerToken, 'to-delete', space.id);
+      await addMember('carol', channel.id);
+      expect((await listRooms(await login('carol'))).map((i) => i.id)).toEqual(
+        expect.arrayContaining([space.id, channel.id]),
+      );
+
+      await request(server())
+        .delete(`/rooms/${channel.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const ids = (await listRooms(await login('carol'))).map((i) => i.id);
+      expect(ids).not.toContain(channel.id);
+      expect(ids).not.toContain(space.id);
+    });
+
+    it('lists nested spaces down to rooms.max_depth, the nearest membership giving the role', async () => {
+      const ownerToken = await login('owner');
+      const depth0 = await createSpace(ownerToken, 'Depth 0');
+      const depth1 = await createSpace(ownerToken, 'Depth 1', depth0.id);
+      const depth2 = await createSpace(ownerToken, 'Depth 2', depth1.id);
+      const depth3 = await createSpace(ownerToken, 'Depth 3', depth2.id);
+      const depth4 = await createSpace(ownerToken, 'Depth 4', depth3.id);
+      const tooDeep = await request(server())
+        .post('/spaces')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ name: 'Too deep', parentId: depth4.id })
+        .expect(422);
+      expect(tooDeep.body.code).toBe('room.max_depth_exceeded');
+
+      await addMember('alice', depth1.id, 'reader');
+      await addMember('alice', depth2.id, 'moderator');
+
+      const items = (await listRooms(await login('alice'))).filter((i) =>
+        [depth0.id, depth1.id, depth2.id, depth3.id, depth4.id].includes(i.id),
+      );
+      expect(pick(items)).toEqual([
+        { id: depth0.id, parentId: null, role: null, access: 'context' },
+        { id: depth1.id, parentId: depth0.id, role: 'reader', access: 'member' },
+        { id: depth2.id, parentId: depth1.id, role: 'moderator', access: 'member' },
+        { id: depth3.id, parentId: depth2.id, role: 'moderator', access: 'inherited' },
+        { id: depth4.id, parentId: depth3.id, role: 'moderator', access: 'inherited' },
+      ]);
     });
   });
 });

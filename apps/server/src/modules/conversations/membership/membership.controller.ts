@@ -32,6 +32,8 @@ import {
   type InviteMember,
   InviteMemberDto,
   JoinRequestParamSchema,
+  type ListJoinRequestsQuery,
+  ListJoinRequestsQueryDto,
   type ListMembersQuery,
   ListMembersQueryDto,
   RoomMemberParamSchema,
@@ -46,6 +48,8 @@ import {
   MembershipViewDto,
   type MyRoomInvitationListView,
   MyRoomInvitationListViewDto,
+  type PendingJoinRequestListView,
+  PendingJoinRequestListViewDto,
   type RoomInvitationView,
   RoomInvitationViewDto,
 } from './membership.view.js';
@@ -155,6 +159,20 @@ export class MembershipController {
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<JoinRequestView> {
     return this.membership.createJoinRequest(principal, params.id);
+  }
+
+  @Get('rooms/:id/join-requests')
+  @ApiOperation({
+    summary: 'List the pending join requests of a room, oldest first (needs room.manage_members).',
+  })
+  @ApiOkResponse({ type: PendingJoinRequestListViewDto })
+  @ApiProblemResponses({ validation: true, statuses: [403, 404] })
+  listJoinRequests(
+    @Param(new ZodValidationPipe(RoomIdParamSchema)) params: { id: string },
+    @Query(new ZodValidationPipe(ListJoinRequestsQueryDto)) query: ListJoinRequestsQuery,
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<PendingJoinRequestListView> {
+    return this.membership.listJoinRequests(principal, params.id, query);
   }
 
   @Post('rooms/:id/join-requests/:requestId/approve')

@@ -92,6 +92,12 @@ All notable changes to the Ekoz protocol. Format
 - `GET /rooms/:id/preview` in [`rooms-and-permissions.md`](rooms-and-permissions.md):
   name, topic and the caller's own join request state for an invite-only room a
   non-member cannot read.
+- `GET /rooms` in [`rooms-and-permissions.md`](rooms-and-permissions.md): the
+  caller's spaces and channels as `RoomListItem`s, each with the caller's `role`
+  and an `access` of `member`, `inherited` or `context`.
+- `GET /rooms/:id/join-requests` in [`rooms-and-permissions.md`](rooms-and-permissions.md):
+  the pending join requests of a room, oldest first and paginated, each with the
+  requester's `UserSummary`.
 - `GET /me/room-invitations` and the shared `UserSummary` object in
   [`rooms-and-permissions.md`](rooms-and-permissions.md): the caller's pending
   room invitations with the room and the inviter embedded.

@@ -25,6 +25,8 @@ describe('createClient', () => {
     expect(client.invitations).toBeDefined();
     expect(client.admin).toBeDefined();
     expect(client.rooms).toBeDefined();
+    expect(client.roomInvitations).toBeDefined();
+    expect(client.directory).toBeDefined();
     expect(client.messages).toBeDefined();
     expect(client.sync).toBeDefined();
     expect(client.stream.status).toBe('idle');

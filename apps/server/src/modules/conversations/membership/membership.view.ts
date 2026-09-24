@@ -128,3 +128,19 @@ export const MemberListViewSchema = z.object({
 });
 export type MemberListView = z.infer<typeof MemberListViewSchema>;
 export class MemberListViewDto extends createZodDto(MemberListViewSchema) {}
+
+/** A pending join request, with the requester to show it in a moderation queue. */
+export const PendingJoinRequestViewSchema = z.object({
+  id: entityIdSchema,
+  roomId: entityIdSchema,
+  createdAt: z.iso.datetime(),
+  user: UserSummarySchema,
+});
+export type PendingJoinRequestView = z.infer<typeof PendingJoinRequestViewSchema>;
+
+export const PendingJoinRequestListViewSchema = z.object({
+  items: z.array(PendingJoinRequestViewSchema),
+  nextCursor: nullableString(),
+});
+export type PendingJoinRequestListView = z.infer<typeof PendingJoinRequestListViewSchema>;
+export class PendingJoinRequestListViewDto extends createZodDto(PendingJoinRequestListViewSchema) {}

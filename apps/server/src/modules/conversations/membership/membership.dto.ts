@@ -32,3 +32,10 @@ export const ListMembersQuerySchema = z.object({
 });
 export type ListMembersQuery = z.infer<typeof ListMembersQuerySchema>;
 export class ListMembersQueryDto extends createZodDto(ListMembersQuerySchema) {}
+
+export const ListJoinRequestsQuerySchema = z.object({
+  cursor: z.string().min(1).optional(),
+  limit: z.coerce.number().int().min(1).optional(),
+});
+export type ListJoinRequestsQuery = z.infer<typeof ListJoinRequestsQuerySchema>;
+export class ListJoinRequestsQueryDto extends createZodDto(ListJoinRequestsQuerySchema) {}

@@ -60,7 +60,9 @@ per-resource constructors:
 | `client.sessions`          | List / rename / revoke the caller's own sessions                 |
 | `client.invitations`       | Owner-only registration invitations                              |
 | `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset), owner and username-request administration |
-| `client.rooms`             | Room members page (`members`); more arrive with `web-client-rooms` |
+| `client.rooms`             | The caller's tree (`list`), detail, preview, children, own permissions, create space / channel, join / leave, join requests (request, list, approve, reject), members page |
+| `client.roomInvitations`   | The caller's pending room invitations (`listMine`, `accept`, `decline`) |
+| `client.directory`         | Public room directory, search and paging (`list`)                |
 | `client.messages`          | Room messages (`list` / `get` / `send`)                          |
 | `client.sync`              | Per-room catch-up (`get`), events typed as `RoomEvent`           |
 | `client.stream`            | Account SSE stream (`connect` / `disconnect` / `status` / `on`) with fresh-ticket reconnection |

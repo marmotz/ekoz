@@ -11,6 +11,12 @@ export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseD
 export const AuthPolicyDtoRegistrationMode = ["open", "invite", "admin"] as const;
 export type AuthPolicyDtoRegistrationMode = (typeof AuthPolicyDtoRegistrationMode)[number];
 
+export const CreateChannelDtoVisibility = ["public", "private", "invite"] as const;
+export type CreateChannelDtoVisibility = (typeof CreateChannelDtoVisibility)[number];
+
+export const CreateSpaceDtoVisibility = ["public", "private", "invite"] as const;
+export type CreateSpaceDtoVisibility = (typeof CreateSpaceDtoVisibility)[number];
+
 export const DirectoryListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type DirectoryListResponseDtoItemsDefaultRole = (typeof DirectoryListResponseDtoItemsDefaultRole)[number];
 
@@ -49,6 +55,18 @@ export type MyRoomInvitationListViewDtoItemsRoomVisibility = (typeof MyRoomInvit
 
 export const RoomInvitationViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type RoomInvitationViewDtoRole = (typeof RoomInvitationViewDtoRole)[number];
+
+export const RoomListViewDtoItemsAccess = ["member", "inherited", "context"] as const;
+export type RoomListViewDtoItemsAccess = (typeof RoomListViewDtoItemsAccess)[number];
+
+export const RoomListViewDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export type RoomListViewDtoItemsDefaultRole = (typeof RoomListViewDtoItemsDefaultRole)[number];
+
+export const RoomListViewDtoItemsType = ["space", "channel", "dm", "group_dm"] as const;
+export type RoomListViewDtoItemsType = (typeof RoomListViewDtoItemsType)[number];
+
+export const RoomListViewDtoItemsVisibility = ["public", "private", "invite"] as const;
+export type RoomListViewDtoItemsVisibility = (typeof RoomListViewDtoItemsVisibility)[number];
 
 export const RoomPreviewDtoJoinRequestStatus = ["pending", "rejected"] as const;
 export type RoomPreviewDtoJoinRequestStatus = (typeof RoomPreviewDtoJoinRequestStatus)[number];

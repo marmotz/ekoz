@@ -720,4 +720,176 @@ describe('conversations — membership (integration)', () => {
       await listMembers(ownerToken, channel.id, { limit: '0' }).expect(422);
     });
   });
+
+  describe('GET /rooms/:id/join-requests', () => {
+    const requesters = ['frank', 'grace', 'heidi', 'ivan'];
+
+    beforeAll(async () => {
+      for (const name of requesters) {
+        await accounts.createAccount({
+          name,
+          email: `${name}@ekoz.example.com`,
+          password,
+          displayName: name,
+          emailVerified: true,
+        });
+      }
+    });
+
+    type PendingItem = {
+      id: string;
+      roomId: string;
+      createdAt: string;
+      user: { id: string; identifier: string | null; displayName: string | null };
+    };
+
+    const listJoinRequests = (token: string, roomId: string, query: Record<string, string> = {}) =>
+      request(server())
+        .get(`/rooms/${roomId}/join-requests`)
+        .query(query)
+        .set('Authorization', `Bearer ${token}`);
+
+    const requestToJoin = async (name: string, roomId: string): Promise<string> =>
+      (
+        await request(server())
+          .post(`/rooms/${roomId}/join-request`)
+          .set('Authorization', `Bearer ${await login(name)}`)
+          .expect(201)
+      ).body.id as string;
+
+    const userIdOf = async (name: string): Promise<string> =>
+      (await accounts.findByIdentifier(name))?.id as string;
+
+    it('lists only pending requests, oldest first, with the requester', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createInviteChannel(ownerToken, 'join-requests-pending');
+
+      const approved = await requestToJoin('frank', channel.id);
+      const rejected = await requestToJoin('grace', channel.id);
+      const first = await requestToJoin('heidi', channel.id);
+      const second = await requestToJoin('ivan', channel.id);
+      await request(server())
+        .post(`/rooms/${channel.id}/join-requests/${approved}/approve`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(201);
+      await request(server())
+        .post(`/rooms/${channel.id}/join-requests/${rejected}/reject`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const res = await listJoinRequests(ownerToken, channel.id).expect(200);
+      expect(res.body.nextCursor).toBeNull();
+      const items = res.body.items as PendingItem[];
+      expect(items.map((i) => i.id)).toEqual([first, second]);
+      expect(items[0]).toEqual({
+        id: first,
+        roomId: channel.id,
+        createdAt: expect.any(String),
+        user: {
+          id: await userIdOf('heidi'),
+          identifier: expect.stringMatching(/^heidi\//),
+          displayName: 'heidi',
+          avatarUrl: null,
+        },
+      });
+      expect(Date.parse(items[0]?.createdAt ?? '')).toBeLessThanOrEqual(
+        Date.parse(items[1]?.createdAt ?? ''),
+      );
+    });
+
+    it('lists a request made again after a rejection as pending', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createInviteChannel(ownerToken, 'join-requests-again');
+      const requestId = await requestToJoin('frank', channel.id);
+      await request(server())
+        .post(`/rooms/${channel.id}/join-requests/${requestId}/reject`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+      expect((await listJoinRequests(ownerToken, channel.id).expect(200)).body.items).toEqual([]);
+
+      await requestToJoin('frank', channel.id);
+      const items = (await listJoinRequests(ownerToken, channel.id).expect(200)).body
+        .items as PendingItem[];
+      expect(items.map((i) => i.id)).toEqual([requestId]);
+    });
+
+    it('paginates with an opaque cursor, keeping the order', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createInviteChannel(ownerToken, 'join-requests-pages');
+      const ids: string[] = [];
+      for (const name of requesters) {
+        ids.push(await requestToJoin(name, channel.id));
+      }
+
+      const seen: string[] = [];
+      let cursor: string | null = null;
+      let pages = 0;
+      do {
+        const query: Record<string, string> = { limit: '3' };
+        if (cursor) {
+          query.cursor = cursor;
+        }
+        const res = await listJoinRequests(ownerToken, channel.id, query).expect(200);
+        expect(res.body.items.length).toBeLessThanOrEqual(3);
+        seen.push(...res.body.items.map((i: PendingItem) => i.id));
+        cursor = res.body.nextCursor;
+        pages += 1;
+      } while (cursor);
+
+      expect(pages).toBe(2);
+      expect(seen).toEqual(ids);
+
+      const malformed = await listJoinRequests(ownerToken, channel.id, {
+        cursor: 'not-a-cursor',
+      }).expect(200);
+      expect(malformed.body.items.map((i: PendingItem) => i.id)).toEqual(ids);
+    });
+
+    it('summarises a deleted requester with null profile fields', async () => {
+      const ownerToken = await login('owner');
+      await accounts.createAccount({
+        name: 'judy',
+        email: 'judy@ekoz.example.com',
+        password,
+        displayName: 'judy',
+        emailVerified: true,
+      });
+      const channel = await createInviteChannel(ownerToken, 'join-requests-deleted');
+      await requestToJoin('judy', channel.id);
+      const judyId = await userIdOf('judy');
+      await prisma.orm.public.User.where({ id: judyId }).update({ status: 'deleted' });
+
+      const items = (await listJoinRequests(ownerToken, channel.id).expect(200)).body
+        .items as PendingItem[];
+      expect(items.map((i) => i.user)).toEqual([
+        { id: judyId, identifier: null, displayName: null, avatarUrl: null },
+      ]);
+    });
+
+    it('needs room.manage_members and refuses unknown, deleted rooms and bad queries', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createInviteChannel(ownerToken, 'join-requests-guard');
+      await requestToJoin('grace', channel.id);
+
+      const requester = await listJoinRequests(await login('grace'), channel.id).expect(403);
+      expect(requester.body.code).toBe('room.permission_denied');
+
+      const unknown = await listJoinRequests(ownerToken, ulid()).expect(404);
+      expect(unknown.body.code).toBe('room.not_found');
+
+      await listJoinRequests(ownerToken, channel.id, { limit: '0' }).expect(422);
+
+      const empty = await createInviteChannel(ownerToken, 'join-requests-deleted-room');
+      await request(server())
+        .delete(`/rooms/${empty.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+      const deleted = await listJoinRequests(ownerToken, empty.id).expect(404);
+      expect(deleted.body.code).toBe('room.not_found');
+    });
+
+    it('requires authentication', async () => {
+      await request(server()).get(`/rooms/${ulid()}/join-requests`).expect(401);
+    });
+  });
 });

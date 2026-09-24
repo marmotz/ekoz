@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -20,7 +21,14 @@ import { ApiProblemResponses } from '../../../core/http/api-problem-responses.de
 import { AuthGuard, type AuthPrincipal } from '../../../core/http/auth.guard.js';
 import { CurrentPrincipal } from '../../../core/http/current-principal.decorator.js';
 import { ZodValidationPipe } from '../../../core/http/zod-validation.pipe.js';
-import { type RoomPreview, RoomPreviewDto, type RoomView, RoomViewDto } from './room.view.js';
+import {
+  type RoomListView,
+  RoomListViewDto,
+  type RoomPreview,
+  RoomPreviewDto,
+  type RoomView,
+  RoomViewDto,
+} from './room.view.js';
 import {
   type CreateChannel,
   CreateChannelDto,
@@ -43,6 +51,7 @@ export class RoomsController {
 
   @Post('spaces')
   @ApiOperation({ summary: 'Create a space (hierarchy node).' })
+  @ApiBody({ type: CreateSpaceDto })
   @ApiCreatedResponse({ type: RoomViewDto })
   @ApiProblemResponses({ validation: true, statuses: [403, 404, 422] })
   createSpace(
@@ -54,6 +63,7 @@ export class RoomsController {
 
   @Post('rooms')
   @ApiOperation({ summary: 'Create a channel, attached to a space.' })
+  @ApiBody({ type: CreateChannelDto })
   @ApiCreatedResponse({ type: RoomViewDto })
   @ApiProblemResponses({ validation: true, statuses: [403, 404, 422] })
   createChannel(
@@ -61,6 +71,16 @@ export class RoomsController {
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<RoomView> {
     return this.rooms.createChannel(principal, body);
+  }
+
+  @Get('rooms')
+  @ApiOperation({
+    summary: "The caller's spaces and channels, with the ancestor spaces that place them.",
+  })
+  @ApiOkResponse({ type: RoomListViewDto })
+  @ApiProblemResponses()
+  listRooms(@CurrentPrincipal() principal: AuthPrincipal): Promise<RoomListView> {
+    return this.rooms.listMine(principal);
   }
 
   @Get('rooms/:id')
