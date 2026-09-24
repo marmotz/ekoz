@@ -1,5 +1,5 @@
-// Typed as plain strings: these pages ship with the next rooms tasks (#84, #86, #87),
-// so the router does not know them yet.
-export const NEW_ROOM_PATH: string = '/rooms/new';
-export const DIRECTORY_PATH: string = '/rooms/directory';
+export const NEW_ROOM_PATH = '/rooms/new';
+export const DIRECTORY_PATH = '/rooms/directory';
+// Typed as a plain string: this page ships with the invitations task (#84), so the
+// router does not know it yet.
 export const INVITATIONS_PATH: string = '/rooms/invitations';

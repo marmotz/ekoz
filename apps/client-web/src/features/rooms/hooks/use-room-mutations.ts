@@ -103,7 +103,10 @@ export function useAcceptInvitation() {
   });
 }
 
-/** `POST /invitations/:id/decline`. */
+/**
+ * `POST /invitations/:id/decline`. The room itself is refreshed too: a pending
+ * invitation was what let the caller read an invite-only room.
+ */
 export function useDeclineInvitation() {
   const sdk = useStartedSdk();
   const invalidate = useInvalidate();
@@ -112,7 +115,12 @@ export function useDeclineInvitation() {
     mutationFn: ({ invitationId }: InvitationVariables) =>
       sdk().roomInvitations.decline(invitationId),
     onSettled: (_result, _error, { roomId }) =>
-      invalidate(roomKeys.list(), roomKeys.invitations(), roomKeys.permissions(roomId)),
+      invalidate(
+        roomKeys.list(),
+        roomKeys.invitations(),
+        roomKeys.permissions(roomId),
+        roomKeys.detail(roomId),
+      ),
   });
 }
 

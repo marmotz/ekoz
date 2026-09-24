@@ -13,19 +13,27 @@ export function useInvitations() {
   return useQuery(roomQueries.invitations(useSdk()));
 }
 
+export interface ConditionalQuery {
+  /** `false` keeps the query idle, e.g. until an earlier step says it is needed. Default `true`. */
+  enabled?: boolean;
+}
+
 /** One room (`GET /rooms/:id`). */
-export function useRoom(roomId: string) {
-  return useQuery(roomQueries.detail(useSdk(), roomId));
+export function useRoom(roomId: string, { enabled = true }: ConditionalQuery = {}) {
+  const options = roomQueries.detail(useSdk(), roomId);
+  return useQuery({ ...options, enabled: options.enabled && enabled });
 }
 
 /** Name, topic and own join request of a room the caller cannot read. */
-export function useRoomPreview(roomId: string) {
-  return useQuery(roomQueries.preview(useSdk(), roomId));
+export function useRoomPreview(roomId: string, { enabled = true }: ConditionalQuery = {}) {
+  const options = roomQueries.preview(useSdk(), roomId);
+  return useQuery({ ...options, enabled: options.enabled && enabled });
 }
 
 /** The caller's effective capabilities in a room. */
-export function useMyPermissions(roomId: string) {
-  return useQuery(roomQueries.permissions(useSdk(), roomId));
+export function useMyPermissions(roomId: string, { enabled = true }: ConditionalQuery = {}) {
+  const options = roomQueries.permissions(useSdk(), roomId);
+  return useQuery({ ...options, enabled: options.enabled && enabled });
 }
 
 /** Public directory search, paged. */
