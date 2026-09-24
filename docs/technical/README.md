@@ -8,6 +8,7 @@ has its own page with full context, alternatives and consequences:
 - [Web client bootstrap](web-client-bootstrap.md) — TanStack Start, shell, theme, i18n, session wiring, CI.
 - [Web client authentication](web-client-auth.md) — `_app` / `_auth` layouts, guest-only pages, error mapping, generated forms.
 - [Web client account](web-client-account.md): `/account` page, user-menu entries registry, avatar rendering, error mapping and the server changes behind it.
+- [Web client chat](web-client-chat.md): room history, live sync, composer, `shared/realtime` stream and the server, protocol and SDK changes behind it.
 - [Admin console Node entry point](admin-console-node-entry.md) — the `server.entry.mjs` adapter.
 - [SDK packaging and protocol-version policy](sdk-packaging-and-protocol-policy.md).
 - [HTTP API conventions](api-conventions.md) — problem+json, correlation, validation.
