@@ -146,6 +146,7 @@ http/
     create-space.hurl                  POST   /spaces                  201 · needs owner access_token
     create-space-forbidden.hurl        POST   /spaces                  403 room.permission_denied (non-owner)
     create-channel.hurl                POST   /rooms                   201 · owner + room_id (parent space)
+    list.hurl                          GET    /rooms                   200 · needs access_token
     get.hurl                           GET    /rooms/:id               200 · needs access_token + room_id
     get-not-found.hurl                 GET    /rooms/:id               404 room.not_found
     get-forbidden.hurl                 GET    /rooms/:id               403 room.permission_denied (private, non-member)
@@ -181,6 +182,8 @@ http/
     accept-invitation.hurl             POST   /invitations/:id/accept                  201 · needs invitation_id (invitee)
     decline-invitation.hurl            POST   /invitations/:id/decline                 204 · needs invitation_id (invitee)
     join-request.hurl                  POST   /rooms/:id/join-request                  201 · needs access_token + room_id
+    list-join-requests.hurl            GET    /rooms/:id/join-requests                 200 · needs room.manage_members + room_id
+    list-join-requests-forbidden.hurl  GET    /rooms/:id/join-requests                 403 room.permission_denied
     join-request-approve.hurl          POST   /rooms/:id/join-requests/:id/approve     201 · needs room.manage_members + join_request_id
     join-request-reject.hurl           POST   /rooms/:id/join-requests/:id/reject      204 · needs room.manage_members + join_request_id
     kick.hurl                          DELETE /rooms/:id/members/:userId               204 · needs room.kick + target_user_id

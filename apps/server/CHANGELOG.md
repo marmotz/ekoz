@@ -43,6 +43,8 @@ that does not touch this file.
 - The server logs its resolved configuration at boot, with secrets masked.
 - The creator of a space or channel becomes its first member, and existing rooms are backfilled. (#62)
 - `GET /me/room-invitations` lists the caller's pending room invitations with the room and the inviter. (#63)
+- `GET /rooms` lists the caller's spaces and channels, inherited ones and their ancestor spaces included. (#79)
+- `GET /rooms/:id/join-requests` lists a room's pending join requests with the requester, for moderators. (#80)
 - `GET /rooms/:id/preview` shows an invite-only room and the caller's join request to a non-member. (#64)
 - `POST /me/password` changes the password of the signed-in account and revokes its other sessions. (#101)
 - `GET /me/username` exposes the identifier change policy, cooldown end and pending request. (#102)

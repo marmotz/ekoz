@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { and } from '@prisma/orm-postgres/orm-client';
+import { ConfigService } from '../../../core/config/config.service.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { UserSummaryReader } from '../../../core/users/user-summary.reader.js';
 import {
@@ -22,7 +23,12 @@ import { PermissionsService } from '../permissions/permissions.service.js';
 import { ROLE_RANK, type RoomRole } from '../permissions/role-default-capabilities.js';
 import type { RoomRow } from '../rooms/room.view.js';
 import { FeedFanoutService } from '../streaming/feed-fanout.service.js';
-import type { BanMember, InviteMember, ListMembersQuery } from './membership.dto.js';
+import type {
+  BanMember,
+  InviteMember,
+  ListJoinRequestsQuery,
+  ListMembersQuery,
+} from './membership.dto.js';
 import {
   type JoinRequestRow,
   type JoinRequestView,
@@ -30,6 +36,7 @@ import {
   type MembershipRow,
   type MembershipView,
   type MyRoomInvitationListView,
+  type PendingJoinRequestListView,
   type RoomInvitationRow,
   type RoomInvitationView,
   toJoinRequestView,
@@ -70,6 +77,36 @@ function decodeMemberCursor(token: string): string | null {
   }
 }
 
+interface JoinRequestCursor {
+  createdAt: string;
+  id: string;
+}
+
+const JOIN_REQUEST_CURSOR_FLOOR = '1970-01-01T00:00:00.000Z';
+
+/** Opaque `GET /rooms/:id/join-requests` cursor: the last request of the previous page. */
+function encodeJoinRequestCursor(cursor: JoinRequestCursor): string {
+  return Buffer.from(JSON.stringify(cursor), 'utf8').toString('base64url');
+}
+
+function decodeJoinRequestCursor(token: string): JoinRequestCursor | null {
+  try {
+    const parsed: unknown = JSON.parse(Buffer.from(token, 'base64url').toString('utf8'));
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      typeof (parsed as Partial<JoinRequestCursor>).createdAt === 'string' &&
+      !Number.isNaN(Date.parse((parsed as JoinRequestCursor).createdAt)) &&
+      typeof (parsed as Partial<JoinRequestCursor>).id === 'string'
+    ) {
+      return parsed as JoinRequestCursor;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /** Membership lifecycle: join/leave, invitations, join requests, kick, ban/unban, role change (technical.md §9, issue #4). */
 @Injectable()
 export class MembershipService {
@@ -79,6 +116,7 @@ export class MembershipService {
     private readonly permissions: PermissionsService,
     private readonly feedFanout: FeedFanoutService,
     private readonly userSummaries: UserSummaryReader,
+    private readonly config: ConfigService,
   ) {}
 
   /**
@@ -372,6 +410,64 @@ export class MembershipService {
     ) as JoinRequestRow;
 
     return toJoinRequestView(row);
+  }
+
+  /**
+   * The pending join requests of a room (`approved IS NULL`), oldest first, for
+   * a moderator to approve or reject. The page size defaults to, and is capped
+   * at, `rooms.directory_page_size`.
+   */
+  async listJoinRequests(
+    actor: PermissionPrincipal,
+    roomId: string,
+    query: ListJoinRequestsQuery,
+  ): Promise<PendingJoinRequestListView> {
+    await this.findRoomOrThrow(roomId);
+    await this.permissions.assertCan(actor, roomId, 'room.manage_members');
+
+    const pageSize = this.config.get('rooms.directory_page_size');
+    const limit = Math.min(query.limit ?? pageSize, pageSize);
+    const cursor = query.cursor ? decodeJoinRequestCursor(query.cursor) : null;
+    const hasCursor = cursor !== null;
+
+    const plan = this.prisma.raw.sql`
+      SELECT id, room_id AS "roomId", user_id AS "userId", created_at AS "createdAt"
+      FROM room_join_request
+      WHERE room_id = ${roomId} AND approved IS NULL
+        AND (${hasCursor} = false OR (created_at, id) > (${cursor?.createdAt ?? JOIN_REQUEST_CURSOR_FLOOR}, ${cursor?.id ?? ''}))
+      ORDER BY created_at ASC, id ASC
+      LIMIT ${limit + 1}
+    `
+      .returnsRow({
+        id: { codecId: 'pg/text@1', nullable: false },
+        roomId: { codecId: 'pg/text@1', nullable: false },
+        userId: { codecId: 'pg/text@1', nullable: false },
+        createdAt: { codecId: 'pg/timestamptz-string@1', nullable: false },
+      })
+      .build();
+
+    const rows = (await this.prisma.runtime().query(plan)) as Array<{
+      id: string;
+      roomId: string;
+      userId: string;
+      createdAt: string;
+    }>;
+    const hasNextPage = rows.length > limit;
+    const page = hasNextPage ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+    const summaries = await this.userSummaries.readMany(page.map((row) => row.userId));
+
+    return {
+      items: page.flatMap((row) => {
+        const user = summaries.get(row.userId);
+
+        return user ? [{ id: row.id, roomId: row.roomId, createdAt: row.createdAt, user }] : [];
+      }),
+      nextCursor:
+        hasNextPage && last
+          ? encodeJoinRequestCursor({ createdAt: last.createdAt, id: last.id })
+          : null,
+    };
   }
 
   async approveJoinRequest(

@@ -14,10 +14,13 @@ import {
 import { EventLogService } from '../events/event-log.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import {
+  type RoomListItemRow,
+  type RoomListView,
   type RoomPreview,
   type RoomPreviewJoinRequestRow,
   type RoomRow,
   type RoomView,
+  toRoomListItem,
   toRoomPreview,
   toRoomView,
 } from './room.view.js';
@@ -78,6 +81,76 @@ export class RoomsService {
       topic: input.topic ?? null,
       slug: input.slug ?? null,
     });
+  }
+
+  /**
+   * The caller's spaces and channels (`GET /rooms`), in one query: rooms with
+   * an explicit membership (`member`), their descendants reached through that
+   * membership (`inherited`, the nearest ancestor membership giving the role,
+   * as {@link PermissionsService.effectiveRole} does), and the ancestor spaces
+   * needed to place them in the tree (`context`, `role: null`). Overrides are
+   * not evaluated: an inherited room with a `room.read` deny is still listed.
+   */
+  async listMine(actor: RoomActor): Promise<RoomListView> {
+    const plan = this.prisma.raw.sql`
+      WITH mine AS (
+        SELECT room_id, role FROM membership WHERE user_id = ${actor.userId}
+      ),
+      reached AS (
+        SELECT room_id, role, 0 AS depth FROM mine
+        UNION ALL
+        SELECT c.descendant_id, mine.role, c.depth
+        FROM mine JOIN room_closure c ON c.ancestor_id = mine.room_id AND c.depth > 0
+      ),
+      reach AS (
+        SELECT DISTINCT ON (r.id) r.id AS room_id, reached.role, reached.depth
+        FROM reached JOIN room r ON r.id = reached.room_id
+        WHERE r.type IN ('space', 'channel') AND r.deleted_at IS NULL
+        ORDER BY r.id, reached.depth ASC
+      ),
+      context AS (
+        SELECT DISTINCT c.ancestor_id AS room_id
+        FROM reach
+        JOIN room_closure c ON c.descendant_id = reach.room_id AND c.depth > 0
+        WHERE c.ancestor_id NOT IN (SELECT room_id FROM reach)
+      )
+      SELECT r.id, r.type, r.parent_id AS "parentId", r.visibility, r.slug, r.name, r.topic,
+             r.avatar_blob_id AS "avatarBlobId", r.default_role AS "defaultRole",
+             r.read_only AS "readOnly", r.origin_server AS "originServer",
+             r.last_seq AS "lastSeq", r.created_at AS "createdAt", r.updated_at AS "updatedAt",
+             reach.role AS "role",
+             CASE WHEN reach.room_id IS NULL THEN 'context'
+                  WHEN reach.depth = 0 THEN 'member'
+                  ELSE 'inherited' END AS "access"
+      FROM room r
+      LEFT JOIN reach ON reach.room_id = r.id
+      WHERE (reach.room_id IS NOT NULL OR r.id IN (SELECT room_id FROM context))
+        AND r.type IN ('space', 'channel') AND r.deleted_at IS NULL
+      ORDER BY r.created_at ASC, r.id ASC
+    `
+      .returnsRow({
+        id: { codecId: 'pg/text@1', nullable: false },
+        type: { codecId: 'pg/text@1', nullable: false },
+        parentId: { codecId: 'pg/text@1', nullable: true },
+        visibility: { codecId: 'pg/text@1', nullable: false },
+        slug: { codecId: 'pg/text@1', nullable: true },
+        name: { codecId: 'pg/text@1', nullable: true },
+        topic: { codecId: 'pg/text@1', nullable: true },
+        avatarBlobId: { codecId: 'pg/text@1', nullable: true },
+        defaultRole: { codecId: 'pg/text@1', nullable: false },
+        readOnly: { codecId: 'pg/bool@1', nullable: false },
+        originServer: { codecId: 'pg/text@1', nullable: false },
+        lastSeq: { codecId: 'pg/int8@1', nullable: false },
+        createdAt: { codecId: 'pg/timestamptz-string@1', nullable: false },
+        updatedAt: { codecId: 'pg/timestamptz-string@1', nullable: false },
+        role: { codecId: 'pg/text@1', nullable: true },
+        access: { codecId: 'pg/text@1', nullable: false },
+      })
+      .build();
+
+    const rows = (await this.prisma.runtime().query(plan)) as RoomListItemRow[];
+
+    return { items: rows.map(toRoomListItem) };
   }
 
   async getRoom(actor: RoomActor, id: string): Promise<RoomView> {

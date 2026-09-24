@@ -85,6 +85,37 @@ Create a channel, attached to a space.
   `room.invalid_parent_type` (`422`, `parentId` is not a space),
   `room.max_depth_exceeded` (`422`), validation (`422`).
 
+### `GET /rooms`
+
+The caller's spaces and channels, as the tree the client shows. Needs only
+authentication. `dm` / `group_dm` rooms and deleted rooms are left out.
+
+- `200`: `{ items: RoomListItem[] }`, ordered by `createdAt` (then `id`). Not
+  paginated: `rooms.max_depth` bounds the tree and a per-user listing is small;
+  the `items` envelope leaves room for a later `nextCursor`.
+- `RoomListItem` is every [`Room`](#the-room-object) field plus
+  `role: RoomRole | null` and `access`:
+  - `member`: the caller holds an explicit `Membership` on the room; `role` is
+    its role. Only these rooms can be left (`POST /rooms/:id/leave`).
+  - `inherited`: a descendant of a space the caller is a member of, with no
+    membership of its own; `role` is the role of the nearest ancestor
+    membership, the same rule as the effective role (see
+    [Permissions](#permissions)).
+  - `context`: an ancestor space the caller does not belong to, listed only to
+    place a `member` or `inherited` room in the tree; `role` is `null`.
+- Known limitation: overrides are not evaluated. An `inherited` room with a
+  `room.read` deny override is listed, while `GET /rooms/:id` answers `403`.
+
+```json
+{
+  "items": [
+    { "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV", "type": "space", "parentId": null, "...": "...", "role": null, "access": "context" },
+    { "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW", "type": "space", "parentId": "01ARZ3NDEKTSV4RRFFQ69G5FAV", "...": "...", "role": "member", "access": "member" },
+    { "id": "01ARZ3NDEKTSV4RRFFQ69G5FAX", "type": "channel", "parentId": "01ARZ3NDEKTSV4RRFFQ69G5FAW", "...": "...", "role": "member", "access": "inherited" }
+  ]
+}
+```
+
 ### `GET /rooms/:id`
 
 Room detail. Needs `room.read`.
@@ -322,6 +353,22 @@ the same request to pending.
 - `201`: `JoinRequest`.
 - Errors: `room.not_found` (`404`), `room.banned` (`403`),
   `room.already_member` (`409`), `room.join_request_already_exists` (`409`).
+
+### `GET /rooms/:id/join-requests`
+
+The pending join requests of a room (neither approved nor rejected), for a
+moderator to resolve. Needs `room.manage_members`.
+
+- Query: `?cursor=&limit=`. `limit` defaults to, and is capped at,
+  `rooms.directory_page_size`. `cursor` is an opaque token from a previous
+  response's `nextCursor`; a malformed one reads as the first page.
+- `200`: `{ items: PendingJoinRequest[], nextCursor: string | null }`, oldest
+  first. `PendingJoinRequest` is `{ id, roomId, createdAt, user: UserSummary }`
+  (see [The `UserSummary` object](#the-usersummary-object)); for a deleted
+  account the nullable `UserSummary` fields are `null`. A request made again
+  after a rejection is pending again and keeps its `createdAt`.
+- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`),
+  validation (`422`).
 
 ### `POST /rooms/:id/join-requests/:requestId/approve`
 

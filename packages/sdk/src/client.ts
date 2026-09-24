@@ -8,9 +8,14 @@ import { type ClientConfig, normaliseConfig } from './config.js';
 import { Discovery } from './discovery/discovery.js';
 import { type AdminResource, createAdminResource } from './resources/admin.js';
 import { type AuthResource, createAuthResource } from './resources/auth.js';
+import { createDirectoryResource, type DirectoryResource } from './resources/directory.js';
 import { createInvitationsResource, type InvitationsResource } from './resources/invitations.js';
 import { createMeResource, type MeResource } from './resources/me.js';
 import { createMessagesResource, type MessagesResource } from './resources/messages.js';
+import {
+  createRoomInvitationsResource,
+  type RoomInvitationsResource,
+} from './resources/room-invitations.js';
 import { createRoomsResource, type RoomsResource } from './resources/rooms.js';
 import { createSessionsResource, type SessionsResource } from './resources/sessions.js';
 import { createSetupResource, type SetupResource } from './resources/setup.js';
@@ -38,6 +43,8 @@ export interface EkozClient {
   invitations: InvitationsResource;
   admin: AdminResource;
   rooms: RoomsResource;
+  roomInvitations: RoomInvitationsResource;
+  directory: DirectoryResource;
   messages: MessagesResource;
   sync: SyncResource;
   stream: RoomStream;
@@ -100,6 +107,8 @@ export function createClient(config: ClientConfig): EkozClient {
     invitations: createInvitationsResource(session),
     admin: createAdminResource(session),
     rooms: createRoomsResource(session),
+    roomInvitations: createRoomInvitationsResource(session),
+    directory: createDirectoryResource(session),
     messages: createMessagesResource(session),
     sync: createSyncResource(session),
     stream: createRoomStream({

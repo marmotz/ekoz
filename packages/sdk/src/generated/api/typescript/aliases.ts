@@ -11,8 +11,10 @@ import type { ChangeEmailDtoDto } from './ChangeEmailDto.type.js';
 import type { ChangePasswordDtoDto } from './ChangePasswordDto.type.js';
 import type { ChangeUsernameDtoDto } from './ChangeUsernameDto.type.js';
 import type { ConfirmPasswordResetDtoDto } from './ConfirmPasswordResetDto.type.js';
+import type { CreateChannelDtoDto } from './CreateChannelDto.type.js';
 import type { CreatedInvitationDtoDto } from './CreatedInvitationDto.type.js';
 import type { CreateInvitationDtoDto } from './CreateInvitationDto.type.js';
+import type { CreateSpaceDtoDto } from './CreateSpaceDto.type.js';
 import type { DeleteMeDtoDto } from './DeleteMeDto.type.js';
 import type { DirectoryListResponseDtoDto } from './DirectoryListResponseDto.type.js';
 import type { DiscoveryDocumentDtoDto } from './DiscoveryDocumentDto.type.js';
@@ -32,6 +34,7 @@ import type { MeViewDtoDto } from './MeViewDto.type.js';
 import type { ModerationLogEntryDtoDto } from './ModerationLogEntryDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.type.js';
+import type { PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
 import type { PublicProfileViewDtoDto } from './PublicProfileViewDto.type.js';
 import type { ReadMarkerViewDtoDto } from './ReadMarkerViewDto.type.js';
@@ -42,6 +45,7 @@ import type { RequestPasswordResetDtoDto } from './RequestPasswordResetDto.type.
 import type { ResendVerificationDtoDto } from './ResendVerificationDto.type.js';
 import type { RevokeAllSessionsResponseDtoDto } from './RevokeAllSessionsResponseDto.type.js';
 import type { RoomInvitationViewDtoDto } from './RoomInvitationViewDto.type.js';
+import type { RoomListViewDtoDto } from './RoomListViewDto.type.js';
 import type { RoomPreviewDtoDto } from './RoomPreviewDto.type.js';
 import type { RoomRetentionViewDtoDto } from './RoomRetentionViewDto.type.js';
 import type { RoomViewDtoDto } from './RoomViewDto.type.js';
@@ -425,6 +429,8 @@ export type AdminOwnersController_remove409ResponseProblemJson = ProblemDetailsD
 
 export type AdminOwnersController_removePathUserId = string;
 
+export type RoomsController_createSpaceRequest = CreateSpaceDtoDto;
+
 export type RoomsController_createSpace201ResponseJson = RoomViewDtoDto;
 
 export type RoomsController_createSpace401ResponseProblemJson = ProblemDetailsDtoDto;
@@ -434,6 +440,12 @@ export type RoomsController_createSpace403ResponseProblemJson = ProblemDetailsDt
 export type RoomsController_createSpace404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type RoomsController_createSpace422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_listRooms200ResponseJson = RoomListViewDtoDto;
+
+export type RoomsController_listRooms401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type RoomsController_createChannelRequest = CreateChannelDtoDto;
 
 export type RoomsController_createChannel201ResponseJson = RoomViewDtoDto;
 
@@ -580,6 +592,16 @@ export type MembershipController_createJoinRequest403ResponseProblemJson = Probl
 export type MembershipController_createJoinRequest404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MembershipController_createJoinRequest409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listJoinRequests200ResponseJson = PendingJoinRequestListViewDtoDto;
+
+export type MembershipController_listJoinRequests401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listJoinRequests403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listJoinRequests404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MembershipController_listJoinRequests422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MembershipController_approveJoinRequest200ResponseJson = MembershipViewDtoDto;
 

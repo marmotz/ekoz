@@ -127,3 +127,35 @@ export function toRoomPreview(
     joinRequest: toPreviewJoinRequest(joinRequest),
   };
 }
+
+/**
+ * How the caller reaches a room listed by `GET /rooms`: an explicit membership,
+ * one inherited from an ancestor space, or an ancestor space listed only to
+ * place such a room in the tree.
+ */
+export const roomAccessSchema = z.enum(['member', 'inherited', 'context']);
+export type RoomAccess = z.infer<typeof roomAccessSchema>;
+
+/** A `Room` of the caller's tree, with the caller's role on it (`null` for `context`). */
+export const RoomListItemSchema = RoomViewSchema.extend({
+  role: roomRoleSchema.nullable(),
+  access: roomAccessSchema,
+});
+export type RoomListItem = z.infer<typeof RoomListItemSchema>;
+
+export const RoomListViewSchema = z.object({ items: z.array(RoomListItemSchema) });
+export type RoomListView = z.infer<typeof RoomListViewSchema>;
+export class RoomListViewDto extends createZodDto(RoomListViewSchema) {}
+
+export interface RoomListItemRow extends Omit<RoomRow, 'deletedAt'> {
+  role: z.infer<typeof roomRoleSchema> | null;
+  access: RoomAccess;
+}
+
+export function toRoomListItem(row: RoomListItemRow): RoomListItem {
+  return {
+    ...toRoomView({ ...row, deletedAt: null }),
+    role: row.role,
+    access: row.access,
+  };
+}
