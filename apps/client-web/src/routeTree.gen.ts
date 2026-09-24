@@ -23,6 +23,7 @@ import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email
 import { Route as AppRoomsIndexRouteImport } from './routes/_app/rooms/index'
 import { Route as AppRoomsRoomIdRouteImport } from './routes/_app/rooms/$roomId'
 import { Route as AppRoomsDirectoryRouteImport } from './routes/_app/rooms/directory'
+import { Route as AppRoomsInvitationsRouteImport } from './routes/_app/rooms/invitations'
 import { Route as AppRoomsNewRouteImport } from './routes/_app/rooms/new'
 import { Route as AppRoomsRoomIdRequestsRouteImport } from './routes/_app/rooms/$roomId/requests'
 
@@ -94,6 +95,11 @@ const AppRoomsDirectoryRoute = AppRoomsDirectoryRouteImport.update({
   path: '/directory',
   getParentRoute: () => AppRoomsRoute,
 } as any)
+const AppRoomsInvitationsRoute = AppRoomsInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
+  getParentRoute: () => AppRoomsRoute,
+} as any)
 const AppRoomsNewRoute = AppRoomsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof AuthVerifyEmailRoute
   '/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
   '/rooms/directory': typeof AppRoomsDirectoryRoute
+  '/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/rooms/new': typeof AppRoomsNewRoute
   '/rooms/': typeof AppRoomsIndexRoute
   '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof AuthVerifyEmailRoute
   '/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
   '/rooms/directory': typeof AppRoomsDirectoryRoute
+  '/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/rooms/new': typeof AppRoomsNewRoute
   '/rooms': typeof AppRoomsIndexRoute
   '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
   '/_app/rooms/directory': typeof AppRoomsDirectoryRoute
+  '/_app/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/_app/rooms/new': typeof AppRoomsNewRoute
   '/_app/rooms/': typeof AppRoomsIndexRoute
   '/_app/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/rooms/$roomId'
     | '/rooms/directory'
+    | '/rooms/invitations'
     | '/rooms/new'
     | '/rooms/'
     | '/rooms/$roomId/requests'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/rooms/$roomId'
     | '/rooms/directory'
+    | '/rooms/invitations'
     | '/rooms/new'
     | '/rooms'
     | '/rooms/$roomId/requests'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/rooms/$roomId'
     | '/_app/rooms/directory'
+    | '/_app/rooms/invitations'
     | '/_app/rooms/new'
     | '/_app/rooms/'
     | '/_app/rooms/$roomId/requests'
@@ -312,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoomsDirectoryRouteImport
       parentRoute: typeof AppRoomsRoute
     }
+    '/_app/rooms/invitations': {
+      id: '/_app/rooms/invitations'
+      path: '/invitations'
+      fullPath: '/rooms/invitations'
+      preLoaderRoute: typeof AppRoomsInvitationsRouteImport
+      parentRoute: typeof AppRoomsRoute
+    }
     '/_app/rooms/new': {
       id: '/_app/rooms/new'
       path: '/new'
@@ -344,6 +363,7 @@ const AppRoomsRoomIdRouteWithChildren = AppRoomsRoomIdRoute._addFileChildren(
 interface AppRoomsRouteChildren {
   AppRoomsRoomIdRoute: typeof AppRoomsRoomIdRouteWithChildren
   AppRoomsDirectoryRoute: typeof AppRoomsDirectoryRoute
+  AppRoomsInvitationsRoute: typeof AppRoomsInvitationsRoute
   AppRoomsNewRoute: typeof AppRoomsNewRoute
   AppRoomsIndexRoute: typeof AppRoomsIndexRoute
 }
@@ -351,6 +371,7 @@ interface AppRoomsRouteChildren {
 const AppRoomsRouteChildren: AppRoomsRouteChildren = {
   AppRoomsRoomIdRoute: AppRoomsRoomIdRouteWithChildren,
   AppRoomsDirectoryRoute: AppRoomsDirectoryRoute,
+  AppRoomsInvitationsRoute: AppRoomsInvitationsRoute,
   AppRoomsNewRoute: AppRoomsNewRoute,
   AppRoomsIndexRoute: AppRoomsIndexRoute,
 }

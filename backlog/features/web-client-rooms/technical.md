@@ -3,6 +3,7 @@
 Technical design for the rooms UI of `apps/client-web`, the server listings it
 needs in `apps/server`, and the matching SDK bindings in `packages/sdk`. Product
 decisions are in [overview.md](./overview.md); this page grounds them in the code.
+What shipped is recorded in [web client rooms](../../../docs/technical/web-client-rooms.md).
 
 Related: [rooms and permissions protocol](../../../docs/protocol/rooms-and-permissions.md),
 [conversations technical design](../../_archives/features/conversations/technical.md),
@@ -305,7 +306,7 @@ Vitest + Testing Library with the `@ekozhq/sdk` module mocked (bootstrap convent
 `RoomGate` (each state, the `403` -> preview fallback, and which states render children with `{ room, capabilities, membership }`), `CreateRoomForm` (eligibility,
 owner root option, error mapping), directory paging and join, invitations, join
 requests. `bun run typecheck`, `lint`, `lint:boundaries` green. `apps/client-web/CHANGELOG.md`
-entries. A `docs/technical/` page records the sidebar slot, the `RoomGate` states and the
+entries. A `docs/technical/` page ([web-client-rooms.md](../../../docs/technical/web-client-rooms.md)) records the sidebar slot, the `RoomGate` states and the
 endpoint decisions (this design, once shipped).
 
 ## 5. Alternatives considered
