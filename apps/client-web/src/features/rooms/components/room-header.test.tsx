@@ -129,4 +129,22 @@ describe('RoomHeader', () => {
     expect(await screen.findByRole('heading', { name: 'General' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Requests' })).not.toBeInTheDocument();
   });
+
+  it('links to the groups with room.manage_groups', async () => {
+    renderHeader(roomItem({ id: 'r1' }), { capabilities: ['room.manage_groups'] });
+
+    expect(await screen.findByRole('link', { name: 'Groups' })).toHaveAttribute(
+      'href',
+      '/rooms/r1/groups',
+    );
+  });
+
+  it('hides the groups without room.manage_groups', async () => {
+    renderHeader(roomItem({ id: 'r1', name: 'General' }), {
+      capabilities: ['room.manage_members'],
+    });
+
+    expect(await screen.findByRole('heading', { name: 'General' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Groups' })).not.toBeInTheDocument();
+  });
 });

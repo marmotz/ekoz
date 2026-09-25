@@ -59,7 +59,7 @@ export function createFakeStream() {
 
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `groups`, `mentions`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -143,9 +143,23 @@ export function createFakeSdk(initial?: FakeSession) {
       avatar: vi.fn(async () => new Blob(['avatar'], { type: 'image/png' })),
     },
     messages: {
-      list: vi.fn(async () => ({ items: [], lastSeq: '0', hasMore: false })),
+      list: vi.fn(async () => ({ items: [], lastSeq: '0', hasMore: false, hasMoreNewer: false })),
       get: vi.fn(async () => ({})),
       send: vi.fn(async () => ({})),
+      edit: vi.fn(async () => ({})),
+    },
+    groups: {
+      list: vi.fn(async () => ({ items: [] as unknown[] })),
+      get: vi.fn(async () => ({})),
+      create: vi.fn(async () => ({})),
+      rename: vi.fn(async () => ({})),
+      remove: vi.fn(async () => {}),
+      addMember: vi.fn(async () => {}),
+      removeMember: vi.fn(async () => {}),
+    },
+    mentions: {
+      list: vi.fn(async () => ({ items: [] as unknown[], nextCursor: null as string | null })),
+      unread: vi.fn(async () => ({ items: [] as unknown[] })),
     },
     rooms: {
       list: vi.fn(async () => ({ items: [] as unknown[] })),

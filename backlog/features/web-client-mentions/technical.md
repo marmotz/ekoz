@@ -392,15 +392,18 @@ A new `MentionResolver` service, used by send and edit.
 - **Highlight.** `message-item.tsx` highlights a message when `mentionsMe` is
   set: a strong tint for `direct`, a lighter one for `collective`.
 
-### C3. Live "concerns me" (`features/chat/lib/mentions-me.ts`)
+### C3. Live "concerns me" (`shared/mentions/mentions-me.ts`, re-exported by `features/chat/lib/mentions-me.ts`)
+
+The derivation lives in `shared/` because the unread counters (C5) need it outside the
+chat feature.
 
 - **Live events.** The event carries no per-viewer value (F8), so on a
   `message_created` the client derives `mentionsMe` from the targets:
   - `user` equal to me: `direct`;
   - `all`: `collective`. Receiving the event means I am an effective member
     now, which is send time.
-  - `role` equal to my effective role in the room (from `RoomGate`'s room
-    access): `collective`;
+  - `role` equal to my effective role in the room (from the members list in the
+    query cache, `RoomGate` only hands capabilities): `collective`;
   - `group` whose `isMember` is true in `useRoomGroups`: `collective`.
 
   The author never concerns themselves.

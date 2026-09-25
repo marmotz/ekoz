@@ -236,7 +236,10 @@
       "loadingOlder": "Chargement des messages plus anciens",
       "loadOlderFailed": "Impossible de charger les messages plus anciens. Réessayer",
       "error": "Les messages n'ont pas pu être chargés.",
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "loadNewer": "Charger les messages plus récents",
+      "loadingNewer": "Chargement des messages plus récents",
+      "loadNewerFailed": "Impossible de charger les messages plus récents. Réessayer"
     },
     "message": {
       "deleted": "Message supprimé",
@@ -261,12 +264,47 @@
         "bodyTooLong": "Ce message est trop long.",
         "bodyInvalid": "Ce message n'est pas valide.",
         "network": "Le serveur est injoignable.",
-        "generic": "Le message n'a pas pu être envoyé."
+        "generic": "Le message n'a pas pu être envoyé.",
+        "mentionInvalid": "Une mention n'est plus valide. Supprimez-la et réessayez."
+      },
+      "suggestions": {
+        "label": "Suggestions de mention",
+        "empty": "Aucun résultat",
+        "sections": {
+          "people": "Personnes",
+          "groups": "Groupes",
+          "roles": "Rôles",
+          "all": "Tout le monde"
+        }
       }
     },
     "connection": {
       "reconnecting": "Reconnexion...",
       "offline": "Hors ligne"
+    },
+    "mentions": {
+      "all": "tous",
+      "roles": {
+        "space_admin": "admins-espace",
+        "room_admin": "admins-salon",
+        "moderator": "moderateurs",
+        "member": "membres",
+        "reader": "lecteurs"
+      },
+      "aria": {
+        "user": "Mention de {{name}}, ouvrir le profil",
+        "userLeft": "Mention de {{name}}, qui a quitté le salon",
+        "userDeleted": "Mention d'un compte supprimé",
+        "all": "Mention de toutes les personnes du salon",
+        "role": "Mention de tous les {{role}}",
+        "group": "Mention du groupe {{name}}",
+        "groupDeleted": "Mention d'un groupe supprimé"
+      }
+    },
+    "jump": {
+      "missing": "Ce message n'est plus disponible.",
+      "detached": "Vous consultez d'anciens messages.",
+      "latest": "Aller au dernier message"
     }
   },
   "members": {
@@ -396,7 +434,8 @@
       "leave": "Quitter",
       "channels": "Salons",
       "noChannels": "Aucun salon dans cet espace pour l'instant.",
-      "requests": "Demandes"
+      "requests": "Demandes",
+      "groups": "Groupes"
     },
     "create": {
       "title": "Créer un espace ou un salon",
@@ -462,6 +501,78 @@
         "member": "membre",
         "reader": "lecteur"
       }
+    },
+    "groups": {
+      "title": "Groupes",
+      "back": "Retour au salon",
+      "forbidden": "Vous ne pouvez pas gérer les groupes de ce salon.",
+      "loading": "Chargement des groupes",
+      "error": "Les groupes n'ont pas pu être chargés.",
+      "retry": "Réessayer",
+      "own": "Groupes de ce salon",
+      "inherited": "Groupes hérités",
+      "empty": "Aucun groupe pour le moment.",
+      "definedOn": "défini sur {{name}}",
+      "memberCount_one": "{{count}} membre",
+      "memberCount_other": "{{count}} membres",
+      "create": {
+        "label": "Nouveau groupe",
+        "placeholder": "equipe-design",
+        "submit": "Créer"
+      },
+      "nameHelp": "De 1 à 32 caractères : minuscules, chiffres, points, tirets et tirets bas. Mentionné avec @nom.",
+      "showMembers": "Afficher les membres de {{name}}",
+      "hideMembers": "Masquer les membres de {{name}}",
+      "rename": "Renommer {{name}}",
+      "delete": "Supprimer {{name}}",
+      "newName": "Nouveau nom",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "noMembers": "Aucun membre dans ce groupe.",
+      "deletedAccount": "Compte supprimé",
+      "removeMember": "Retirer {{name}}",
+      "pickMember": "Ajouter un membre à {{name}}",
+      "pickPlaceholder": "Choisir un membre",
+      "addMember": "Ajouter",
+      "confirmDelete": {
+        "title": "Supprimer le groupe {{name}} ?",
+        "message": "Les messages qui le mentionnent gardent leur audience. Cette action est irréversible.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer"
+      },
+      "errors": {
+        "nameInvalid": "De 1 à 32 caractères : minuscules, chiffres, points, tirets et tirets bas.",
+        "nameReserved": "Ce nom est réservé (@all et les noms de rôles).",
+        "nameTaken": "Un groupe portant ce nom existe déjà sur cet espace ou l'un de ses salons.",
+        "memberNotMember": "Cette personne n'est pas membre du salon.",
+        "notFound": "Ce groupe n'existe plus."
+      }
+    }
+  },
+  "mentions": {
+    "title": "Mes mentions",
+    "sidebar": {
+      "label": "Mentions",
+      "unread_one": "{{count}} mention non lue",
+      "unread_other": "{{count}} mentions non lues"
+    },
+    "badge": {
+      "direct_one": "{{count}} mention non lue, dont vous nommément",
+      "direct_other": "{{count}} mentions non lues, dont vous nommément",
+      "collective_one": "{{count}} mention de groupe non lue",
+      "collective_other": "{{count}} mentions de groupe non lues"
+    },
+    "list": {
+      "loading": "Chargement de vos mentions",
+      "error": "Vos mentions n'ont pas pu être chargées.",
+      "retry": "Réessayer",
+      "empty": "Personne ne vous a encore mentionné.",
+      "loadMore": "Charger plus",
+      "deletedAccount": "Compte supprimé",
+      "open": "Ouvrir {{room}} à ce message",
+      "direct": "Vous mentionne",
+      "collective": "Mentionne un groupe",
+      "unread": "Non lu"
     }
   }
 }

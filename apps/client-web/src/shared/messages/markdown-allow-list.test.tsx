@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import Markdown from 'react-markdown';
 import { expect, it } from 'vitest';
 
-import { markdownOptions, transformUrl } from '@/features/chat/lib/markdown-allow-list';
+import { markdownOptions, transformUrl } from '@/shared/messages/markdown-allow-list';
 
 function renderMarkdown(source: string) {
   return render(<Markdown {...markdownOptions}>{source}</Markdown>);

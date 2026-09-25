@@ -1,7 +1,7 @@
 import type { Room, RoomListItem } from '@ekozhq/sdk';
 import { Link, useNavigate } from '@tanstack/react-router';
 import type { ParseKeys } from 'i18next';
-import { Folder, Hash, UserPlus } from 'lucide-react';
+import { Folder, Hash, UserPlus, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { roomErrorKey } from '@/features/rooms/api/errors';
@@ -28,7 +28,7 @@ export interface RoomHeaderProps {
  * Name, topic and type of a room. Leave is offered for an explicit membership only
  * (`access: "member"`): leaving an inherited access answers `room.membership_not_found`.
  * A space lists its channels from the cached rooms list; moderators get a link to the
- * pending join requests.
+ * pending join requests and, with `room.manage_groups`, to the groups.
  */
 export function RoomHeader({ room, capabilities, actions }: RoomHeaderProps) {
   const { t } = useTranslation();
@@ -55,6 +55,14 @@ export function RoomHeader({ room, capabilities, actions }: RoomHeaderProps) {
             <Link to="/rooms/$roomId/requests" params={{ roomId: room.id }}>
               <UserPlus />
               {t('rooms.header.requests')}
+            </Link>
+          </Button>
+        )}
+        {capabilities.includes('room.manage_groups') && (
+          <Button asChild size="sm" variant="outline">
+            <Link to="/rooms/$roomId/groups" params={{ roomId: room.id }}>
+              <Users />
+              {t('rooms.header.groups')}
             </Link>
           </Button>
         )}

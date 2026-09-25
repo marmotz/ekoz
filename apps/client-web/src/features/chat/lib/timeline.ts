@@ -1,5 +1,12 @@
 import type { MentionTarget, Message, RoomEvent } from '@ekozhq/sdk';
 
+import {
+  deriveMentionsMe,
+  type MentionsMe,
+  type MentionViewer,
+  parseMentionsMe,
+} from '@/shared/mentions/mentions-me';
+
 /**
  * Pure timeline state of one room and the only place room events are interpreted
  * (web-client-chat technical design 6.1). No React, no SDK calls.
@@ -19,6 +26,8 @@ export interface TimelineMessage {
   body: string;
   replyToId: string | null;
   mentions: MentionTarget[];
+  /** From the server on REST pages, derived from the targets on live events. */
+  mentionsMe: MentionsMe | null;
   editedAt: string | null;
   redactedAt: string | null;
   hiddenAt: string | null;
@@ -30,6 +39,7 @@ export type SendFailureReason =
   | 'permission_denied'
   | 'body_too_long'
   | 'body_invalid'
+  | 'mention_invalid'
   | 'network'
   | 'unknown';
 
@@ -37,6 +47,8 @@ export type SendFailureReason =
 export interface PendingMessage {
   localId: string;
   body: string;
+  /** The targets the body mentions, so the pending message can show its chips. */
+  mentions: MentionTarget[];
   state: 'sending' | 'failed';
   reason?: SendFailureReason;
 }
@@ -45,6 +57,11 @@ export interface Timeline {
   /** Ascending `seq`, unique by `seq`. */
   messages: TimelineMessage[];
   hasMoreOlder: boolean;
+  /**
+   * True while the window ends before the newest message (opened at a message with
+   * `around`): live `message_created` events are not inserted, they would leave a gap.
+   */
+  hasMoreNewer: boolean;
   /** Highest room `seq` reflected in `messages`. */
   lastSeq: string;
   pending: PendingMessage[];
@@ -55,6 +72,8 @@ export interface MessagesPageLike {
   items: readonly Message[];
   lastSeq: string;
   hasMore: boolean;
+  /** Absent on pages that end at the newest message. */
+  hasMoreNewer?: boolean;
 }
 
 export interface ApplyResult {
@@ -77,6 +96,7 @@ export function toTimelineMessage(message: Message): TimelineMessage {
     body: message.body,
     replyToId: message.replyToId,
     mentions: message.mentions,
+    mentionsMe: parseMentionsMe(message.mentionsMe),
     editedAt: toIso(message.editedAt),
     redactedAt: toIso(message.redactedAt),
     hiddenAt: toIso(message.hiddenAt),
@@ -117,11 +137,15 @@ function replaceWhere(
   return messages.map((message) => (matches(message) ? replace(message) : message));
 }
 
-/** Timeline seeded from the newest page (`GET /rooms/:id/messages`). */
+/**
+ * Timeline seeded from the newest page (`GET /rooms/:id/messages`), or from an
+ * `around` page, which is detached while `hasMoreNewer` is set.
+ */
 export function mergeFirstPage(page: MessagesPageLike, pending: PendingMessage[] = []): Timeline {
   return {
     messages: page.items.map(toTimelineMessage),
     hasMoreOlder: page.hasMore,
+    hasMoreNewer: page.hasMoreNewer ?? false,
     lastSeq: page.lastSeq,
     pending,
   };
@@ -134,6 +158,24 @@ export function prependOlder(timeline: Timeline, page: MessagesPageLike): Timeli
   const messages = [...older, ...timeline.messages];
   messages.sort((a, b) => compareSeq(a.seq, b.seq));
   return { ...timeline, messages, hasMoreOlder: page.hasMore };
+}
+
+/**
+ * Adds an `after` page behind the loaded messages, ignoring the ones already there.
+ * Once `hasMoreNewer` is false the timeline is attached to the head again and behaves
+ * as one opened on the newest page.
+ */
+export function appendNewer(timeline: Timeline, page: MessagesPageLike): Timeline {
+  const known = new Set(timeline.messages.map((message) => message.seq));
+  const newer = page.items.map(toTimelineMessage).filter((message) => !known.has(message.seq));
+  const messages = [...timeline.messages, ...newer];
+  messages.sort((a, b) => compareSeq(a.seq, b.seq));
+  return {
+    ...timeline,
+    messages,
+    hasMoreNewer: page.hasMoreNewer ?? false,
+    lastSeq: maxSeq(timeline.lastSeq, page.lastSeq),
+  };
 }
 
 /** Replaces a message by id with a freshly fetched one (after a `message_edited`). */
@@ -152,8 +194,13 @@ export function replaceMessage(timeline: Timeline, message: TimelineMessage): Ti
 /**
  * Applies one room event. Events at or below `lastSeq` are ignored, which makes
  * the live stream, the durable-feed replay and `/sync` catch-up safe to overlap.
+ * `viewer` derives `mentionsMe` for a `message_created`.
  */
-export function applyRoomEvent(timeline: Timeline, event: RoomEvent): ApplyResult {
+export function applyRoomEvent(
+  timeline: Timeline,
+  event: RoomEvent,
+  viewer: MentionViewer | null = null,
+): ApplyResult {
   // A deletion rewrites the original row in place, so a redacted event keeps the
   // `seq` of the message it hides and would always look old to the guard below.
   if (event.type === 'message_redacted') {
@@ -174,6 +221,8 @@ export function applyRoomEvent(timeline: Timeline, event: RoomEvent): ApplyResul
 
   switch (event.type) {
     case 'message_created': {
+      // Detached: inserting it would leave a gap; it is loaded when the window catches up.
+      if (timeline.hasMoreNewer) return { timeline: advanced, refetch: [] };
       const { messageId, body, replyToId, mentions } = event.content;
       const message: TimelineMessage = {
         id: messageId,
@@ -183,6 +232,7 @@ export function applyRoomEvent(timeline: Timeline, event: RoomEvent): ApplyResul
         body,
         replyToId,
         mentions,
+        mentionsMe: deriveMentionsMe(mentions, event.senderId, viewer),
         editedAt: null,
         redactedAt: null,
         hiddenAt: null,
@@ -251,7 +301,8 @@ export function reconcilePending(
 ): Timeline {
   return {
     ...timeline,
-    messages: insertBySeq(timeline.messages, message),
+    // Detached: the message belongs after a gap; it is loaded when the window catches up.
+    messages: timeline.hasMoreNewer ? timeline.messages : insertBySeq(timeline.messages, message),
     pending: timeline.pending.filter((entry) => entry.localId !== localId),
   };
 }

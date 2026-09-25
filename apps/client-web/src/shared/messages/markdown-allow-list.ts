@@ -21,6 +21,7 @@ export const ALLOWED_ELEMENTS = [
   'li',
   'a',
   'br',
+  'mention',
 ] as const;
 
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);

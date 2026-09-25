@@ -7,7 +7,7 @@ import { ConnectionBanner } from '@/features/chat/components/connection-banner';
 import { MessageList } from '@/features/chat/components/message-list';
 import { useAuthors } from '@/features/chat/hooks/use-authors';
 import { useSendMessage } from '@/features/chat/hooks/use-send-message';
-import { useLoadOlder, useTimeline } from '@/features/chat/hooks/use-timeline';
+import { useLoadNewer, useLoadOlder, useTimeline } from '@/features/chat/hooks/use-timeline';
 import { useTimelineSync } from '@/features/chat/hooks/use-timeline-sync';
 import {
   type ChatMembership,
@@ -23,6 +23,10 @@ export interface RoomChatProps {
   room: ChatRoom;
   capabilities: readonly string[];
   membership: ChatMembership;
+  /** `seq` of a message to open the room at, instead of at the newest message. */
+  at?: string | undefined;
+  /** Leaves the message the room was opened at: back to the newest messages. */
+  onJumpToLatest?: (() => void) | undefined;
 }
 
 /**
@@ -30,11 +34,12 @@ export interface RoomChatProps {
  * `membership` come from `RoomGate` through the route; nothing about access is
  * fetched here. The timeline lives in the query cache only while this is mounted.
  */
-export function RoomChat({ room, capabilities, membership }: RoomChatProps) {
+export function RoomChat({ room, capabilities, membership, at, onJumpToLatest }: RoomChatProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const timeline = useTimeline(room.id);
+  const timeline = useTimeline(room.id, at);
   const { loadOlder, state: olderState } = useLoadOlder(room.id);
+  const { loadNewer, state: newerState } = useLoadNewer(room.id);
   const { send, retry } = useSendMessage(room.id);
   useTimelineSync(room.id);
 
@@ -66,10 +71,14 @@ export function RoomChat({ room, capabilities, membership }: RoomChatProps) {
         </div>
       ) : timeline.data ? (
         <MessageList
+          roomId={room.id}
           timeline={timeline.data}
           resolveAuthor={resolve}
           onLoadOlder={() => void loadOlder()}
           olderState={olderState}
+          onLoadNewer={() => void loadNewer()}
+          newerState={newerState}
+          targetSeq={at}
           onRetryPending={(localId) => void retry(localId)}
         />
       ) : (
@@ -79,10 +88,23 @@ export function RoomChat({ room, capabilities, membership }: RoomChatProps) {
           <Skeleton className="h-10 w-3/4" />
         </div>
       )}
+      {timeline.data?.hasMoreNewer && onJumpToLatest ? (
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-between gap-2 border-t bg-muted/50 px-4 py-2 text-sm"
+        >
+          <span>{t('chat.jump.detached')}</span>
+          <Button type="button" size="sm" onClick={onJumpToLatest}>
+            {t('chat.jump.latest')}
+          </Button>
+        </div>
+      ) : null}
       <Composer
+        roomId={room.id}
+        allowCollective={room.type === 'channel'}
         block={composerBlock(room, capabilities, membership)}
         loading={!timeline.data}
-        onSend={(body) => void send(body)}
+        onSend={(message) => void send(message)}
       />
     </section>
   );

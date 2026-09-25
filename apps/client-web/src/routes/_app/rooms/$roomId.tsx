@@ -1,16 +1,28 @@
-import { createFileRoute, Outlet, useChildMatches } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
 
 import { RoomChat } from '@/features/chat/components/room-chat';
 import { MembersPanel } from '@/features/members/components/members-panel';
 import { MembersToggle } from '@/features/members/components/members-toggle';
 import { RoomGate } from '@/features/rooms/components/room-gate';
 import { RoomHeader } from '@/features/rooms/components/room-header';
+import { useGroupsLive } from '@/shared/groups/use-groups-live';
 import { useMembersLive } from '@/shared/members/use-members-live';
+
+/** `at`: the `seq` of a message to open the room at, a decimal string (or the number a hand-typed URL gives). */
+// The router merges the result over the raw search, so an invalid value must be overridden explicitly.
+export function validateRoomSearch(search: Record<string, unknown>): { at?: string | undefined } {
+  const { at } = search;
+  const value = typeof at === 'number' && Number.isSafeInteger(at) ? String(at) : at;
+  return { at: typeof value === 'string' && /^\d+$/.test(value) ? value : undefined };
+}
 
 function RoomPage() {
   const { roomId } = Route.useParams();
+  const { at } = Route.useSearch();
+  const navigate = useNavigate();
   const hasChildPage = useChildMatches().length > 0;
   useMembersLive(roomId);
+  useGroupsLive(roomId);
 
   return (
     <RoomGate roomId={roomId}>
@@ -30,10 +42,18 @@ function RoomPage() {
                   <Outlet />
                 ) : (
                   <RoomChat
-                    key={room.id}
+                    key={`${room.id}:${at ?? ''}`}
                     room={room}
                     capabilities={capabilities}
                     membership={membership}
+                    at={at}
+                    onJumpToLatest={() =>
+                      void navigate({
+                        to: '/rooms/$roomId',
+                        params: { roomId: room.id },
+                        search: {},
+                      })
+                    }
                   />
                 )}
               </div>
@@ -56,5 +76,6 @@ function RoomPage() {
  */
 export const Route = createFileRoute('/_app/rooms/$roomId')({
   staticData: { title: 'chat.title' },
+  validateSearch: validateRoomSearch,
   component: RoomPage,
 });

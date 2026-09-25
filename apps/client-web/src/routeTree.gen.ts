@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppMentionsRouteImport } from './routes/_app/mentions'
 import { Route as AppRoomsRouteImport } from './routes/_app/rooms'
 import { Route as AuthCheckEmailRouteImport } from './routes/_auth/check-email'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
@@ -25,6 +26,7 @@ import { Route as AppRoomsRoomIdRouteImport } from './routes/_app/rooms/$roomId'
 import { Route as AppRoomsDirectoryRouteImport } from './routes/_app/rooms/directory'
 import { Route as AppRoomsInvitationsRouteImport } from './routes/_app/rooms/invitations'
 import { Route as AppRoomsNewRouteImport } from './routes/_app/rooms/new'
+import { Route as AppRoomsRoomIdGroupsRouteImport } from './routes/_app/rooms/$roomId/groups'
 import { Route as AppRoomsRoomIdRequestsRouteImport } from './routes/_app/rooms/$roomId/requests'
 
 const AppRoute = AppRouteImport.update({
@@ -43,6 +45,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAccountRoute = AppAccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMentionsRoute = AppMentionsRouteImport.update({
+  id: '/mentions',
+  path: '/mentions',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRoomsRoute = AppRoomsRouteImport.update({
@@ -105,6 +112,11 @@ const AppRoomsNewRoute = AppRoomsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AppRoomsRoute,
 } as any)
+const AppRoomsRoomIdGroupsRoute = AppRoomsRoomIdGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => AppRoomsRoomIdRoute,
+} as any)
 const AppRoomsRoomIdRequestsRoute = AppRoomsRoomIdRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
@@ -114,6 +126,7 @@ const AppRoomsRoomIdRequestsRoute = AppRoomsRoomIdRequestsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/account': typeof AppAccountRoute
+  '/mentions': typeof AppMentionsRoute
   '/rooms': typeof AppRoomsRouteWithChildren
   '/check-email': typeof AuthCheckEmailRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
@@ -126,11 +139,13 @@ export interface FileRoutesByFullPath {
   '/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/rooms/new': typeof AppRoomsNewRoute
   '/rooms/': typeof AppRoomsIndexRoute
+  '/rooms/$roomId/groups': typeof AppRoomsRoomIdGroupsRoute
   '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/account': typeof AppAccountRoute
+  '/mentions': typeof AppMentionsRoute
   '/check-email': typeof AuthCheckEmailRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
@@ -142,6 +157,7 @@ export interface FileRoutesByTo {
   '/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/rooms/new': typeof AppRoomsNewRoute
   '/rooms': typeof AppRoomsIndexRoute
+  '/rooms/$roomId/groups': typeof AppRoomsRoomIdGroupsRoute
   '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
 export interface FileRoutesById {
@@ -149,6 +165,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_app/account': typeof AppAccountRoute
+  '/_app/mentions': typeof AppMentionsRoute
   '/_app/rooms': typeof AppRoomsRouteWithChildren
   '/_auth/check-email': typeof AuthCheckEmailRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -162,6 +179,7 @@ export interface FileRoutesById {
   '/_app/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/_app/rooms/new': typeof AppRoomsNewRoute
   '/_app/rooms/': typeof AppRoomsIndexRoute
+  '/_app/rooms/$roomId/groups': typeof AppRoomsRoomIdGroupsRoute
   '/_app/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
 export interface FileRouteTypes {
@@ -169,6 +187,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/account'
+    | '/mentions'
     | '/rooms'
     | '/check-email'
     | '/forgot-password'
@@ -181,11 +200,13 @@ export interface FileRouteTypes {
     | '/rooms/invitations'
     | '/rooms/new'
     | '/rooms/'
+    | '/rooms/$roomId/groups'
     | '/rooms/$roomId/requests'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/account'
+    | '/mentions'
     | '/check-email'
     | '/forgot-password'
     | '/login'
@@ -197,12 +218,14 @@ export interface FileRouteTypes {
     | '/rooms/invitations'
     | '/rooms/new'
     | '/rooms'
+    | '/rooms/$roomId/groups'
     | '/rooms/$roomId/requests'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
     | '/_app/account'
+    | '/_app/mentions'
     | '/_app/rooms'
     | '/_auth/check-email'
     | '/_auth/forgot-password'
@@ -216,6 +239,7 @@ export interface FileRouteTypes {
     | '/_app/rooms/invitations'
     | '/_app/rooms/new'
     | '/_app/rooms/'
+    | '/_app/rooms/$roomId/groups'
     | '/_app/rooms/$roomId/requests'
   fileRoutesById: FileRoutesById
 }
@@ -252,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mentions': {
+      id: '/_app/mentions'
+      path: '/mentions'
+      fullPath: '/mentions'
+      preLoaderRoute: typeof AppMentionsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/rooms': {
@@ -338,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoomsNewRouteImport
       parentRoute: typeof AppRoomsRoute
     }
+    '/_app/rooms/$roomId/groups': {
+      id: '/_app/rooms/$roomId/groups'
+      path: '/groups'
+      fullPath: '/rooms/$roomId/groups'
+      preLoaderRoute: typeof AppRoomsRoomIdGroupsRouteImport
+      parentRoute: typeof AppRoomsRoomIdRoute
+    }
     '/_app/rooms/$roomId/requests': {
       id: '/_app/rooms/$roomId/requests'
       path: '/requests'
@@ -349,10 +387,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRoomsRoomIdRouteChildren {
+  AppRoomsRoomIdGroupsRoute: typeof AppRoomsRoomIdGroupsRoute
   AppRoomsRoomIdRequestsRoute: typeof AppRoomsRoomIdRequestsRoute
 }
 
 const AppRoomsRoomIdRouteChildren: AppRoomsRoomIdRouteChildren = {
+  AppRoomsRoomIdGroupsRoute: AppRoomsRoomIdGroupsRoute,
   AppRoomsRoomIdRequestsRoute: AppRoomsRoomIdRequestsRoute,
 }
 
@@ -382,12 +422,14 @@ const AppRoomsRouteWithChildren = AppRoomsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
+  AppMentionsRoute: typeof AppMentionsRoute
   AppRoomsRoute: typeof AppRoomsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
+  AppMentionsRoute: AppMentionsRoute,
   AppRoomsRoute: AppRoomsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }

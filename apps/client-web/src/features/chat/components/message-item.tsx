@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 
-import { MessageBody } from '@/features/chat/components/message-body';
 import type { Author } from '@/features/chat/hooks/use-authors';
 import type {
   PendingMessage,
@@ -8,6 +7,8 @@ import type {
   TimelineMessage,
 } from '@/features/chat/lib/timeline';
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { cn } from '@/shared/lib/utils';
+import { MessageBody } from '@/shared/messages/message-body';
 import { ProfileCardPopover } from '@/shared/profile/profile-card';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
@@ -18,6 +19,7 @@ const FAILURE_KEYS = {
   permission_denied: 'chat.composer.errors.permissionDenied',
   body_too_long: 'chat.composer.errors.bodyTooLong',
   body_invalid: 'chat.composer.errors.bodyInvalid',
+  mention_invalid: 'chat.composer.errors.mentionInvalid',
   network: 'chat.composer.errors.network',
   unknown: 'chat.composer.errors.generic',
 } as const satisfies Record<SendFailureReason, string>;
@@ -109,7 +111,17 @@ export function MessageItem({ message, author }: { message: TimelineMessage; aut
   const deleted = message.redactedAt !== null;
 
   return (
-    <li className="flex gap-3 py-1.5" data-message-id={message.id}>
+    <li
+      className={cn(
+        'flex gap-3 rounded-md py-1.5',
+        !deleted && message.mentionsMe === 'direct' && 'bg-primary/15',
+        !deleted && message.mentionsMe === 'collective' && 'bg-primary/5',
+        // Set on the element by the list after a jump to this message.
+        'data-[jump-target]:ring-2 data-[jump-target]:ring-primary',
+      )}
+      data-message-id={message.id}
+      data-mentions-me={deleted ? undefined : (message.mentionsMe ?? undefined)}
+    >
       <AuthorCard author={author} decorative>
         <UserAvatar
           userId={author.userId}
@@ -139,7 +151,7 @@ export function MessageItem({ message, author }: { message: TimelineMessage; aut
         {deleted ? (
           <p className="text-sm italic text-muted-foreground">{t('chat.message.deleted')}</p>
         ) : (
-          <MessageBody body={message.body} />
+          <MessageBody body={message.body} roomId={message.roomId} mentions={message.mentions} />
         )}
       </div>
     </li>
@@ -149,9 +161,11 @@ export function MessageItem({ message, author }: { message: TimelineMessage; aut
 /** An own message that is still being sent, or that failed and can be retried. */
 export function PendingItem({
   pending,
+  roomId,
   onRetry,
 }: {
   pending: PendingMessage;
+  roomId: string;
   onRetry: (localId: string) => void;
 }) {
   const { t } = useTranslation();
@@ -161,7 +175,7 @@ export function PendingItem({
     <li className="flex gap-3 py-1.5 opacity-70" data-pending-id={pending.localId}>
       <div className="size-8 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
-        <MessageBody body={pending.body} />
+        <MessageBody body={pending.body} roomId={roomId} mentions={pending.mentions} />
         {failed ? (
           <p
             role="alert"

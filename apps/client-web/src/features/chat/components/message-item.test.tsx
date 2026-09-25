@@ -22,6 +22,7 @@ const message: TimelineMessage = {
   body: 'hello there',
   replyToId: null,
   mentions: [],
+  mentionsMe: null,
   editedAt: null,
   redactedAt: null,
   hiddenAt: null,
@@ -48,7 +49,7 @@ const deleted: Author = {
 };
 const pending: Author = { ...deleted, kind: 'pending' };
 
-function setup(author: Author) {
+function setup(author: Author, item: TimelineMessage = message) {
   const fake = createFakeSdk({ identifier: 'jane/example.test', sessionId: 's1' });
   fake.stubs.users.getProfile.mockResolvedValue({
     identifier: 'alice/example.test',
@@ -61,7 +62,7 @@ function setup(author: Author) {
   renderWithProviders(
     <SdkProvider>
       <ol>
-        <MessageItem message={message} author={author} />
+        <MessageItem message={item} author={author} />
       </ol>
     </SdkProvider>,
   );
@@ -128,4 +129,46 @@ it('does not fetch the profile before the card is opened', async () => {
   await screen.findByRole('button', { name: 'Alice' });
 
   expect(fake.stubs.users.getProfile).not.toHaveBeenCalled();
+});
+
+it('does not highlight a message that does not concern the viewer', async () => {
+  setup(member);
+
+  const item = (await screen.findByText('hello there')).closest('li');
+  expect(item).not.toHaveAttribute('data-mentions-me');
+  expect(item?.className).not.toContain('bg-primary');
+});
+
+it('highlights a direct mention strongly and a collective one lightly', async () => {
+  setup(member, { ...message, mentionsMe: 'direct' });
+  const direct = (await screen.findByText('hello there')).closest('li');
+  expect(direct).toHaveAttribute('data-mentions-me', 'direct');
+  expect(direct?.className).toContain('bg-primary/15');
+});
+
+it('uses the lighter tint for a collective mention', async () => {
+  setup(member, { ...message, mentionsMe: 'collective' });
+  const collective = (await screen.findByText('hello there')).closest('li');
+  expect(collective).toHaveAttribute('data-mentions-me', 'collective');
+  expect(collective?.className).toContain('bg-primary/5');
+  expect(collective?.className).not.toContain('bg-primary/15');
+});
+
+it('does not highlight a deleted message', async () => {
+  setup(member, { ...message, mentionsMe: 'direct', redactedAt: '2026-01-01T11:00:00.000Z' });
+
+  const item = (await screen.findByText('Message deleted')).closest('li');
+  expect(item).not.toHaveAttribute('data-mentions-me');
+});
+
+it('renders the mention chips of the message', async () => {
+  setup(member, {
+    ...message,
+    body: 'hi @all',
+    mentions: [{ type: 'all', target: null, token: '@all' }],
+  });
+
+  expect(
+    await screen.findByRole('img', { name: 'Mention of everyone in the room' }),
+  ).toBeInTheDocument();
 });

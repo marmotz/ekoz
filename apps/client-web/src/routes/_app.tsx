@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 import { AppFrame } from '@/app/app-frame';
 import { UserMenu } from '@/features/auth/components/user-menu';
+import { useUnreadMentionsLive } from '@/shared/mentions/use-unread-mentions-live';
 import { RequireAuth } from '@/shared/sdk/require-auth';
 
 /**
@@ -14,10 +15,17 @@ export const Route = createFileRoute('/_app')({
   component: AppLayout,
 });
 
+/** Keeps the unread mention counters live; inside `RequireAuth`, so it only runs signed in. */
+function UnreadMentionsLive() {
+  useUnreadMentionsLive();
+  return null;
+}
+
 function AppLayout() {
   return (
     <AppFrame userMenu={<UserMenu />}>
       <RequireAuth>
+        <UnreadMentionsLive />
         <Outlet />
       </RequireAuth>
     </AppFrame>
