@@ -1,0 +1,217 @@
+[
+  {
+    "id": "table.message_mention_recipient",
+    "label": "Create table \"message_mention_recipient\"",
+    "summary": "Creates table \"message_mention_recipient\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_mention_recipient"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_mention_recipient\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_recipient\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message_mention_recipient\"",
+        "sql": "CREATE TABLE \"public\".\"message_mention_recipient\" (\n  \"message_id\" text NOT NULL,\n  \"room_id\" text NOT NULL,\n  \"seq\" int8 NOT NULL,\n  \"target\" text NOT NULL,\n  \"type\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"message_id\", \"type\", \"target\", \"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_mention_recipient\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_recipient\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.message_mention_target",
+    "label": "Create table \"message_mention_target\"",
+    "summary": "Creates table \"message_mention_target\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_mention_target"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_mention_target\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_target\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message_mention_target\"",
+        "sql": "CREATE TABLE \"public\".\"message_mention_target\" (\n  \"message_id\" text NOT NULL,\n  \"position\" int4 NOT NULL,\n  \"target\" text NOT NULL,\n  \"token\" text NOT NULL,\n  \"type\" text NOT NULL,\n  PRIMARY KEY (\"message_id\", \"type\", \"target\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_mention_target\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_target\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message_mention_recipient.message_mention_recipient_message_id_idx_8a7ff1ba",
+    "label": "Create index \"message_mention_recipient_message_id_idx_8a7ff1ba\" on \"message_mention_recipient\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_mention_recipient_message_id_idx_8a7ff1ba",
+        "table": "message_mention_recipient"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_mention_recipient_message_id_idx_8a7ff1ba\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_recipient_message_id_idx_8a7ff1ba\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_mention_recipient_message_id_idx_8a7ff1ba\"",
+        "sql": "CREATE INDEX \"message_mention_recipient_message_id_idx_8a7ff1ba\" ON \"public\".\"message_mention_recipient\" (\"message_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_mention_recipient_message_id_idx_8a7ff1ba\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_recipient_message_id_idx_8a7ff1ba\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message_mention_recipient.message_mention_recipient_user_id_room_id_seq_idx_9da19553",
+    "label": "Create index \"message_mention_recipient_user_id_room_id_seq_idx_9da19553\" on \"message_mention_recipient\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_mention_recipient_user_id_room_id_seq_idx_9da19553",
+        "table": "message_mention_recipient"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_mention_recipient_user_id_room_id_seq_idx_9da19553\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_recipient_user_id_room_id_seq_idx_9da19553\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_mention_recipient_user_id_room_id_seq_idx_9da19553\"",
+        "sql": "CREATE INDEX \"message_mention_recipient_user_id_room_id_seq_idx_9da19553\" ON \"public\".\"message_mention_recipient\" (\"user_id\", \"room_id\", \"seq\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_mention_recipient_user_id_room_id_seq_idx_9da19553\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention_recipient_user_id_room_id_seq_idx_9da19553\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data.backfill-message-mention-targets",
+    "label": "Backfill mention targets and recipients from message_mention",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Insert one user target per existing mention",
+        "sql": "INSERT INTO \"public\".\"message_mention_target\" (\"message_id\", \"type\", \"target\", \"token\", \"position\")\nSELECT mm.\"message_id\", 'user', mm.\"user_id\",\n  CASE\n    WHEN u.\"id\" IS NULL OR u.\"status\"::text = 'deleted' OR u.\"name\" IS NULL OR si.\"domain\" IS NULL THEN '@deleted'\n    ELSE '@' || u.\"name\" || '/' || si.\"domain\"\n  END,\n  (row_number() OVER (PARTITION BY mm.\"message_id\" ORDER BY mm.\"user_id\") - 1)::int\nFROM \"public\".\"message_mention\" mm\nLEFT JOIN \"public\".\"user\" u ON u.\"id\" = mm.\"user_id\"\nLEFT JOIN \"public\".\"server_identity\" si ON si.\"id\" = 'server'\nON CONFLICT DO NOTHING",
+        "params": []
+      },
+      {
+        "description": "Insert one recipient per existing mention, at the message seq",
+        "sql": "INSERT INTO \"public\".\"message_mention_recipient\" (\"message_id\", \"type\", \"target\", \"user_id\", \"room_id\", \"seq\")\nSELECT mm.\"message_id\", 'user', mm.\"user_id\", mm.\"user_id\", m.\"room_id\", m.\"seq\"\nFROM \"public\".\"message_mention\" mm\nJOIN \"public\".\"message\" m ON m.\"id\" = mm.\"message_id\"\nWHERE m.\"author_id\" IS DISTINCT FROM mm.\"user_id\"\nON CONFLICT DO NOTHING",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "dropTable.message_mention",
+    "label": "Drop table \"message_mention\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_mention"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_mention\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop table \"message_mention\"",
+        "sql": "DROP TABLE \"public\".\"message_mention\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_mention\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_mention\""
+        ]
+      }
+    ]
+  }
+]

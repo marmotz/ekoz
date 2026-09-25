@@ -25,6 +25,7 @@ function wireMessage(seq: number, overrides: Partial<Message> = {}): Message {
     body: `body ${seq}`,
     replyToId: null,
     mentions: [],
+    mentionsMe: null,
     editedAt: null,
     redactedAt: null,
     hiddenAt: null,

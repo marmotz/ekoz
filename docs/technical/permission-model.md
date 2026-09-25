@@ -16,7 +16,8 @@ A capability-based ACL layered on named roles.
 - **Capabilities**: a closed, versioned set of room-scoped capability strings
   (`room.post`, `room.edit_any`, `room.delete_any`, `room.pin`, `room.react`,
   `room.invite`, `room.kick`, `room.ban`, `room.manage_members`,
-  `room.manage_roles`, `room.manage_retention`, `room.read`, `space.create_child`,
+  `room.manage_roles`, `room.manage_retention`, `room.manage_groups`, `room.read`,
+  `space.create_child`,
   `space.manage`, `directory.publish`). The list is part of the protocol and
   grows only additively.
 - **Roles**: `owner` (server-level, implicit allow-all), `space_admin`,

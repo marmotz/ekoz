@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MentionTargetSchema } from '../messages/mention.types.js';
 import { CAPABILITIES } from '../permissions/capabilities.js';
 import { retentionRuleSchema } from '../retention/retention-rule.js';
 
@@ -25,7 +26,8 @@ export type RoomEventType =
   | 'pin_added'
   | 'pin_removed'
   | 'retention_changed'
-  | 'receipt_updated';
+  | 'receipt_updated'
+  | 'group_changed';
 
 const roomTypeSchema = z.enum(['space', 'channel', 'dm', 'group_dm']);
 const roomVisibilitySchema = z.enum(['public', 'private', 'invite']);
@@ -94,7 +96,7 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
     messageId: z.string(),
     body: z.string(),
     replyToId: z.string().nullable(),
-    mentions: z.array(z.string()),
+    mentions: z.array(MentionTargetSchema),
   }),
   // Fixed shape (technical.md §11, issue #7). `senderId` carries the pinner.
   pin_added: z.object({ messageId: z.string() }),
@@ -128,6 +130,15 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   // Fixed shape (technical.md §13, issue #12). `rule` is the node's own new
   // rule (never the resolved effective rule).
   retention_changed: z.object({ rule: retentionRuleSchema }),
+
+  // Fixed shape (web-client-mentions technical.md S4). Appended on the group's
+  // own node; `userId` is set for `member_added` / `member_removed`.
+  group_changed: z.object({
+    groupId: z.string(),
+    change: z.enum(['created', 'renamed', 'deleted', 'member_added', 'member_removed']),
+    name: z.string(),
+    userId: z.string().optional(),
+  }),
 } as const satisfies Record<RoomEventType, z.ZodType>;
 
 export type RoomEventContent<T extends RoomEventType> = z.infer<

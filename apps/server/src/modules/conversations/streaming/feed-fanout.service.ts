@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { and } from '@prisma/orm-postgres/orm-client';
 import type { JsonValue } from '@prisma/orm-postgres/target/codec-types';
 import type { RoomEventRecord, RoomTx } from '../events/event-log.service.js';
+import { EffectiveMembersQuery } from '../membership/effective-members.query.js';
 
 /**
  * Account feed fan-out (technical.md §16, issue #11): when a `room_event` is
@@ -9,8 +9,7 @@ import type { RoomEventRecord, RoomTx } from '../events/event-log.service.js';
  * account-scoped events (invitations, join-request outcomes, ...) are inserted
  * directly by their owning service via {@link pushAccountEvent}.
  *
- * Effective members are the explicit `Membership` rows of the room plus those
- * of its ancestor spaces, one row per distinct user. Simplification: it checks
+ * Effective members come from {@link EffectiveMembersQuery}. Simplification: it checks
  * that a membership exists, not the `room.read` capability — every seeded role
  * grants `room.read` by default (a `deny` override is not honoured), and a room
  * with no membership yet (pure-public browsing) has nobody to fan out to
@@ -25,10 +24,12 @@ import type { RoomEventRecord, RoomTx } from '../events/event-log.service.js';
  */
 @Injectable()
 export class FeedFanoutService {
-  async fanOutRoomEvent(tx: RoomTx, event: RoomEventRecord): Promise<void> {
-    const userIds = await this.effectiveMemberIds(tx, event.roomId);
+  constructor(private readonly effectiveMembers: EffectiveMembersQuery) {}
 
-    for (const userId of userIds) {
+  async fanOutRoomEvent(tx: RoomTx, event: RoomEventRecord): Promise<void> {
+    const members = await this.effectiveMembers.listAll(event.roomId, tx);
+
+    for (const { userId } of members) {
       await tx.orm.public.AccountFeedEvent.create({
         userId,
         roomId: event.roomId,
@@ -43,20 +44,6 @@ export class FeedFanoutService {
         } as JsonValue,
       });
     }
-  }
-
-  /** Distinct users with a membership on the room or on one of its ancestor spaces. */
-  private async effectiveMemberIds(tx: RoomTx, roomId: string): Promise<string[]> {
-    const ancestors = (await tx.orm.public.RoomClosure.where((f) =>
-      and(f.descendantId.eq(roomId), f.depth.gt(0)),
-    ).all()) as Array<{ ancestorId: string }>;
-    const roomIds = [roomId, ...ancestors.map((row) => row.ancestorId)];
-
-    const memberships = (await tx.orm.public.Membership.where((f) =>
-      f.roomId.in(roomIds),
-    ).all()) as Array<{ userId: string }>;
-
-    return [...new Set(memberships.map((m) => m.userId))];
   }
 
   async pushAccountEvent(

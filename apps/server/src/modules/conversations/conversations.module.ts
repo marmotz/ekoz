@@ -5,11 +5,17 @@ import { DirectoryService } from './directory/directory.service.js';
 import { DmController } from './dm/dm.controller.js';
 import { DmService } from './dm/dm.service.js';
 import { EventLogService } from './events/event-log.service.js';
+import { GroupsController } from './groups/groups.controller.js';
+import { GroupsService } from './groups/groups.service.js';
+import { EffectiveMembersQuery } from './membership/effective-members.query.js';
 import {
   MembershipController,
   MyRoomInvitationsController,
 } from './membership/membership.controller.js';
 import { MembershipService } from './membership/membership.service.js';
+import { MentionsController } from './mentions/mentions.controller.js';
+import { MentionsService } from './mentions/mentions.service.js';
+import { MentionResolver } from './messages/mention-resolver.js';
 import { MessagesController } from './messages/messages.controller.js';
 import { MessagesService } from './messages/messages.service.js';
 import { ModerationController } from './moderation/moderation.controller.js';
@@ -46,7 +52,7 @@ import { SyncService } from './streaming/sync.service.js';
  * messages/mentions/replies/pins (#7), message edit/delete/tombstones (#8),
  * reactions and read markers (#9), presence and typing (#10), sync/account
  * feed/SSE stream (#11), retention policies and worker (#12), local
- * moderation (#13).
+ * moderation (#13), room groups (web-client-mentions).
  */
 @Module({
   controllers: [
@@ -65,6 +71,8 @@ import { SyncService } from './streaming/sync.service.js';
     TypingController,
     RetentionController,
     ModerationController,
+    GroupsController,
+    MentionsController,
   ],
   providers: [
     EventLogService,
@@ -89,6 +97,10 @@ import { SyncService } from './streaming/sync.service.js';
     { provide: PRESENCE_STORE, useClass: InProcessPresenceStore },
     RetentionService,
     RetentionWorkerService,
+    EffectiveMembersQuery,
+    GroupsService,
+    MentionResolver,
+    MentionsService,
   ],
   exports: [EventLogService, PermissionsService],
 })

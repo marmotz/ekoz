@@ -1,4 +1,4 @@
-import type { Message, RoomEvent } from '@ekozhq/sdk';
+import type { MentionTarget, Message, RoomEvent } from '@ekozhq/sdk';
 
 /**
  * Pure timeline state of one room and the only place room events are interpreted
@@ -18,7 +18,7 @@ export interface TimelineMessage {
   authorId: string | null;
   body: string;
   replyToId: string | null;
-  mentions: string[];
+  mentions: MentionTarget[];
   editedAt: string | null;
   redactedAt: string | null;
   hiddenAt: string | null;

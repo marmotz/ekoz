@@ -28,6 +28,8 @@ describe('createClient', () => {
     expect(client.roomInvitations).toBeDefined();
     expect(client.directory).toBeDefined();
     expect(client.messages).toBeDefined();
+    expect(client.mentions).toBeDefined();
+    expect(client.groups).toBeDefined();
     expect(client.sync).toBeDefined();
     expect(client.stream.status).toBe('idle');
     expect(client.discovery).toBeDefined();

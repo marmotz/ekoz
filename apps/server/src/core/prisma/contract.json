@@ -36,8 +36,12 @@
       "model": "Message",
       "namespace": "public"
     },
-    "message_mention": {
-      "model": "MessageMention",
+    "message_mention_recipient": {
+      "model": "MessageMentionRecipient",
+      "namespace": "public"
+    },
+    "message_mention_target": {
+      "model": "MessageMentionTarget",
       "namespace": "public"
     },
     "message_pin": {
@@ -82,6 +86,14 @@
     },
     "room_event": {
       "model": "RoomEvent",
+      "namespace": "public"
+    },
+    "room_group": {
+      "model": "RoomGroup",
+      "namespace": "public"
+    },
+    "room_group_member": {
+      "model": "RoomGroupMember",
       "namespace": "public"
     },
     "room_invitation": {
@@ -240,6 +252,10 @@
               {
                 "name": "receipt_updated",
                 "value": "receipt_updated"
+              },
+              {
+                "name": "group_changed",
+                "value": "group_changed"
               }
             ]
           },
@@ -1067,9 +1083,37 @@
               "table": "message"
             }
           },
-          "MessageMention": {
+          "MessageMentionRecipient": {
             "fields": {
               "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "seq": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "target": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "type": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -1090,12 +1134,85 @@
                 "messageId": {
                   "column": "message_id"
                 },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "seq": {
+                  "column": "seq"
+                },
+                "target": {
+                  "column": "target"
+                },
+                "type": {
+                  "column": "type"
+                },
                 "userId": {
                   "column": "user_id"
                 }
               },
               "namespaceId": "public",
-              "table": "message_mention"
+              "table": "message_mention_recipient"
+            }
+          },
+          "MessageMentionTarget": {
+            "fields": {
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "position": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "target": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "token": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "type": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "messageId": {
+                  "column": "message_id"
+                },
+                "position": {
+                  "column": "position"
+                },
+                "target": {
+                  "column": "target"
+                },
+                "token": {
+                  "column": "token"
+                },
+                "type": {
+                  "column": "type"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message_mention_target"
             }
           },
           "MessagePin": {
@@ -1962,6 +2079,108 @@
               },
               "namespaceId": "public",
               "table": "room_event"
+            }
+          },
+          "RoomGroup": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdById": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "nodeId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "createdById": {
+                  "column": "created_by_id"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "nodeId": {
+                  "column": "node_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "room_group"
+            }
+          },
+          "RoomGroupMember": {
+            "fields": {
+              "addedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "groupId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "addedAt": {
+                  "column": "added_at"
+                },
+                "groupId": {
+                  "column": "group_id"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "room_group_member"
             }
           },
           "RoomInvitation": {
@@ -3530,9 +3749,29 @@
                 }
               ]
             },
-            "message_mention": {
+            "message_mention_recipient": {
               "columns": {
                 "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "seq": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "target": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "type": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -3547,17 +3786,68 @@
               "indexes": [
                 {
                   "columns": [
-                    "user_id"
+                    "message_id"
                   ],
-                  "name": "message_mention_user_id_idx_6c952402",
-                  "prefix": "message_mention_user_id_idx",
+                  "name": "message_mention_recipient_message_id_idx_8a7ff1ba",
+                  "prefix": "message_mention_recipient_message_id_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "user_id",
+                    "room_id",
+                    "seq"
+                  ],
+                  "name": "message_mention_recipient_user_id_room_id_seq_idx_9da19553",
+                  "prefix": "message_mention_recipient_user_id_room_id_seq_idx",
                   "unique": false
                 }
               ],
               "primaryKey": {
                 "columns": [
                   "message_id",
+                  "type",
+                  "target",
                   "user_id"
+                ]
+              },
+              "uniques": []
+            },
+            "message_mention_target": {
+              "columns": {
+                "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "position": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "target": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "token": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "type": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "message_id",
+                  "type",
+                  "target"
                 ]
               },
               "uniques": []
@@ -4213,8 +4503,8 @@
             "room_event": {
               "checks": [
                 {
-                  "expression": "\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated')",
-                  "name": "room_event_type_check_eaaedd9c",
+                  "expression": "\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated', 'group_changed')",
+                  "name": "room_event_type_check_02d9b1d8",
                   "prefix": "room_event_type_check"
                 }
               ],
@@ -4281,6 +4571,104 @@
                 "columns": [
                   "room_id",
                   "seq"
+                ]
+              },
+              "uniques": []
+            },
+            "room_group": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "created_by_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "node_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "node_id"
+                  ],
+                  "name": "room_group_node_id_idx_c068255a",
+                  "prefix": "room_group_node_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "node_id",
+                    "name"
+                  ]
+                }
+              ]
+            },
+            "room_group_member": {
+              "columns": {
+                "added_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "group_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "user_id"
+                  ],
+                  "name": "room_group_member_user_id_idx_6c952402",
+                  "prefix": "room_group_member_user_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "group_id",
+                  "user_id"
                 ]
               },
               "uniques": []
@@ -5097,7 +5485,8 @@
                 "pin_added",
                 "pin_removed",
                 "retention_changed",
-                "receipt_updated"
+                "receipt_updated",
+                "group_changed"
               ]
             },
             "RoomRole": {
@@ -5150,10 +5539,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "40480fe9c202bda5aa0d8d492c66e054d8d335ea5d506f0de3faa39865e2adc4"
+    "storageHash": "6299cf899070292540d8f1ac30a762ac8e0b8daca7b265c646787db5c8c12d20"
   },
   "execution": {
-    "executionHash": "97287832eef1065781f34394e3048bb70ea6956ebc227fa85c0eb92bba8af219",
+    "executionHash": "0d7e92451c7c33c0d650a9d770dae222b1cb293f180758a7fe96283497afc9f6",
     "mutations": {
       "defaults": [
         {
@@ -5283,6 +5672,17 @@
             "column": "updated_at",
             "namespace": "public",
             "table": "room"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "room_group"
           }
         },
         {

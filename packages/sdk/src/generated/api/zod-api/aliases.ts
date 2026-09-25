@@ -20,6 +20,8 @@ import { DirectoryListResponseDtoSchema, type DirectoryListResponseDtoDto } from
 import { DiscoveryDocumentDtoSchema, type DiscoveryDocumentDtoDto } from './DiscoveryDocumentDto.schema.js';
 import { EmailAcceptedResponseDtoSchema, type EmailAcceptedResponseDtoDto } from './EmailAcceptedResponseDto.schema.js';
 import { EmailVerifiedResponseDtoSchema, type EmailVerifiedResponseDtoDto } from './EmailVerifiedResponseDto.schema.js';
+import { GroupDetailDtoSchema, type GroupDetailDtoDto } from './GroupDetailDto.schema.js';
+import { GroupListViewDtoSchema, type GroupListViewDtoDto } from './GroupListViewDto.schema.js';
 import { HeartbeatResponseDtoSchema, type HeartbeatResponseDtoDto } from './HeartbeatResponseDto.schema.js';
 import { InvitationViewDtoSchema, type InvitationViewDtoDto } from './InvitationViewDto.schema.js';
 import { JoinRequestViewDtoSchema, type JoinRequestViewDtoDto } from './JoinRequestViewDto.schema.js';
@@ -32,6 +34,7 @@ import { MessagePinViewDtoSchema, type MessagePinViewDtoDto } from './MessagePin
 import { MessageViewDtoSchema, type MessageViewDtoDto } from './MessageViewDto.schema.js';
 import { MeViewDtoSchema, type MeViewDtoDto } from './MeViewDto.schema.js';
 import { ModerationLogEntryDtoSchema, type ModerationLogEntryDtoDto } from './ModerationLogEntryDto.schema.js';
+import { MyMentionsPageDtoSchema, type MyMentionsPageDtoDto } from './MyMentionsPageDto.schema.js';
 import { MyPermissionsResponseDtoSchema, type MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.schema.js';
 import { MyRoomInvitationListViewDtoSchema, type MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.schema.js';
 import { PendingJoinRequestListViewDtoSchema, type PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.schema.js';
@@ -57,6 +60,7 @@ import { StreamTicketResponseDtoSchema, type StreamTicketResponseDtoDto } from '
 import { SuspendUserDtoSchema, type SuspendUserDtoDto } from './SuspendUserDto.schema.js';
 import { SyncResponseDtoSchema, type SyncResponseDtoDto } from './SyncResponseDto.schema.js';
 import { TokenBundleDtoSchema, type TokenBundleDtoDto } from './TokenBundleDto.schema.js';
+import { UnreadMentionsViewDtoSchema, type UnreadMentionsViewDtoDto } from './UnreadMentionsViewDto.schema.js';
 import { UpdateProfileDtoSchema, type UpdateProfileDtoDto } from './UpdateProfileDto.schema.js';
 import { UsernameApprovedDtoSchema, type UsernameApprovedDtoDto } from './UsernameApprovedDto.schema.js';
 import { UsernameChangeAppliedDtoSchema, type UsernameChangeAppliedDtoDto } from './UsernameChangeAppliedDto.schema.js';
@@ -388,6 +392,96 @@ export type EmailVerificationController_verifyRequest = z.infer<typeof EmailVeri
 export const EventsController_streamQueryTicketSchema = z.string();
 export type EventsController_streamQueryTicket = z.infer<typeof EventsController_streamQueryTicketSchema>;
 
+export const GroupsController_addMember401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_addMember401ResponseProblemJson = z.infer<typeof GroupsController_addMember401ResponseProblemJsonSchema>;
+
+export const GroupsController_addMember403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_addMember403ResponseProblemJson = z.infer<typeof GroupsController_addMember403ResponseProblemJsonSchema>;
+
+export const GroupsController_addMember404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_addMember404ResponseProblemJson = z.infer<typeof GroupsController_addMember404ResponseProblemJsonSchema>;
+
+export const GroupsController_addMember422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_addMember422ResponseProblemJson = z.infer<typeof GroupsController_addMember422ResponseProblemJsonSchema>;
+
+export const GroupsController_create201ResponseJsonSchema = GroupDetailDtoSchema;
+export type GroupsController_create201ResponseJson = z.infer<typeof GroupsController_create201ResponseJsonSchema>;
+
+export const GroupsController_create401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_create401ResponseProblemJson = z.infer<typeof GroupsController_create401ResponseProblemJsonSchema>;
+
+export const GroupsController_create403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_create403ResponseProblemJson = z.infer<typeof GroupsController_create403ResponseProblemJsonSchema>;
+
+export const GroupsController_create404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_create404ResponseProblemJson = z.infer<typeof GroupsController_create404ResponseProblemJsonSchema>;
+
+export const GroupsController_create409ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_create409ResponseProblemJson = z.infer<typeof GroupsController_create409ResponseProblemJsonSchema>;
+
+export const GroupsController_create422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_create422ResponseProblemJson = z.infer<typeof GroupsController_create422ResponseProblemJsonSchema>;
+
+export const GroupsController_get200ResponseJsonSchema = GroupDetailDtoSchema;
+export type GroupsController_get200ResponseJson = z.infer<typeof GroupsController_get200ResponseJsonSchema>;
+
+export const GroupsController_get401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_get401ResponseProblemJson = z.infer<typeof GroupsController_get401ResponseProblemJsonSchema>;
+
+export const GroupsController_get403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_get403ResponseProblemJson = z.infer<typeof GroupsController_get403ResponseProblemJsonSchema>;
+
+export const GroupsController_get404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_get404ResponseProblemJson = z.infer<typeof GroupsController_get404ResponseProblemJsonSchema>;
+
+export const GroupsController_list200ResponseJsonSchema = GroupListViewDtoSchema;
+export type GroupsController_list200ResponseJson = z.infer<typeof GroupsController_list200ResponseJsonSchema>;
+
+export const GroupsController_list401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_list401ResponseProblemJson = z.infer<typeof GroupsController_list401ResponseProblemJsonSchema>;
+
+export const GroupsController_list403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_list403ResponseProblemJson = z.infer<typeof GroupsController_list403ResponseProblemJsonSchema>;
+
+export const GroupsController_list404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_list404ResponseProblemJson = z.infer<typeof GroupsController_list404ResponseProblemJsonSchema>;
+
+export const GroupsController_remove401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_remove401ResponseProblemJson = z.infer<typeof GroupsController_remove401ResponseProblemJsonSchema>;
+
+export const GroupsController_remove403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_remove403ResponseProblemJson = z.infer<typeof GroupsController_remove403ResponseProblemJsonSchema>;
+
+export const GroupsController_remove404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_remove404ResponseProblemJson = z.infer<typeof GroupsController_remove404ResponseProblemJsonSchema>;
+
+export const GroupsController_removeMember401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_removeMember401ResponseProblemJson = z.infer<typeof GroupsController_removeMember401ResponseProblemJsonSchema>;
+
+export const GroupsController_removeMember403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_removeMember403ResponseProblemJson = z.infer<typeof GroupsController_removeMember403ResponseProblemJsonSchema>;
+
+export const GroupsController_removeMember404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_removeMember404ResponseProblemJson = z.infer<typeof GroupsController_removeMember404ResponseProblemJsonSchema>;
+
+export const GroupsController_rename200ResponseJsonSchema = GroupDetailDtoSchema;
+export type GroupsController_rename200ResponseJson = z.infer<typeof GroupsController_rename200ResponseJsonSchema>;
+
+export const GroupsController_rename401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_rename401ResponseProblemJson = z.infer<typeof GroupsController_rename401ResponseProblemJsonSchema>;
+
+export const GroupsController_rename403ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_rename403ResponseProblemJson = z.infer<typeof GroupsController_rename403ResponseProblemJsonSchema>;
+
+export const GroupsController_rename404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_rename404ResponseProblemJson = z.infer<typeof GroupsController_rename404ResponseProblemJsonSchema>;
+
+export const GroupsController_rename409ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_rename409ResponseProblemJson = z.infer<typeof GroupsController_rename409ResponseProblemJsonSchema>;
+
+export const GroupsController_rename422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type GroupsController_rename422ResponseProblemJson = z.infer<typeof GroupsController_rename422ResponseProblemJsonSchema>;
+
 export const InvitationsController_create201ResponseJsonSchema = CreatedInvitationDtoSchema;
 export type InvitationsController_create201ResponseJson = z.infer<typeof InvitationsController_create201ResponseJsonSchema>;
 
@@ -669,6 +763,21 @@ export type MembershipController_unban403ResponseProblemJson = z.infer<typeof Me
 
 export const MembershipController_unban404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MembershipController_unban404ResponseProblemJson = z.infer<typeof MembershipController_unban404ResponseProblemJsonSchema>;
+
+export const MentionsController_list200ResponseJsonSchema = MyMentionsPageDtoSchema;
+export type MentionsController_list200ResponseJson = z.infer<typeof MentionsController_list200ResponseJsonSchema>;
+
+export const MentionsController_list401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MentionsController_list401ResponseProblemJson = z.infer<typeof MentionsController_list401ResponseProblemJsonSchema>;
+
+export const MentionsController_list422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MentionsController_list422ResponseProblemJson = z.infer<typeof MentionsController_list422ResponseProblemJsonSchema>;
+
+export const MentionsController_unread200ResponseJsonSchema = UnreadMentionsViewDtoSchema;
+export type MentionsController_unread200ResponseJson = z.infer<typeof MentionsController_unread200ResponseJsonSchema>;
+
+export const MentionsController_unread401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MentionsController_unread401ResponseProblemJson = z.infer<typeof MentionsController_unread401ResponseProblemJsonSchema>;
 
 export const MePasswordController_change401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MePasswordController_change401ResponseProblemJson = z.infer<typeof MePasswordController_change401ResponseProblemJsonSchema>;

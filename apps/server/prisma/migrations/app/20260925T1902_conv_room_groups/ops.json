@@ -1,0 +1,284 @@
+[
+  {
+    "id": "dropCheckConstraint.room_event.room_event_type_check_eaaedd9c",
+    "label": "Drop check constraint \"room_event_type_check_eaaedd9c\" on \"room_event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "room_event_type_check_eaaedd9c",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_event_type_check_eaaedd9c\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_eaaedd9c",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"room_event_type_check_eaaedd9c\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" DROP CONSTRAINT \"room_event_type_check_eaaedd9c\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_event_type_check_eaaedd9c\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_eaaedd9c",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_group",
+    "label": "Create table \"room_group\"",
+    "summary": "Creates table \"room_group\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_group"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_group\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_group\"",
+        "sql": "CREATE TABLE \"public\".\"room_group\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"created_by_id\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"node_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_group\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.room_group_member",
+    "label": "Create table \"room_group_member\"",
+    "summary": "Creates table \"room_group_member\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "room_group_member"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"room_group_member\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group_member\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"room_group_member\"",
+        "sql": "CREATE TABLE \"public\".\"room_group_member\" (\n  \"added_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"group_id\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"group_id\", \"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"room_group_member\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group_member\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.room_event.room_event_type_check_02d9b1d8",
+    "label": "Add check constraint \"room_event_type_check_02d9b1d8\" on \"room_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "room_event_type_check_02d9b1d8",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_event_type_check_02d9b1d8\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_02d9b1d8",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"room_event_type_check_02d9b1d8\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" ADD CONSTRAINT \"room_event_type_check_02d9b1d8\" CHECK (\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated', 'group_changed'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_event_type_check_02d9b1d8\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_02d9b1d8",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.room_group.room_group_node_id_name_key",
+    "label": "Add unique constraint on \"room_group\" (node_id, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "room_group_node_id_name_key",
+        "table": "room_group"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_group_node_id_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_group_node_id_name_key",
+          "public",
+          "\"public\".\"room_group\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"room_group_node_id_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"room_group\" ADD CONSTRAINT \"room_group_node_id_name_key\" UNIQUE (\"node_id\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_group_node_id_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_group_node_id_name_key",
+          "public",
+          "\"public\".\"room_group\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room_group.room_group_node_id_idx_c068255a",
+    "label": "Create index \"room_group_node_id_idx_c068255a\" on \"room_group\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_group_node_id_idx_c068255a",
+        "table": "room_group"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_group_node_id_idx_c068255a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group_node_id_idx_c068255a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_group_node_id_idx_c068255a\"",
+        "sql": "CREATE INDEX \"room_group_node_id_idx_c068255a\" ON \"public\".\"room_group\" (\"node_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_group_node_id_idx_c068255a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group_node_id_idx_c068255a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.room_group_member.room_group_member_user_id_idx_6c952402",
+    "label": "Create index \"room_group_member_user_id_idx_6c952402\" on \"room_group_member\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "room_group_member_user_id_idx_6c952402",
+        "table": "room_group_member"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"room_group_member_user_id_idx_6c952402\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group_member_user_id_idx_6c952402\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"room_group_member_user_id_idx_6c952402\"",
+        "sql": "CREATE INDEX \"room_group_member_user_id_idx_6c952402\" ON \"public\".\"room_group_member\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"room_group_member_user_id_idx_6c952402\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"room_group_member_user_id_idx_6c952402\""
+        ]
+      }
+    ]
+  }
+]

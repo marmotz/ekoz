@@ -20,6 +20,8 @@ import type { DirectoryListResponseDtoDto } from './DirectoryListResponseDto.typ
 import type { DiscoveryDocumentDtoDto } from './DiscoveryDocumentDto.type.js';
 import type { EmailAcceptedResponseDtoDto } from './EmailAcceptedResponseDto.type.js';
 import type { EmailVerifiedResponseDtoDto } from './EmailVerifiedResponseDto.type.js';
+import type { GroupDetailDtoDto } from './GroupDetailDto.type.js';
+import type { GroupListViewDtoDto } from './GroupListViewDto.type.js';
 import type { HeartbeatResponseDtoDto } from './HeartbeatResponseDto.type.js';
 import type { InvitationViewDtoDto } from './InvitationViewDto.type.js';
 import type { JoinRequestViewDtoDto } from './JoinRequestViewDto.type.js';
@@ -32,6 +34,7 @@ import type { MessagePinViewDtoDto } from './MessagePinViewDto.type.js';
 import type { MessageViewDtoDto } from './MessageViewDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
 import type { ModerationLogEntryDtoDto } from './ModerationLogEntryDto.type.js';
+import type { MyMentionsPageDtoDto } from './MyMentionsPageDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.type.js';
 import type { PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.type.js';
@@ -57,6 +60,7 @@ import type { StreamTicketResponseDtoDto } from './StreamTicketResponseDto.type.
 import type { SuspendUserDtoDto } from './SuspendUserDto.type.js';
 import type { SyncResponseDtoDto } from './SyncResponseDto.type.js';
 import type { TokenBundleDtoDto } from './TokenBundleDto.type.js';
+import type { UnreadMentionsViewDtoDto } from './UnreadMentionsViewDto.type.js';
 import type { UpdateProfileDtoDto } from './UpdateProfileDto.type.js';
 import type { UsernameApprovedDtoDto } from './UsernameApprovedDto.type.js';
 import type { UsernameChangeAppliedDtoDto } from './UsernameChangeAppliedDto.type.js';
@@ -847,3 +851,73 @@ export type ModerationController_getModerationLog401ResponseProblemJson = Proble
 export type ModerationController_getModerationLog403ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type ModerationController_getModerationLog404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_list200ResponseJson = GroupListViewDtoDto;
+
+export type GroupsController_list401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_list403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_list404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_create201ResponseJson = GroupDetailDtoDto;
+
+export type GroupsController_create401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_create403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_create404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_create409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_create422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_get200ResponseJson = GroupDetailDtoDto;
+
+export type GroupsController_get401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_get403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_get404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_remove401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_remove403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_remove404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_rename200ResponseJson = GroupDetailDtoDto;
+
+export type GroupsController_rename401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_rename403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_rename404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_rename409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_rename422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_addMember401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_addMember403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_addMember404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_addMember422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_removeMember401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_removeMember403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type GroupsController_removeMember404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MentionsController_unread200ResponseJson = UnreadMentionsViewDtoDto;
+
+export type MentionsController_unread401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MentionsController_list200ResponseJson = MyMentionsPageDtoDto;
+
+export type MentionsController_list401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MentionsController_list422ResponseProblemJson = ProblemDetailsDtoDto;

@@ -25,11 +25,18 @@ describe('conversations — messages (integration)', () => {
   const password = 'a-perfectly-fine-passphrase';
   const server = () => app.getHttpServer();
 
+  // Logins are throttled per identifier, so each account logs in once.
+  const tokens = new Map<string, string>();
   const login = async (identifier: string): Promise<string> => {
+    const cached = tokens.get(identifier);
+    if (cached) {
+      return cached;
+    }
     const res = await request(server())
       .post('/auth/login')
       .send({ identifier, password })
       .expect(200);
+    tokens.set(identifier, res.body.accessToken as string);
 
     return res.body.accessToken as string;
   };
@@ -100,9 +107,12 @@ describe('conversations — messages (integration)', () => {
     const first = await request(server())
       .post(`/rooms/${channel.id}/messages`)
       .set('Authorization', `Bearer ${ownerToken}`)
-      .send({ body: 'hello **world**', mentions: [alice.id] })
+      .send({ body: 'hello **world**', mentions: [{ type: 'user', userId: alice.id }] })
       .expect(201);
-    expect(first.body.mentions).toEqual([alice.id]);
+    expect(first.body.mentions).toEqual([
+      { type: 'user', target: alice.id, token: `@alice/${config.get('server.domain')}` },
+    ]);
+    expect(first.body.mentionsMe).toBeNull();
     expect(first.body.seq).toBeDefined();
 
     const reply = await request(server())
@@ -128,7 +138,7 @@ describe('conversations — messages (integration)', () => {
     const badMention = await request(server())
       .post(`/rooms/${channel.id}/messages`)
       .set('Authorization', `Bearer ${ownerToken}`)
-      .send({ body: 'hi', mentions: ['01ARZ3NDEKTSV4RRFFQ69G5FAV'] })
+      .send({ body: 'hi', mentions: [{ type: 'user', userId: '01ARZ3NDEKTSV4RRFFQ69G5FAV' }] })
       .expect(422);
     expect(badMention.body.code).toBe('message.mention_not_member');
   });
@@ -254,11 +264,21 @@ describe('conversations — messages (integration)', () => {
       .put(`/rooms/${channel.id}/pins/${message.body.id}`)
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(200);
+    for (const emoji of ['👍', '🎉']) {
+      await request(server())
+        .put(`/messages/${message.body.id}/reactions/${encodeURIComponent(emoji)}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+    }
 
     await request(server())
       .delete(`/rooms/${channel.id}/messages/${message.body.id}`)
       .set('Authorization', `Bearer ${ownerToken}`)
       .expect(204);
+    // Every reaction goes, not only the first one.
+    expect(await prisma.orm.public.Reaction.where({ messageId: message.body.id }).all()).toEqual(
+      [],
+    );
 
     // Deleting an already-deleted message is refused (404, not idempotent).
     await request(server())
@@ -330,7 +350,12 @@ describe('conversations — messages (integration)', () => {
         .query(query)
         .set('Authorization', `Bearer ${token}`);
 
-    const post = async (token: string, roomId: string, body: string, mentions?: string[]) =>
+    const post = async (
+      token: string,
+      roomId: string,
+      body: string,
+      mentions?: Array<{ type: 'user'; userId: string }>,
+    ) =>
       (
         await request(server())
           .post(`/rooms/${roomId}/messages`)
@@ -390,7 +415,9 @@ describe('conversations — messages (integration)', () => {
         .expect(201);
 
       const plain = await post(ownerToken, channel.id, 'plain');
-      const mentioning = await post(ownerToken, channel.id, 'hello @alice', [alice.id]);
+      const mentioning = await post(ownerToken, channel.id, 'hello @alice', [
+        { type: 'user', userId: alice.id },
+      ]);
       const doomed = await post(ownerToken, channel.id, 'to delete');
       await request(server())
         .delete(`/rooms/${channel.id}/messages/${doomed.id}`)
@@ -400,7 +427,7 @@ describe('conversations — messages (integration)', () => {
       const res = await list(aliceToken, channel.id).expect(200);
       const byId = new Map(res.body.items.map((m: { id: string }) => [m.id, m] as const)) as Map<
         string,
-        { mentions: string[]; body: string; redactedAt: string | null }
+        { mentions: unknown[]; mentionsMe: string | null; body: string; redactedAt: string | null }
       >;
       expect(res.body.items.map((m: { id: string }) => m.id)).toEqual([
         plain.id,
@@ -408,7 +435,11 @@ describe('conversations — messages (integration)', () => {
         doomed.id,
       ]);
       expect(byId.get(plain.id)?.mentions).toEqual([]);
-      expect(byId.get(mentioning.id)?.mentions).toEqual([alice.id]);
+      expect(byId.get(mentioning.id)?.mentions).toEqual([
+        { type: 'user', target: alice.id, token: `@alice/${config.get('server.domain')}` },
+      ]);
+      expect(byId.get(mentioning.id)?.mentionsMe).toBe('direct');
+      expect(byId.get(plain.id)?.mentionsMe).toBeNull();
       expect(byId.get(doomed.id)).toMatchObject({ body: '' });
       expect(byId.get(doomed.id)?.redactedAt).not.toBeNull();
     });
@@ -428,6 +459,119 @@ describe('conversations — messages (integration)', () => {
       } finally {
         await config.clear('messages.max_page');
       }
+    });
+
+    it('pages forwards with `after`, with hasMore and hasMoreNewer', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'after-room');
+      const sent = [];
+      for (const body of ['m1', 'm2', 'm3', 'm4', 'm5']) {
+        sent.push(await post(ownerToken, channel.id, body));
+      }
+      const bodies = (res: { body: { items: Array<{ body: string }> } }) =>
+        res.body.items.map((m) => m.body);
+
+      // Right after the first message: ascending, older exists, newer exists.
+      const first = await list(ownerToken, channel.id, {
+        after: sent[0]?.seq ?? '0',
+        limit: '2',
+      }).expect(200);
+      expect(bodies(first)).toEqual(['m2', 'm3']);
+      expect(first.body.hasMore).toBe(true);
+      expect(first.body.hasMoreNewer).toBe(true);
+
+      // Fewer than `limit` left: the end of the room.
+      const end = await list(ownerToken, channel.id, {
+        after: sent[2]?.seq ?? '0',
+        limit: '10',
+      }).expect(200);
+      expect(bodies(end)).toEqual(['m4', 'm5']);
+      expect(end.body.hasMore).toBe(true);
+      expect(end.body.hasMoreNewer).toBe(false);
+
+      // After the newest message: empty, nothing newer, older still exists.
+      const beyond = await list(ownerToken, channel.id, { after: sent[4]?.seq ?? '0' }).expect(200);
+      expect(beyond.body.items).toEqual([]);
+      expect(beyond.body.hasMore).toBe(true);
+      expect(beyond.body.hasMoreNewer).toBe(false);
+
+      // Before the first message: everything, no older message.
+      const everything = await list(ownerToken, channel.id, { after: '0' }).expect(200);
+      expect(bodies(everything)).toEqual(['m1', 'm2', 'm3', 'm4', 'm5']);
+      expect(everything.body.hasMore).toBe(false);
+      expect(everything.body.hasMoreNewer).toBe(false);
+    });
+
+    it('returns a window `around` a message, with hasMore and hasMoreNewer', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'around-room');
+      const sent = [];
+      for (const body of ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7']) {
+        sent.push(await post(ownerToken, channel.id, body));
+      }
+      const bodies = (res: { body: { items: Array<{ body: string }> } }) =>
+        res.body.items.map((m) => m.body);
+
+      // floor(4/2) = 2 older, then the anchor and the rest from `seq` on.
+      const middle = await list(ownerToken, channel.id, {
+        around: sent[3]?.seq ?? '0',
+        limit: '4',
+      }).expect(200);
+      expect(bodies(middle)).toEqual(['m2', 'm3', 'm4', 'm5']);
+      expect(middle.body.hasMore).toBe(true);
+      expect(middle.body.hasMoreNewer).toBe(true);
+
+      // First message: nothing older, and the split stays `floor(limit/2)` / the rest.
+      const oldest = await list(ownerToken, channel.id, {
+        around: sent[0]?.seq ?? '0',
+        limit: '4',
+      }).expect(200);
+      expect(bodies(oldest)).toEqual(['m1', 'm2']);
+      expect(oldest.body.hasMore).toBe(false);
+      expect(oldest.body.hasMoreNewer).toBe(true);
+
+      // Newest message: fewer than `limit` after it.
+      const newest = await list(ownerToken, channel.id, {
+        around: sent[6]?.seq ?? '0',
+        limit: '4',
+      }).expect(200);
+      expect(bodies(newest)).toEqual(['m5', 'm6', 'm7']);
+      expect(newest.body.hasMore).toBe(true);
+      expect(newest.body.hasMoreNewer).toBe(false);
+
+      // Fewer messages than `limit` overall.
+      const all = await list(ownerToken, channel.id, { around: sent[3]?.seq ?? '0' }).expect(200);
+      expect(bodies(all)).toEqual(['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7']);
+      expect(all.body.hasMore).toBe(false);
+      expect(all.body.hasMoreNewer).toBe(false);
+    });
+
+    it('reports hasMoreNewer false on the default and `before` pages', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'newer-flag-room');
+      const sent = [];
+      for (const body of ['m1', 'm2', 'm3']) {
+        sent.push(await post(ownerToken, channel.id, body));
+      }
+
+      const newest = await list(ownerToken, channel.id, { limit: '1' }).expect(200);
+      expect(newest.body.hasMoreNewer).toBe(false);
+      const older = await list(ownerToken, channel.id, {
+        before: sent[2]?.seq ?? '0',
+        limit: '1',
+      }).expect(200);
+      expect(older.body.hasMoreNewer).toBe(false);
+    });
+
+    it('rejects more than one of `before`, `after` and `around`', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'exclusive-room');
+
+      await list(ownerToken, channel.id, { before: '5', after: '1' }).expect(422);
+      await list(ownerToken, channel.id, { before: '5', around: '3' }).expect(422);
+      await list(ownerToken, channel.id, { after: '1', around: '3' }).expect(422);
+      await list(ownerToken, channel.id, { after: 'abc' }).expect(422);
+      await list(ownerToken, channel.id, { around: '-1' }).expect(422);
     });
 
     it('refuses a non-reader, an unknown room and invalid query values', async () => {

@@ -9,8 +9,10 @@ import { Discovery } from './discovery/discovery.js';
 import { type AdminResource, createAdminResource } from './resources/admin.js';
 import { type AuthResource, createAuthResource } from './resources/auth.js';
 import { createDirectoryResource, type DirectoryResource } from './resources/directory.js';
+import { createGroupsResource, type GroupsResource } from './resources/groups.js';
 import { createInvitationsResource, type InvitationsResource } from './resources/invitations.js';
 import { createMeResource, type MeResource } from './resources/me.js';
+import { createMentionsResource, type MentionsResource } from './resources/mentions.js';
 import { createMessagesResource, type MessagesResource } from './resources/messages.js';
 import {
   createRoomInvitationsResource,
@@ -46,6 +48,8 @@ export interface EkozClient {
   roomInvitations: RoomInvitationsResource;
   directory: DirectoryResource;
   messages: MessagesResource;
+  mentions: MentionsResource;
+  groups: GroupsResource;
   sync: SyncResource;
   stream: RoomStream;
   discovery: Discovery;
@@ -110,6 +114,8 @@ export function createClient(config: ClientConfig): EkozClient {
     roomInvitations: createRoomInvitationsResource(session),
     directory: createDirectoryResource(session),
     messages: createMessagesResource(session),
+    mentions: createMentionsResource(session),
+    groups: createGroupsResource(session),
     sync: createSyncResource(session),
     stream: createRoomStream({
       session,

@@ -144,6 +144,31 @@ http/
     ticket-unauthenticated.hurl       POST   /stream/ticket           401 auth.unauthenticated
   messages/
     list.hurl                          GET    /rooms/:id/messages      200 · needs access_token + room_id
+    list-after.hurl                    GET    /rooms/:id/messages?after=  200 · needs access_token + room_id + message_seq
+    list-around.hurl                   GET    /rooms/:id/messages?around= 200 · needs access_token + room_id + message_seq
+    list-conflicting-params.hurl       GET    /rooms/:id/messages      422 · before and after together
+    send-mentions.hurl                 POST   /rooms/:id/messages      201 · needs room.post + target_user_id
+    send-mention-invalid.hurl          POST   /rooms/:id/messages      422 message.mention_invalid (dm)
+    edit-mentions.hurl                 PATCH  /rooms/:id/messages/:id  200 · needs edit right + message_id
+  mentions/
+    unread.hurl                        GET    /me/mentions/unread      200 · needs access_token
+    unread-unauthenticated.hurl        GET    /me/mentions/unread      401 auth.unauthenticated
+    list.hurl                          GET    /me/mentions             200 · needs access_token
+    list-invalid.hurl                  GET    /me/mentions             422 · limit below 1
+    list-unauthenticated.hurl          GET    /me/mentions             401 auth.unauthenticated
+  groups/
+    list.hurl                          GET    /rooms/:id/groups                        200 · needs access_token + room_id
+    get.hurl                           GET    /rooms/:id/groups/:groupId               200 · needs room_id + group_id
+    get-not-found.hurl                 GET    /rooms/:id/groups/:groupId               404 group.not_found
+    create.hurl                        POST   /rooms/:id/groups                        201 · needs room.manage_groups
+    create-forbidden.hurl              POST   /rooms/:id/groups                        403 room.permission_denied
+    create-name-reserved.hurl          POST   /rooms/:id/groups                        422 group.name_reserved
+    create-name-taken.hurl             POST   /rooms/:id/groups                        409 group.name_taken
+    rename.hurl                        PATCH  /rooms/:id/groups/:groupId               200 · needs room.manage_groups + group_id
+    remove.hurl                        DELETE /rooms/:id/groups/:groupId               204 · needs room.manage_groups + group_id
+    add-member.hurl                    PUT    /rooms/:id/groups/:groupId/members/:userId    204 · needs group_id + target_user_id
+    add-member-not-member.hurl         PUT    /rooms/:id/groups/:groupId/members/:userId    422 group.member_not_member
+    remove-member.hurl                 DELETE /rooms/:id/groups/:groupId/members/:userId    204 · needs group_id + target_user_id
   rooms/
     create-space.hurl                  POST   /spaces                  201 · needs owner access_token
     create-space-forbidden.hurl        POST   /spaces                  403 room.permission_denied (non-owner)

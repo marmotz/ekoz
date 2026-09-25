@@ -8,3 +8,4 @@ HTTP 200
 jsonpath "$.items" isCollection
 jsonpath "$.lastSeq" isString
 jsonpath "$.hasMore" isBoolean
+jsonpath "$.hasMoreNewer" isBoolean

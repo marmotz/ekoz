@@ -7,7 +7,6 @@ import {
   MessageAlreadyPinnedError,
   MessageBodyInvalidError,
   MessageBodyTooLongError,
-  MessageMentionNotMemberError,
   MessageNotFoundError,
   MessageNotPinnedError,
   MessageReplyNotInRoomError,
@@ -17,13 +16,29 @@ import {
 import { EventLogService, type RoomTx } from '../events/event-log.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
+import {
+  dedupeMentions,
+  inputTarget,
+  type MentionsMe,
+  type MentionTarget,
+  type MentionTargetRow,
+  mentionKey,
+  toMentionTarget,
+} from './mention.types.js';
+import { MentionResolver, type ResolvedMention } from './mention-resolver.js';
 import { type MessageRow, type MessageView, toMessageView } from './message.view.js';
-import type { ListMessagesQuery, MessagePage, SendMessage } from './messages.dto.js';
+import type { EditMessage, ListMessagesQuery, MessagePage, SendMessage } from './messages.dto.js';
 import type { MessagePinRow, MessagePinView } from './pin.view.js';
 import { RestrictedMarkdownError, validateRestrictedMarkdown } from './restricted-markdown.js';
 
 /** Default `limit` of `GET /rooms/:id/messages`, capped by `messages.max_page`. */
 const DEFAULT_PAGE_SIZE = 50;
+
+interface Window {
+  items: MessageRow[];
+  hasMore: boolean;
+  hasMoreNewer: boolean;
+}
 
 /** Messages: send, restricted Markdown, mentions, replies, pins (technical.md §11, issue #7). */
 @Injectable()
@@ -33,6 +48,7 @@ export class MessagesService {
     private readonly config: ConfigService,
     private readonly eventLog: EventLogService,
     private readonly permissions: PermissionsService,
+    private readonly mentionResolver: MentionResolver,
   ) {}
 
   async sendMessage(
@@ -58,16 +74,13 @@ export class MessagesService {
       }
     }
 
-    const mentions = [...new Set(input.mentions ?? [])];
-    for (const userId of mentions) {
-      const membership = (await this.prisma.orm.public.Membership.where({
-        roomId,
-        userId,
-      }).first()) as unknown;
-      if (!membership) {
-        throw new MessageMentionNotMemberError();
-      }
-    }
+    const resolved = await this.mentionResolver.resolve({
+      roomId,
+      roomType: room.type,
+      authorId: actor.userId,
+      mentions: input.mentions ?? [],
+    });
+    const targets = resolved.map((mention, position) => ({ ...mention, position }));
 
     const id = ulid();
     const message = await this.prisma.transaction(async (tx) => {
@@ -75,7 +88,12 @@ export class MessagesService {
         roomId,
         type: 'message_created',
         senderId: actor.userId,
-        content: { messageId: id, body: input.body, replyToId: input.replyToId ?? null, mentions },
+        content: {
+          messageId: id,
+          body: input.body,
+          replyToId: input.replyToId ?? null,
+          mentions: targets.map(toMentionTarget),
+        },
       });
 
       const row = (await tx.orm.public.Message.create({
@@ -91,59 +109,106 @@ export class MessagesService {
         hiddenAt: null,
       })) as MessageRow;
 
-      for (const userId of mentions) {
-        await tx.orm.public.MessageMention.create({ messageId: id, userId });
-      }
+      await this.writeTargets(tx, id, roomId, event.seq, targets);
 
       return row;
     });
 
-    return toMessageView(message, mentions);
+    return toMessageView(message, targets.map(toMentionTarget));
   }
 
   /**
-   * Edit a message's body (technical.md §12, issue #8). `room.edit_own` (the
-   * author, within `messages.edit_window` if set) or `room.edit_any`. Emits
+   * Edit a message's body and, optionally, its mention targets (technical.md §12,
+   * issue #8; web-client-mentions S3). `room.edit_own` (the author, within
+   * `messages.edit_window` if set) or `room.edit_any`. Emits
    * `message_edited { messageId, editedAt }` — never the previous body; no version
    * history is retained.
+   *
+   * `mentions` absent leaves the targets alone. Present, it is the full new list:
+   * a kept target keeps its token and audience, a removed one loses its
+   * recipients, an added one is resolved now with recipients at the `seq` of the
+   * `message_edited` event appended here.
    */
   async editMessage(
     actor: PermissionPrincipal,
     roomId: string,
     messageId: string,
-    body: string,
+    input: EditMessage,
   ): Promise<MessageView> {
     const message = await this.findMessageOrThrow(roomId, messageId);
     if (message.redactedAt) {
       throw new MessageNotFoundError();
     }
     await this.assertCanEditOrThrow(actor, roomId, message);
-    this.validateBody(body);
+    this.validateBody(input.body);
+
+    const existing = await this.loadTargets(messageId);
+    let removed: MentionTargetRow[] = [];
+    let added: Array<ResolvedMention & { position: number }> = [];
+    if (input.mentions !== undefined) {
+      const wanted = dedupeMentions(input.mentions);
+      const wantedKeys = new Set(wanted.map((m) => mentionKey(m.type, inputTarget(m))));
+      const existingKeys = new Set(existing.map((row) => mentionKey(row.type, row.target)));
+
+      removed = existing.filter((row) => !wantedKeys.has(mentionKey(row.type, row.target)));
+      const addedInputs = wanted.filter(
+        (m) => !existingKeys.has(mentionKey(m.type, inputTarget(m))),
+      );
+      if (addedInputs.length > 0) {
+        const room = await this.findRoomOrThrow(roomId);
+        const resolved = await this.mentionResolver.resolve({
+          roomId,
+          roomType: room.type,
+          // The author of the message, not the editor: their own mentions never notify them.
+          authorId: message.authorId ?? '',
+          mentions: addedInputs,
+        });
+        const firstPosition = Math.max(-1, ...existing.map((row) => row.position)) + 1;
+        added = resolved.map((mention, i) => ({ ...mention, position: firstPosition + i }));
+      }
+    }
 
     const now = new Date().toISOString();
     const updated = await this.prisma.transaction(async (tx) => {
       const row = (await tx.orm.public.Message.where({ id: messageId }).update({
-        body,
+        body: input.body,
         editedAt: now,
       })) as MessageRow;
 
-      await this.eventLog.append(tx, {
+      const event = await this.eventLog.append(tx, {
         roomId,
         type: 'message_edited',
         senderId: actor.userId,
         content: { messageId, editedAt: now },
       });
 
+      for (const target of removed) {
+        await tx.orm.public.MessageMentionRecipient.where({
+          messageId,
+          type: target.type,
+          target: target.target,
+        }).deleteAndCount();
+        await tx.orm.public.MessageMentionTarget.where({
+          messageId,
+          type: target.type,
+          target: target.target,
+        }).delete();
+      }
+      await this.writeTargets(tx, messageId, roomId, event.seq, added);
+
       return row;
     });
 
-    return toMessageView(updated, await this.mentionsFor(messageId));
+    const targets = await this.loadTargets(messageId);
+    const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
+
+    return toMessageView(updated, targets.map(toMentionTarget), mentionsMe.get(messageId) ?? null);
   }
 
   /**
    * Delete a message (technical.md §12, issue #8). `room.delete_own` (the
-   * author) or `room.delete_any`. Clears `body`, removes `message_mention`
-   * and `message_pin` rows, and rewrites the original `message_created`
+   * author) or `room.delete_any`. Clears `body`, removes the mention targets,
+   * their recipients and `message_pin` rows, and rewrites the original `message_created`
    * event into a tombstone (same `seq`, no new event) — reused by the
    * retention worker (#12) via {@link redactMessage}. Returns which
    * capability the deletion went through, so the moderation façade (#13)
@@ -190,9 +255,14 @@ export class MessagesService {
         redactedAt: now,
         redactedById,
       });
-      await tx.orm.public.MessageMention.where((f) => f.messageId.eq(message.id)).delete();
+      await tx.orm.public.MessageMentionTarget.where((f) =>
+        f.messageId.eq(message.id),
+      ).deleteAndCount();
+      await tx.orm.public.MessageMentionRecipient.where((f) =>
+        f.messageId.eq(message.id),
+      ).deleteAndCount();
       await tx.orm.public.MessagePin.where({ roomId, messageId: message.id }).delete();
-      await tx.orm.public.Reaction.where((f) => f.messageId.eq(message.id)).delete();
+      await tx.orm.public.Reaction.where((f) => f.messageId.eq(message.id)).deleteAndCount();
       await tx.orm.public.RoomEvent.where({ roomId, seq: message.seq }).update({
         type: 'message_redacted',
         content: { reason },
@@ -208,9 +278,13 @@ export class MessagesService {
   }
 
   /**
-   * One page of history: the newest `limit` messages with `seq < before`,
-   * ascending inside the page. `lastSeq` is read first so the page is at least
-   * as recent as it; mentions are loaded in one query for the whole page.
+   * One page of history, ascending inside the page. The default and `before`
+   * pages are the newest `limit` messages with `seq < before`; `after` is the
+   * oldest `limit` messages with `seq > after`; `around` is `floor(limit/2)`
+   * messages before `seq` plus the rest from `seq` on. `lastSeq` is read first
+   * so the page is at least as recent as it; mentions are loaded in one query
+   * for the whole page. `hasMore` means "older messages exist", `hasMoreNewer`
+   * "newer messages exist" (always `false` for the default and `before` pages).
    */
   async listMessages(
     actor: PermissionPrincipal,
@@ -228,8 +302,33 @@ export class MessagesService {
 
     const maxPage = this.config.get('messages.max_page');
     const limit = Math.min(query.limit ?? DEFAULT_PAGE_SIZE, maxPage);
-    const before = query.before === undefined ? null : BigInt(query.before);
 
+    const window =
+      query.after !== undefined
+        ? await this.pageAfter(roomId, BigInt(query.after), limit)
+        : query.around !== undefined
+          ? await this.pageAround(roomId, BigInt(query.around), limit)
+          : await this.pageBefore(
+              roomId,
+              query.before === undefined ? null : BigInt(query.before),
+              limit,
+            );
+
+    const ids = window.items.map((row) => row.id);
+    const mentionsByMessage = await this.targetsForMany(ids);
+    const mentionsMe = await this.mentionsMeFor(actor.userId, ids);
+
+    return {
+      items: window.items.map((row) =>
+        toMessageView(row, mentionsByMessage.get(row.id) ?? [], mentionsMe.get(row.id) ?? null),
+      ),
+      lastSeq: room.lastSeq.toString(),
+      hasMore: window.hasMore,
+      hasMoreNewer: window.hasMoreNewer,
+    };
+  }
+
+  private async pageBefore(roomId: string, before: bigint | null, limit: number): Promise<Window> {
     const rows = (await this.prisma.orm.public.Message.where((f) =>
       before === null ? f.roomId.eq(roomId) : and(f.roomId.eq(roomId), f.seq.lt(before)),
     )
@@ -237,15 +336,59 @@ export class MessagesService {
       .limit(limit + 1)
       .all()) as MessageRow[];
 
-    const hasMore = rows.length > limit;
-    const page = rows.slice(0, limit).reverse();
-    const mentionsByMessage = await this.mentionsForMany(page.map((row) => row.id));
+    return {
+      items: rows.slice(0, limit).reverse(),
+      hasMore: rows.length > limit,
+      hasMoreNewer: false,
+    };
+  }
+
+  private async pageAfter(roomId: string, after: bigint, limit: number): Promise<Window> {
+    const rows = (await this.prisma.orm.public.Message.where((f) =>
+      and(f.roomId.eq(roomId), f.seq.gt(after)),
+    )
+      .orderBy((f) => f.seq.asc())
+      .limit(limit + 1)
+      .all()) as MessageRow[];
+    const items = rows.slice(0, limit);
 
     return {
-      items: page.map((row) => toMessageView(row, mentionsByMessage.get(row.id) ?? [])),
-      lastSeq: room.lastSeq.toString(),
-      hasMore,
+      items,
+      hasMore: await this.hasOlderThan(roomId, items[0]?.seq ?? after + 1n),
+      hasMoreNewer: rows.length > limit,
     };
+  }
+
+  private async pageAround(roomId: string, around: bigint, limit: number): Promise<Window> {
+    const olderCount = Math.floor(limit / 2);
+    const newerCount = limit - olderCount;
+
+    const older = (await this.prisma.orm.public.Message.where((f) =>
+      and(f.roomId.eq(roomId), f.seq.lt(around)),
+    )
+      .orderBy((f) => f.seq.desc())
+      .limit(olderCount + 1)
+      .all()) as MessageRow[];
+    const newer = (await this.prisma.orm.public.Message.where((f) =>
+      and(f.roomId.eq(roomId), f.seq.gte(around)),
+    )
+      .orderBy((f) => f.seq.asc())
+      .limit(newerCount + 1)
+      .all()) as MessageRow[];
+
+    return {
+      items: [...older.slice(0, olderCount).reverse(), ...newer.slice(0, newerCount)],
+      hasMore: older.length > olderCount,
+      hasMoreNewer: newer.length > newerCount,
+    };
+  }
+
+  private async hasOlderThan(roomId: string, seq: bigint): Promise<boolean> {
+    const row = (await this.prisma.orm.public.Message.where((f) =>
+      and(f.roomId.eq(roomId), f.seq.lt(seq)),
+    ).first()) as unknown;
+
+    return row !== null;
   }
 
   async getMessage(
@@ -255,9 +398,10 @@ export class MessagesService {
   ): Promise<MessageView> {
     await this.permissions.assertCan(actor, roomId, 'room.read');
     const message = await this.findMessageOrThrow(roomId, messageId);
-    const mentions = await this.mentionsFor(messageId);
+    const mentions = (await this.loadTargets(messageId)).map(toMentionTarget);
+    const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
 
-    return toMessageView(message, mentions);
+    return toMessageView(message, mentions, mentionsMe.get(messageId) ?? null);
   }
 
   async pin(
@@ -349,9 +493,12 @@ export class MessagesService {
     }
   }
 
-  private async findRoomOrThrow(id: string): Promise<{ id: string; readOnly: boolean }> {
+  private async findRoomOrThrow(
+    id: string,
+  ): Promise<{ id: string; type: string; readOnly: boolean }> {
     const row = (await this.prisma.orm.public.Room.where({ id }).first()) as {
       id: string;
+      type: string;
       readOnly: boolean;
       deletedAt: string | null;
     } | null;
@@ -408,27 +555,93 @@ export class MessagesService {
     await this.permissions.assertCan(actor, roomId, 'room.edit_any');
   }
 
-  private async mentionsForMany(messageIds: string[]): Promise<Map<string, string[]>> {
-    const byMessage = new Map<string, string[]>();
+  /** Insert targets and their recipients (at `seq`) inside the caller's transaction. */
+  private async writeTargets(
+    tx: RoomTx,
+    messageId: string,
+    roomId: string,
+    seq: bigint,
+    targets: ReadonlyArray<ResolvedMention & { position: number }>,
+  ): Promise<void> {
+    for (const target of targets) {
+      await tx.orm.public.MessageMentionTarget.create({
+        messageId,
+        type: target.type,
+        target: target.target,
+        token: target.token,
+        position: target.position,
+      });
+      if (target.audience.length > 0) {
+        await tx.orm.public.MessageMentionRecipient.createAll(
+          target.audience.map((userId) => ({
+            messageId,
+            type: target.type,
+            target: target.target,
+            userId,
+            roomId,
+            seq,
+          })),
+        );
+      }
+    }
+  }
+
+  private async loadTargets(messageId: string): Promise<MentionTargetRow[]> {
+    const map = await this.targetRowsForMany([messageId]);
+
+    return map.get(messageId) ?? [];
+  }
+
+  private async targetsForMany(messageIds: string[]): Promise<Map<string, MentionTarget[]>> {
+    const rows = await this.targetRowsForMany(messageIds);
+
+    return new Map([...rows].map(([id, list]) => [id, list.map(toMentionTarget)]));
+  }
+
+  /** Targets of each message, ordered by `position`. */
+  private async targetRowsForMany(messageIds: string[]): Promise<Map<string, MentionTargetRow[]>> {
+    const byMessage = new Map<string, MentionTargetRow[]>();
     if (messageIds.length === 0) {
       return byMessage;
     }
 
-    const rows = (await this.prisma.orm.public.MessageMention.where((f) =>
+    const rows = (await this.prisma.orm.public.MessageMentionTarget.where((f) =>
       f.messageId.in(messageIds),
-    ).all()) as Array<{ messageId: string; userId: string }>;
+    )
+      .orderBy((f) => f.position.asc())
+      .all()) as MentionTargetRow[];
     for (const row of rows) {
-      byMessage.set(row.messageId, [...(byMessage.get(row.messageId) ?? []), row.userId]);
+      byMessage.set(row.messageId, [...(byMessage.get(row.messageId) ?? []), row]);
     }
 
     return byMessage;
   }
 
-  private async mentionsFor(messageId: string): Promise<string[]> {
-    const rows = (await this.prisma.orm.public.MessageMention.where({
-      messageId,
-    }).all()) as Array<{ userId: string }>;
+  /**
+   * The caller's relation to each message: `direct` when one of their recipient
+   * rows comes from a `user` target, else `collective` when they have any.
+   * One recipient query for the whole page.
+   */
+  private async mentionsMeFor(
+    userId: string,
+    messageIds: string[],
+  ): Promise<Map<string, MentionsMe>> {
+    const result = new Map<string, MentionsMe>();
+    if (messageIds.length === 0) {
+      return result;
+    }
 
-    return rows.map((r) => r.userId);
+    const rows = (await this.prisma.orm.public.MessageMentionRecipient.where((f) =>
+      and(f.userId.eq(userId), f.messageId.in(messageIds)),
+    ).all()) as Array<{ messageId: string; type: string }>;
+    for (const row of rows) {
+      if (row.type === 'user') {
+        result.set(row.messageId, 'direct');
+      } else if (!result.has(row.messageId)) {
+        result.set(row.messageId, 'collective');
+      }
+    }
+
+    return result;
   }
 }
