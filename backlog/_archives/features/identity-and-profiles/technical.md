@@ -1,14 +1,14 @@
 # Identity and profiles — technical design
 
 Technical design for local accounts, authentication, sessions and profiles.
-Builds on [server core](../../_archives/features/server-core/technical.md); the `server` repository is
+Builds on [server core](../server-core/technical.md); the `server` repository is
 greenfield, so this document defines the initial module rather than referencing
 existing code.
 
-Related: [user identifier](../../../docs/technical/user-identifier.md),
-[auth-and-sessions](../../../docs/technical/auth-and-sessions.md),
-[server-initialization](../../../docs/technical/server-initialization.md),
-[api-conventions](../../../docs/technical/api-conventions.md).
+Related: [user identifier](../../../../docs/technical/user-identifier.md),
+[auth-and-sessions](../../../../docs/technical/auth-and-sessions.md),
+[server-initialization](../../../../docs/technical/server-initialization.md),
+[api-conventions](../../../../docs/technical/api-conventions.md).
 
 **Reading guide.** §1 to §20 describe the server identity layer as first shipped;
 they are kept as written because code comments cite them by number (for example
@@ -29,7 +29,7 @@ In scope for the first increment:
 - login, access token (JWT) + rotating opaque refresh token, reuse detection;
 - named multi-device sessions: list, rename, revoke, revoke-all;
 - SSE stream ticket endpoint (the stream consumer itself ships with
-  [conversations](../../_archives/features/conversations/overview.md));
+  [conversations](../conversations/overview.md));
 - profile: display name, short bio, avatar (via server-core `BlobService`);
 - identifier change driven by the `identity.username_change_policy`;
 - account suspension (blocks all access), account deletion + anonymisation;
@@ -205,7 +205,7 @@ model ReservedUsername {
 
 `email` and `name` are both normalised (NFC, trim, lowercase) before insert and
 stored as plain unique `text` — no `citext` extension
-([identity account and token mechanics](../../../docs/technical/identity-account-and-token-mechanics.md)).
+([identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md)).
 
 ## 5. Identifier rules
 
@@ -293,7 +293,7 @@ Common:
 - `GET /invitations` (list, own + others for owners), `DELETE /invitations/:id`
   (revoke: set `consumedAt` with a sentinel, or delete).
 - Space administrators inviting into their space is a
-  [conversations](../../_archives/features/conversations/overview.md) concern; a
+  [conversations](../conversations/overview.md) concern; a
   `runtime` flag to let ordinary users invite is reserved but not built now.
 
 ## 9. Email verification
@@ -344,7 +344,7 @@ Session management (all scoped to the caller):
   bound to `{ userId, sessionId }` (a Redis-backed store is the multi-instance
   upgrade).
 - The `GET /events?ticket=…` consumer is specified and built with
-  [conversations](../../_archives/features/conversations/overview.md); it validates the ticket, binds
+  [conversations](../conversations/overview.md); it validates the ticket, binds
   the stream to the session, and rejects if the session is revoked.
 
 ## 13. Profile and avatar
@@ -400,7 +400,7 @@ increment"; the general policy still comes later.
   - `User.name → null`, `User.email → null`;
   - insert `ReservedUsername { name, reservedUntil: now + identity.username_release_delay, reason: "account_deleted" }`;
   - `audit_log("identity.account_deleted")`.
-- Forward contract for [conversations](../../_archives/features/conversations/overview.md): message
+- Forward contract for [conversations](../conversations/overview.md): message
   authorship keeps `User.id`; reads resolve a deleted user to "Deleted account".
   `room_events.sender` is unchanged.
 - The last owner cannot be deleted or suspended.
@@ -433,7 +433,7 @@ increment"; the general policy still comes later.
 | `POST /admin/username-requests/:id/approve` / `reject`, `GET /admin/username-requests` | owner         | approval-mode username changes     |
 
 The `/admin/*` endpoints here are the minimal owner surface needed by this
-feature; the full admin experience is [server administration](../../_archives/features/server-administration/overview.md).
+feature; the full admin experience is [server administration](../server-administration/overview.md).
 
 ## 17. Identifier change flows
 
@@ -463,7 +463,7 @@ and `web_url`.
 | Avatar storage                   | server-core `BlobService` (dedup)                                                                                                                                  | column blob; separate table                  | the file storage and quotas design; avatars are files like any other                                     |
 | Password hash lib                | `@node-rs/argon2`                                                                                                                                                  | `argon2` (node-gyp), `bcrypt`                | native, Bun-friendly, Argon2id is the OWASP recommendation                     |
 | Sensitive-endpoint throttle      | narrow in-memory guard now                                                                                                                                         | wait for the general rate-limiter            | credential endpoints cannot ship unprotected; scope is minimal                 |
-| Email case-insensitivity         | normalise-on-write + plain unique `text` ([identity account and token mechanics](../../../docs/technical/identity-account-and-token-mechanics.md)) | `citext` column; `lower(email)` unique index | no extension dependency; one rule for `name` and `email`                       |
+| Email case-insensitivity         | normalise-on-write + plain unique `text` ([identity account and token mechanics](../../../../docs/technical/identity-account-and-token-mechanics.md)) | `citext` column; `lower(email)` unique index | no extension dependency; one rule for `name` and `email`                       |
 
 ## 20. Consequences
 
@@ -474,7 +474,7 @@ and `web_url`.
 - Establishes the `sid` denylist as an in-process concern → becomes a
   Redis-backed concern at the same time as the SSE backplane (multi-instance).
 - The SSE ticket store and `GET /events` consumer are specified here but
-  completed with [conversations](../../_archives/features/conversations/overview.md).
+  completed with [conversations](../conversations/overview.md).
 - Forward contracts recorded for conversations: user resolution for deleted
   users, mention/authorship by `User.id`, name changes never rewriting history.
 - `server-administration` will extend `/admin/*` (pagination, filters,
@@ -486,26 +486,26 @@ Everything below was checked against the code at the time of writing.
 
 | # | Finding | Evidence | Consequence |
 | - | ------- | -------- | ----------- |
-| F1 | Server and SDK already cover profile read/update, avatar upload/removal, email change, username change, self-deletion and the four session operations. | [me.ts](../../../packages/sdk/src/resources/me.ts), [sessions.ts](../../../packages/sdk/src/resources/sessions.ts), [profile.controller.ts](../../../apps/server/src/modules/identity/profile/profile.controller.ts) | These are reused as they are. |
-| F2 | There is no password change for a signed-in user. Only the email reset flow sets a new hash. | [password-reset.service.ts](../../../apps/server/src/modules/identity/accounts/password-reset.service.ts), [protocol](../../../docs/protocol/identity.md) | New endpoint (S1). |
-| F3 | The username change policy (`identity.username_change_policy`) is a server-side setting the client cannot read. The cooldown is computed from the last `identity.username_changed` audit entry. | [registry.ts:230](../../../apps/server/src/core/config/registry.ts), [username.service.ts:152](../../../apps/server/src/modules/identity/accounts/username.service.ts) | New state endpoint (S2). |
-| F4 | In `approval` mode `changeOwn` inserts a new pending request on every call: nothing prevents several pending requests for one user, and nothing lets the user cancel one. | [username.service.ts:46](../../../apps/server/src/modules/identity/accounts/username.service.ts) | Single pending request, cancellation (S2). |
-| F5 | A pending email change exists only as an unconsumed `EmailVerification` row whose `email` differs from `User.email`. `MeView` does not expose it. `startVerification` deletes every earlier unconsumed row of the user, so at most one pending row exists. | [email-verification.service.ts:61](../../../apps/server/src/modules/identity/email-verification/email-verification.service.ts), [profile.dto.ts:23](../../../apps/server/src/modules/identity/profile/profile.dto.ts) | `MeView.pendingEmail` (S3), no schema change. Resending re-submits `POST /me/email`. |
-| F6 | `GET /users/:identifier/avatar` needs a Bearer token, so an `<img src>` cannot load it. The SDK transport only parses JSON and sends `Accept: application/json`. The route answers `private, max-age=31536000, immutable` on a URL that stays the same when the avatar is replaced. | [profile.controller.ts:121](../../../apps/server/src/modules/identity/profile/profile.controller.ts), [http-client.ts:114](../../../packages/sdk/src/transport/http-client.ts), [profile.service.ts:228](../../../apps/server/src/modules/identity/profile/profile.service.ts) | Blob binding in the SDK (S5), versioned `avatarUrl` (S4). |
-| F7 | A wrong password on `POST /me/email` and `DELETE /me` answers `401 auth.invalid_credentials` (code and e2e), while the protocol page says `403`. The SDK maps that code to `InvalidCredentialsError`, which is not an `AuthenticationError`: it neither triggers a refresh nor signs the user out. | [identity.errors.ts:21](../../../apps/server/src/modules/identity/identity.errors.ts), [identity-lifecycle.e2e-spec.ts:316](../../../apps/server/src/modules/identity/identity-lifecycle.e2e-spec.ts), [protocol](../../../docs/protocol/identity.md), [errors.ts](../../../packages/sdk/src/transport/errors.ts) | The protocol page is fixed (`401`). The client shows a field error for it. |
-| F8 | `GET /sessions` returns revoked sessions too (`listForUser` has no filter). A revoked session cannot refresh (`AuthService.refresh` checks `getActive`). | [session.service.ts:76](../../../apps/server/src/modules/identity/auth/session.service.ts), [auth.service.ts:97](../../../apps/server/src/modules/identity/auth/auth.service.ts) | The client filters `revokedAt === null`. `revokeAllForUser` is enough to cut sessions (no refresh-token burn needed). |
-| F9 | The SDK session keeps the `identifier` it got at login; a username change does not update it. | [session-manager.ts](../../../packages/sdk/src/session/session-manager.ts) | The client reads the identifier from `useMe()`, never from `useSession()` (L1). |
-| F10 | The [`auth` design](../auth/technical.md) (C1, C6) already covers the shell and the user menu: `routes/_app.tsx` passes a `userMenu` to `AppShell`, and `features/auth/components/user-menu.tsx` (display name with initials fallback, "Sign out") is issue [#93](https://github.com/marmotz/ekoz/issues/93). It states that the `/account` screens add their entry later and that the avatar image is left to this feature. Every protected route lives under `routes/_app/` ([#92](https://github.com/marmotz/ekoz/issues/92)). A feature may not import another, and `registerNav` shows the accepted pattern (registry in `shared`). | [auth technical C6](../auth/technical.md), [topbar.tsx](../../../apps/client-web/src/shared/layout/topbar.tsx), [eslint.config.js](../../../apps/client-web/eslint.config.js), [nav-registry.ts](../../../apps/client-web/src/shared/layout/nav-registry.ts) | `auth` keeps the menu and Sign out. This feature adds a menu-entry registry in `shared/layout` that `UserMenu` reads (§24). |
+| F1 | Server and SDK already cover profile read/update, avatar upload/removal, email change, username change, self-deletion and the four session operations. | [me.ts](../../../../packages/sdk/src/resources/me.ts), [sessions.ts](../../../../packages/sdk/src/resources/sessions.ts), [profile.controller.ts](../../../../apps/server/src/modules/identity/profile/profile.controller.ts) | These are reused as they are. |
+| F2 | There is no password change for a signed-in user. Only the email reset flow sets a new hash. | [password-reset.service.ts](../../../../apps/server/src/modules/identity/accounts/password-reset.service.ts), [protocol](../../../../docs/protocol/identity.md) | New endpoint (S1). |
+| F3 | The username change policy (`identity.username_change_policy`) is a server-side setting the client cannot read. The cooldown is computed from the last `identity.username_changed` audit entry. | [registry.ts:230](../../../../apps/server/src/core/config/registry.ts), [username.service.ts:152](../../../../apps/server/src/modules/identity/accounts/username.service.ts) | New state endpoint (S2). |
+| F4 | In `approval` mode `changeOwn` inserts a new pending request on every call: nothing prevents several pending requests for one user, and nothing lets the user cancel one. | [username.service.ts:46](../../../../apps/server/src/modules/identity/accounts/username.service.ts) | Single pending request, cancellation (S2). |
+| F5 | A pending email change exists only as an unconsumed `EmailVerification` row whose `email` differs from `User.email`. `MeView` does not expose it. `startVerification` deletes every earlier unconsumed row of the user, so at most one pending row exists. | [email-verification.service.ts:61](../../../../apps/server/src/modules/identity/email-verification/email-verification.service.ts), [profile.dto.ts:23](../../../../apps/server/src/modules/identity/profile/profile.dto.ts) | `MeView.pendingEmail` (S3), no schema change. Resending re-submits `POST /me/email`. |
+| F6 | `GET /users/:identifier/avatar` needs a Bearer token, so an `<img src>` cannot load it. The SDK transport only parses JSON and sends `Accept: application/json`. The route answers `private, max-age=31536000, immutable` on a URL that stays the same when the avatar is replaced. | [profile.controller.ts:121](../../../../apps/server/src/modules/identity/profile/profile.controller.ts), [http-client.ts:114](../../../../packages/sdk/src/transport/http-client.ts), [profile.service.ts:228](../../../../apps/server/src/modules/identity/profile/profile.service.ts) | Blob binding in the SDK (S5), versioned `avatarUrl` (S4). |
+| F7 | A wrong password on `POST /me/email` and `DELETE /me` answers `401 auth.invalid_credentials` (code and e2e), while the protocol page says `403`. The SDK maps that code to `InvalidCredentialsError`, which is not an `AuthenticationError`: it neither triggers a refresh nor signs the user out. | [identity.errors.ts:21](../../../../apps/server/src/modules/identity/identity.errors.ts), [identity-lifecycle.e2e-spec.ts:316](../../../../apps/server/src/modules/identity/identity-lifecycle.e2e-spec.ts), [protocol](../../../../docs/protocol/identity.md), [errors.ts](../../../../packages/sdk/src/transport/errors.ts) | The protocol page is fixed (`401`). The client shows a field error for it. |
+| F8 | `GET /sessions` returns revoked sessions too (`listForUser` has no filter). A revoked session cannot refresh (`AuthService.refresh` checks `getActive`). | [session.service.ts:76](../../../../apps/server/src/modules/identity/auth/session.service.ts), [auth.service.ts:97](../../../../apps/server/src/modules/identity/auth/auth.service.ts) | The client filters `revokedAt === null`. `revokeAllForUser` is enough to cut sessions (no refresh-token burn needed). |
+| F9 | The SDK session keeps the `identifier` it got at login; a username change does not update it. | [session-manager.ts](../../../../packages/sdk/src/session/session-manager.ts) | The client reads the identifier from `useMe()`, never from `useSession()` (L1). |
+| F10 | The [`auth` design](../auth/technical.md) (C1, C6) already covers the shell and the user menu: `routes/_app.tsx` passes a `userMenu` to `AppShell`, and `features/auth/components/user-menu.tsx` (display name with initials fallback, "Sign out") is issue [#93](https://github.com/marmotz/ekoz/issues/93). It states that the `/account` screens add their entry later and that the avatar image is left to this feature. Every protected route lives under `routes/_app/` ([#92](https://github.com/marmotz/ekoz/issues/92)). A feature may not import another, and `registerNav` shows the accepted pattern (registry in `shared`). | [auth technical C6](../auth/technical.md), [topbar.tsx](../../../../apps/client-web/src/shared/layout/topbar.tsx), [eslint.config.js](../../../../apps/client-web/eslint.config.js), [nav-registry.ts](../../../../apps/client-web/src/shared/layout/nav-registry.ts) | `auth` keeps the menu and Sign out. This feature adds a menu-entry registry in `shared/layout` that `UserMenu` reads (§24). |
 | F11 | `useMe` does not exist. [`#65`](https://github.com/marmotz/ekoz/issues/65) (`web-client-rooms`) creates `shared/sdk/use-me.ts` with key `['me']` and is independent of everything else. | [web-client-rooms technical §4.1](../web-client-rooms/technical.md) | This feature depends on `#65` instead of creating a second `useMe`. |
-| F12 | `client.me.deleteAccount` clears the session store and emits `session:cleared`. `SessionGuard` only listens to `session:invalid`, but `useSession()` follows `session:cleared`, so `RequireAuth` redirects to `/login`. The query cache is not cleared. | [me.ts](../../../packages/sdk/src/resources/me.ts), [session-guard.tsx](../../../apps/client-web/src/app/session-guard.tsx), [session.ts](../../../apps/client-web/src/shared/sdk/session.ts) | The deletion mutation clears the query cache itself. |
-| F13 | `auth` generates its forms with kurotako `gen-react` and TanStack Form ([auth technical §4](../auth/technical.md)); [#94](https://github.com/marmotz/ekoz/issues/94) wires the generator, adds `zod` and `@tanstack/react-form`, and is blocked until `@kurotako/gen-react` is published. [#92](https://github.com/marmotz/ekoz/issues/92) adds `input`, `label`, `card` and extends `createFakeSdk` with `auth` and `me` stubs. #94 puts `PasswordInput` and the field wrappers in `features/auth/components`, which this feature cannot import. `textarea` and `dialog` do not exist; `@radix-ui/react-dialog` is already installed (used by `sheet`). i18n keys are typed from `common.json` only. | [package.json](../../../apps/client-web/package.json), [sdk-mock.ts](../../../apps/client-web/test/sdk-mock.ts), [use-translation.ts](../../../apps/client-web/src/shared/i18n/use-translation.ts) | Same generated forms (product decision), so the screens wait on #94. `PasswordInput` and the field wrappers move to `shared/ui`. New: `textarea`, `dialog`; strings under `account.*` in `common.json`; `createFakeSdk` gets `sessions` and `users` stubs. |
+| F12 | `client.me.deleteAccount` clears the session store and emits `session:cleared`. `SessionGuard` only listens to `session:invalid`, but `useSession()` follows `session:cleared`, so `RequireAuth` redirects to `/login`. The query cache is not cleared. | [me.ts](../../../../packages/sdk/src/resources/me.ts), [session-guard.tsx](../../../../apps/client-web/src/app/session-guard.tsx), [session.ts](../../../../apps/client-web/src/shared/sdk/session.ts) | The deletion mutation clears the query cache itself. |
+| F13 | `auth` generates its forms with kurotako `gen-react` and TanStack Form ([auth technical §4](../auth/technical.md)); [#94](https://github.com/marmotz/ekoz/issues/94) wires the generator, adds `zod` and `@tanstack/react-form`, and is blocked until `@kurotako/gen-react` is published. [#92](https://github.com/marmotz/ekoz/issues/92) adds `input`, `label`, `card` and extends `createFakeSdk` with `auth` and `me` stubs. #94 puts `PasswordInput` and the field wrappers in `features/auth/components`, which this feature cannot import. `textarea` and `dialog` do not exist; `@radix-ui/react-dialog` is already installed (used by `sheet`). i18n keys are typed from `common.json` only. | [package.json](../../../../apps/client-web/package.json), [sdk-mock.ts](../../../../apps/client-web/test/sdk-mock.ts), [use-translation.ts](../../../../apps/client-web/src/shared/i18n/use-translation.ts) | Same generated forms (product decision), so the screens wait on #94. `PasswordInput` and the field wrappers move to `shared/ui`. New: `textarea`, `dialog`; strings under `account.*` in `common.json`; `createFakeSdk` gets `sessions` and `users` stubs. |
 
 ## 22. Server changes
 
 Each change follows the repository flow: update the Zod DTO, then
 `bun run openapi:emit` (committed `apps/server/openapi.json`, checked by
 `openapi:check`), then `bun run generate` for the SDK types. The protocol page
-[`docs/protocol/identity.md`](../../../docs/protocol/identity.md) is edited first
+[`docs/protocol/identity.md`](../../../../docs/protocol/identity.md) is edited first
 in the same change.
 
 ### S1. Password change
@@ -548,7 +548,7 @@ Same controller as `PATCH /me/username` (`MeUsernameController`, route
   `identity.username_change_cancelled`. `404 identity.username_request_not_found`
   if there is none.
 - `UsernameChangeStatus` gains `cancelled` in
-  [contract.prisma](../../../apps/server/src/core/prisma/contract.prisma) (a
+  [contract.prisma](../../../../apps/server/src/core/prisma/contract.prisma) (a
   `pg/text@1` enum: `bun run db:plan` decides whether a migration file is emitted),
   in `UsernameChangeRequestSchema`, in the `UsernameChangeRequestRow` union and in
   the `status` enum of `GET /admin/username-requests`. `approve` and `reject`
@@ -752,7 +752,7 @@ A page `docs/technical/web-client-account.md` records the client design (user-me
 menu entries, avatar rendering, `/account` sections, error mapping) and the three server
 decisions (password change, single cancellable username request, versioned
 `avatarUrl`). The avatar caching bullet of
-[identity lifecycle and abuse protection](../../../docs/technical/identity-lifecycle-and-abuse-protection.md)
+[identity lifecycle and abuse protection](../../../../docs/technical/identity-lifecycle-and-abuse-protection.md)
 links to it. The protocol page gains the new endpoints, `MeView.pendingEmail`, the
 versioned `avatarUrl`, the `cancelled` status, the new error code, and the `401`
 correction of F7; the protocol changelog gets its entry.
@@ -767,7 +767,7 @@ correction of F7; the protocol changelog gets its entry.
   changelog.
 - The admin console is unaffected: `apps/admin` only requests the `pending`,
   `approved` and `rejected` filters, so `cancelled` rows never reach its table
-  ([username-requests.tsx](../../../apps/admin/src/routes/username-requests.tsx)).
+  ([username-requests.tsx](../../../../apps/admin/src/routes/username-requests.tsx)).
 - Any future author-avatar display (rooms, chat) reuses `UserAvatar`: one
   authenticated fetch per distinct `avatarUrl`, cached for the session.
 - This feature depends on `web-client-rooms` issue `#65` (`useMe`) and on `auth`

@@ -9,8 +9,8 @@ Bootstrap seul du client de démonstration. Livrable : une application
 **TanStack Start** (React + Vite + runtime serveur Nitro) qui build, lint,
 teste, se lance, affiche un shell applicatif (sidebar + topbar + bascule de
 thème) et câble l'accès serveur via `sdk-js`. **Aucune** feature métier ici :
-`auth` ([overview](../../../features/auth/overview.md)) et `identity-and-profiles`
-([overview](../../../features/identity-and-profiles/overview.md)) sont des features séparées qui se branchent
+`auth` ([overview](../auth/overview.md)) et `identity-and-profiles`
+([overview](../identity-and-profiles/overview.md)) sont des features séparées qui se branchent
 sur ce socle.
 
 Hors périmètre : toute route/écran métier, la persistance de session réelle

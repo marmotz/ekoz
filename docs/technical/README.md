@@ -9,6 +9,7 @@ has its own page with full context, alternatives and consequences:
 - [Web client authentication](web-client-auth.md) — `_app` / `_auth` layouts, guest-only pages, error mapping, generated forms.
 - [Web client account](web-client-account.md): `/account` page, user-menu entries registry, avatar rendering, error mapping and the server changes behind it.
 - [Web client chat](web-client-chat.md): room history, live sync, composer, `shared/realtime` stream and the server, protocol and SDK changes behind it.
+- [Web client composer editor](web-client-composer-editor.md): TipTap 3 as the composer editor, restricted-Markdown schema, mention node.
 - [Web client rooms](web-client-rooms.md): sidebar section slot and rooms tree, `RoomGate` states, rooms pages, query keys and the server, protocol and SDK changes behind them.
 - [Admin console Node entry point](admin-console-node-entry.md) — the `server.entry.mjs` adapter.
 - [SDK packaging and protocol-version policy](sdk-packaging-and-protocol-policy.md).

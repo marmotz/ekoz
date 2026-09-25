@@ -17,7 +17,7 @@ Three constraints shaped it:
   this feature can only contribute to it.
 
 The feature-level design is in
-[`backlog/features/identity-and-profiles/technical.md`](../../backlog/features/identity-and-profiles/technical.md)
+[`backlog/_archives/features/identity-and-profiles/technical.md`](../../backlog/_archives/features/identity-and-profiles/technical.md)
 (§21 to §28); this page records what shipped and why. The server rules it relies on are
 in [identity lifecycle and abuse protection](identity-lifecycle-and-abuse-protection.md).
 

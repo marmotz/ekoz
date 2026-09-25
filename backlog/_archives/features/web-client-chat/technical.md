@@ -39,17 +39,17 @@ Everything below was checked against the code at the time of writing.
 
 | # | Finding | Evidence | Consequence |
 | - | ------- | -------- | ----------- |
-| F1 | No messages list endpoint. Only `GET /rooms/:id/messages/:messageId`. | [messages.controller.ts](../../../apps/server/src/modules/conversations/messages/messages.controller.ts) | New endpoint (S1). |
-| F2 | `/sync` pages **forward only** and `seq` counts every room event (joins, reactions, pins...). "Last N seq" can hold no message at all. | [sync.service.ts:29](../../../apps/server/src/modules/conversations/streaming/sync.service.ts) | History does not come from `/sync`; it only serves reconnection catch-up. |
-| F3 | `message_edited` carries `{ editedAt }` only: no `messageId`. `message_created` keeps the original body in the log. | [messages.service.ts:127](../../../apps/server/src/modules/conversations/messages/messages.service.ts) | A client cannot tell which message was edited. Protocol fix (S3). |
-| F4 | A deletion rewrites the original `message_created` row in place (`type: message_redacted`, `content: { reason }`, same `seq`). It appends **no** event and no feed row. | [messages.service.ts:172](../../../apps/server/src/modules/conversations/messages/messages.service.ts) | No connected client ever sees a deletion; `/sync since=` never re-serves it. Protocol fix (S3). |
-| F5 | The account feed row for the original `message_created` still holds the body after a deletion, until the feed is pruned. | `redactMessage` does not touch `AccountFeedEvent`; feed payload copied at [feed-fanout.service.ts:35](../../../apps/server/src/modules/conversations/streaming/feed-fanout.service.ts) | Deleted content can be replayed by `GET /events`. Scrubbed in S3. |
-| F6 | `GET /events` without `Last-Event-ID` starts from cursor `0`: a fresh connection replays the whole retained feed. | [events.controller.ts:100](../../../apps/server/src/modules/conversations/streaming/events.controller.ts), `parseCursor` line 160 | A page load would flood the client. Server change S4. |
-| F7 | A message only has `authorId` (ULID). The only profile lookup is `GET /users/:identifier` (`name/server`). No members endpoint exists. | [profile.service.ts:75](../../../apps/server/src/modules/identity/profile/profile.service.ts), controller list above | Author names cannot be shown. New endpoint (S2). |
-| F8 | The stream ticket is **single use**. A native `EventSource` reconnects by itself with the same URL, i.e. with a spent ticket. | [ticket.service.ts](../../../apps/server/src/modules/identity/auth/ticket.service.ts), events controller | The SDK owns reconnection and mints a fresh ticket each time. |
-| F9 | Generated SDK types are wrong for this surface: `SyncResponseDtoEvents.content` is `string` (the server sends `z.unknown()`), timestamps are typed `Date` (the wire is an ISO string). The SDK does not parse responses. | [sync.dto.ts:19](../../../apps/server/src/modules/conversations/streaming/sync.dto.ts), `packages/sdk/src/generated/api/typescript/` | The SDK hand-writes a discriminated `RoomEvent` union; the client never relies on `Date` instances. |
-| F10 | The account feed fans out to **explicit `Membership` rows only**, while effective access also comes from ancestor spaces. | [feed-fanout.service.ts](../../../apps/server/src/modules/conversations/streaming/feed-fanout.service.ts) | Server task S5. `web-client-rooms` lists such rooms as `inherited`, so they must update live too. |
-| F11 | `GET /rooms/:id/my-permissions` exists (`{ capabilities }`) and `Room.readOnly` is on `GET /rooms/:id`; `MeView.id` is the caller's ULID. | permissions controller, [rooms-and-permissions.md](../../../docs/protocol/rooms-and-permissions.md) | Composer state needs no server work. |
+| F1 | No messages list endpoint. Only `GET /rooms/:id/messages/:messageId`. | [messages.controller.ts](../../../../apps/server/src/modules/conversations/messages/messages.controller.ts) | New endpoint (S1). |
+| F2 | `/sync` pages **forward only** and `seq` counts every room event (joins, reactions, pins...). "Last N seq" can hold no message at all. | [sync.service.ts:29](../../../../apps/server/src/modules/conversations/streaming/sync.service.ts) | History does not come from `/sync`; it only serves reconnection catch-up. |
+| F3 | `message_edited` carries `{ editedAt }` only: no `messageId`. `message_created` keeps the original body in the log. | [messages.service.ts:127](../../../../apps/server/src/modules/conversations/messages/messages.service.ts) | A client cannot tell which message was edited. Protocol fix (S3). |
+| F4 | A deletion rewrites the original `message_created` row in place (`type: message_redacted`, `content: { reason }`, same `seq`). It appends **no** event and no feed row. | [messages.service.ts:172](../../../../apps/server/src/modules/conversations/messages/messages.service.ts) | No connected client ever sees a deletion; `/sync since=` never re-serves it. Protocol fix (S3). |
+| F5 | The account feed row for the original `message_created` still holds the body after a deletion, until the feed is pruned. | `redactMessage` does not touch `AccountFeedEvent`; feed payload copied at [feed-fanout.service.ts:35](../../../../apps/server/src/modules/conversations/streaming/feed-fanout.service.ts) | Deleted content can be replayed by `GET /events`. Scrubbed in S3. |
+| F6 | `GET /events` without `Last-Event-ID` starts from cursor `0`: a fresh connection replays the whole retained feed. | [events.controller.ts:100](../../../../apps/server/src/modules/conversations/streaming/events.controller.ts), `parseCursor` line 160 | A page load would flood the client. Server change S4. |
+| F7 | A message only has `authorId` (ULID). The only profile lookup is `GET /users/:identifier` (`name/server`). No members endpoint exists. | [profile.service.ts:75](../../../../apps/server/src/modules/identity/profile/profile.service.ts), controller list above | Author names cannot be shown. New endpoint (S2). |
+| F8 | The stream ticket is **single use**. A native `EventSource` reconnects by itself with the same URL, i.e. with a spent ticket. | [ticket.service.ts](../../../../apps/server/src/modules/identity/auth/ticket.service.ts), events controller | The SDK owns reconnection and mints a fresh ticket each time. |
+| F9 | Generated SDK types are wrong for this surface: `SyncResponseDtoEvents.content` is `string` (the server sends `z.unknown()`), timestamps are typed `Date` (the wire is an ISO string). The SDK does not parse responses. | [sync.dto.ts:19](../../../../apps/server/src/modules/conversations/streaming/sync.dto.ts), `packages/sdk/src/generated/api/typescript/` | The SDK hand-writes a discriminated `RoomEvent` union; the client never relies on `Date` instances. |
+| F10 | The account feed fans out to **explicit `Membership` rows only**, while effective access also comes from ancestor spaces. | [feed-fanout.service.ts](../../../../apps/server/src/modules/conversations/streaming/feed-fanout.service.ts) | Server task S5. `web-client-rooms` lists such rooms as `inherited`, so they must update live too. |
+| F11 | `GET /rooms/:id/my-permissions` exists (`{ capabilities }`) and `Room.readOnly` is on `GET /rooms/:id`; `MeView.id` is the caller's ULID. | permissions controller, [rooms-and-permissions.md](../../../../docs/protocol/rooms-and-permissions.md) | Composer state needs no server work. |
 
 ## 3. Decisions
 
@@ -58,7 +58,7 @@ Everything below was checked against the code at the time of writing.
 | History source | New `GET /rooms/:id/messages` (newest first, `before` cursor), current state | Folding the `/sync` log backwards (overview draft) | F2, F3: window-by-window folding, re-fetching edited messages and a loop to find enough messages. The server already holds current state. Replaces the overview's "since = lastSeq - N". |
 | Author names | New `GET /rooms/:id/members` with public profile fields | Batch lookup by ULID; embedding `author` in `Message` and events | Chosen with the product owner; the list also serves the future members panel. Limitation: L1. |
 | Live edits / deletions | `messageId` in `message_edited`; new `message_deleted` event | Ignoring them; reusing `message_redacted` for the new event | F3, F4. A new type keeps the in-place tombstone row (type `message_redacted`) distinct from the live notification. Costs one enum value and a migration. |
-| Stream reconnection | Owned by the SDK (fresh ticket, backoff, `lastEventId`) | Native `EventSource` auto-retry; leaving it to the client | F8; [realtime transport](../../../docs/technical/realtime-transport.md) already says the SDK carries it. |
+| Stream reconnection | Owned by the SDK (fresh ticket, backoff, `lastEventId`) | Native `EventSource` auto-retry; leaving it to the client | F8; [realtime transport](../../../../docs/technical/realtime-transport.md) already says the SDK carries it. |
 | SSE transport in the SDK | `EventSource` (injectable), closed on error and re-created | `fetch` + hand-written SSE parser | The ticket is already a query parameter, so headers are not needed; no parser to maintain. |
 | Stream scope in the client | One connection per authenticated session, in `shared/realtime`, which only dispatches events (subscription hooks) and keeps the unseen store | Opened by the chat view; interpreting events in `shared` | Decided in the overview; `shared` is the only place both `rooms` and `chat` may read (boundaries), and it cannot import `features/chat` (the reducer) or `features/rooms` (its query keys). Each feature subscribes and updates its own cache. |
 | Timeline state | TanStack Query cache entry per room, updated by a pure reducer, kept only while the room is open | Separate store; `useInfiniteQuery`; timelines kept for every visited room | Same cache as the rest of the app; the reducer is unit-testable without React. `useInfiniteQuery` cannot absorb live inserts cleanly. Only the mounted `RoomChat` subscribes, so a cached timeline of a closed room would miss events: it is removed on unmount. |
@@ -70,9 +70,9 @@ Everything below was checked against the code at the time of writing.
 ## 4. Server changes (`apps/server`)
 
 Every change is protocol-first: the page under `docs/protocol/` is updated before
-the code (see [HTTP API conventions](../../../docs/technical/api-conventions.md)),
+the code (see [HTTP API conventions](../../../../docs/technical/api-conventions.md)),
 then `openapi.json` is re-emitted (`bun run openapi:emit`) and the SDK types are
-regenerated (see [OpenAPI description and SDK types](../../../docs/technical/openapi-description-and-sdk-types.md)).
+regenerated (see [OpenAPI description and SDK types](../../../../docs/technical/openapi-description-and-sdk-types.md)).
 
 ### S1. `GET /rooms/:id/messages`
 
@@ -104,11 +104,11 @@ regenerated (see [OpenAPI description and SDK types](../../../docs/technical/ope
   `avatarUrl` is null without avatar; all three nullable fields are null for a
   deleted account). One shape for every "who" in the client, so the components
   that render a user are shared. `Membership.hiddenAt` is a per-user archive flag
-  for `dm` rooms only ([contract.prisma](../../../apps/server/src/core/prisma/contract.prisma))
+  for `dm` rooms only ([contract.prisma](../../../../apps/server/src/core/prisma/contract.prisma))
   and is not relevant here.
 - Members are the **effective** ones: explicit memberships on the room plus
   memberships of its ancestor spaces (nearest role wins, resolved through
-  `room_closure` like [the permission model](../../../docs/technical/permission-model.md)),
+  `room_closure` like [the permission model](../../../../docs/technical/permission-model.md)),
   otherwise a member of a space who never joined the channel would appear as an
   unknown author.
 
@@ -122,14 +122,14 @@ regenerated (see [OpenAPI description and SDK types](../../../docs/technical/ope
 - The in-place rewrite of the original row (`message_redacted`, `{ reason }`) is
   kept: it is what makes history and the log tombstoned. Both live in
   `redactMessage`, which the retention worker also calls
-  ([retention-worker.service.ts:112](../../../apps/server/src/modules/conversations/retention/retention-worker.service.ts)),
+  ([retention-worker.service.ts:112](../../../../apps/server/src/modules/conversations/retention/retention-worker.service.ts)),
   so retention deletions emit the event too (one per message; acceptable at this
   scale, noted in the protocol page).
 - Feed scrub: in the same transaction, `AccountFeedEvent` rows where
   `roomId` and `roomSeq` match the redacted `seq` get a tombstone payload (same
   shape as the rewritten row), closing F5.
 - Enum: add `message_deleted` to `RoomEventType` in
-  [contract.prisma:418](../../../apps/server/src/core/prisma/contract.prisma)
+  [contract.prisma:418](../../../../apps/server/src/core/prisma/contract.prisma)
   and add the migration.
 
 ### S4. Stream start position
@@ -144,7 +144,7 @@ gets a "head" query. `synchronisation.md` documents the new rule.
 
 The account feed fan-out (`feed-fanout.service.ts`) targets the room's explicit
 members **and** the members of its ancestor spaces (same resolution as S2 and as
-the [permission model](../../../docs/technical/permission-model.md), one feed row
+the [permission model](../../../../docs/technical/permission-model.md), one feed row
 per distinct user), so that a room listed as `inherited` by `web-client-rooms`
 receives live events, unseen dots and reconnection catch-up like any other.
 Decision: write-time fan-out, not a client-side `/sync` fallback and not explicit
@@ -155,7 +155,7 @@ Consequences:
 - The cost of `fanOutRoomEvent`, which runs synchronously in the transaction of
   the event append, becomes proportional to the **effective** members (every member
   of the ancestor spaces), not only to the explicit ones. The limit is recorded in
-  [realtime transport](../../../docs/technical/realtime-transport.md), where moving
+  [realtime transport](../../../../docs/technical/realtime-transport.md), where moving
   the fan-out to an asynchronous worker is already the named evolution.
 - As today, the fan-out checks presence of a membership, not the `room.read`
   capability: a `deny` override on `room.read` is not honoured (same limitation as
@@ -163,15 +163,15 @@ Consequences:
 - Feed volume grows accordingly; pruning is unchanged.
 
 Protocol policy: S1-S3 are additive; S4 and S5 change delivery behaviour. Check
-[SDK packaging and protocol policy](../../../docs/technical/sdk-packaging-and-protocol-policy.md)
+[SDK packaging and protocol policy](../../../../docs/technical/sdk-packaging-and-protocol-policy.md)
 before choosing the version note in `docs/protocol/CHANGELOG.md`.
 
 ## 5. SDK (`packages/sdk`)
 
 New public surface, added to `createClient` in
-[client.ts:65](../../../packages/sdk/src/client.ts) next to the existing
+[client.ts:65](../../../../packages/sdk/src/client.ts) next to the existing
 resources, each built on `SessionManager.request`
-([session-manager.ts:104](../../../packages/sdk/src/session/session-manager.ts)):
+([session-manager.ts:104](../../../../packages/sdk/src/session/session-manager.ts)):
 
 ```ts
 // client.rooms.get / myPermissions (MyPermissionsResponse) come from web-client-rooms
@@ -220,7 +220,7 @@ Changes to `packages/sdk/src` need a changeset (`bunx changeset`).
 
 ## 6. Client architecture (`apps/client-web`)
 
-Boundaries ([web client bootstrap](../../../docs/technical/web-client-bootstrap.md)):
+Boundaries ([web client bootstrap](../../../../docs/technical/web-client-bootstrap.md)):
 `features/chat` imports only `shared` and itself; `shared` imports only `shared`;
 routes import features. New code respects that:
 

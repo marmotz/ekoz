@@ -22,7 +22,7 @@ Three constraints shaped it:
   the forms should not restate them by hand.
 
 The feature-level design is in
-[`backlog/features/auth/technical.md`](../../backlog/features/auth/technical.md);
+[`backlog/_archives/features/auth/technical.md`](../../backlog/_archives/features/auth/technical.md);
 this page records what shipped and why.
 
 ## Decision

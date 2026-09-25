@@ -1,13 +1,13 @@
 # Web client chat
 
-**Status**: technical design, see [technical.md](./technical.md)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 
 With rooms available ([`web-client-rooms`](../web-client-rooms/overview.md)), users
 need to actually talk: read a room's history, send messages and see new ones
 arrive live. This is the client counterpart of the messages and streaming parts
-of the [conversations](../../_archives/features/conversations/overview.md) server feature.
+of the [conversations](../conversations/overview.md) server feature.
 
 Gaps found while scoping, against the current server and SDK:
 
@@ -32,7 +32,7 @@ messages appear without reloading, all against a running reference server.
 ## Decisions made
 
 - Lives in `src/features/chat/{api,components,hooks,routes}`; all network access
-  through [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md),
+  through [`@ekozhq/sdk`](../sdk-foundations/overview.md),
   including the SSE connection.
 - First increment is text messages only. Sending and receiving are in scope;
   edit and delete actions, reactions, pins, read markers, typing, presence and
@@ -70,7 +70,7 @@ messages appear without reloading, all against a running reference server.
 
 - [`web-client-rooms`](../web-client-rooms/overview.md) — room selection and
   membership.
-- [conversations](../../_archives/features/conversations/overview.md) — server side, already shipped.
+- [conversations](../conversations/overview.md) — server side, already shipped.
 - Server changes in `apps/server` (messages list, members list, edit/delete
   events, stream start position) and their protocol pages under `docs/protocol/`.
 - SDK bindings for messages, sync, the event stream, `rooms.myPermissions` and

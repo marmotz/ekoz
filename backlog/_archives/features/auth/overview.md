@@ -1,10 +1,10 @@
 # Auth
 
-**Status**: [technical design](technical.md)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 
-Split out of [web-client-foundations](../../_archives/features/web-client-foundations/overview.md),
+Split out of [web-client-foundations](../web-client-foundations/overview.md),
 which delivers only the client bootstrap. The reference server has shipped its
 identity layer; this feature makes the authentication flows exercisable from the
 demonstration UI.
@@ -26,14 +26,14 @@ client (the flows).
 ## Decisions made
 
 - Lives in `src/features/auth/{api,components,hooks,routes}`; all network access
-  through [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md).
+  through [`@ekozhq/sdk`](../sdk-foundations/overview.md).
 - **Registration policy is exposed by the server** (part of this feature, not a
   separate one): today `registration.mode` (`open` / `invite` / `admin`) and
   `email.verification_required` are not readable by an unauthenticated client.
   - Server: a new public `GET /auth/policy` (registration mode, whether email
     verification is required, minimum password length), read live so a change
     shows immediately; documented first in the
-    [identity protocol](../../../docs/protocol/identity.md).
+    [identity protocol](../../../../docs/protocol/identity.md).
   - SDK: binds it (new resource method, changeset).
   - Client: shows the matching form: open, invitation-token field (pre-filled
     from the `?invite=` link the server puts in invitation mails), or a
@@ -73,7 +73,7 @@ client (the flows).
 
 ## Dependencies
 
-- [web-client-foundations](../../_archives/features/web-client-foundations/overview.md) — bootstrap,
+- [web-client-foundations](../web-client-foundations/overview.md) — bootstrap,
   layout, routing, SDK session wiring.
 - [SDK foundations](https://github.com/marmotz/ekoz/blob/develop/packages/sdk/backlog/features/sdk-foundations/overview.md)
   — identity bindings (already shipped: `register`, `login`, `verifyEmail`,

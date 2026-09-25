@@ -26,7 +26,7 @@ could not support it:
 
 The scope therefore spans the server, the protocol pages, the SDK and the client.
 The feature-level design is in
-[`backlog/features/web-client-chat/technical.md`](../../backlog/features/web-client-chat/technical.md);
+[`backlog/_archives/features/web-client-chat/technical.md`](../../backlog/_archives/features/web-client-chat/technical.md);
 this page records what shipped and why. It builds on
 [web client bootstrap](web-client-bootstrap.md) (boundaries, session, SDK client),
 [real-time transport](realtime-transport.md) and the

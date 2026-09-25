@@ -36,7 +36,7 @@ exchanges without weighing down the operation of a standalone instance.
 
 ## Depends on
 
-- [Identity and profiles](../identity-and-profiles/overview.md), for the users'
+- [Identity and profiles](../../_archives/features/identity-and-profiles/overview.md), for the users'
   home identity.
 - [Conversations](../../_archives/features/conversations/overview.md), for shared rooms, private
   messages and read receipts.

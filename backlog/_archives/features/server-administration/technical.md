@@ -5,7 +5,7 @@ few read/reset endpoints the console needs, and build the **admin console**
 application (`apps/admin/`) covering server initialization and account
 administration.
 
-Builds on [identity and profiles](../../../features/identity-and-profiles/technical.md) and
+Builds on [identity and profiles](../identity-and-profiles/technical.md) and
 [server core](../server-core/technical.md). Product scope is settled in
 [overview.md](./overview.md).
 

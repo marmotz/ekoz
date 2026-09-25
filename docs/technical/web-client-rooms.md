@@ -23,7 +23,7 @@ Checking the product scoping against the code showed gaps on the server and in t
   ULID to a name.
 
 The feature-level design is in
-[`backlog/features/web-client-rooms/technical.md`](../../backlog/features/web-client-rooms/technical.md);
+[`backlog/_archives/features/web-client-rooms/technical.md`](../../backlog/_archives/features/web-client-rooms/technical.md);
 this page records what shipped and why. It builds on
 [web client bootstrap](web-client-bootstrap.md) (boundaries, session, SDK client), the
 [permission model](permission-model.md) and the

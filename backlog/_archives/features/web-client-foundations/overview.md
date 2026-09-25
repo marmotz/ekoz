@@ -66,9 +66,9 @@ running reference server, with no domain feature implemented yet.
 ## Feature order
 
 1. **web-client-foundations** (this feature) — the bootstrap.
-2. [`auth`](../../../features/auth/overview.md) — depends on this feature and on the SDK
+2. [`auth`](../auth/overview.md) — depends on this feature and on the SDK
    identity bindings.
-3. [`identity-and-profiles`](../../../features/identity-and-profiles/overview.md) (client part, formerly `profile`) — depends on `auth`.
+3. [`identity-and-profiles`](../identity-and-profiles/overview.md) (client part, formerly `profile`) — depends on `auth`.
 
 Every later client feature (conversations UI, notifications, sharing) builds on
 this bootstrap and follows the matching server feature.

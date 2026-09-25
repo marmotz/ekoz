@@ -3,7 +3,7 @@
 Technical design for spaces, rooms, roles/permissions, messages, presence,
 retention, the per-room event log and local moderation. Builds on
 [server core](../server-core/technical.md) and
-[identity and profiles](../../../features/identity-and-profiles/technical.md). The `server`
+[identity and profiles](../identity-and-profiles/technical.md). The `server`
 repository is greenfield, so this document defines the initial module.
 
 Related: [conversation data model](../../../../docs/technical/conversation-data-model.md),
@@ -506,7 +506,7 @@ and upserts; returns the existing room if any.
   row for each member with `room.read`; account-scoped events (room invitations,
   presence, join-request outcomes) are inserted directly.
 - **SSE**: `GET /events?ticket=<t>` (ticket from
-  [identity-and-profiles §12](../../../features/identity-and-profiles/technical.md)). Validates
+  [identity-and-profiles §12](../identity-and-profiles/technical.md)). Validates
   the ticket, binds to the session, streams `AccountFeedEvent`s as they are
   produced. `Last-Event-ID` = the last `feedSeq`; on reconnect the server may
   replay recent feed rows, but the SDK's contract is to reconcile per stale room

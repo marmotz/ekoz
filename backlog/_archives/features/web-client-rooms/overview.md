@@ -1,17 +1,17 @@
 # Web client rooms
 
-**Status**: technical design, see [technical.md](./technical.md)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 
 Once a user can sign in ([`auth`](../auth/overview.md)), the demonstration client
 needs to let them create and browse conversation rooms, the counterpart of the
-shipped [conversations](../../_archives/features/conversations/overview.md) server feature.
+shipped [conversations](../conversations/overview.md) server feature.
 
 Gaps found while scoping, against the current server and SDK:
 
 - The server exposes no "my rooms" listing. Only the public
-  [directory](../../../docs/protocol/rooms-and-permissions.md) and
+  [directory](../../../../docs/protocol/rooms-and-permissions.md) and
   `GET /rooms/:id[/children]` exist, so a client cannot discover the rooms and
   spaces the user belongs to.
 - The server exposes no listing of a user's pending invitations, nor of a room's
@@ -30,7 +30,7 @@ running reference server.
 
 - Lives in `src/features/rooms/{api,components,hooks,routes}` and registers its
   sidebar entry through the nav registry; all network access through
-  [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md).
+  [`@ekozhq/sdk`](../sdk-foundations/overview.md).
 - **Server listings added by this feature** (each with its protocol page, OpenAPI
   description and SDK bindings), rather than reconstructing state client-side:
   - `GET /rooms`: spaces and channels the caller is a member of.
@@ -73,7 +73,7 @@ running reference server.
 ## Dependencies
 
 - [`auth`](../auth/overview.md): a signed-in session is required.
-- [conversations](../../_archives/features/conversations/overview.md): server side; needs the new
+- [conversations](../conversations/overview.md): server side; needs the new
   `GET /rooms`, `GET /invitations` and join-requests listing added to
   `apps/server`.
 - SDK bindings for rooms, membership, invitations and directory in `packages/sdk`.

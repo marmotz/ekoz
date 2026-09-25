@@ -35,7 +35,7 @@ channels later.
 
 ## Depends on
 
-- [Identity and profiles](../identity-and-profiles/overview.md), for the verified
+- [Identity and profiles](../../_archives/features/identity-and-profiles/overview.md), for the verified
   email address and user preferences.
 - [Conversations](../../_archives/features/conversations/overview.md), for events from rooms and
   messages.
@@ -45,3 +45,5 @@ channels later.
 ## Feature order
 
 - [Extensibility](../extensibility/overview.md) allows adding delivery adapters.
+- [`web-client-mentions`](../web-client-mentions/overview.md) defines mentions
+  (direct, `@all`, role, group, added on edit) that this feature notifies.

@@ -455,7 +455,7 @@ model AuditLog {
 ```
 
 (`User` / `Session` are defined by
-[identity and profiles](../../../features/identity-and-profiles/overview.md).)
+[identity and profiles](../identity-and-profiles/overview.md).)
 
 ## 13. Alternatives considered
 

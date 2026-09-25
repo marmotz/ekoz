@@ -99,7 +99,7 @@ its users and its spaces, through a web application deployed with the server.
 
 ## Depends on
 
-- [Identity and profiles](../../../features/identity-and-profiles/overview.md), for
+- [Identity and profiles](../identity-and-profiles/overview.md), for
   administering accounts and roles.
 - [SDK foundations](https://github.com/marmotz/ekoz/blob/develop/packages/sdk/backlog/features/sdk-foundations/overview.md),
   the console's only integration surface.

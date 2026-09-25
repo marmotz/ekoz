@@ -3,27 +3,27 @@
 Technical design for the rooms UI of `apps/client-web`, the server listings it
 needs in `apps/server`, and the matching SDK bindings in `packages/sdk`. Product
 decisions are in [overview.md](./overview.md); this page grounds them in the code.
-What shipped is recorded in [web client rooms](../../../docs/technical/web-client-rooms.md).
+What shipped is recorded in [web client rooms](../../../../docs/technical/web-client-rooms.md).
 
-Related: [rooms and permissions protocol](../../../docs/protocol/rooms-and-permissions.md),
-[conversations technical design](../../_archives/features/conversations/technical.md),
-[permission model](../../../docs/technical/permission-model.md),
-[web client bootstrap](../../../docs/technical/web-client-bootstrap.md),
-[OpenAPI description and SDK types](../../../docs/technical/openapi-description-and-sdk-types.md).
+Related: [rooms and permissions protocol](../../../../docs/protocol/rooms-and-permissions.md),
+[conversations technical design](../conversations/technical.md),
+[permission model](../../../../docs/technical/permission-model.md),
+[web client bootstrap](../../../../docs/technical/web-client-bootstrap.md),
+[OpenAPI description and SDK types](../../../../docs/technical/openapi-description-and-sdk-types.md).
 
 ## 1. Findings from the current code
 
 | # | Finding | Where | Consequence |
 |---|---------|-------|-------------|
-| F1 | `GET /invitations` is already the owner-only list of **registration** invitations. Room invitations only have `POST /invitations/:id/accept\|decline`. The SDK's `client.invitations` is the registration one. | [invitations.controller.ts](../../../apps/server/src/modules/identity/invitations/invitations.controller.ts), [identity.md](../../../docs/protocol/identity.md), [invitations.ts](../../../packages/sdk/src/resources/invitations.ts) | The overview's `GET /invitations` is renamed `GET /me/room-invitations`; SDK namespace `client.roomInvitations`. |
-| F2 | `createNode` creates the room, closure rows and `room_created`, but **no `Membership`**. A server owner creating a root space is not a member of it. | [rooms.service.ts:286](../../../apps/server/src/modules/conversations/rooms/rooms.service.ts) | A membership-based `GET /rooms` would not show a room to its own creator. |
-| F3 | Effective role resolves from an explicit membership, else the nearest ancestor **space** membership, else `defaultRole` for a `public` room or a pending invitation. | [permissions.service.ts:172](../../../apps/server/src/modules/conversations/permissions/permissions.service.ts) | A space member reads its channels with no row of their own; the list must return inherited rooms, and the client must know which rooms it can actually `leave` (explicit membership only, otherwise `404 room.membership_not_found`). |
-| F4 | `GET /rooms/:id` needs `room.read`; a non-member of an `invite` room gets `403 room.permission_denied`. A pending invitation grants read access before acceptance. | [rooms.service.ts:76](../../../apps/server/src/modules/conversations/rooms/rooms.service.ts), F3 | The "request to join" screen needs a dedicated preview. A user with a pending invitation can read the room without being a member. |
-| F5 | `RoomInvitation.invitedById` and `RoomJoinRequest.userId` are ULIDs. `GET /users/:identifier` takes `name/server`, not a ULID. | [profile.controller.ts:108](../../../apps/server/src/modules/identity/profile/profile.controller.ts) | The new listings embed a user summary. |
-| F6 | `createJoinRequest` on a room with a resolved request resets it to pending (upsert). No endpoint reads the caller's own request. | [membership.service.ts:210](../../../apps/server/src/modules/conversations/membership/membership.service.ts) | The preview carries the caller's request state. |
-| F7 | `RoomInvitation.expiresAt` is never written by the server (always `null`) and never checked. | [membership.service.ts](../../../apps/server/src/modules/conversations/membership/membership.service.ts) | "Pending" means `acceptedAt` and `declinedAt` both null, same as the resolver's `pendingInvitation`. |
-| F8 | The client query defaults are `staleTime: 30s` and `refetchOnWindowFocus: false`. The nav registry is a flat list of links. i18n keys are typed from `common.json` only. | [query-client.ts:22](../../../apps/client-web/src/app/query-client.ts), [nav-registry.ts](../../../apps/client-web/src/shared/layout/nav-registry.ts), [use-translation.ts](../../../apps/client-web/src/shared/i18n/use-translation.ts) | Per-query freshness overrides, a sidebar section slot, feature strings under `rooms.*` in `common.json`. |
-| F9 | The SDK type pipeline is `openapi:emit` (server DTOs) -> `bun run generate` (tako) -> `packages/sdk/src/generated/api` -> `wire.ts` re-exports. `RoomViewDto`, `MembershipViewDto`, `JoinRequestViewDto`, `RoomInvitationViewDto`, `DirectoryListResponseDto` and `MyPermissionsResponseDto` are already generated; no `rooms` resource exists. | [wire.ts](../../../packages/sdk/src/types/wire.ts) | Only the new views need generating; the resources are new hand-written bindings. |
+| F1 | `GET /invitations` is already the owner-only list of **registration** invitations. Room invitations only have `POST /invitations/:id/accept\|decline`. The SDK's `client.invitations` is the registration one. | [invitations.controller.ts](../../../../apps/server/src/modules/identity/invitations/invitations.controller.ts), [identity.md](../../../../docs/protocol/identity.md), [invitations.ts](../../../../packages/sdk/src/resources/invitations.ts) | The overview's `GET /invitations` is renamed `GET /me/room-invitations`; SDK namespace `client.roomInvitations`. |
+| F2 | `createNode` creates the room, closure rows and `room_created`, but **no `Membership`**. A server owner creating a root space is not a member of it. | [rooms.service.ts:286](../../../../apps/server/src/modules/conversations/rooms/rooms.service.ts) | A membership-based `GET /rooms` would not show a room to its own creator. |
+| F3 | Effective role resolves from an explicit membership, else the nearest ancestor **space** membership, else `defaultRole` for a `public` room or a pending invitation. | [permissions.service.ts:172](../../../../apps/server/src/modules/conversations/permissions/permissions.service.ts) | A space member reads its channels with no row of their own; the list must return inherited rooms, and the client must know which rooms it can actually `leave` (explicit membership only, otherwise `404 room.membership_not_found`). |
+| F4 | `GET /rooms/:id` needs `room.read`; a non-member of an `invite` room gets `403 room.permission_denied`. A pending invitation grants read access before acceptance. | [rooms.service.ts:76](../../../../apps/server/src/modules/conversations/rooms/rooms.service.ts), F3 | The "request to join" screen needs a dedicated preview. A user with a pending invitation can read the room without being a member. |
+| F5 | `RoomInvitation.invitedById` and `RoomJoinRequest.userId` are ULIDs. `GET /users/:identifier` takes `name/server`, not a ULID. | [profile.controller.ts:108](../../../../apps/server/src/modules/identity/profile/profile.controller.ts) | The new listings embed a user summary. |
+| F6 | `createJoinRequest` on a room with a resolved request resets it to pending (upsert). No endpoint reads the caller's own request. | [membership.service.ts:210](../../../../apps/server/src/modules/conversations/membership/membership.service.ts) | The preview carries the caller's request state. |
+| F7 | `RoomInvitation.expiresAt` is never written by the server (always `null`) and never checked. | [membership.service.ts](../../../../apps/server/src/modules/conversations/membership/membership.service.ts) | "Pending" means `acceptedAt` and `declinedAt` both null, same as the resolver's `pendingInvitation`. |
+| F8 | The client query defaults are `staleTime: 30s` and `refetchOnWindowFocus: false`. The nav registry is a flat list of links. i18n keys are typed from `common.json` only. | [query-client.ts:22](../../../../apps/client-web/src/app/query-client.ts), [nav-registry.ts](../../../../apps/client-web/src/shared/layout/nav-registry.ts), [use-translation.ts](../../../../apps/client-web/src/shared/i18n/use-translation.ts) | Per-query freshness overrides, a sidebar section slot, feature strings under `rooms.*` in `common.json`. |
+| F9 | The SDK type pipeline is `openapi:emit` (server DTOs) -> `bun run generate` (tako) -> `packages/sdk/src/generated/api` -> `wire.ts` re-exports. `RoomViewDto`, `MembershipViewDto`, `JoinRequestViewDto`, `RoomInvitationViewDto`, `DirectoryListResponseDto` and `MyPermissionsResponseDto` are already generated; no `rooms` resource exists. | [wire.ts](../../../../packages/sdk/src/types/wire.ts) | Only the new views need generating; the resources are new hand-written bindings. |
 
 ## 2. Server changes (`apps/server`, `conversations` module)
 
@@ -58,14 +58,14 @@ Item: every `Room` field plus `role: RoomRole | null` and
 - `member`: explicit `Membership` (`role` = its role).
 - `inherited`: descendant of a space the caller is a member of, no own membership
   (`role` = role of the nearest ancestor membership, smallest `RoomClosure.depth`,
-  the same rule as [`resolveRole`](../../../apps/server/src/modules/conversations/permissions/permissions.service.ts)).
+  the same rule as [`resolveRole`](../../../../apps/server/src/modules/conversations/permissions/permissions.service.ts)).
 - `context`: an ancestor space needed to place a `member` / `inherited` room in the
   tree, that the caller does not belong to (`role: null`). Exposes its `name` and
   `topic` only as far as `Room` does; the client renders it as a non-link group header.
 
 Only `type IN ('space','channel')` and `deleted_at IS NULL` (dm / group_dm are out of
 scope). One raw SQL query in the style of
-[`DirectoryService.list`](../../../apps/server/src/modules/conversations/directory/directory.service.ts)
+[`DirectoryService.list`](../../../../apps/server/src/modules/conversations/directory/directory.service.ts)
 over `membership` and `room_closure`; no per-room resolver call.
 
 Known limitation: a `room.read` deny override on an inherited room is not reflected
@@ -101,7 +101,7 @@ the versioned URL `<api_url>/users/<name>/avatar?v=<avatarBlobId>`. Both are bui
 `identity`; all
 three nullable fields are `null` for a deleted account (the client renders its localized
 "Deleted account", per the forward contract in
-[conversations §20](../../_archives/features/conversations/technical.md)). Accept and decline keep their
+[conversations §20](../conversations/technical.md)). Accept and decline keep their
 current endpoints and payloads.
 
 ### S4. `GET /rooms/:id/preview`
@@ -128,7 +128,7 @@ Approve / reject keep their endpoints.
 
 ### Cross-cutting server work
 
-- Protocol: [rooms-and-permissions.md](../../../docs/protocol/rooms-and-permissions.md)
+- Protocol: [rooms-and-permissions.md](../../../../docs/protocol/rooms-and-permissions.md)
   gains `GET /rooms`, `GET /me/room-invitations`, `GET /rooms/:id/preview`,
   `GET /rooms/:id/join-requests`, the `RoomListItem` / `UserSummary` shapes, and the
   creator-membership rule; `docs/protocol/CHANGELOG.md` updated.
@@ -138,7 +138,7 @@ Approve / reject keep their endpoints.
   `membership/list-join-requests.hurl`, `membership/list-join-requests-forbidden.hurl`;
   `http/README.md` layout block kept in sync.
 - `apps/server/CHANGELOG.md` entries under `## [Unreleased]`.
-- Check [SDK packaging and protocol policy](../../../docs/technical/sdk-packaging-and-protocol-policy.md)
+- Check [SDK packaging and protocol policy](../../../../docs/technical/sdk-packaging-and-protocol-policy.md)
   for the version note in `docs/protocol/CHANGELOG.md` (S1 changes a behaviour, the
   listings are additive). `rooms-and-permissions.md` is also edited by
   `web-client-chat` (members endpoint); Prisma migrations of both features are
@@ -150,9 +150,9 @@ Approve / reject keep their endpoints.
 
 ## 3. SDK bindings (`packages/sdk`)
 
-New resources, wired in [client.ts](../../../packages/sdk/src/client.ts) beside
+New resources, wired in [client.ts](../../../../packages/sdk/src/client.ts) beside
 `invitations` and following the `SessionManager.request` pattern of
-[users.ts](../../../packages/sdk/src/resources/users.ts):
+[users.ts](../../../../packages/sdk/src/resources/users.ts):
 
 | Namespace | Methods |
 |-----------|---------|
@@ -193,7 +193,7 @@ src/shared/sdk/use-me.ts   # `useMe()`: `client.me.get()`, key `['me']`; needed 
 `registerNav` only renders links. Add to `shared/layout` a `registerSidebarSection({ id,
 order, component })` registry (same de-duplication as `registerNav`), rendered by a new
 `SidebarSections` under `SidebarNav` in both the fixed `Sidebar` and the mobile `Sheet`
-in [app-shell.tsx](../../../apps/client-web/src/shared/layout/app-shell.tsx). The
+in [app-shell.tsx](../../../../apps/client-web/src/shared/layout/app-shell.tsx). The
 route file `src/routes/rooms.tsx` registers `SidebarRooms` at import time, exactly as
 `index.tsx` registers `home`. `SidebarRooms` renders nothing unless the session is
 `authenticated`.
@@ -306,7 +306,7 @@ Vitest + Testing Library with the `@ekozhq/sdk` module mocked (bootstrap convent
 `RoomGate` (each state, the `403` -> preview fallback, and which states render children with `{ room, capabilities, membership }`), `CreateRoomForm` (eligibility,
 owner root option, error mapping), directory paging and join, invitations, join
 requests. `bun run typecheck`, `lint`, `lint:boundaries` green. `apps/client-web/CHANGELOG.md`
-entries. A `docs/technical/` page ([web-client-rooms.md](../../../docs/technical/web-client-rooms.md)) records the sidebar slot, the `RoomGate` states and the
+entries. A `docs/technical/` page ([web-client-rooms.md](../../../../docs/technical/web-client-rooms.md)) records the sidebar slot, the `RoomGate` states and the
 endpoint decisions (this design, once shipped).
 
 ## 5. Alternatives considered

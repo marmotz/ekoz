@@ -1,6 +1,6 @@
 # Identity and profiles
 
-**Status**: [technical design](technical.md) (§1 to §20 server layer as shipped, §21 to §28 client scope)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 
@@ -11,7 +11,7 @@ without imposing an external identity provider in the first increment.
 The server-side identity layer and the SDK bindings have shipped; a signed-in
 user still has no UI to manage their own account. The former `profile` feature
 (client account screens, split out of
-[web-client-foundations](../../_archives/features/web-client-foundations/overview.md)) is merged
+[web-client-foundations](../web-client-foundations/overview.md)) is merged
 here, so this feature now spans `apps/server`, `packages/sdk` and
 `apps/client-web`. Sign-in and registration flows stay in
 [`auth`](../auth/overview.md).
@@ -32,7 +32,7 @@ web client against a running reference server.
   distinct from the display name. The `name` is lowercase, restricted to the
   characters `[a-z0-9_.-]`, at most 64 characters, unique on its server,
   unrelated to the display name. The `server` is a real domain (no `localhost`).
-  See [user identifier](../../../docs/technical/user-identifier.md).
+  See [user identifier](../../../../docs/technical/user-identifier.md).
 - The server administrator chooses whether registration is open, invite-only or
   reserved to administrators.
 - A mandatory, verified email address enables account recovery and email
@@ -42,7 +42,7 @@ web client against a running reference server.
 - Multi-factor authentication is planned for a later increment.
 - Authentication uses a short-lived JWT access token + an opaque refresh token;
   named multi-device sessions, revocable by the user or by the server
-  (suspension). See [authentication and sessions](../../../docs/technical/auth-and-sessions.md).
+  (suspension). See [authentication and sessions](../../../../docs/technical/auth-and-sessions.md).
 - The public profile contains a display name, an avatar and a short biography.
 - The server owner configures the identifier change policy: immutable identifier,
   free change subject to availability, or change subject to administrative
@@ -51,7 +51,7 @@ web client against a running reference server.
   retained messages.
 - The client part lives in `src/features/profile/{api,components,hooks,routes}` of
   `apps/client-web`; all network access goes through
-  [`@ekozhq/sdk`](../../_archives/features/sdk-foundations/overview.md).
+  [`@ekozhq/sdk`](../sdk-foundations/overview.md).
 - **Client scope** (existing server endpoints and SDK bindings are reused for
   profile, avatar, email and username change, sessions and account deletion;
   three gaps are closed as part of this feature, each server -> SDK -> client):
@@ -59,7 +59,7 @@ web client against a running reference server.
     requiring the current password. On success every other session of the user is
     revoked; the current session stays open. Aligned with password reset, which
     revokes all sessions. Documented first in the
-    [identity protocol](../../../docs/protocol/identity.md).
+    [identity protocol](../../../../docs/protocol/identity.md).
   - **Username change state**: the server exposes to the signed-in user the
     active `identity.username_change_policy`, the cooldown, and their pending
     change request (`approval` mode). The client hides or disables the form when
@@ -87,7 +87,7 @@ web client against a running reference server.
 
 - [`auth`](../auth/overview.md) — the client account screens require a signed-in
   session.
-- [web-client-foundations](../../_archives/features/web-client-foundations/overview.md) — bootstrap
+- [web-client-foundations](../web-client-foundations/overview.md) — bootstrap
   and layout of the client.
 - [`web-client-rooms`](../web-client-rooms/overview.md) — its issue
   [#65](https://github.com/marmotz/ekoz/issues/65) creates the shared `useMe` hook
@@ -103,11 +103,11 @@ web client against a running reference server.
 - Within the client part: server gaps first, then their SDK bindings, then the
   `/account` screens that use them.
 
-- [Conversations](../../_archives/features/conversations/overview.md) use the accounts and profiles
+- [Conversations](../conversations/overview.md) use the accounts and profiles
   managed by this feature.
-- [Server administration](../../_archives/features/server-administration/overview.md) manages accounts
+- [Server administration](../server-administration/overview.md) manages accounts
   and roles at the server scale.
-- [Notifications](../notifications/overview.md) use the verified email address
+- [Notifications](../../../features/notifications/overview.md) use the verified email address
   and account preferences.
-- [Federation](../federation/overview.md) relies on the identifier and profile
+- [Federation](../../../features/federation/overview.md) relies on the identifier and profile
   of the home server.
