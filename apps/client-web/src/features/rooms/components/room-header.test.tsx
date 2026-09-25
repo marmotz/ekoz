@@ -38,6 +38,19 @@ describe('RoomHeader', () => {
     expect(screen.getByText('Channel')).toBeInTheDocument();
   });
 
+  it('renders the controls another feature passes in the actions slot', async () => {
+    renderSignedIn(
+      <RoomHeader
+        room={roomItem({ id: 'r1', name: 'General' })}
+        capabilities={[]}
+        actions={<button type="button">Extra action</button>}
+      />,
+      { route: '/rooms/r1' },
+    );
+
+    expect(await screen.findByRole('button', { name: 'Extra action' })).toBeInTheDocument();
+  });
+
   it('leaves an explicit membership and goes back to the rooms', async () => {
     const { fake, user, router } = renderHeader(roomItem({ id: 'r1', access: 'member' }));
 

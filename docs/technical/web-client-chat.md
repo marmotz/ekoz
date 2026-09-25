@@ -80,7 +80,7 @@ after the first. `EventSource` is injectable, like `fetch`.
 ```
 src/shared/realtime/   provider, subscription hooks, unseen-rooms store
 src/features/chat/
-  api/         query keys and queryFns (timeline first page, older page, members)
+  api/         query keys and queryFns (timeline first page, older page)
   lib/         timeline.ts (pure reducer), markdown-allow-list.ts, composer-state.ts
   hooks/       use-timeline, use-timeline-sync, use-send-message, use-authors
   components/  room-chat, message-list, message-item, message-body, composer,
@@ -143,10 +143,11 @@ displayed. `mentions` are never sent.
 
 ### Authors and rendering
 
-`use-authors` loads the members list (up to 5 pages) into `['chat', 'members', roomId]`
-and invalidates it on `member_joined`. A null author, or a member whose
-`displayName` is null, is shown as "Deleted account"; an author missing from the list
-is shown as "Unknown user" and triggers one members refetch. Strings live under
+`use-authors` reads the shared members list (`shared/members`, key
+`['members', roomId]`, refreshed on every membership event). A null author, or a member
+whose `displayName` is null, is shown as "Deleted account"; an author missing from the
+list is looked up through `GET /users?ids=` and shown with their name and a marker.
+See [web client members](web-client-members.md). Strings live under
 `chat.*` in `common.json` (French and English), like the `rooms.*` keys, because key
 typing derives from that file only.
 
@@ -163,7 +164,7 @@ allow-list of elements (`p`, `em`, `strong`, `del`, `code`, `pre`, `blockquote`,
 | Topic                          | Chosen                                                                       | Rejected                                                         | Why                                                                                                                                                                |
 |--------------------------------|------------------------------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | History source                 | New `GET /rooms/:id/messages` (current state, `before` cursor)               | Folding the `/sync` log backwards                                | `seq` counts every event and edits live in later events: folding needs window-by-window loops and re-fetching. The server already holds the current state.        |
-| Author names                   | `GET /rooms/:id/members` with public profile fields                          | Batch lookup by ULID; embedding `author` in messages and events  | Also serves the future members panel and shares the `UserSummary` shape. Limitation L1.                                                                            |
+| Author names                   | `GET /rooms/:id/members` with public profile fields                          | Batch lookup by ULID; embedding `author` in messages and events  | Also serves the members panel and shares the `UserSummary` shape. Limitation L1, resolved by [web client members](web-client-members.md).                                                                            |
 | Live edit and delete           | `messageId` in `message_edited`; new `message_deleted` event                 | Ignoring them; reusing `message_redacted`                        | Without them no client sees a change. A new type keeps the in-place tombstone row distinct from the live notification, at the cost of one enum value and a migration. |
 | Stream reconnection            | Owned by the SDK, fresh ticket each time                                     | Native `EventSource` auto-retry; leaving it to the client        | The ticket is single use, so the native retry fails.                                                                                                               |
 | SSE transport in the SDK       | `EventSource` (injectable), closed on error and re-created                   | `fetch` plus a hand-written SSE parser                           | The ticket is a query parameter, so no header is needed and there is no parser to maintain.                                                                        |
@@ -177,8 +178,9 @@ allow-list of elements (`p`, `em`, `strong`, `del`, `code`, `pre`, `blockquote`,
 
 ## Consequences
 
-- **L1.** An author who left the room is no longer in the members list and shows as
-  "Unknown user". Embedding authors in the messages page would fix it.
+- **L1 (resolved).** An author who left the room is no longer in the members list. It
+  is now resolved through `GET /users?ids=` and shows the name with a marker; see
+  [web client members](web-client-members.md).
 - **L2.** `POST /rooms/:id/messages` has no idempotency key: a Retry after a lost
   response can create a duplicate.
 - **L3.** A non-member reading a public room (`joinable`) or an invited room

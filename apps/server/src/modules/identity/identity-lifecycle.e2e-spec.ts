@@ -176,6 +176,70 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       .expect(422);
   });
 
+  it('summarises users by id in request order, collapsing duplicates and hiding unknown or deleted ids', async () => {
+    const aliceId = (await accounts.findByIdentifier('alice'))?.id ?? '';
+    const ownerId = (await accounts.findByIdentifier('owner'))?.id ?? '';
+    await accounts.createAccount({
+      name: 'gone',
+      email: 'gone@ekoz.example.com',
+      password,
+      displayName: 'Gone',
+      emailVerified: true,
+    });
+    const goneToken = await login('gone');
+    const goneId = (await accounts.findByIdentifier('gone'))?.id ?? '';
+    await request(server())
+      .delete('/me')
+      .set('Authorization', `Bearer ${goneToken}`)
+      .send({ password })
+      .expect(204);
+    const unknownId = '01ARZ3NDEKTSV4RRFFQ69G5FAV';
+
+    await request(server()).get(`/users?ids=${aliceId}`).expect(401);
+
+    const token = await login('alice');
+    const auth = { Authorization: `Bearer ${token}` };
+    const res = await request(server())
+      .get(`/users?ids=${ownerId},${goneId},${aliceId},${ownerId},${unknownId}`)
+      .set(auth)
+      .expect(200);
+
+    expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([
+      ownerId,
+      goneId,
+      aliceId,
+      unknownId,
+    ]);
+    expect(res.body.items[0]).toMatchObject({
+      identifier: 'owner/ekoz.example.com',
+      displayName: 'The Owner',
+    });
+    expect(res.body.items[2]).toMatchObject({ identifier: 'alice/ekoz.example.com' });
+    // A deleted and an unknown id are indistinguishable.
+    const deleted = { identifier: null, displayName: null, avatarUrl: null };
+    expect(res.body.items[1]).toEqual({ id: goneId, ...deleted });
+    expect(res.body.items[3]).toEqual({ id: unknownId, ...deleted });
+  });
+
+  it('rejects an empty, oversized or malformed user id list with a 422', async () => {
+    const token = await login('alice');
+    const auth = { Authorization: `Bearer ${token}` };
+    const idAt = (n: number) => `01ARZ3NDEKTSV4RRFFQ69G${String(n).padStart(4, '0')}`;
+    const many = (count: number) => Array.from({ length: count }, (_, i) => idAt(i)).join(',');
+
+    await request(server()).get('/users').set(auth).expect(422);
+    await request(server()).get('/users?ids=').set(auth).expect(422);
+    await request(server()).get('/users?ids=not-an-id').set(auth).expect(422);
+    await request(server())
+      .get(`/users?ids=${many(101)}`)
+      .set(auth)
+      .expect(422);
+    await request(server())
+      .get(`/users?ids=${many(100)}`)
+      .set(auth)
+      .expect(200);
+  });
+
   it('rejects a non-image avatar, accepts a PNG, and serves it via the blob path', async () => {
     const token = await login('alice');
 

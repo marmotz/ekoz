@@ -180,24 +180,61 @@ it('keeps the scroll anchor when older messages are prepended', async () => {
   }
 });
 
-it('shows the author labels for deleted and unknown accounts and refetches the members once', async () => {
+it('shows the author labels for deleted accounts and for authors who left', async () => {
   const { fake } = setup({
     items: [
       wireMessage(1, { authorId: null }),
       wireMessage(2, { authorId: 'u3' }),
       wireMessage(3, { authorId: 'gone' }),
+      wireMessage(4, { authorId: 'wiped' }),
     ],
-    lastSeq: '3',
+    lastSeq: '4',
     members: [member('u3', null), member('u1', 'Alice')],
+    configure: (f) => {
+      f.stubs.users.summaries.mockImplementation(async (ids: readonly string[]) =>
+        ids.map((id) => ({
+          id,
+          identifier: id === 'gone' ? 'gone/example.test' : null,
+          displayName: id === 'gone' ? 'Gone Person' : null,
+          avatarUrl: null,
+        })),
+      );
+    },
   });
 
-  await screen.findByText('message 3');
+  await screen.findByText('message 4');
 
-  await waitFor(() => expect(screen.getAllByText('Deleted account')).toHaveLength(2));
-  expect(screen.getByText('Unknown user')).toBeInTheDocument();
-  await waitFor(() => expect(fake.stubs.rooms.members).toHaveBeenCalledTimes(2));
-  await act(async () => {});
-  expect(fake.stubs.rooms.members).toHaveBeenCalledTimes(2);
+  expect(await screen.findByText('Gone Person')).toBeInTheDocument();
+  await waitFor(() => expect(screen.getAllByText('Deleted account')).toHaveLength(3));
+  expect(screen.queryByText('Unknown user')).not.toBeInTheDocument();
+  expect(fake.stubs.users.summaries).toHaveBeenCalledTimes(1);
+  expect(fake.stubs.users.summaries).toHaveBeenCalledWith(['gone', 'wiped']);
+  // The members list is not fetched again to find them.
+  expect(fake.stubs.rooms.members).toHaveBeenCalledTimes(1);
+});
+
+it('shows a name placeholder while an author who left is being looked up', async () => {
+  let release: (summaries: unknown[]) => void = () => {};
+  setup({
+    items: [wireMessage(1, { authorId: 'gone' })],
+    lastSeq: '1',
+    configure: (f) => {
+      f.stubs.users.summaries.mockImplementation(
+        () => new Promise((resolve) => (release = resolve)) as never,
+      );
+    },
+  });
+
+  expect(await screen.findByTestId('author-pending')).toBeInTheDocument();
+
+  await act(async () => {
+    release([
+      { id: 'gone', identifier: 'gone/example.test', displayName: 'Gone', avatarUrl: null },
+    ]);
+  });
+
+  expect(await screen.findByText('Gone')).toBeInTheDocument();
+  expect(screen.queryByTestId('author-pending')).not.toBeInTheDocument();
 });
 
 it('renders a tombstone for a deleted message and an edited marker', async () => {
@@ -367,27 +404,6 @@ it('buffers events that arrive while the first page is loading', async () => {
 
   expect(await screen.findByText('live 3')).toBeInTheDocument();
   expect(screen.getByText('message 2')).toBeInTheDocument();
-});
-
-it('refetches the members when someone joins', async () => {
-  const { fake } = setup();
-  await screen.findByText('message 2');
-  await waitFor(() => expect(fake.stubs.rooms.members).toHaveBeenCalledTimes(1));
-
-  await emit(fake, 'room_event', {
-    roomId: 'r1',
-    feedSeq: '3',
-    event: {
-      type: 'member_joined',
-      roomId: 'r1',
-      seq: '3',
-      senderId: 'u9',
-      createdAt: '2026-01-02T00:00:00.000Z',
-      content: { userId: 'u9' },
-    },
-  });
-
-  await waitFor(() => expect(fake.stubs.rooms.members).toHaveBeenCalledTimes(2));
 });
 
 // --- reconnection ----------------------------------------------------------

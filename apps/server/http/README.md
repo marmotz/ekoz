@@ -97,6 +97,8 @@ http/
     delete.hurl                       DELETE /me                      204 · re-auth, throwaway account
   users/
     profile.hurl                      GET    /users/:identifier       200 · needs access_token
+    summaries.hurl                    GET    /users?ids=              200 · needs access_token + target_user_id
+    summaries-invalid.hurl            GET    /users?ids=              422 validation_failed
     profile-not-found.hurl            GET    /users/:identifier       404 identity.profile_not_found
     avatar.hurl                       GET    /users/:identifier/avatar 200 · ETag, needs access_token
     avatar-not-found.hurl             GET    /users/:identifier/avatar 404 identity.avatar_not_found

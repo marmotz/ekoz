@@ -37,6 +37,32 @@ describe('users resource', () => {
     return createUsersResource(session);
   }
 
+  it('summaries() hits GET /users with the ids comma-joined and returns the items', async () => {
+    const items = [
+      { id: 'A'.repeat(26), identifier: 'bob/example.com', displayName: 'Bob', avatarUrl: null },
+      { id: 'B'.repeat(26), identifier: null, displayName: null, avatarUrl: null },
+    ];
+    const fetchMock = createFetchMock(jsonResponse({ body: { items } }));
+    const users = await usersWith(fetchMock);
+
+    const result = await users.summaries(['A'.repeat(26), 'B'.repeat(26)]);
+
+    expect(fetchMock.calls[0]?.url).toBe(
+      `https://api.example.com/users?ids=${'A'.repeat(26)}%2C${'B'.repeat(26)}`,
+    );
+    expect(new Headers(fetchMock.calls[0]?.init?.headers).get('Authorization')).toBe('Bearer a');
+    expect(result).toEqual(items);
+  });
+
+  it('summaries() rejects with a typed error on a problem response', async () => {
+    const fetchMock = createFetchMock(
+      jsonResponse({ status: 422, body: { code: 'validation_failed', status: 422 } }),
+    );
+    const users = await usersWith(fetchMock);
+
+    await expect(users.summaries(['x'])).rejects.toMatchObject({ status: 422 });
+  });
+
   it('avatar() fetches a Blob with image Accept and the bearer token', async () => {
     const fetchMock = createFetchMock(
       new Response(new Uint8Array([1, 2]), { headers: { 'Content-Type': 'image/webp' } }),

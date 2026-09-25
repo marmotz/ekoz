@@ -4,16 +4,16 @@
 
 ## Web client members ·  [overview](features/web-client-members/overview.md)
 
-_technical design, see [technical.md](features/web-client-members/technical.md)_ — 0/6 tasks done
+_done, see [technical.md](features/web-client-members/technical.md)_ — 6/6 tasks done
 
 | Done | Issue                                              | Title                                                                   | Blocked by       |
 |------|----------------------------------------------------|-------------------------------------------------------------------------|------------------|
-| [ ]  | [#123](https://github.com/marmotz/ekoz/issues/123) | Members server: GET /users?ids= user summaries by id                    | —                |
-| [ ]  | [#124](https://github.com/marmotz/ekoz/issues/124) | Members SDK: users.summaries(ids) binding                               | #123             |
-| [ ]  | [#125](https://github.com/marmotz/ekoz/issues/125) | Members client: shared members query, live refresh and authors who left | #124             |
-| [ ]  | [#126](https://github.com/marmotz/ekoz/issues/126) | Members client: public profile card from authors and the user menu      | #125             |
-| [ ]  | [#127](https://github.com/marmotz/ekoz/issues/127) | Members client: members panel, header toggle and route composition      | #125, #126       |
-| [ ]  | [#128](https://github.com/marmotz/ekoz/issues/128) | Members docs: docs/technical/web-client-members.md                      | #125, #126, #127 |
+| [x]  | [#123](https://github.com/marmotz/ekoz/issues/123) | Members server: GET /users?ids= user summaries by id                    | —                |
+| [x]  | [#124](https://github.com/marmotz/ekoz/issues/124) | Members SDK: users.summaries(ids) binding                               | #123             |
+| [x]  | [#125](https://github.com/marmotz/ekoz/issues/125) | Members client: shared members query, live refresh and authors who left | #124             |
+| [x]  | [#126](https://github.com/marmotz/ekoz/issues/126) | Members client: public profile card from authors and the user menu      | #125             |
+| [x]  | [#127](https://github.com/marmotz/ekoz/issues/127) | Members client: members panel, header toggle and route composition      | #125, #126       |
+| [x]  | [#128](https://github.com/marmotz/ekoz/issues/128) | Members docs: docs/technical/web-client-members.md                      | #125, #126, #127 |
 
 ## Web client mentions ·  [overview](features/web-client-mentions/overview.md)
 

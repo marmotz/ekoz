@@ -80,5 +80,6 @@ export {
   UsernameChangeRequestDtoSchema as UsernameChangeRequestSchema,
   UsernameChangeStateDtoPendingRequestSchema as UsernameChangePendingRequestSchema,
   UsernameChangeStateDtoSchema as UsernameChangeStateSchema,
+  UserSummaryListViewDtoSchema as UserSummaryListSchema,
   VerifyEmailDtoSchema as VerifyEmailBodySchema,
 } from '../generated/api/zod-api/index.js';

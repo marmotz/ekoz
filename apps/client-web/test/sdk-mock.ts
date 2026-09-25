@@ -1,4 +1,4 @@
-import type { EkozClient, SessionEventMap, SessionEventName } from '@ekozhq/sdk';
+import type { EkozClient, SessionEventMap, SessionEventName, UserSummary } from '@ekozhq/sdk';
 import { vi } from 'vitest';
 
 type Listener = (...args: unknown[]) => void;
@@ -136,6 +136,10 @@ export function createFakeSdk(initial?: FakeSession) {
     },
     users: {
       getProfile: vi.fn(async () => ({})),
+      summaries: vi.fn(
+        async (ids: readonly string[]): Promise<UserSummary[]> =>
+          ids.map((id) => ({ id, identifier: null, displayName: null, avatarUrl: null })),
+      ),
       avatar: vi.fn(async () => new Blob(['avatar'], { type: 'image/png' })),
     },
     messages: {

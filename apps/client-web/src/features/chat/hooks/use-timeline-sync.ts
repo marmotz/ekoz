@@ -17,7 +17,7 @@ export const MAX_SYNC_PAGES = 5;
 
 /**
  * Keeps the room timeline current: live stream events for this room, the
- * reconnection catch-up, and the members list on `member_joined`. Mounted by
+ * reconnection catch-up. Mounted by
  * `RoomChat`. Every path goes through `applyRoomEvent`, whose `seq > lastSeq`
  * guard makes overlapping sources (stream, feed replay, `/sync`) harmless.
  */
@@ -76,9 +76,6 @@ export function useTimelineSync(roomId: string) {
 
   useRoomEvents(({ roomId: eventRoomId, event }: RoomStreamRoomEvent) => {
     if (eventRoomId !== roomId) return;
-    if (event.type === 'member_joined') {
-      void queryClient.invalidateQueries({ queryKey: chatKeys.members(roomId) });
-    }
     if (!apply(event)) buffer.current.push(event);
   });
 

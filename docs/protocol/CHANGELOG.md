@@ -110,6 +110,9 @@ All notable changes to the Ekoz protocol. Format
 - `message_deleted` room event, appended when a message is deleted (by its
   author, a moderator or retention) so connected clients see the deletion.
   `message_edited` now carries `messageId`.
+- `GET /users?ids=` in [`identity.md`](identity.md): public summaries of up to 100
+  users by id, in request order; unknown and deleted ids come back as deleted
+  accounts.
 
 ### Changed
 

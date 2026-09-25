@@ -1802,6 +1802,64 @@
         ]
       }
     },
+    "/users": {
+      "get": {
+        "description": "One summary per distinct requested id, in request order. An unknown or deleted id is summarised like a deleted account (null `identifier`, `displayName` and `avatarUrl`).",
+        "operationId": "UsersController_summaries",
+        "parameters": [
+          {
+            "name": "ids",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated list of 1 to 100 user ids.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSummaryListViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "User summaries by id.",
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
     "/users/{identifier}": {
       "get": {
         "operationId": "UsersController_publicProfile",
@@ -6625,6 +6683,45 @@
         },
         "required": [
           "avatarUrl"
+        ]
+      },
+      "UserSummaryListViewDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                  "description": "Crockford base32 entity identifier (ULID), 26 characters"
+                },
+                "identifier": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "displayName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "avatarUrl": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "identifier",
+                "displayName",
+                "avatarUrl"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "PublicProfileViewDto": {

@@ -63,6 +63,7 @@ import type { UsernameChangeAppliedDtoDto } from './UsernameChangeAppliedDto.typ
 import type { UsernameChangePendingDtoDto } from './UsernameChangePendingDto.type.js';
 import type { UsernameChangeRequestDtoDto } from './UsernameChangeRequestDto.type.js';
 import type { UsernameChangeStateDtoDto } from './UsernameChangeStateDto.type.js';
+import type { UserSummaryListViewDtoDto } from './UserSummaryListViewDto.type.js';
 import type { VerifyEmailDtoDto } from './VerifyEmailDto.type.js';
 
 export type BlobController_download200ResponseOctetStream = Uint8Array;
@@ -318,6 +319,14 @@ export type MeController_uploadAvatar413ResponseProblemJson = ProblemDetailsDtoD
 export type MeController_uploadAvatar422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MeController_deleteAvatar401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type UsersController_summaries200ResponseJson = UserSummaryListViewDtoDto;
+
+export type UsersController_summaries401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type UsersController_summaries422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type UsersController_summariesQueryIds = string;
 
 export type UsersController_publicProfile200ResponseJson = PublicProfileViewDtoDto;
 

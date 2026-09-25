@@ -2,6 +2,7 @@ import type { Room, RoomListItem } from '@ekozhq/sdk';
 import { Link, useNavigate } from '@tanstack/react-router';
 import type { ParseKeys } from 'i18next';
 import { Folder, Hash, UserPlus } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { roomErrorKey } from '@/features/rooms/api/errors';
 import { useLeaveRoom } from '@/features/rooms/hooks/use-room-mutations';
@@ -19,6 +20,8 @@ const TYPE_LABEL: Record<Room['type'], ParseKeys> = {
 export interface RoomHeaderProps {
   room: Room | RoomListItem;
   capabilities: readonly string[];
+  /** Controls another feature places in the header (the route composes them). */
+  actions?: ReactNode;
 }
 
 /**
@@ -27,7 +30,7 @@ export interface RoomHeaderProps {
  * A space lists its channels from the cached rooms list; moderators get a link to the
  * pending join requests.
  */
-export function RoomHeader({ room, capabilities }: RoomHeaderProps) {
+export function RoomHeader({ room, capabilities, actions }: RoomHeaderProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const rooms = useRooms();
@@ -46,6 +49,7 @@ export function RoomHeader({ room, capabilities }: RoomHeaderProps) {
           <h2 className="truncate text-lg font-semibold">{room.name ?? t('rooms.unnamed')}</h2>
           <p className="text-xs text-muted-foreground">{t(TYPE_LABEL[room.type])}</p>
         </div>
+        {actions}
         {capabilities.includes('room.manage_members') && (
           <Button asChild size="sm" variant="outline">
             <Link to="/rooms/$roomId/requests" params={{ roomId: room.id }}>

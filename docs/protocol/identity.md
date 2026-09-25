@@ -271,6 +271,21 @@ Authenticated (the profile itself is public; the endpoint is not anonymous).
   (`avatarUrl` is versioned, see `GET /me`).
 - Errors: `identity.profile_not_found` (`404`).
 
+### `GET /users?ids=`
+
+Authenticated. Resolves user ids to public summaries, for content whose author or
+subject is no longer visible another way (for instance a message author who left
+the room).
+
+- Query: `ids`, a comma-separated list of 1 to 100 user ids (ULIDs). Duplicates are
+  collapsed.
+- `200`: `{ items: UserSummary[] }`, one item per distinct requested id, in request
+  order. `UserSummary` is `{ id, identifier, displayName, avatarUrl }`; the three
+  last fields are `null` for a deleted account. An unknown id is summarised the same
+  way, so the endpoint never reveals whether an id existed.
+- Errors: `validation_failed` (`422`) for an empty list, more than 100 ids or a
+  malformed id.
+
 ## Invitations (owner)
 
 ### `POST /invitations`

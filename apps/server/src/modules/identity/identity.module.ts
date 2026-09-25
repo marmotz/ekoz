@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { UserSummaryReader } from '../../core/users/user-summary.reader.js';
 import { AccountService } from './accounts/account.service.js';
 import { AdminUserQueryController } from './accounts/admin-users.controller.js';
 import { AdminUsersQueryService } from './accounts/admin-users.service.js';
@@ -105,6 +106,7 @@ import { ProfileService } from './profile/profile.service.js';
     PasswordResetService,
     PasswordChangeService,
     ProfileService,
+    UserSummaryReader,
     UsernameService,
     LifecycleService,
     AdminUsersQueryService,

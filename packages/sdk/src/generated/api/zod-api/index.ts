@@ -41,6 +41,8 @@ export * from './ConfirmPasswordResetDto.schema.js';
 export * from './MeViewDto.schema.js';
 export * from './UpdateProfileDto.schema.js';
 export * from './AvatarUploadedDto.schema.js';
+export * from './UserSummaryListViewDtoItems.schema.js';
+export * from './UserSummaryListViewDto.schema.js';
 export * from './PublicProfileViewDto.schema.js';
 export * from './UsernameChangeStateDtoPendingRequest.schema.js';
 export * from './UsernameChangeStateDto.schema.js';

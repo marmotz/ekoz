@@ -41,6 +41,8 @@ export type * from './ConfirmPasswordResetDto.type.js';
 export type * from './MeViewDto.type.js';
 export type * from './UpdateProfileDto.type.js';
 export type * from './AvatarUploadedDto.type.js';
+export type * from './UserSummaryListViewDtoItems.type.js';
+export type * from './UserSummaryListViewDto.type.js';
 export type * from './PublicProfileViewDto.type.js';
 export type * from './UsernameChangeStateDtoPendingRequest.type.js';
 export type * from './UsernameChangeStateDto.type.js';

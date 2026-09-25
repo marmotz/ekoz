@@ -1,8 +1,10 @@
 import { Link } from '@tanstack/react-router';
-import { LogOut } from 'lucide-react';
+import { LogOut, UserRound } from 'lucide-react';
+import { useState } from 'react';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { getUserMenuItems } from '@/shared/layout/user-menu-items';
+import { ProfileCardPopover } from '@/shared/profile/profile-card';
 import { useSession } from '@/shared/sdk/session';
 import { useMe } from '@/shared/sdk/use-me';
 import { useSdk } from '@/shared/sdk/use-sdk';
@@ -22,33 +24,63 @@ function SignedInMenu() {
   const { t } = useTranslation();
   const sdk = useSdk();
   const me = useMe();
+  const [profileOpen, setProfileOpen] = useState(false);
 
   if (me.isPending) {
     return <Skeleton className="size-8 rounded-full" data-testid="user-menu-skeleton" />;
   }
 
   const displayName = me.data?.displayName;
+  const identifier = me.data?.identifier;
+
+  const trigger = (
+    <DropdownMenuTrigger asChild>
+      <Button variant="ghost" className="gap-2 px-2" aria-label={t('auth.userMenu.label')}>
+        <UserAvatar
+          identifier={identifier}
+          avatarUrl={me.data?.avatarUrl}
+          displayName={displayName}
+        />
+        {displayName ? (
+          <span className="hidden max-w-40 truncate sm:inline">{displayName}</span>
+        ) : null}
+      </Button>
+    </DropdownMenuTrigger>
+  );
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-2 px-2" aria-label={t('auth.userMenu.label')}>
-          <UserAvatar
-            identifier={me.data?.identifier}
-            avatarUrl={me.data?.avatarUrl}
-            displayName={displayName}
-          />
-          {displayName ? (
-            <span className="hidden max-w-40 truncate sm:inline">{displayName}</span>
-          ) : null}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      {identifier ? (
+        // The card is anchored to the menu trigger; the menu item opens it.
+        <ProfileCardPopover
+          anchorOnly
+          identifier={identifier}
+          fallback={{ displayName: displayName ?? null, avatarUrl: me.data?.avatarUrl ?? null }}
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+        >
+          {trigger}
+        </ProfileCardPopover>
+      ) : (
+        trigger
+      )}
+      <DropdownMenuContent
+        align="end"
+        // The card takes the focus itself; the closing menu must not pull it back to the trigger.
+        onCloseAutoFocus={(event) => {
+          if (profileOpen) event.preventDefault();
+        }}
+      >
         {displayName ? (
           <>
             <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
             <DropdownMenuSeparator />
           </>
+        ) : null}
+        {identifier ? (
+          <DropdownMenuItem onSelect={() => setProfileOpen(true)}>
+            <UserRound className="size-4" /> {t('members.menu.myProfile')}
+          </DropdownMenuItem>
         ) : null}
         {getUserMenuItems().map(({ id, to, labelKey, icon: Icon }) => (
           <DropdownMenuItem key={id} asChild>
