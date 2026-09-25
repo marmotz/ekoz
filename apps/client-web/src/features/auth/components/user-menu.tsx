@@ -37,6 +37,7 @@ function SignedInMenu() {
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="gap-2 px-2" aria-label={t('auth.userMenu.label')}>
         <UserAvatar
+          userId={me.data?.id}
           identifier={identifier}
           avatarUrl={me.data?.avatarUrl}
           displayName={displayName}
@@ -54,6 +55,7 @@ function SignedInMenu() {
         // The card is anchored to the menu trigger; the menu item opens it.
         <ProfileCardPopover
           anchorOnly
+          userId={me.data?.id}
           identifier={identifier}
           fallback={{ displayName: displayName ?? null, avatarUrl: me.data?.avatarUrl ?? null }}
           open={profileOpen}

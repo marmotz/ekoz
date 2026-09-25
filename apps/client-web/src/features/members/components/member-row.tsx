@@ -13,6 +13,7 @@ export function MemberRow({ member }: { member: Member }) {
   return (
     <li>
       <ProfileCardPopover
+        userId={user.id}
         identifier={user.identifier}
         fallback={{ displayName: user.displayName, avatarUrl: user.avatarUrl }}
         role={member.role}
@@ -22,6 +23,7 @@ export function MemberRow({ member }: { member: Member }) {
           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-accent hover:text-accent-foreground focus-visible:outline-2"
         >
           <UserAvatar
+            userId={user.id}
             identifier={user.identifier}
             avatarUrl={user.avatarUrl}
             displayName={user.displayName}

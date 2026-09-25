@@ -124,6 +124,7 @@ function InvitationRow({
   return (
     <li className="flex flex-wrap items-center gap-3 p-3">
       <UserAvatar
+        userId={invitedBy.id}
         identifier={invitedBy.identifier}
         avatarUrl={invitedBy.avatarUrl}
         displayName={invitedBy.displayName}

@@ -4,9 +4,10 @@ import { beforeEach, expect, it, vi } from 'vitest';
 
 import { UserMenu } from '@/features/auth/components/user-menu';
 import { clearUserMenuItems, registerUserMenuItem } from '@/shared/layout/user-menu-items';
+import { avatarColors } from '@/shared/lib/avatar-color';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { renderWithProviders } from '../../../../test/render';
-import { createClientMock, createFakeSdk } from '../../../../test/sdk-mock';
+import { createClientMock, createFakeSdk, defaultMe } from '../../../../test/sdk-mock';
 
 vi.mock('@ekozhq/sdk', async (importOriginal) =>
   (await import('../../../../test/sdk-mock')).mockSdkModule(await importOriginal()),
@@ -171,4 +172,17 @@ it('shows the avatar of the account, fetched with its versioned url', async () =
   await waitFor(() =>
     expect(fake.stubs.users.avatar).toHaveBeenCalledWith('jane/example.test', { version: '3' }),
   );
+});
+
+it('colors the avatar like the same account elsewhere, from the account id', async () => {
+  createClientMock.mockReturnValue(createFakeSdk(signedIn).sdk);
+
+  renderWithProviders(menu());
+
+  const button = await screen.findByRole('button', { name: 'Account menu' });
+  const disc = within(button).getByText('JD');
+  // jsdom normalizes colors, so compare with the expected value written the same way.
+  const expected = document.createElement('span');
+  expected.style.background = avatarColors(defaultMe.id).background;
+  expect(disc.style.background).toBe(expected.style.background);
 });

@@ -62,6 +62,7 @@ function AuthorCard({
 
   return (
     <ProfileCardPopover
+      userId={author.userId ?? undefined}
       identifier={author.identifier}
       fallback={{ displayName: author.displayName, avatarUrl: author.avatarUrl }}
       role={author.role}
@@ -111,6 +112,7 @@ export function MessageItem({ message, author }: { message: TimelineMessage; aut
     <li className="flex gap-3 py-1.5" data-message-id={message.id}>
       <AuthorCard author={author} decorative>
         <UserAvatar
+          userId={author.userId}
           identifier={author.identifier}
           avatarUrl={author.avatarUrl}
           displayName={author.displayName}

@@ -14,6 +14,8 @@ export interface ProfileFallback {
 }
 
 export interface ProfileCardProps {
+  /** The account id, when known: keys the avatar color. */
+  userId?: string;
   /** `name/server` identifier the profile is read by. */
   identifier: string;
   fallback: ProfileFallback;
@@ -29,7 +31,7 @@ export interface ProfileCardProps {
  * profile cannot be read (`404` for a deleted account), the card keeps the
  * fallback and shows no bio.
  */
-export function ProfileCard({ identifier, fallback, role, left }: ProfileCardProps) {
+export function ProfileCard({ userId, identifier, fallback, role, left }: ProfileCardProps) {
   const { t } = useTranslation();
   const profile = usePublicProfile(identifier);
   const displayName = profile.data?.displayName ?? fallback.displayName;
@@ -42,6 +44,7 @@ export function ProfileCard({ identifier, fallback, role, left }: ProfileCardPro
     >
       <div className="flex items-center gap-3">
         <UserAvatar
+          userId={userId}
           identifier={identifier}
           avatarUrl={avatarUrl}
           displayName={displayName}

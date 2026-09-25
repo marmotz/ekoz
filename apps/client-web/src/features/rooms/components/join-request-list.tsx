@@ -146,6 +146,7 @@ function JoinRequestRow({
   return (
     <li className="flex flex-wrap items-center gap-3 p-3">
       <UserAvatar
+        userId={user.id}
         identifier={user.identifier}
         avatarUrl={user.avatarUrl}
         displayName={user.displayName}

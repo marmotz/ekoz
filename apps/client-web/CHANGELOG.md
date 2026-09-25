@@ -47,3 +47,4 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Share the room members query across features (`shared/members`: pages of 200 up to 2,000 members, `truncated` flag, refreshed live on every membership event) and resolve authors who left a room through `GET /users?ids=` instead of "Unknown user" (#125).
 - Add the public profile card (`shared/profile`, shadcn/ui `popover`), opened from message authors and from a "My public profile" user menu entry, with left-the-room and deleted account markers (#126).
 - Add the members panel: header toggle with the count, list grouped by role or A to Z with search, an inline column from `lg` and a sheet below, its state kept in `localStorage` (#127).
+- Draw default avatars (no uploaded picture) as initials on a color derived from the account id, with dark or light text chosen for contrast.
