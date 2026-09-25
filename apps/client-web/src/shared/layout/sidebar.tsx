@@ -42,7 +42,7 @@ export function Sidebar() {
   const { t } = useTranslation();
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-4 border-r p-4 md:flex">
+    <aside className="surface-panel hidden w-60 shrink-0 flex-col gap-4 border-r p-4 md:flex">
       <span className="px-3 text-lg font-semibold">{t('appName')}</span>
       <SidebarNav />
       <SidebarSections />

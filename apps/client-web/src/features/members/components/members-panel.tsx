@@ -130,7 +130,7 @@ export function MembersPanel({ roomId }: { roomId: string }) {
     return (
       <aside
         aria-label={t('members.panel.title')}
-        className="flex min-h-0 w-72 shrink-0 flex-col border-l p-4"
+        className="surface-panel flex min-h-0 w-72 shrink-0 flex-col border-l p-4"
       >
         <PanelBody
           roomId={roomId}
@@ -143,7 +143,11 @@ export function MembersPanel({ roomId }: { roomId: string }) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" aria-describedby={undefined} className="flex flex-col">
+      <SheetContent
+        side="right"
+        aria-describedby={undefined}
+        className="surface-panel flex flex-col bg-panel"
+      >
         <PanelBody roomId={roomId} title={<SheetTitle>{t('members.panel.title')}</SheetTitle>} />
       </SheetContent>
     </Sheet>

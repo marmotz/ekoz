@@ -28,7 +28,7 @@ export function AppShell({ theme, onThemeChange, userMenu, children }: AppShellP
           <Menu className="size-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left">
+      <SheetContent side="left" className="surface-panel bg-panel">
         <SheetTitle>{t('appName')}</SheetTitle>
         <SheetDescription className="sr-only">{t('nav.label')}</SheetDescription>
         <div className="mt-4 flex flex-col gap-4">
