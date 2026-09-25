@@ -77,5 +77,6 @@ export type {
   UsernameChangeRequestDtoDto as UsernameChangeRequest,
   UsernameChangeStateDtoDto as UsernameChangeState,
   UsernameChangeStateDtoPendingRequestDto as UsernameChangePendingRequest,
+  UserSummaryListViewDtoDto as UserSummaryList,
   VerifyEmailDtoDto as VerifyEmailBody,
 } from '../generated/api/index.js';

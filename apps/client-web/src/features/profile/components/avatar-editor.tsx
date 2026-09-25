@@ -50,6 +50,7 @@ export function AvatarEditor({ me }: { me: MeView }) {
     <SectionCard title={t('account.avatar.title')} description={t('account.avatar.description')}>
       <div className="flex items-center gap-4">
         <UserAvatar
+          userId={me.id}
           identifier={me.identifier}
           avatarUrl={me.avatarUrl}
           displayName={me.displayName}

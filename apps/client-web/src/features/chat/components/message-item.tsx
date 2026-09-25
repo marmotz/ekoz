@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { MessageBody } from '@/features/chat/components/message-body';
 import type { Author } from '@/features/chat/hooks/use-authors';
 import type {
@@ -6,7 +8,9 @@ import type {
   TimelineMessage,
 } from '@/features/chat/lib/timeline';
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { ProfileCardPopover } from '@/shared/profile/profile-card';
 import { Button } from '@/shared/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { UserAvatar } from '@/shared/ui/user-avatar';
 
 const FAILURE_KEYS = {
@@ -22,8 +26,7 @@ function useAuthorLabel() {
   const { t } = useTranslation();
   return (author: Author) => {
     if (author.kind === 'deleted') return t('chat.message.deletedAccount');
-    if (author.kind === 'unknown') return t('chat.message.unknownUser');
-    return author.displayName ?? t('chat.message.unknownUser');
+    return author.displayName ?? '';
   };
 }
 
@@ -38,6 +41,68 @@ function Time({ iso }: { iso: string }) {
   );
 }
 
+/**
+ * Wraps `children` in a button that opens the author's profile card, for authors
+ * who have a profile to show (members and people who left); anything else is
+ * rendered as is.
+ */
+function AuthorCard({
+  author,
+  children,
+  decorative = false,
+}: {
+  author: Author;
+  children: ReactNode;
+  /** The avatar duplicates the name button: mouse-only, out of the tab order. */
+  decorative?: boolean;
+}) {
+  if ((author.kind !== 'member' && author.kind !== 'left') || author.identifier === null) {
+    return children;
+  }
+
+  return (
+    <ProfileCardPopover
+      userId={author.userId ?? undefined}
+      identifier={author.identifier}
+      fallback={{ displayName: author.displayName, avatarUrl: author.avatarUrl }}
+      role={author.role}
+      left={author.kind === 'left'}
+    >
+      <button
+        type="button"
+        className="rounded-sm text-left hover:underline focus-visible:outline-2"
+        {...(decorative ? { tabIndex: -1, 'aria-hidden': true } : {})}
+      >
+        {children}
+      </button>
+    </ProfileCardPopover>
+  );
+}
+
+/** 🚪 for someone who left the room, 💀 for a deleted account; nothing otherwise. */
+function AuthorMarker({ kind }: { kind: Author['kind'] }) {
+  const { t } = useTranslation();
+  if (kind === 'left') {
+    return (
+      <span role="img" aria-label={t('members.markers.left')} title={t('members.markers.left')}>
+        🚪
+      </span>
+    );
+  }
+  if (kind === 'deleted') {
+    return (
+      <span
+        role="img"
+        aria-label={t('members.markers.deleted')}
+        title={t('members.markers.deleted')}
+      >
+        💀
+      </span>
+    );
+  }
+  return null;
+}
+
 export function MessageItem({ message, author }: { message: TimelineMessage; author: Author }) {
   const { t } = useTranslation();
   const label = useAuthorLabel()(author);
@@ -45,15 +110,27 @@ export function MessageItem({ message, author }: { message: TimelineMessage; aut
 
   return (
     <li className="flex gap-3 py-1.5" data-message-id={message.id}>
-      <UserAvatar
-        identifier={author.identifier}
-        avatarUrl={author.avatarUrl}
-        displayName={author.displayName}
-        className="mt-0.5 size-8"
-      />
+      <AuthorCard author={author} decorative>
+        <UserAvatar
+          userId={author.userId}
+          identifier={author.identifier}
+          avatarUrl={author.avatarUrl}
+          displayName={author.displayName}
+          className="mt-0.5 size-8"
+        />
+      </AuthorCard>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium">{label}</span>
+          {author.kind === 'pending' ? (
+            <Skeleton className="h-4 w-24" aria-hidden="true" data-testid="author-pending" />
+          ) : (
+            <>
+              <AuthorCard author={author}>
+                <span className="text-sm font-medium">{label}</span>
+              </AuthorCard>
+              <AuthorMarker kind={author.kind} />
+            </>
+          )}
           <Time iso={message.createdAt} />
           {!deleted && message.editedAt !== null ? (
             <span className="text-xs text-muted-foreground">({t('chat.message.edited')})</span>

@@ -40,3 +40,18 @@ it('keeps the initials until the image has loaded', () => {
 
   expect(screen.getByText('JD')).toBeInTheDocument();
 });
+
+it('draws the initials on a color keyed by the account id, not by the name', () => {
+  useAvatarSrc.mockReturnValue(null);
+
+  const { rerender } = render(<UserAvatar {...props} userId="01USER" />);
+  const first = screen.getByText('JD').style.background;
+  expect(first).not.toBe('');
+  expect(screen.getByText('JD').style.color).not.toBe('');
+
+  rerender(<UserAvatar {...props} userId="01USER" displayName="Someone Else" />);
+  expect(screen.getByText('SE').style.background).toBe(first);
+
+  rerender(<UserAvatar {...props} userId="01OTHER" />);
+  expect(screen.getByText('JD').style.background).not.toBe(first);
+});

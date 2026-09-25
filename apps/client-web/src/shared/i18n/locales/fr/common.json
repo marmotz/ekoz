@@ -242,7 +242,6 @@
       "deleted": "Message supprimé",
       "edited": "modifié",
       "deletedAccount": "Compte supprimé",
-      "unknownUser": "Utilisateur inconnu",
       "sending": "Envoi en cours",
       "failed": "Non envoyé",
       "retry": "Réessayer"
@@ -268,6 +267,54 @@
     "connection": {
       "reconnecting": "Reconnexion...",
       "offline": "Hors ligne"
+    }
+  },
+  "members": {
+    "card": {
+      "label": "Profil de {{name}}",
+      "loading": "Chargement du profil",
+      "role": "Rôle",
+      "left": "A quitté le salon"
+    },
+    "menu": {
+      "myProfile": "Mon profil public"
+    },
+    "markers": {
+      "left": "A quitté le salon",
+      "deleted": "Compte supprimé"
+    },
+    "role": {
+      "space_admin": "Administrateur de l'espace",
+      "room_admin": "Administrateur du salon",
+      "moderator": "Modérateur",
+      "member": "Membre",
+      "reader": "Lecteur"
+    },
+    "toggle": {
+      "label": "Membres"
+    },
+    "panel": {
+      "title": "Membres",
+      "close": "Fermer le panneau des membres",
+      "viewLabel": "Trier les membres",
+      "views": {
+        "role": "Par rôle",
+        "alpha": "A à Z"
+      },
+      "search": "Rechercher un membre",
+      "loading": "Chargement des membres",
+      "error": "Impossible de charger les membres.",
+      "retry": "Réessayer",
+      "empty": "Aucun membre.",
+      "noMatch": "Aucun membre ne correspond à la recherche.",
+      "truncated": "Seuls les {{count}} premiers membres sont listés.",
+      "sections": {
+        "space_admin": "Administrateurs de l'espace",
+        "room_admin": "Administrateurs du salon",
+        "moderator": "Modérateurs",
+        "member": "Membres",
+        "reader": "Lecteurs"
+      }
     }
   },
   "rooms": {

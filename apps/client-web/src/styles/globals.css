@@ -22,6 +22,9 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  --panel: oklch(0.962 0.014 265);
+  --panel-accent: oklch(0.925 0.03 265);
+  --panel-border: oklch(0.9 0.02 265);
   --radius: 0.625rem;
 }
 
@@ -45,6 +48,9 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --panel: oklch(0.2 0.022 265);
+  --panel-accent: oklch(0.27 0.035 265);
+  --panel-border: oklch(0.32 0.03 265 / 60%);
 }
 
 @theme inline {
@@ -67,6 +73,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-panel: var(--panel);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -79,5 +86,15 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Side columns (sidebar, members): tinted surface distinct from the chat.
+     Re-maps the neutral tokens so descendants (hover, skeleton, inputs) adapt. */
+  .surface-panel {
+    --accent: var(--panel-accent);
+    --secondary: var(--panel-accent);
+    --muted: var(--panel-accent);
+    --border: var(--panel-border);
+    --input: var(--panel-border);
+    @apply bg-panel;
   }
 }

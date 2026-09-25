@@ -242,7 +242,6 @@
       "deleted": "Message deleted",
       "edited": "edited",
       "deletedAccount": "Deleted account",
-      "unknownUser": "Unknown user",
       "sending": "Sending",
       "failed": "Not sent",
       "retry": "Retry"
@@ -268,6 +267,54 @@
     "connection": {
       "reconnecting": "Reconnecting...",
       "offline": "Offline"
+    }
+  },
+  "members": {
+    "card": {
+      "label": "Profile of {{name}}",
+      "loading": "Loading the profile",
+      "role": "Role",
+      "left": "Left the room"
+    },
+    "menu": {
+      "myProfile": "My public profile"
+    },
+    "markers": {
+      "left": "Left the room",
+      "deleted": "Deleted account"
+    },
+    "role": {
+      "space_admin": "Space admin",
+      "room_admin": "Room admin",
+      "moderator": "Moderator",
+      "member": "Member",
+      "reader": "Reader"
+    },
+    "toggle": {
+      "label": "Members"
+    },
+    "panel": {
+      "title": "Members",
+      "close": "Close the members panel",
+      "viewLabel": "Sort members",
+      "views": {
+        "role": "By role",
+        "alpha": "A to Z"
+      },
+      "search": "Search members",
+      "loading": "Loading the members",
+      "error": "The members could not be loaded.",
+      "retry": "Retry",
+      "empty": "No members.",
+      "noMatch": "No member matches your search.",
+      "truncated": "Only the first {{count}} members are listed.",
+      "sections": {
+        "space_admin": "Space admins",
+        "room_admin": "Room admins",
+        "moderator": "Moderators",
+        "member": "Members",
+        "reader": "Readers"
+      }
     }
   },
   "rooms": {

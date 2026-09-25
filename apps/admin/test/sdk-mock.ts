@@ -50,6 +50,7 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
     },
     users: {
       getProfile: vi.fn(),
+      summaries: vi.fn(),
       avatar: vi.fn(),
     },
     sessions: {

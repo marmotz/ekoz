@@ -1,72 +1,101 @@
-import type { Member } from '@ekozhq/sdk';
-import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { Member, UserSummary } from '@ekozhq/sdk';
+import { useCallback, useMemo } from 'react';
 
-import { fetchMembers } from '@/features/chat/api/queries';
-import { chatKeys } from '@/features/chat/api/query-keys';
-import { useSdk } from '@/shared/sdk/use-sdk';
+import { useRoomMembers } from '@/shared/members/room-members';
+import { useUserSummaries } from '@/shared/members/use-user-summaries';
 
-export type AuthorKind = 'user' | 'deleted' | 'unknown';
+/**
+ * - `member`: in the members list.
+ * - `left`: no longer a member, but the account still has a name.
+ * - `deleted`: no author, or an account with no name left.
+ * - `pending`: the lookup is still loading.
+ */
+export type AuthorKind = 'member' | 'left' | 'deleted' | 'pending';
 
 export interface Author {
   kind: AuthorKind;
+  /** The account id; null for a message with no author. */
+  userId: string | null;
   /** `name/server`, or null when there is nothing to key an avatar by. */
   identifier: string | null;
   displayName: string | null;
   avatarUrl: string | null;
+  /** The room role; null for `left`, `deleted` and `pending` authors. */
+  role: Member['role'] | null;
 }
 
-const DELETED: Author = { kind: 'deleted', identifier: null, displayName: null, avatarUrl: null };
-const UNKNOWN: Author = { kind: 'unknown', identifier: null, displayName: null, avatarUrl: null };
+const empty = (kind: AuthorKind, userId: string | null): Author => ({
+  kind,
+  userId,
+  identifier: null,
+  displayName: null,
+  avatarUrl: null,
+  role: null,
+});
 
 /**
- * Resolves message authors from the room members (`['chat','members',roomId]`).
- * A null author or a member whose `displayName` is null is a deleted account; an
- * author missing from the list (they left the room) is unknown and triggers one
- * members refetch. Display labels are chosen by the caller from `kind`.
+ * Resolves message authors from the shared members list first, then, for the
+ * authors missing from it (they left the room), from `GET /users?ids=`. Display
+ * labels are chosen by the caller from `kind`. A failed summary lookup leaves the
+ * author `deleted`, since no name could be found for them.
  */
 export function useAuthors(roomId: string, authorIds: readonly (string | null)[]) {
-  const sdk = useSdk();
-  const members = useQuery<Member[]>({
-    queryKey: chatKeys.members(roomId),
-    queryFn: () => {
-      if (!sdk) throw new Error('SDK not started');
-      return fetchMembers(sdk, roomId);
-    },
-    enabled: sdk !== null,
-  });
+  const members = useRoomMembers(roomId);
 
   const byId = useMemo(() => {
-    const map = new Map<string, Member['user']>();
-    for (const member of members.data ?? []) map.set(member.user.id, member.user);
+    const map = new Map<string, Member>();
+    for (const member of members.data?.members ?? []) map.set(member.user.id, member);
     return map;
   }, [members.data]);
 
-  const refetched = useRef(false);
-  const { refetch } = members;
-  const loaded = members.data !== undefined;
-  const hasUnknown = authorIds.some((id) => id !== null && !byId.has(id));
-  useEffect(() => {
-    if (loaded && hasUnknown && !refetched.current) {
-      refetched.current = true;
-      void refetch();
-    }
-  }, [loaded, hasUnknown, refetch]);
+  const missingIds = useMemo(() => {
+    if (members.isPending) return [];
+    const ids = new Set<string>();
+    for (const id of authorIds) if (id !== null && !byId.has(id)) ids.add(id);
+    return [...ids];
+  }, [members.isPending, authorIds, byId]);
+
+  const summaries = useUserSummaries(missingIds);
+
+  const summaryById = useMemo(() => {
+    const map = new Map<string, UserSummary>();
+    for (const summary of summaries.data ?? []) map.set(summary.id, summary);
+    return map;
+  }, [summaries.data]);
 
   const resolve = useCallback(
     (authorId: string | null): Author => {
-      if (authorId === null) return DELETED;
-      const user = byId.get(authorId);
-      if (!user) return UNKNOWN;
-      if (user.displayName === null) return DELETED;
+      if (authorId === null) return empty('deleted', null);
+      if (members.isPending) return empty('pending', authorId);
+
+      const member = byId.get(authorId);
+      if (member) {
+        const { user } = member;
+        if (user.displayName === null) return empty('deleted', authorId);
+        return {
+          kind: 'member',
+          userId: authorId,
+          identifier: user.identifier,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+          role: member.role,
+        };
+      }
+
+      const summary = summaryById.get(authorId);
+      if (!summary)
+        return summaries.isError ? empty('deleted', authorId) : empty('pending', authorId);
+      if (summary.displayName === null) return empty('deleted', authorId);
       return {
-        kind: 'user',
-        identifier: user.identifier,
-        displayName: user.displayName,
-        avatarUrl: user.avatarUrl,
+        kind: 'left',
+        userId: authorId,
+        identifier: summary.identifier,
+        displayName: summary.displayName,
+        avatarUrl: summary.avatarUrl,
+        role: null,
       };
     },
-    [byId],
+    [members.isPending, byId, summaryById, summaries.isError],
   );
 
   return { resolve, isLoading: members.isPending };

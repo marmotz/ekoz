@@ -1,16 +1,18 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 import { UserMenu } from '@/features/auth/components/user-menu';
 import { clearUserMenuItems, registerUserMenuItem } from '@/shared/layout/user-menu-items';
+import { avatarColors } from '@/shared/lib/avatar-color';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { renderWithProviders } from '../../../../test/render';
-import { createClientMock, createFakeSdk } from '../../../../test/sdk-mock';
+import { createClientMock, createFakeSdk, defaultMe } from '../../../../test/sdk-mock';
 
 vi.mock('@ekozhq/sdk', async (importOriginal) =>
   (await import('../../../../test/sdk-mock')).mockSdkModule(await importOriginal()),
 );
+vi.mock('@/shared/ui/popover', () => import('../../../../test/popover-mock'));
 vi.mock('@/shared/ui/dropdown-menu', () => import('../../../../test/dropdown-menu-mock'));
 
 const signedIn = { identifier: null, sessionId: 's1' };
@@ -101,17 +103,60 @@ it('lists the registered entries above "Sign out", in order, as links', async ()
   renderWithProviders(menu());
 
   const items = await screen.findAllByRole('menuitem');
-  expect(items.map((item) => item.textContent?.trim())).toEqual(['Account', 'Account', 'Sign out']);
-  expect(items[0]).toHaveAttribute('href', '/account');
-  expect(items[1]).toHaveAttribute('href', '/settings');
+  expect(items.map((item) => item.textContent?.trim())).toEqual([
+    'My public profile',
+    'Account',
+    'Account',
+    'Sign out',
+  ]);
+  expect(items[1]).toHaveAttribute('href', '/account');
+  expect(items[2]).toHaveAttribute('href', '/settings');
 });
 
-it('shows no entry but "Sign out" when none is registered', async () => {
+it('shows no entry but the profile and "Sign out" when none is registered', async () => {
   createClientMock.mockReturnValue(createFakeSdk(signedIn).sdk);
 
   renderWithProviders(menu());
 
-  expect(await screen.findAllByRole('menuitem')).toHaveLength(1);
+  const items = await screen.findAllByRole('menuitem');
+  expect(items.map((item) => item.textContent?.trim())).toEqual(['My public profile', 'Sign out']);
+});
+
+it('opens the public profile card of the account from "My public profile"', async () => {
+  const user = userEvent.setup();
+  const fake = createFakeSdk(signedIn);
+  fake.stubs.me.get.mockResolvedValue({
+    ...(await fake.stubs.me.get()),
+    bio: 'about me',
+  });
+  fake.stubs.users.getProfile.mockResolvedValue({
+    identifier: 'jane/example.test',
+    displayName: 'Jane Doe',
+    bio: 'about me',
+    avatarUrl: null,
+  } as never);
+  createClientMock.mockReturnValue(fake.sdk);
+
+  renderWithProviders(menu());
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  await user.click(await screen.findByRole('menuitem', { name: 'My public profile' }));
+
+  const card = await screen.findByRole('dialog');
+  expect(await within(card).findByText('about me')).toBeInTheDocument();
+  expect(within(card).getByText('jane/example.test')).toBeInTheDocument();
+  expect(within(card).getByText('Jane Doe')).toBeInTheDocument();
+  expect(fake.stubs.users.getProfile).toHaveBeenCalledWith('jane/example.test');
+});
+
+it('offers no profile entry when the account could not be loaded', async () => {
+  const fake = createFakeSdk(signedIn);
+  fake.stubs.me.get.mockRejectedValue(new Error('offline'));
+  createClientMock.mockReturnValue(fake.sdk);
+
+  renderWithProviders(menu());
+
+  expect(await screen.findByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
+  expect(screen.queryByRole('menuitem', { name: 'My public profile' })).not.toBeInTheDocument();
 });
 
 it('shows the avatar of the account, fetched with its versioned url', async () => {
@@ -127,4 +172,17 @@ it('shows the avatar of the account, fetched with its versioned url', async () =
   await waitFor(() =>
     expect(fake.stubs.users.avatar).toHaveBeenCalledWith('jane/example.test', { version: '3' }),
   );
+});
+
+it('colors the avatar like the same account elsewhere, from the account id', async () => {
+  createClientMock.mockReturnValue(createFakeSdk(signedIn).sdk);
+
+  renderWithProviders(menu());
+
+  const button = await screen.findByRole('button', { name: 'Account menu' });
+  const disc = within(button).getByText('JD');
+  // jsdom normalizes colors, so compare with the expected value written the same way.
+  const expected = document.createElement('span');
+  expected.style.background = avatarColors(defaultMe.id).background;
+  expect(disc.style.background).toBe(expected.style.background);
 });

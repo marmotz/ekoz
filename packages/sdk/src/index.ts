@@ -167,6 +167,7 @@ export {
   UsernameChangeRequestSchema,
   UsernameChangeStateSchema,
   UsernameRequestsListResponseSchema,
+  UserSummaryListSchema,
   UserSummarySchema,
   VerifyEmailBodySchema,
 } from './types/schemas.js';
@@ -236,5 +237,6 @@ export type {
   UsernameChangeState,
   UsernameRequestsListResponse,
   UserSummary,
+  UserSummaryList,
   VerifyEmailBody,
 } from './types/wire.js';

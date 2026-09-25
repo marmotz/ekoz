@@ -7,6 +7,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Tint the sidebar and members panel with a dedicated `surface-panel` surface (light and dark) so they stand out from the chat.
 - Scaffold the web client on TanStack Start (Vite, Tailwind CSS 4, strict TypeScript, `@/*` alias), with a placeholder home route and Vitest + Testing Library setup.
 - Add the `eslint-plugin-boundaries` module-boundary check (`lint:boundaries`): features may only import `shared` and themselves; guarded by a fixture-based test.
 - Add shadcn/ui base components (`button`, `dropdown-menu`, `sheet`, `avatar`, `sonner`, `skeleton`) and the `cn()` helper under `src/shared`.
@@ -44,3 +45,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Add the `/rooms/directory` page: `DirectoryList` searches public channels (debounced 300 ms), pages on `nextCursor`, opens the rooms the caller already reads and joins the others (#87).
 - Add the `/rooms/$roomId/requests` page: `JoinRequestList` shows the pending join requests (requester, date, deleted account label), approves or rejects them, pages on `nextCursor` and is guarded on `room.manage_members`, as is the "Requests" link of `RoomHeader` (#88).
 - Add the `/rooms/invitations` page: `InvitationList` shows the pending room invitations (room name and type, inviter with the deleted account label, role, date), accepts them (then opens the room) or declines them, and refreshes the list with the mapped message when an invitation was answered elsewhere (#84).
+- Share the room members query across features (`shared/members`: pages of 200 up to 2,000 members, `truncated` flag, refreshed live on every membership event) and resolve authors who left a room through `GET /users?ids=` instead of "Unknown user" (#125).
+- Add the public profile card (`shared/profile`, shadcn/ui `popover`), opened from message authors and from a "My public profile" user menu entry, with left-the-room and deleted account markers (#126).
+- Add the members panel: header toggle with the count, list grouped by role or A to Z with search, an inline column from `lg` and a sheet below, its state kept in `localStorage` (#127).
+- Draw default avatars (no uploaded picture) as initials on a color derived from the account id, with dark or light text chosen for contrast.

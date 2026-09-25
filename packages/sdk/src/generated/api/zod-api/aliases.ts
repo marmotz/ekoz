@@ -63,6 +63,7 @@ import { UsernameChangeAppliedDtoSchema, type UsernameChangeAppliedDtoDto } from
 import { UsernameChangePendingDtoSchema, type UsernameChangePendingDtoDto } from './UsernameChangePendingDto.schema.js';
 import { UsernameChangeRequestDtoSchema, type UsernameChangeRequestDtoDto } from './UsernameChangeRequestDto.schema.js';
 import { UsernameChangeStateDtoSchema, type UsernameChangeStateDtoDto } from './UsernameChangeStateDto.schema.js';
+import { UserSummaryListViewDtoSchema, type UserSummaryListViewDtoDto } from './UserSummaryListViewDto.schema.js';
 import { VerifyEmailDtoSchema, type VerifyEmailDtoDto } from './VerifyEmailDto.schema.js';
 import { z } from 'zod';
 
@@ -1226,3 +1227,15 @@ export type UsersController_publicProfile404ResponseProblemJson = z.infer<typeof
 
 export const UsersController_publicProfilePathIdentifierSchema = z.string();
 export type UsersController_publicProfilePathIdentifier = z.infer<typeof UsersController_publicProfilePathIdentifierSchema>;
+
+export const UsersController_summaries200ResponseJsonSchema = UserSummaryListViewDtoSchema;
+export type UsersController_summaries200ResponseJson = z.infer<typeof UsersController_summaries200ResponseJsonSchema>;
+
+export const UsersController_summaries401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type UsersController_summaries401ResponseProblemJson = z.infer<typeof UsersController_summaries401ResponseProblemJsonSchema>;
+
+export const UsersController_summaries422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type UsersController_summaries422ResponseProblemJson = z.infer<typeof UsersController_summaries422ResponseProblemJsonSchema>;
+
+export const UsersController_summariesQueryIdsSchema = z.string();
+export type UsersController_summariesQueryIds = z.infer<typeof UsersController_summariesQueryIdsSchema>;

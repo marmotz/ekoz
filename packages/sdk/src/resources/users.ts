@@ -5,7 +5,7 @@
 
 import type { SessionManager } from '../session/session-manager.js';
 import type { RequestOptions } from '../transport/http-client.js';
-import type { PublicProfileView } from '../types/wire.js';
+import type { PublicProfileView, UserSummary, UserSummaryList } from '../types/wire.js';
 
 export interface AvatarOptions {
   /** Cache-busting version, taken from the `v` query of `avatarUrl`. */
@@ -15,6 +15,12 @@ export interface AvatarOptions {
 
 export interface UsersResource {
   getProfile(identifier: string): Promise<PublicProfileView>;
+  /**
+   * Summaries of users by id, in request order; an unknown or deleted id comes back
+   * with null `identifier`, `displayName` and `avatarUrl`. Does not split: pass at
+   * most 100 ids.
+   */
+  summaries(ids: readonly string[]): Promise<UserSummary[]>;
   /** Fetch the avatar image; the route needs a Bearer token so `<img src>` cannot load it. */
   avatar(identifier: string, options?: AvatarOptions): Promise<Blob>;
 }
@@ -23,6 +29,13 @@ export function createUsersResource(session: SessionManager): UsersResource {
   return {
     getProfile(identifier) {
       return session.request<PublicProfileView>('GET', `/users/${encodeURIComponent(identifier)}`);
+    },
+
+    async summaries(ids) {
+      const list = await session.request<UserSummaryList>('GET', '/users', {
+        query: { ids: ids.join(',') },
+      });
+      return list.items;
     },
 
     avatar(identifier, options = {}) {

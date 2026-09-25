@@ -1,6 +1,8 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { entityIdSchema } from '../../../core/http/entity-id.schema.js';
 import { nullableString } from '../../../core/http/nullable.js';
+import { UserSummarySchema } from '../../../core/users/user-summary.js';
 import { AccountViewSchema } from '../accounts/account.view.js';
 
 /**
@@ -40,3 +42,25 @@ export class PublicProfileViewDto extends createZodDto(PublicProfileViewSchema) 
 /** `PUT /me/avatar` response. */
 export const AvatarUploadedSchema = z.object({ avatarUrl: z.string() });
 export class AvatarUploadedDto extends createZodDto(AvatarUploadedSchema) {}
+
+/** Largest number of ids one `GET /users?ids=` call accepts. */
+export const USER_SUMMARIES_MAX_IDS = 100;
+
+/**
+ * `GET /users?ids=` query: a comma-separated list of 1 to 100 entity ids, each
+ * validated after the split. Duplicates are collapsed, keeping the first
+ * occurrence so the response follows the request order.
+ */
+export const UserSummariesQuerySchema = z.object({
+  ids: z
+    .string()
+    .transform((raw) => raw.split(','))
+    .pipe(z.array(entityIdSchema).min(1).max(USER_SUMMARIES_MAX_IDS))
+    .transform((ids) => [...new Set(ids)]),
+});
+export type UserSummariesQuery = z.infer<typeof UserSummariesQuerySchema>;
+
+/** `GET /users?ids=` response. */
+export const UserSummaryListViewSchema = z.object({ items: z.array(UserSummarySchema) });
+export type UserSummaryListView = z.infer<typeof UserSummaryListViewSchema>;
+export class UserSummaryListViewDto extends createZodDto(UserSummaryListViewSchema) {}

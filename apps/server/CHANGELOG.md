@@ -6,6 +6,10 @@ that does not touch this file.
 
 ## [Unreleased]
 
+### Added
+
+- `GET /users?ids=` returns user summaries by id, in request order. (#123)
+
 ### Fixed
 
 - The SMTP transport and the storage driver use the configured `email.*` / `storage.*` values instead of the code defaults: the configuration is loaded before the providers built from it.
