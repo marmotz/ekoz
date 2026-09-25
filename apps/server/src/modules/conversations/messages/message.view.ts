@@ -1,6 +1,12 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { nullableString } from '../../../core/http/nullable.js';
+import {
+  type MentionsMe,
+  MentionsMeSchema,
+  type MentionTarget,
+  MentionTargetSchema,
+} from './mention.types.js';
 
 /** `Message`, as the API exposes it (technical.md §11). */
 export const MessageViewSchema = z.object({
@@ -10,7 +16,8 @@ export const MessageViewSchema = z.object({
   authorId: nullableString(),
   body: z.string(),
   replyToId: nullableString(),
-  mentions: z.array(z.string()),
+  mentions: z.array(MentionTargetSchema),
+  mentionsMe: MentionsMeSchema.nullable(),
   editedAt: z.iso.datetime().nullable(),
   redactedAt: z.iso.datetime().nullable(),
   hiddenAt: z.iso.datetime().nullable(),
@@ -33,7 +40,16 @@ export interface MessageRow {
   createdAt: string;
 }
 
-export function toMessageView(row: MessageRow, mentions: string[]): MessageView {
+/**
+ * `mentionsMe` is the viewer's own relation to the message, computed per
+ * request: it is never part of a live event (events are shared by every
+ * viewer) and is `null` for the author of the message.
+ */
+export function toMessageView(
+  row: MessageRow,
+  mentions: MentionTarget[],
+  mentionsMe: MentionsMe | null = null,
+): MessageView {
   return {
     id: row.id,
     roomId: row.roomId,
@@ -42,6 +58,7 @@ export function toMessageView(row: MessageRow, mentions: string[]): MessageView 
     body: row.body,
     replyToId: row.replyToId,
     mentions,
+    mentionsMe,
     editedAt: row.editedAt,
     redactedAt: row.redactedAt,
     hiddenAt: row.hiddenAt,

@@ -5,6 +5,8 @@
  * discriminated union on `type` instead (web-client-chat technical design §5).
  */
 
+import type { MentionTarget } from './wire.js';
+
 export interface RoomEventBase {
   roomId: string;
   /** Per-room sequence, a decimal string (it can exceed `Number.MAX_SAFE_INTEGER`). */
@@ -22,7 +24,7 @@ export interface MessageCreatedEvent extends RoomEventBase {
     messageId: string;
     body: string;
     replyToId: string | null;
-    mentions: string[];
+    mentions: MentionTarget[];
   };
 }
 
@@ -41,7 +43,19 @@ export interface MessageRedactedEvent extends RoomEventBase {
   content: { reason: 'user' | 'retention' };
 }
 
-/** Every event type the server can emit besides the four typed above. */
+/** A room group was created, renamed, deleted or had a member added or removed. */
+export interface GroupChangedEvent extends RoomEventBase {
+  type: 'group_changed';
+  content: {
+    groupId: string;
+    change: 'created' | 'renamed' | 'deleted' | 'member_added' | 'member_removed';
+    name: string;
+    /** Set for `member_added` and `member_removed`. */
+    userId?: string;
+  };
+}
+
+/** Every event type the server can emit besides the five typed above. */
 export type OtherRoomEventType =
   | 'message_hidden'
   | 'reaction_added'
@@ -73,6 +87,7 @@ export type RoomEvent =
   | MessageEditedEvent
   | MessageDeletedEvent
   | MessageRedactedEvent
+  | GroupChangedEvent
   | UnknownRoomEvent;
 
 /** `GET /sync` response, with `events` typed by {@link RoomEvent}. */

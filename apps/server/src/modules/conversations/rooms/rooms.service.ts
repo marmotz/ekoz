@@ -12,6 +12,7 @@ import {
   RoomPermissionDeniedError,
 } from '../conversations.errors.js';
 import { EventLogService } from '../events/event-log.service.js';
+import { GroupsService } from '../groups/groups.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import {
   type RoomListItemRow,
@@ -44,6 +45,7 @@ export class RoomsService {
     private readonly config: ConfigService,
     private readonly eventLog: EventLogService,
     private readonly permissions: PermissionsService,
+    private readonly groups: GroupsService,
   ) {}
 
   async createSpace(actor: RoomActor, input: CreateSpace): Promise<RoomView> {
@@ -291,12 +293,16 @@ export class RoomsService {
     }
 
     const subtreeIds = subtreeRows.map((r) => r.descendantId);
+    await this.groups.assertNoNameConflictOnMove(
+      subtreeIds,
+      newAncestorRows.map((r) => r.ancestorId),
+    );
     const now = new Date().toISOString();
 
     await this.prisma.transaction(async (tx) => {
       await tx.orm.public.RoomClosure.where((f) =>
         and(f.descendantId.in(subtreeIds), not(f.ancestorId.in(subtreeIds))),
-      ).delete();
+      ).deleteAndCount();
 
       const newRows = newAncestorRows.flatMap((ancestor) =>
         subtreeRows.map((sub) => ({

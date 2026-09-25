@@ -18,11 +18,13 @@ import {
   RoomNotJoinableError,
 } from '../conversations.errors.js';
 import { EventLogService } from '../events/event-log.service.js';
+import { GroupsService } from '../groups/groups.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import { ROLE_RANK, type RoomRole } from '../permissions/role-default-capabilities.js';
 import type { RoomRow } from '../rooms/room.view.js';
 import { FeedFanoutService } from '../streaming/feed-fanout.service.js';
+import { EffectiveMembersQuery } from './effective-members.query.js';
 import type {
   BanMember,
   InviteMember,
@@ -117,6 +119,8 @@ export class MembershipService {
     private readonly feedFanout: FeedFanoutService,
     private readonly userSummaries: UserSummaryReader,
     private readonly config: ConfigService,
+    private readonly effectiveMembers: EffectiveMembersQuery,
+    private readonly groups: GroupsService,
   ) {}
 
   /**
@@ -134,30 +138,8 @@ export class MembershipService {
 
     const limit = Math.min(query.limit ?? MEMBERS_DEFAULT_LIMIT, MEMBERS_MAX_LIMIT);
     const cursorUserId = query.cursor ? decodeMemberCursor(query.cursor) : null;
-    const hasCursor = cursorUserId !== null;
 
-    const plan = this.prisma.raw.sql`
-      SELECT DISTINCT ON (m.user_id) m.user_id AS "userId", m.role AS "role",
-             m.joined_at AS "joinedAt"
-      FROM membership m
-      LEFT JOIN room_closure c ON c.ancestor_id = m.room_id AND c.descendant_id = ${roomId}
-      WHERE (m.room_id = ${roomId} OR c.ancestor_id IS NOT NULL)
-        AND (${hasCursor} = false OR m.user_id > ${cursorUserId ?? ''})
-      ORDER BY m.user_id ASC, coalesce(c.depth, 0) ASC
-      LIMIT ${limit + 1}
-    `
-      .returnsRow({
-        userId: { codecId: 'pg/text@1', nullable: false },
-        role: { codecId: 'pg/text@1', nullable: false },
-        joinedAt: { codecId: 'pg/timestamptz-string@1', nullable: false },
-      })
-      .build();
-
-    const rows = (await this.prisma.runtime().query(plan)) as Array<{
-      userId: string;
-      role: RoomRole;
-      joinedAt: string;
-    }>;
+    const rows = await this.effectiveMembers.listPage(roomId, cursorUserId, limit);
     const hasNextPage = rows.length > limit;
     const page = hasNextPage ? rows.slice(0, limit) : rows;
     const last = page.at(-1);
@@ -220,6 +202,7 @@ export class MembershipService {
 
     await this.prisma.transaction(async (tx) => {
       await tx.orm.public.Membership.where({ roomId, userId: actor.userId }).delete();
+      await this.groups.removeUserFromNodeGroups(tx, roomId, actor.userId);
       await this.eventLog.append(tx, {
         roomId,
         type: 'member_left',
@@ -549,6 +532,7 @@ export class MembershipService {
 
     await this.prisma.transaction(async (tx) => {
       await tx.orm.public.Membership.where({ roomId, userId }).delete();
+      await this.groups.removeUserFromNodeGroups(tx, roomId, userId);
       await this.eventLog.append(tx, {
         roomId,
         type: 'member_kicked',
@@ -575,6 +559,7 @@ export class MembershipService {
         update: { reason: input.reason ?? null, bannedById: actor.userId },
       });
       await tx.orm.public.Membership.where({ roomId, userId: input.userId }).delete();
+      await this.groups.removeUserFromNodeGroups(tx, roomId, input.userId);
 
       await this.eventLog.append(tx, {
         roomId,

@@ -18,6 +18,7 @@ export const CAPABILITIES = [
   'room.manage_roles',
   'room.manage_permissions',
   'room.manage_retention',
+  'room.manage_groups',
   'space.create_child',
   'space.manage',
   'directory.publish',

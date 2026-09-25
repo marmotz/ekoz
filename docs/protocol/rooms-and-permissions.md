@@ -175,11 +175,15 @@ algorithm. The capability list (grows only additively):
 room.read, room.post, room.edit_own, room.delete_own, room.edit_any,
 room.delete_any, room.react, room.pin, room.invite, room.kick, room.ban,
 room.manage_members, room.manage_roles, room.manage_permissions,
-room.manage_retention, space.create_child, space.manage, directory.publish
+room.manage_retention, room.manage_groups, space.create_child, space.manage,
+directory.publish
 ```
 
 Roles: `space_admin`, `room_admin`, `moderator`, `member`, `reader` — plus the
 server-level `owner`, an implicit allow-all outside this set.
+
+`room.manage_groups` (create, rename, delete room groups and change their
+members) is granted by default to `space_admin` and `room_admin`.
 
 A caller's effective role on a room, in order: an explicit `Membership` on the
 room; else the role inherited from the nearest ancestor space membership; else
@@ -443,6 +447,101 @@ resolved through the room hierarchy like the effective role. Needs `room.read`.
 - Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
   validation (`422`).
 
+## Room groups
+
+A **group** is a named set of members defined on a room or a space, mentioned as
+`@<name>` (see [Messages and interactions](messages-and-interactions.md#mentions)).
+A group is visible from its own node and from every descendant of it.
+
+```json
+{
+  "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+  "nodeId": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+  "name": "devs",
+  "memberCount": 3,
+  "inherited": false,
+  "isMember": true
+}
+```
+
+- `nodeId` is the room or space the group is defined on. `inherited` is `true`
+  when it differs from the `:id` the group is read through. `isMember` is about
+  the caller. A detail view adds `members: UserSummary[]`.
+- `name` matches `^[a-z0-9_.-]{1,32}$`. `all` and the five role names are
+  reserved (`422 group.name_reserved`).
+- A name is unique over the whole chain of the node: its ancestors, itself and
+  its descendants (`409 group.name_taken`). Siblings do not share a chain.
+- A member must be an effective member of the group's node
+  (`422 group.member_not_member`).
+- When a user leaves, is kicked from or is banned from a node, they are removed
+  from the groups defined on that node and its descendants.
+- Moving a room is refused (`409 group.name_taken`) when it would put two
+  same-named groups on one chain.
+- Deleting a group does not change the audience of messages that already
+  mentioned it.
+
+### `GET /rooms/:id/groups`
+
+Groups defined on `:id` and on its ancestors. Needs `room.read`.
+
+- `200`: `{ items: Group[] }`, ordered by `name`.
+- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`).
+
+### `GET /rooms/:id/groups/:groupId`
+
+A group and its members. Needs `room.read`.
+
+- `200`: `Group` with `members: UserSummary[]`.
+- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
+  `group.not_found` (`404`, the group is not defined on `:id` or an ancestor).
+
+### `POST /rooms/:id/groups`
+
+Create a group on `:id`. Needs `room.manage_groups` on `:id`. Emits
+`group_changed` (`created`).
+
+- Body: `{ name, memberIds? }`.
+- `201`: `Group` with `members`.
+- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
+  `group.name_reserved` (`422`), `group.name_taken` (`409`),
+  `group.member_not_member` (`422`), validation (`422`).
+
+### `PATCH /rooms/:id/groups/:groupId`
+
+Rename a group. Needs `room.manage_groups` on the **group's node**. Emits
+`group_changed` (`renamed`). The tokens already frozen in messages keep the old
+name.
+
+- Body: `{ name }`.
+- `200`: `Group` with `members`.
+- Errors: as `POST`, plus `group.not_found` (`404`).
+
+### `DELETE /rooms/:id/groups/:groupId`
+
+Delete a group and its members. Needs `room.manage_groups` on the group's node.
+Emits `group_changed` (`deleted`).
+
+- `204`.
+- Errors: `room.permission_denied` (`403`), `group.not_found` (`404`).
+
+### `PUT /rooms/:id/groups/:groupId/members/:userId`
+
+Add a member. Idempotent: adding a member already in the group changes nothing
+and emits nothing. Needs `room.manage_groups` on the group's node. Emits
+`group_changed` (`member_added`).
+
+- `204`.
+- Errors: `room.permission_denied` (`403`), `group.not_found` (`404`),
+  `group.member_not_member` (`422`).
+
+### `DELETE /rooms/:id/groups/:groupId/members/:userId`
+
+Remove a member. Idempotent. Needs `room.manage_groups` on the group's node.
+Emits `group_changed` (`member_removed`).
+
+- `204`.
+- Errors: `room.permission_denied` (`403`), `group.not_found` (`404`).
+
 ## Direct and group conversations
 
 `dm` and `group_dm` rooms (technical.md §7, issue #5): outside the hierarchy
@@ -530,6 +629,7 @@ implements it (#12) — its payload shape is not fixed yet.
 | `member_banned` | `{ userId, reason }` |
 | `member_unbanned` | `{ userId }` |
 | `role_changed` | `{ userId, role }` |
+| `group_changed` | `{ groupId, change, name, userId? }` — `change` is `created`, `renamed`, `deleted`, `member_added` or `member_removed`; `userId` is set for the two member changes. Appended on the group's own node, so it only reaches that node's effective members |
 
 `senderId` on the event row already carries the actor (inviter, kicker,
 banner, ...); `content` only ever carries the delta.

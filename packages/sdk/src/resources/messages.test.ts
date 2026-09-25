@@ -20,7 +20,7 @@ async function resource(fetchImpl: typeof fetch) {
 
 describe('messages resource', () => {
   it('list() hits GET /rooms/:id/messages with before and limit', async () => {
-    const page = { items: [], lastSeq: '0', hasMore: false };
+    const page = { items: [], lastSeq: '0', hasMore: false, hasMoreNewer: false };
     const fetchMock = createFetchMock(jsonResponse({ body: page }));
     const messages = await resource(fetchMock);
 
@@ -54,10 +54,65 @@ describe('messages resource', () => {
     const fetchMock = createFetchMock(jsonResponse({ status: 201, body: { id: 'm1' } }));
     const messages = await resource(fetchMock);
 
-    await messages.send('room1', { body: 'hello', mentions: ['u1'] });
+    await messages.send('room1', {
+      body: 'hello',
+      mentions: [{ type: 'user', userId: 'u1' }, { type: 'all' }],
+    });
 
     expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/rooms/room1/messages');
     expect(fetchMock.calls[0]?.init?.method).toBe('POST');
-    expect(fetchMock.calls[0]?.init?.body).toBe('{"body":"hello","mentions":["u1"]}');
+    expect(fetchMock.calls[0]?.init?.body).toBe(
+      '{"body":"hello","mentions":[{"type":"user","userId":"u1"},{"type":"all"}]}',
+    );
+  });
+
+  it('send() carries role and group targets', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 201, body: { id: 'm1' } }));
+    const messages = await resource(fetchMock);
+
+    await messages.send('room1', {
+      body: 'hello',
+      mentions: [
+        { type: 'role', role: 'moderator' },
+        { type: 'group', groupId: 'g1' },
+      ],
+    });
+
+    expect(fetchMock.calls[0]?.init?.body).toBe(
+      '{"body":"hello","mentions":[{"type":"role","role":"moderator"},{"type":"group","groupId":"g1"}]}',
+    );
+  });
+
+  it('list() forwards after and around', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: {} }), jsonResponse({ body: {} }));
+    const messages = await resource(fetchMock);
+
+    await messages.list('room1', { after: '40', limit: 20 });
+    await messages.list('room1', { around: '41' });
+
+    expect(fetchMock.calls[0]?.url).toBe(
+      'https://api.example.com/rooms/room1/messages?after=40&limit=20',
+    );
+    expect(fetchMock.calls[1]?.url).toBe('https://api.example.com/rooms/room1/messages?around=41');
+  });
+
+  it('edit() PATCHes the body and the full mention list', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { id: 'm1' } }));
+    const messages = await resource(fetchMock);
+
+    await messages.edit('room1', 'm1', { body: 'edited', mentions: [{ type: 'all' }] });
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/rooms/room1/messages/m1');
+    expect(fetchMock.calls[0]?.init?.method).toBe('PATCH');
+    expect(fetchMock.calls[0]?.init?.body).toBe('{"body":"edited","mentions":[{"type":"all"}]}');
+  });
+
+  it('edit() leaves mentions out when absent', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { id: 'm1' } }));
+    const messages = await resource(fetchMock);
+
+    await messages.edit('room1', 'm1', { body: 'edited' });
+
+    expect(fetchMock.calls[0]?.init?.body).toBe('{"body":"edited"}');
   });
 });

@@ -440,6 +440,7 @@ enum RoomEventType {
   pin_removed               = "pin_removed"
   retention_changed         = "retention_changed"
   receipt_updated           = "receipt_updated"
+  group_changed             = "group_changed"
 }
 
 /// Append-only per-room event log (technical.md §10, event-log-and-ordering.md).
@@ -576,6 +577,35 @@ model RoomBan {
   @@map("room_ban")
 }
 
+// ── conversations: room groups ───────────────────────────────────────────────
+// web-client-mentions technical.md S1 / S4. No FK to `User` or `Room`.
+
+/// A named set of members defined on a room or space, mentionable as
+/// `@<name>`. Names are unique over the whole ancestor/descendant chain of the
+/// node (enforced by `GroupsService`, not by this per-node key).
+model RoomGroup {
+  id          String                     @id @default(ulid())
+  nodeId      String                     @map("node_id")
+  name        String
+  createdById String                     @map("created_by_id")
+  createdAt   temporal.createdAtString() @map("created_at")
+
+  @@unique([nodeId, name])
+  @@index([nodeId])
+  @@map("room_group")
+}
+
+/// A member of a {@link RoomGroup}.
+model RoomGroupMember {
+  groupId String                     @map("group_id")
+  userId  String                     @map("user_id")
+  addedAt temporal.createdAtString() @map("added_at")
+
+  @@id([groupId, userId])
+  @@index([userId])
+  @@map("room_group_member")
+}
+
 // ── conversations: messages ──────────────────────────────────────────────────
 // Issue #7 (technical.md §11), plus the edit/delete/tombstone/retention
 // columns (`editedAt`, `redactedAt`, `redactedById`, `hiddenAt`) owned by
@@ -604,16 +634,38 @@ model Message {
   @@map("message")
 }
 
-/// A structured mention on a {@link Message} (technical.md §11): the
-/// authoritative notification/audience list, independent of the rendered
-/// `@name` in the body.
-model MessageMention {
+/// What the author of a {@link Message} mentioned (web-client-mentions technical.md
+/// S1). `type` is `user`, `all`, `role` or `group`; `target` is the userId, role
+/// name or groupId, "" for `all`. `token` is the literal body text standing for
+/// the target, frozen when the target is created; `position` is the order of
+/// first use, for a stable wire order.
+model MessageMentionTarget {
   messageId String @map("message_id")
-  userId    String @map("user_id")
+  type      String
+  target    String
+  token     String
+  position  Int
 
-  @@id([messageId, userId])
-  @@index([userId])
-  @@map("message_mention")
+  @@id([messageId, type, target])
+  @@map("message_mention_target")
+}
+
+/// Who a {@link Message} concerns, resolved from its targets when a target is
+/// created, then frozen. `seq` is the seq of the event that created the target:
+/// the message's own for targets present at send time, the `message_edited`
+/// event's for targets added by an edit.
+model MessageMentionRecipient {
+  messageId String @map("message_id")
+  type      String
+  target    String
+  userId    String @map("user_id")
+  roomId    String @map("room_id")
+  seq       BigInt
+
+  @@id([messageId, type, target, userId])
+  @@index([userId, roomId, seq])
+  @@index([messageId])
+  @@map("message_mention_recipient")
 }
 
 /// A pinned message in a room (technical.md §11).

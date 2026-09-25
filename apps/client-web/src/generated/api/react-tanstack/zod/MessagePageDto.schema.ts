@@ -7,71 +7,84 @@ export const MessagePageDtoSchema: z.ZodType<MessagePageDtoDto> = z.object({
   items: z.array(MessagePageDtoItemsSchema),
   lastSeq: z.string(),
   hasMore: z.boolean(),
+  hasMoreNewer: z.boolean(),
 });
 export type MessagePageDtoDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export const MessagePageDtoDeepSchema: z.ZodType<MessagePageDtoDeepDto> = z.object({
   items: z.array(MessagePageDtoItemsSchema),
   lastSeq: z.string(),
   hasMore: z.boolean(),
+  hasMoreNewer: z.boolean(),
 });
 export type MessagePageDtoDeepDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export const MessagePageDtoCreateSchema: z.ZodType<MessagePageDtoCreateDto> = z.object({
   items: z.array(MessagePageDtoItemsSchema),
   lastSeq: z.string(),
   hasMore: z.boolean(),
+  hasMoreNewer: z.boolean(),
 });
 export type MessagePageDtoCreateDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export const MessagePageDtoCreateDeepSchema: z.ZodType<MessagePageDtoCreateDeepDto> = z.object({
   items: z.array(MessagePageDtoItemsSchema),
   lastSeq: z.string(),
   hasMore: z.boolean(),
+  hasMoreNewer: z.boolean(),
 });
 export type MessagePageDtoCreateDeepDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export const MessagePageDtoUpdateSchema: z.ZodType<MessagePageDtoUpdateDto> = z.object({
   items: z.array(MessagePageDtoItemsSchema),
   lastSeq: z.string(),
   hasMore: z.boolean(),
+  hasMoreNewer: z.boolean(),
 }).partial();
 export type MessagePageDtoUpdateDto = {
   items?: MessagePageDtoItemsDto[];
   lastSeq?: string;
   hasMore?: boolean;
+  hasMoreNewer?: boolean;
 };
 
 export const MessagePageDtoUpdateDeepSchema: z.ZodType<MessagePageDtoUpdateDeepDto> = z.object({
   items: z.array(MessagePageDtoItemsSchema),
   lastSeq: z.string(),
   hasMore: z.boolean(),
+  hasMoreNewer: z.boolean(),
 }).partial();
 export type MessagePageDtoUpdateDeepDto = {
   items?: MessagePageDtoItemsDto[];
   lastSeq?: string;
   hasMore?: boolean;
+  hasMoreNewer?: boolean;
 };
 
 const MessagePageDtoWhereSchemaBase = z.object({
   lastSeq: StringFilter.optional(),
   hasMore: BoolFilter.optional(),
+  hasMoreNewer: BoolFilter.optional(),
 });
 export const MessagePageDtoWhereSchema: z.ZodType<MessagePageDtoWhereDto> = z.lazy(() => MessagePageDtoWhereSchemaBase.extend({
   AND: z.union([MessagePageDtoWhereSchema, z.array(MessagePageDtoWhereSchema)]).optional(),
@@ -83,6 +96,7 @@ export type MessagePageDtoWhereDto = z.infer<typeof MessagePageDtoWhereSchemaBas
 const MessagePageDtoWhereDeepSchemaBase = z.object({
   lastSeq: StringFilter.optional(),
   hasMore: BoolFilter.optional(),
+  hasMoreNewer: BoolFilter.optional(),
 });
 export const MessagePageDtoWhereDeepSchema: z.ZodType<MessagePageDtoWhereDeepDto> = z.lazy(() => MessagePageDtoWhereDeepSchemaBase.extend({
   AND: z.union([MessagePageDtoWhereDeepSchema, z.array(MessagePageDtoWhereDeepSchema)]).optional(),
@@ -95,6 +109,7 @@ export const MessagePageDtoSelectSchema = z.object({
   items: z.boolean().optional(),
   lastSeq: z.boolean().optional(),
   hasMore: z.boolean().optional(),
+  hasMoreNewer: z.boolean().optional(),
 });
 export type MessagePageDtoSelectDto = z.infer<typeof MessagePageDtoSelectSchema>;
 
@@ -102,5 +117,6 @@ export const MessagePageDtoSelectDeepSchema = z.object({
   items: z.boolean().optional(),
   lastSeq: z.boolean().optional(),
   hasMore: z.boolean().optional(),
+  hasMoreNewer: z.boolean().optional(),
 });
 export type MessagePageDtoSelectDeepDto = z.infer<typeof MessagePageDtoSelectDeepSchema>;

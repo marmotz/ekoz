@@ -53,11 +53,31 @@ export const MembershipViewDtoRole = ["space_admin", "room_admin", "moderator", 
 export const MembershipViewDtoRoleSchema = z.enum(MembershipViewDtoRole);
 export type MembershipViewDtoRole = (typeof MembershipViewDtoRole)[number];
 
+export const MessagePageDtoItemsMentionsType = ["user", "all", "role", "group"] as const;
+export const MessagePageDtoItemsMentionsTypeSchema = z.enum(MessagePageDtoItemsMentionsType);
+export type MessagePageDtoItemsMentionsType = (typeof MessagePageDtoItemsMentionsType)[number];
+
+export const MessageViewDtoMentionsType = ["user", "all", "role", "group"] as const;
+export const MessageViewDtoMentionsTypeSchema = z.enum(MessageViewDtoMentionsType);
+export type MessageViewDtoMentionsType = (typeof MessageViewDtoMentionsType)[number];
+
 export const MeViewDtoStatus = ["active", "suspended", "deleted"] as const;
 export const MeViewDtoStatusSchema = z.enum(MeViewDtoStatus);
 export type MeViewDtoStatus = (typeof MeViewDtoStatus)[number];
 
-export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "space.create_child", "space.manage", "directory.publish"] as const;
+export const MyMentionsPageDtoItemsMentionsMe = ["direct", "collective"] as const;
+export const MyMentionsPageDtoItemsMentionsMeSchema = z.enum(MyMentionsPageDtoItemsMentionsMe);
+export type MyMentionsPageDtoItemsMentionsMe = (typeof MyMentionsPageDtoItemsMentionsMe)[number];
+
+export const MyMentionsPageDtoItemsMessageMentionsType = ["user", "all", "role", "group"] as const;
+export const MyMentionsPageDtoItemsMessageMentionsTypeSchema = z.enum(MyMentionsPageDtoItemsMessageMentionsType);
+export type MyMentionsPageDtoItemsMessageMentionsType = (typeof MyMentionsPageDtoItemsMessageMentionsType)[number];
+
+export const MyMentionsPageDtoItemsRoomType = ["space", "channel", "dm", "group_dm"] as const;
+export const MyMentionsPageDtoItemsRoomTypeSchema = z.enum(MyMentionsPageDtoItemsRoomType);
+export type MyMentionsPageDtoItemsRoomType = (typeof MyMentionsPageDtoItemsRoomType)[number];
+
+export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "room.manage_groups", "space.create_child", "space.manage", "directory.publish"] as const;
 export const MyPermissionsResponseDtoCapabilitiesSchema = z.enum(MyPermissionsResponseDtoCapabilities);
 export type MyPermissionsResponseDtoCapabilities = (typeof MyPermissionsResponseDtoCapabilities)[number];
 

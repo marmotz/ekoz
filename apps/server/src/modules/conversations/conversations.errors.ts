@@ -149,6 +149,12 @@ export class MessageMentionNotMemberError extends DomainError {
   }
 }
 
+export class MessageMentionInvalidError extends DomainError {
+  constructor(detail = 'A mention target is not valid in this room.') {
+    super('message.mention_invalid', detail, 422, 'Unprocessable Entity');
+  }
+}
+
 export class MessageAlreadyPinnedError extends DomainError {
   constructor(detail = 'This message is already pinned.') {
     super('message.already_pinned', detail, 409, 'Conflict');
@@ -176,5 +182,29 @@ export class ReactionAlreadyExistsError extends DomainError {
 export class ReactionNotFoundError extends DomainError {
   constructor(detail = 'No such reaction from you on this message.') {
     super('message.reaction_not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class GroupNotFoundError extends DomainError {
+  constructor(detail = 'No such group on this room or its ancestors.') {
+    super('group.not_found', detail, 404, 'Not Found');
+  }
+}
+
+export class GroupNameReservedError extends DomainError {
+  constructor(detail = 'This group name is reserved.') {
+    super('group.name_reserved', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class GroupNameTakenError extends DomainError {
+  constructor(detail = 'A group with this name already exists on this room chain.') {
+    super('group.name_taken', detail, 409, 'Conflict');
+  }
+}
+
+export class GroupMemberNotMemberError extends DomainError {
+  constructor(detail = 'A group member must be an effective member of the room.') {
+    super('group.member_not_member', detail, 422, 'Unprocessable Entity');
   }
 }

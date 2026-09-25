@@ -113,8 +113,26 @@ All notable changes to the Ekoz protocol. Format
 - `GET /users?ids=` in [`identity.md`](identity.md): public summaries of up to 100
   users by id, in request order; unknown and deleted ids come back as deleted
   accounts.
+- Room groups in [`rooms-and-permissions.md`](rooms-and-permissions.md):
+  `GET` / `POST /rooms/:id/groups`, `GET` / `PATCH` / `DELETE /rooms/:id/groups/:groupId`,
+  `PUT` / `DELETE /rooms/:id/groups/:groupId/members/:userId`, the
+  `room.manage_groups` capability (default for `space_admin` and `room_admin`) and
+  the `group_changed` room event.
+- `GET /rooms/:id/messages` takes `after` and `around` (at most one of `before`,
+  `after`, `around`), and the page carries `hasMoreNewer`.
+- Mentions in [`messages-and-interactions.md`](messages-and-interactions.md):
+  `all`, role and group targets in channels, `PATCH /rooms/:id/messages/:messageId`
+  takes `mentions`, `Message.mentionsMe`, `GET /me/mentions` and
+  `GET /me/mentions/unread`, and the `message.mention_invalid` error.
 
 ### Changed
+
+- **Breaking.** `Message.mentions` and `message_created.content.mentions` are
+  now mention targets `{ type, target, token }` instead of user ids, and
+  `POST /rooms/:id/messages` takes target inputs (`{ type: "user", userId }`,
+  `{ type: "all" }`, ...) instead of user ids. A mentioned user must now be an
+  effective member of the room (ancestor space members included), not only an
+  explicit member.
 
 - Deleting a message also rewrites the account feed rows that mirrored the
   original `message_created`, so `GET /events` no longer replays the deleted

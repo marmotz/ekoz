@@ -7,6 +7,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Regenerate the API types from the server contract: structured message mention targets, `mentionsMe`, `hasMoreNewer`, room groups and mention counters, and type the timeline mentions accordingly (#173, #175).
 - Tint the sidebar and members panel with a dedicated `surface-panel` surface (light and dark) so they stand out from the chat.
 - Scaffold the web client on TanStack Start (Vite, Tailwind CSS 4, strict TypeScript, `@/*` alias), with a placeholder home route and Vitest + Testing Library setup.
 - Add the `eslint-plugin-boundaries` module-boundary check (`lint:boundaries`): features may only import `shared` and themselves; guarded by a fixture-based test.

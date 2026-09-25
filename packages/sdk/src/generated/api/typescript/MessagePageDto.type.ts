@@ -8,41 +8,48 @@ export type MessagePageDtoDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export type MessagePageDtoDeepDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export type MessagePageDtoCreateDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export type MessagePageDtoCreateDeepDto = {
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 };
 
 export type MessagePageDtoUpdateDto = Partial<{
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 }>;
 
 export type MessagePageDtoUpdateDeepDto = Partial<{
   items: MessagePageDtoItemsDto[];
   lastSeq: string;
   hasMore: boolean;
+  hasMoreNewer: boolean;
 }>;
 
 export type MessagePageDtoWhereDto = {
   lastSeq?: StringFilter;
   hasMore?: BoolFilter;
+  hasMoreNewer?: BoolFilter;
   AND?: MessagePageDtoWhereDto | MessagePageDtoWhereDto[];
   OR?: MessagePageDtoWhereDto | MessagePageDtoWhereDto[];
   NOT?: MessagePageDtoWhereDto | MessagePageDtoWhereDto[];
@@ -51,6 +58,7 @@ export type MessagePageDtoWhereDto = {
 export type MessagePageDtoWhereDeepDto = {
   lastSeq?: StringFilter;
   hasMore?: BoolFilter;
+  hasMoreNewer?: BoolFilter;
   AND?: MessagePageDtoWhereDeepDto | MessagePageDtoWhereDeepDto[];
   OR?: MessagePageDtoWhereDeepDto | MessagePageDtoWhereDeepDto[];
   NOT?: MessagePageDtoWhereDeepDto | MessagePageDtoWhereDeepDto[];
@@ -60,10 +68,12 @@ export type MessagePageDtoSelectDto = {
   items?: boolean;
   lastSeq?: boolean;
   hasMore?: boolean;
+  hasMoreNewer?: boolean;
 };
 
 export type MessagePageDtoSelectDeepDto = {
   items?: boolean;
   lastSeq?: boolean;
   hasMore?: boolean;
+  hasMoreNewer?: boolean;
 };

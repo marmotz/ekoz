@@ -95,7 +95,7 @@ export class MessagesController {
     @Body(new ZodValidationPipe(EditMessageDto)) body: EditMessage,
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<MessageView> {
-    return this.messages.editMessage(principal, params.id, params.messageId, body.body);
+    return this.messages.editMessage(principal, params.id, params.messageId, body);
   }
 
   @Delete('rooms/:id/messages/:messageId')

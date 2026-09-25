@@ -11,6 +11,8 @@ function describeEvent(event: RoomEvent): string {
       return `deleted:${event.content.messageSeq}:${event.content.reason}`;
     case 'message_redacted':
       return `redacted:${event.content.reason}`;
+    case 'group_changed':
+      return `group:${event.content.change}:${event.content.name}:${event.content.userId ?? '-'}`;
     default:
       return `other:${event.type}`;
   }
@@ -37,6 +39,44 @@ describe('RoomEvent', () => {
     expect(
       describeEvent({ ...base, type: 'message_redacted', content: { reason: 'retention' } }),
     ).toBe('redacted:retention');
+  });
+
+  it('types the mention targets of a created message', () => {
+    const event: RoomEvent = {
+      ...base,
+      type: 'message_created',
+      content: {
+        messageId: 'm',
+        body: 'hi @all',
+        replyToId: null,
+        mentions: [
+          { type: 'all', target: null, token: '@all' },
+          { type: 'user', target: 'u2', token: '@bob/example.com' },
+        ],
+      },
+    };
+
+    expect(event.type === 'message_created' && event.content.mentions.map((m) => m.token)).toEqual([
+      '@all',
+      '@bob/example.com',
+    ]);
+  });
+
+  it('narrows group_changed content', () => {
+    expect(
+      describeEvent({
+        ...base,
+        type: 'group_changed',
+        content: { groupId: 'g', change: 'member_added', name: 'devs', userId: 'u2' },
+      }),
+    ).toBe('group:member_added:devs:u2');
+    expect(
+      describeEvent({
+        ...base,
+        type: 'group_changed',
+        content: { groupId: 'g', change: 'created', name: 'devs' },
+      }),
+    ).toBe('group:created:devs:-');
   });
 
   it('keeps unknown-content events on the fallback variant', () => {

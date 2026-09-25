@@ -9,9 +9,21 @@ that does not touch this file.
 ### Added
 
 - `GET /users?ids=` returns user summaries by id, in request order. (#123)
+- Room groups: create, rename and delete named member sets on a room or space, and manage their members, with the `room.manage_groups` capability. (#168)
+- `GET /rooms/:id/messages` accepts `after` and `around`, and reports `hasMoreNewer`. (#169)
+- Messages can mention everyone, a role or a group in channels; mentions carry a frozen token and audience, and editing a message can change them. (#173)
+- Messages report `mentionsMe` for the caller. (#173)
+- `GET /me/mentions/unread` and `GET /me/mentions` list unread mention counters and the messages that mention the caller. (#174)
+
+### Changed
+
+- Breaking: message `mentions` are now `{ type, target, token }` targets instead of user ids. (#173)
+- A member of the parent space can be mentioned in one of its channels. (#173)
 
 ### Fixed
 
+- Moving a room now drops all of its outdated ancestor links, not only one.
+- Deleting a message now removes all of its reactions, not only one. (#173)
 - The SMTP transport and the storage driver use the configured `email.*` / `storage.*` values instead of the code defaults: the configuration is loaded before the providers built from it.
 - Requesting to join a room again after a rejection, and inviting a user again after a decline, no longer fail with a 500. (#64)
 - Creating a space or channel returns its up-to-date `lastSeq` instead of `0`. (#62)

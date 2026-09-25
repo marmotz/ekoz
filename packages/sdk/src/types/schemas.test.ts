@@ -3,11 +3,14 @@ import {
   AdminCreateUserBodySchema,
   AuthPolicySchema,
   ChangePasswordBodySchema,
+  GroupListResponseSchema,
   LoginBodySchema,
   MembersPageSchema,
   MessageSchema,
   MessagesPageSchema,
+  MyMentionsPageSchema,
   StreamTicketSchema,
+  UnreadMentionsResponseSchema,
   UsernameChangeStateSchema,
 } from './schemas.js';
 
@@ -132,7 +135,8 @@ describe('schemas', () => {
       authorId: null,
       body: 'hello',
       replyToId: null,
-      mentions: [],
+      mentions: [{ type: 'user', target: '01HZX0000000000000000000CC', token: '@bob/example.com' }],
+      mentionsMe: 'direct',
       editedAt: null,
       redactedAt: null,
       hiddenAt: null,
@@ -141,8 +145,42 @@ describe('schemas', () => {
     expect(MessageSchema.safeParse(message).success).toBe(true);
     expect(MessageSchema.safeParse({ ...message, seq: 3 }).success).toBe(false);
     expect(
-      MessagesPageSchema.safeParse({ items: [message], lastSeq: '3', hasMore: false }).success,
+      MessageSchema.safeParse({
+        ...message,
+        mentions: [{ type: 'user', target: 'x', token: '@x' }],
+      }).success,
     ).toBe(true);
+    expect(
+      MessageSchema.safeParse({ ...message, mentions: ['01HZX0000000000000000000CC'] }).success,
+    ).toBe(false);
+    expect(MessageSchema.safeParse({ ...message, mentionsMe: null }).success).toBe(true);
+    expect(
+      MessagesPageSchema.safeParse({
+        items: [message],
+        lastSeq: '3',
+        hasMore: false,
+        hasMoreNewer: false,
+      }).success,
+    ).toBe(true);
+    expect(
+      MyMentionsPageSchema.safeParse({
+        items: [
+          {
+            message,
+            room: { id: 'r1', type: 'channel', name: 'general', parentId: null },
+            mentionsMe: 'direct',
+            unread: true,
+          },
+        ],
+        nextCursor: null,
+      }).success,
+    ).toBe(true);
+    expect(
+      UnreadMentionsResponseSchema.safeParse({
+        items: [{ roomId: 'r1', direct: 1, collective: 0 }],
+      }).success,
+    ).toBe(true);
+    expect(GroupListResponseSchema.safeParse({ items: [{ id: 'g' }] }).success).toBe(false);
     expect(MembersPageSchema.safeParse({ items: [], nextCursor: null }).success).toBe(true);
     expect(StreamTicketSchema.safeParse({ ticket: 't', expiresIn: 30 }).success).toBe(true);
     expect(StreamTicketSchema.safeParse({ ticket: 't' }).success).toBe(false);

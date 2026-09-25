@@ -38,10 +38,25 @@ export type MemberListViewDtoItemsRole = (typeof MemberListViewDtoItemsRole)[num
 export const MembershipViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type MembershipViewDtoRole = (typeof MembershipViewDtoRole)[number];
 
+export const MessagePageDtoItemsMentionsType = ["user", "all", "role", "group"] as const;
+export type MessagePageDtoItemsMentionsType = (typeof MessagePageDtoItemsMentionsType)[number];
+
+export const MessageViewDtoMentionsType = ["user", "all", "role", "group"] as const;
+export type MessageViewDtoMentionsType = (typeof MessageViewDtoMentionsType)[number];
+
 export const MeViewDtoStatus = ["active", "suspended", "deleted"] as const;
 export type MeViewDtoStatus = (typeof MeViewDtoStatus)[number];
 
-export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "space.create_child", "space.manage", "directory.publish"] as const;
+export const MyMentionsPageDtoItemsMentionsMe = ["direct", "collective"] as const;
+export type MyMentionsPageDtoItemsMentionsMe = (typeof MyMentionsPageDtoItemsMentionsMe)[number];
+
+export const MyMentionsPageDtoItemsMessageMentionsType = ["user", "all", "role", "group"] as const;
+export type MyMentionsPageDtoItemsMessageMentionsType = (typeof MyMentionsPageDtoItemsMessageMentionsType)[number];
+
+export const MyMentionsPageDtoItemsRoomType = ["space", "channel", "dm", "group_dm"] as const;
+export type MyMentionsPageDtoItemsRoomType = (typeof MyMentionsPageDtoItemsRoomType)[number];
+
+export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "room.manage_groups", "space.create_child", "space.manage", "directory.publish"] as const;
 export type MyPermissionsResponseDtoCapabilities = (typeof MyPermissionsResponseDtoCapabilities)[number];
 
 export const MyRoomInvitationListViewDtoItemsRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;

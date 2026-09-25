@@ -233,6 +233,34 @@ describe('conversations — rooms (integration)', () => {
       .expect(422);
   });
 
+  it('drops every outdated closure row of the moved subtree', async () => {
+    const ownerToken = await login('owner');
+    const create = async (body: Record<string, unknown>) =>
+      (
+        await request(server())
+          .post('/spaces')
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send(body)
+          .expect(201)
+      ).body as { id: string };
+    const a = await create({ name: 'ClosureA' });
+    const b = await create({ name: 'ClosureB', parentId: a.id });
+    const c = await create({ name: 'ClosureC', parentId: b.id });
+
+    await request(server())
+      .post(`/rooms/${b.id}/move`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ parentId: null })
+      .expect(200);
+
+    // Both (A, B) and (A, C) are stale: a single-row delete would keep one.
+    const rows = (await prisma.orm.public.RoomClosure.where((f) =>
+      f.ancestorId.eq(a.id),
+    ).all()) as Array<{ descendantId: string }>;
+    expect(rows.map((r) => r.descendantId)).toEqual([a.id]);
+    expect(c.id).toBeDefined();
+  });
+
   it('blocks deleting a room that still has children', async () => {
     const ownerToken = await login('owner');
     const parent = (
