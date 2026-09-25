@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { ChevronDown, ChevronRight, Folder, Hash } from 'lucide-react';
-
 import type { RoomNode } from '@/features/rooms/components/build-room-tree';
+import { MentionBadge } from '@/features/rooms/components/mention-badge';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { cn } from '@/shared/lib/utils';
 
@@ -83,6 +83,7 @@ function RoomTreeItem({
           >
             <Icon className="size-4 shrink-0" />
             <span className="truncate">{name}</span>
+            <MentionBadge roomId={room.id} />
           </Link>
         )}
       </div>

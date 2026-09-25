@@ -1,21 +1,31 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { MessageItem, PendingItem } from '@/features/chat/components/message-item';
 import type { Author } from '@/features/chat/hooks/use-authors';
 import type { Timeline } from '@/features/chat/lib/timeline';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { Button } from '@/shared/ui/button';
+import { toast } from '@/shared/ui/sonner';
 
 /** Distance from the top, in pixels, under which scrolling loads older history. */
 const LOAD_OLDER_THRESHOLD = 40;
+/** Distance from the bottom, in pixels, under which scrolling loads newer history (detached timeline). */
+const LOAD_NEWER_THRESHOLD = 40;
+/** How long the jump target stays outlined. */
+const FLASH_DURATION_MS = 2500;
 /** Distance from the bottom under which new messages keep the list pinned to the bottom. */
 const STICK_TO_BOTTOM_THRESHOLD = 80;
 
 export interface MessageListProps {
+  roomId: string;
   timeline: Timeline;
   resolveAuthor: (authorId: string | null) => Author;
   onLoadOlder: () => void;
   olderState: 'idle' | 'loading' | 'error';
+  onLoadNewer: () => void;
+  newerState: 'idle' | 'loading' | 'error';
+  /** `seq` of the message to scroll to and outline when the list first shows. */
+  targetSeq?: string | undefined;
   onRetryPending: (localId: string) => void;
 }
 
@@ -25,15 +35,22 @@ export interface MessageListProps {
  * pinned to the bottom unless the user scrolled up.
  */
 export function MessageList({
+  roomId,
   timeline,
   resolveAuthor,
   onLoadOlder,
   olderState,
+  onLoadNewer,
+  newerState,
+  targetSeq,
   onRetryPending,
 }: MessageListProps) {
   const { t } = useTranslation();
   const container = useRef<HTMLDivElement>(null);
-  const stickToBottom = useRef(true);
+  // A jump target keeps the list where the target is instead of at the bottom.
+  const stickToBottom = useRef(targetSeq === undefined);
+  const targetHandled = useRef(false);
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const anchor = useRef<{ height: number; top: number } | null>(null);
 
   const visible = timeline.messages.filter((message) => message.hiddenAt === null);
@@ -56,6 +73,31 @@ export function MessageList({
     if (element && stickToBottom.current) element.scrollTop = element.scrollHeight;
   }, [tail]);
 
+  // Jump target: scroll it into view once and outline it briefly; say so when it is not there.
+  // The outline is a data attribute set on the element, so no render is needed for it.
+  // `targetHandled` makes later runs (the list changes) no-ops.
+  useLayoutEffect(() => {
+    if (targetSeq === undefined || targetHandled.current) return;
+    targetHandled.current = true;
+    stickToBottom.current = false;
+
+    const target = visible.find((message) => message.seq === targetSeq);
+    if (!target) {
+      toast.info(t('chat.jump.missing'));
+      return;
+    }
+    const element = container.current?.querySelector(`[data-message-id="${target.id}"]`);
+    if (!element) return;
+    element.scrollIntoView?.({ block: 'center' });
+    element.setAttribute('data-jump-target', '');
+    flashTimer.current = setTimeout(
+      () => element.removeAttribute('data-jump-target'),
+      FLASH_DURATION_MS,
+    );
+  }, [targetSeq, visible, t]);
+
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+
   const loadOlder = () => {
     const element = container.current;
     if (element) anchor.current = { height: element.scrollHeight, top: element.scrollTop };
@@ -65,8 +107,10 @@ export function MessageList({
   const onScroll = () => {
     const element = container.current;
     if (!element) return;
+    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
     stickToBottom.current =
-      element.scrollHeight - element.scrollTop - element.clientHeight <= STICK_TO_BOTTOM_THRESHOLD;
+      distanceFromBottom <= STICK_TO_BOTTOM_THRESHOLD && !timeline.hasMoreNewer;
+    if (distanceFromBottom <= LOAD_NEWER_THRESHOLD && timeline.hasMoreNewer) onLoadNewer();
     if (element.scrollTop <= LOAD_OLDER_THRESHOLD && timeline.hasMoreOlder) loadOlder();
   };
 
@@ -103,10 +147,32 @@ export function MessageList({
             />
           ))}
           {timeline.pending.map((pending) => (
-            <PendingItem key={pending.localId} pending={pending} onRetry={onRetryPending} />
+            <PendingItem
+              key={pending.localId}
+              pending={pending}
+              roomId={roomId}
+              onRetry={onRetryPending}
+            />
           ))}
         </ol>
       )}
+      {timeline.hasMoreNewer ? (
+        <div className="flex justify-center py-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={newerState === 'loading'}
+            onClick={onLoadNewer}
+          >
+            {newerState === 'loading'
+              ? t('chat.list.loadingNewer')
+              : newerState === 'error'
+                ? t('chat.list.loadNewerFailed')
+                : t('chat.list.loadNewer')}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

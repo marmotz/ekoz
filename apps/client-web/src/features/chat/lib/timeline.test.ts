@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   addPending,
+  appendNewer,
   applyRoomEvent,
   compareSeq,
   markPendingFailed,
@@ -42,6 +43,7 @@ function timeline(seqs: number[], lastSeq = String(Math.max(0, ...seqs))): Timel
   return {
     messages: seqs.map((seq) => message(seq)),
     hasMoreOlder: false,
+    hasMoreNewer: false,
     lastSeq,
     pending: [],
   };
@@ -278,7 +280,7 @@ describe('replaceMessage', () => {
 });
 
 describe('pending messages', () => {
-  const pending = { localId: 'l1', body: 'hi', state: 'sending' as const };
+  const pending = { localId: 'l1', body: 'hi', mentions: [], state: 'sending' as const };
 
   it('adds, fails and retries an entry', () => {
     const added = addPending(timeline([1]), pending);
@@ -310,9 +312,183 @@ describe('pending messages', () => {
   });
 
   it('leaves the other pending entries alone', () => {
-    const other = { localId: 'l2', body: 'yo', state: 'sending' as const };
+    const other = { localId: 'l2', body: 'yo', mentions: [], state: 'sending' as const };
     const base = addPending(addPending(timeline([1]), pending), other);
 
     expect(reconcilePending(base, 'l1', message(2)).pending).toEqual([other]);
+  });
+});
+
+describe('mentionsMe', () => {
+  const viewer = { userId: 'me', role: 'moderator', groupIds: new Set(['g1']) };
+  const withMentions = (mentions: unknown[]): RoomEvent => {
+    const event = created(5);
+    if (event.type !== 'message_created') throw new Error('unexpected');
+    return { ...event, content: { ...event.content, mentions: mentions as never } };
+  };
+
+  it('carries the server value on REST pages', () => {
+    const page = {
+      items: [
+        wireMessage(1, { mentionsMe: 'direct' }),
+        wireMessage(2, { mentionsMe: 'collective' }),
+        wireMessage(3),
+      ],
+      lastSeq: '3',
+      hasMore: false,
+    };
+
+    expect(mergeFirstPage(page).messages.map((m) => m.mentionsMe)).toEqual([
+      'direct',
+      'collective',
+      null,
+    ]);
+  });
+
+  it('derives a direct mention for a live message', () => {
+    const { timeline: next } = applyRoomEvent(
+      timeline([1, 2, 3, 4]),
+      withMentions([{ type: 'user', target: 'me', token: '@me' }]),
+      viewer,
+    );
+
+    expect(next.messages.at(-1)?.mentionsMe).toBe('direct');
+    expect(next.messages.at(-1)?.mentions).toHaveLength(1);
+  });
+
+  it('derives a collective mention for a live message', () => {
+    const { timeline: next } = applyRoomEvent(
+      timeline([1, 2, 3, 4]),
+      withMentions([{ type: 'all', target: null, token: '@all' }]),
+      viewer,
+    );
+
+    expect(next.messages.at(-1)?.mentionsMe).toBe('collective');
+  });
+
+  it('is null for a live message without a viewer or a matching target', () => {
+    const noViewer = applyRoomEvent(timeline([1, 2, 3, 4]), withMentions([]));
+    expect(noViewer.timeline.messages.at(-1)?.mentionsMe).toBeNull();
+
+    const other = applyRoomEvent(
+      timeline([1, 2, 3, 4]),
+      withMentions([{ type: 'user', target: 'u9', token: '@u9' }]),
+      viewer,
+    );
+    expect(other.timeline.messages.at(-1)?.mentionsMe).toBeNull();
+  });
+});
+
+describe('detached timeline', () => {
+  const detached = (seqs: number[], lastSeq = '90'): Timeline => ({
+    ...timeline(seqs, lastSeq),
+    hasMoreNewer: true,
+  });
+
+  it('is detached when the page says there are newer messages', () => {
+    const result = mergeFirstPage({
+      items: [wireMessage(40), wireMessage(41)],
+      lastSeq: '90',
+      hasMore: true,
+      hasMoreNewer: true,
+    });
+
+    expect(result.hasMoreNewer).toBe(true);
+    expect(result.hasMoreOlder).toBe(true);
+  });
+
+  it('appendNewer adds the page after the loaded messages, in order, without duplicates', () => {
+    const result = appendNewer(detached([40, 41]), {
+      items: [wireMessage(41), wireMessage(42), wireMessage(43)],
+      lastSeq: '90',
+      hasMore: false,
+      hasMoreNewer: true,
+    });
+
+    expect(result.messages.map((m) => m.seq)).toEqual(['40', '41', '42', '43']);
+    expect(result.hasMoreNewer).toBe(true);
+  });
+
+  it('appendNewer reattaches the timeline once the last page is loaded', () => {
+    const result = appendNewer(detached([88, 89]), {
+      items: [wireMessage(90), wireMessage(91)],
+      lastSeq: '91',
+      hasMore: false,
+      hasMoreNewer: false,
+    });
+
+    expect(result.hasMoreNewer).toBe(false);
+    expect(result.lastSeq).toBe('91');
+    expect(result.messages.map((m) => m.seq)).toEqual(['88', '89', '90', '91']);
+  });
+
+  it('appendNewer never moves lastSeq back', () => {
+    const result = appendNewer(detached([40], '90'), {
+      items: [wireMessage(41)],
+      lastSeq: '60',
+      hasMore: false,
+      hasMoreNewer: true,
+    });
+
+    expect(result.lastSeq).toBe('90');
+  });
+
+  it('does not insert a live message while detached', () => {
+    const { timeline: next } = applyRoomEvent(detached([40, 41]), created(95));
+
+    expect(next.messages.map((m) => m.seq)).toEqual(['40', '41']);
+    expect(next.hasMoreNewer).toBe(true);
+  });
+
+  it('inserts live messages again once reattached', () => {
+    const attached = appendNewer(detached([90]), {
+      items: [wireMessage(91)],
+      lastSeq: '91',
+      hasMore: false,
+      hasMoreNewer: false,
+    });
+
+    const { timeline: next } = applyRoomEvent(attached, created(92));
+
+    expect(next.messages.map((m) => m.seq)).toEqual(['90', '91', '92']);
+  });
+
+  it('still applies deletions and edits to loaded messages while detached', () => {
+    const deleted: RoomEvent = {
+      type: 'message_deleted',
+      roomId: 'r1',
+      seq: '95',
+      senderId: 'u1',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { messageId: 'm40', messageSeq: '40', reason: 'user' },
+    };
+    const edited: RoomEvent = {
+      type: 'message_edited',
+      roomId: 'r1',
+      seq: '96',
+      senderId: 'u1',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { messageId: 'm41', editedAt: '2026-01-02T00:00:00.000Z' },
+    };
+
+    const afterDelete = applyRoomEvent(detached([40, 41]), deleted);
+    expect(afterDelete.timeline.messages[0]?.redactedAt).not.toBeNull();
+
+    const afterEdit = applyRoomEvent(afterDelete.timeline, edited);
+    expect(afterEdit.refetch).toEqual(['m41']);
+  });
+
+  it('does not insert a confirmed own message while detached, but clears the pending entry', () => {
+    const base = addPending(detached([40]), {
+      localId: 'l1',
+      body: 'hi',
+      mentions: [],
+      state: 'sending',
+    });
+
+    const next = reconcilePending(base, 'l1', message(95));
+
+    expect(next.pending).toEqual([]);
+    expect(next.messages.map((m) => m.seq)).toEqual(['40']);
   });
 });

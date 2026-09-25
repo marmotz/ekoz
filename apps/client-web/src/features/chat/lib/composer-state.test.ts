@@ -2,8 +2,8 @@ import { expect, it } from 'vitest';
 
 import { composerBlock } from '@/features/chat/lib/composer-state';
 
-const open = { id: 'r1', readOnly: false };
-const readOnly = { id: 'r1', readOnly: true };
+const open = { id: 'r1', type: 'channel', readOnly: false };
+const readOnly = { id: 'r1', type: 'channel', readOnly: true };
 
 it('lets a member with room.post write in an open room', () => {
   expect(composerBlock(open, ['room.read', 'room.post'], 'member')).toBeNull();

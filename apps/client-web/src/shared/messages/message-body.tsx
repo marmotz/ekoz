@@ -1,0 +1,45 @@
+import type { MentionTarget } from '@ekozhq/sdk';
+import { type ComponentProps, useMemo } from 'react';
+import Markdown from 'react-markdown';
+
+import { markdownOptions } from '@/shared/messages/markdown-allow-list';
+import { MentionChip } from '@/shared/messages/mention-chip';
+import { remarkMentions } from '@/shared/messages/remark-mentions';
+
+export interface MessageBodyProps {
+  body: string;
+  /** The room the message belongs to: chips resolve members and groups in it. */
+  roomId: string;
+  mentions?: readonly MentionTarget[];
+}
+
+const NO_MENTIONS: readonly MentionTarget[] = [];
+
+/** Message text as sanitised Markdown: allow-listed elements only, no raw HTML. */
+export function MessageBody({ body, roomId, mentions = NO_MENTIONS }: MessageBodyProps) {
+  const options = useMemo(() => {
+    // `react-markdown` hands the hast properties over as props of the element.
+    const Mention = (props: ComponentProps<'span'> & Record<string, unknown>) => {
+      const target = mentions[Number(props['data-mention-index'])];
+      return target ? (
+        <MentionChip roomId={roomId} target={target} />
+      ) : (
+        <span>{props.children}</span>
+      );
+    };
+    return {
+      ...markdownOptions,
+      remarkPlugins: [
+        ...(markdownOptions.remarkPlugins ?? []),
+        [remarkMentions, { mentions }] as [typeof remarkMentions, { mentions: typeof mentions }],
+      ],
+      components: { ...markdownOptions.components, mention: Mention },
+    };
+  }, [mentions, roomId]);
+
+  return (
+    <div className="break-words text-sm [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-muted [&_pre]:p-2 [&_ul]:list-disc [&_ul]:pl-5">
+      <Markdown {...options}>{body}</Markdown>
+    </div>
+  );
+}

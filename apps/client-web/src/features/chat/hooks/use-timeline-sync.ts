@@ -9,7 +9,11 @@ import {
   type Timeline,
   toTimelineMessage,
 } from '@/features/chat/lib/timeline';
+import { useRoomGroups } from '@/shared/groups/room-groups';
+import { useRoomMembers } from '@/shared/members/room-members';
+import { viewerFromCache } from '@/shared/mentions/mentions-me';
 import { useReconnected, useRoomEvents } from '@/shared/realtime/use-realtime';
+import { useMe } from '@/shared/sdk/use-me';
 import { useSdk } from '@/shared/sdk/use-sdk';
 
 /** Pages `/sync` may take to close a gap before the timeline is reloaded instead. */
@@ -25,6 +29,10 @@ export function useTimelineSync(roomId: string) {
   const sdk = useSdk();
   const queryClient = useQueryClient();
   const timelineKey = chatKeys.timeline(roomId);
+  // Loaded so that `mentionsMe` can be derived from them for live messages.
+  useMe();
+  useRoomMembers(roomId);
+  useRoomGroups(roomId);
   // Events that arrive before the first page has loaded, applied once it has.
   const buffer = useRef<RoomEvent[]>([]);
 
@@ -53,12 +61,16 @@ export function useTimelineSync(roomId: string) {
       const current = queryClient.getQueryData<Timeline>(timelineKey);
       if (!current) return false;
 
-      const { timeline, refetch } = applyRoomEvent(current, event);
+      const { timeline, refetch } = applyRoomEvent(
+        current,
+        event,
+        viewerFromCache(queryClient, roomId),
+      );
       if (timeline !== current) queryClient.setQueryData(timelineKey, timeline);
       refetchMessages(refetch);
       return true;
     },
-    [queryClient, timelineKey, refetchMessages],
+    [queryClient, roomId, timelineKey, refetchMessages],
   );
 
   const flushBuffer = useCallback(() => {

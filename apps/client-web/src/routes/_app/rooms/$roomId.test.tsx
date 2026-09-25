@@ -15,7 +15,8 @@ import {
   MEMBERS_PANEL_STORAGE_KEY,
   reloadMembersPanelPrefs,
 } from '@/features/members/hooks/use-members-panel-prefs';
-import { Route } from '@/routes/_app/rooms/$roomId';
+import { Route, validateRoomSearch } from '@/routes/_app/rooms/$roomId';
+import { Route as GroupsRoute } from '@/routes/_app/rooms/$roomId/groups';
 import { Route as RequestsRoute } from '@/routes/_app/rooms/$roomId/requests';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { roomItem } from '../../../../test/room-fixtures';
@@ -88,9 +89,17 @@ function renderRoom(path: string, capabilities: string[], roomType = 'channel') 
     path: '/requests',
     getParentRoute: () => pageRoute,
   } as never);
+  const groupsRoute = GroupsRoute.update({
+    id: '/groups',
+    path: '/groups',
+    getParentRoute: () => pageRoute,
+  } as never);
   const router = createRouter({
     routeTree: rootRoute.addChildren([
-      (pageRoute as unknown as typeof Route).addChildren([requestsRoute as never]) as never,
+      (pageRoute as unknown as typeof Route).addChildren([
+        requestsRoute as never,
+        groupsRoute as never,
+      ]) as never,
     ]),
     history: createMemoryHistory({ initialEntries: [path] }),
   });
@@ -111,9 +120,25 @@ function renderRoom(path: string, capabilities: string[], roomType = 'channel') 
   return fake;
 }
 
+it.each([
+  [{ at: '42' }, { at: '42' }],
+  [{ at: 42 }, { at: '42' }],
+  [{ at: '9007199254740993' }, { at: '9007199254740993' }],
+  [{ at: 'abc' }, { at: undefined }],
+  [{ at: '-1' }, { at: undefined }],
+  [{ at: '1.5' }, { at: undefined }],
+  [{ at: 1.5 }, { at: undefined }],
+  [{ at: '' }, { at: undefined }],
+  [{ at: null }, { at: undefined }],
+  [{}, { at: undefined }],
+])('validates the at search param %j', (search, expected) => {
+  expect(validateRoomSearch(search)).toEqual(expected);
+});
+
 it('titles the page', () => {
   expect(Route.options.staticData?.title).toBe('chat.title');
   expect(RequestsRoute.options.staticData?.title).toBe('rooms.requests.title');
+  expect(GroupsRoute.options.staticData?.title).toBe('rooms.groups.title');
 });
 
 it('composes RoomGate, RoomHeader and RoomChat for the room in the URL', async () => {
@@ -125,6 +150,57 @@ it('composes RoomGate, RoomHeader and RoomChat for the room in the URL', async (
   expect(screen.getByRole('textbox', { name: 'Message' })).toBeEnabled();
 });
 
+it('opens the room around the message given in the at search param', async () => {
+  const fake = renderRoom('/rooms/room-42?at=1', ['room.read', 'room.post']);
+
+  expect(await screen.findByText('hello from the room')).toBeInTheDocument();
+  expect(fake.stubs.messages.list).toHaveBeenCalledWith('room-42', { around: '1' });
+});
+
+it('ignores an at search param that is not a seq', async () => {
+  const fake = renderRoom('/rooms/room-42?at=abc', ['room.read', 'room.post']);
+
+  expect(await screen.findByText('hello from the room')).toBeInTheDocument();
+  expect(fake.stubs.messages.list).toHaveBeenCalledWith('room-42');
+});
+
+it('jumps back to the newest messages, dropping at from the URL', async () => {
+  Element.prototype.scrollIntoView = vi.fn();
+  const fake = renderRoom('/rooms/room-42?at=1', ['room.read', 'room.post']);
+  fake.stubs.messages.list.mockImplementation((async (
+    _room: string,
+    params?: { around?: string },
+  ) =>
+    params?.around
+      ? {
+          items: [
+            {
+              id: 'm1',
+              roomId: 'room-42',
+              seq: '1',
+              authorId: 'u1',
+              body: 'old message',
+              replyToId: null,
+              mentions: [],
+              editedAt: null,
+              redactedAt: null,
+              hiddenAt: null,
+              createdAt: '2026-01-01T10:00:00.000Z',
+            },
+          ],
+          lastSeq: '9',
+          hasMore: false,
+          hasMoreNewer: true,
+        }
+      : { items: [], lastSeq: '9', hasMore: false, hasMoreNewer: false }) as never);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Jump to latest' }));
+
+  await waitFor(() => expect(fake.stubs.messages.list).toHaveBeenLastCalledWith('room-42'));
+  await waitFor(() => expect(screen.queryByRole('button', { name: 'Jump to latest' })).toBeNull());
+  expect(await screen.findByText('No messages yet.')).toBeInTheDocument();
+});
+
 it('renders the join requests instead of the chat under the same header', async () => {
   const fake = renderRoom('/rooms/room-42/requests', ['room.read', 'room.manage_members']);
 
@@ -132,6 +208,38 @@ it('renders the join requests instead of the chat under the same header', async 
   expect(screen.getByRole('heading', { name: 'General' })).toBeInTheDocument();
   expect(await screen.findByText('No pending request.')).toBeInTheDocument();
   expect(fake.stubs.messages.list).not.toHaveBeenCalled();
+});
+
+it('renders the groups settings instead of the chat under the same header', async () => {
+  const fake = renderRoom('/rooms/room-42/groups', ['room.read', 'room.manage_groups']);
+
+  expect(await screen.findByRole('heading', { name: 'Groups' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'General' })).toBeInTheDocument();
+  expect(await screen.findByText('No group yet.')).toBeInTheDocument();
+  expect(fake.stubs.messages.list).not.toHaveBeenCalled();
+});
+
+it('refreshes the groups when a group_changed event of the room arrives', async () => {
+  const fake = renderRoom('/rooms/room-42', ['room.read', 'room.post']);
+  await screen.findByText('hello from the room');
+  await waitFor(() => expect(fake.stubs.groups.list).toHaveBeenCalledTimes(1));
+
+  act(() =>
+    fake.streamControl.emit('room_event', {
+      roomId: 'room-42',
+      feedSeq: '2',
+      event: {
+        type: 'group_changed',
+        roomId: 'room-42',
+        seq: '2',
+        senderId: 'u9',
+        createdAt: '2026-01-02T00:00:00.000Z',
+        content: { groupId: 'g1', change: 'created', name: 'design' },
+      },
+    }),
+  );
+
+  await waitFor(() => expect(fake.stubs.groups.list).toHaveBeenCalledTimes(2));
 });
 
 it('refreshes the members list when a membership event of the room arrives', async () => {

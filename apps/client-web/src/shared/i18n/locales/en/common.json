@@ -236,7 +236,10 @@
       "loadingOlder": "Loading older messages",
       "loadOlderFailed": "Could not load older messages. Retry",
       "error": "The messages could not be loaded.",
-      "retry": "Retry"
+      "retry": "Retry",
+      "loadNewer": "Load newer messages",
+      "loadingNewer": "Loading newer messages",
+      "loadNewerFailed": "Could not load newer messages. Retry"
     },
     "message": {
       "deleted": "Message deleted",
@@ -261,12 +264,47 @@
         "bodyTooLong": "This message is too long.",
         "bodyInvalid": "This message is not valid.",
         "network": "The server could not be reached.",
-        "generic": "The message could not be sent."
+        "generic": "The message could not be sent.",
+        "mentionInvalid": "A mention is no longer valid. Remove it and try again."
+      },
+      "suggestions": {
+        "label": "Mention suggestions",
+        "empty": "No match",
+        "sections": {
+          "people": "People",
+          "groups": "Groups",
+          "roles": "Roles",
+          "all": "Everyone"
+        }
       }
     },
     "connection": {
       "reconnecting": "Reconnecting...",
       "offline": "Offline"
+    },
+    "mentions": {
+      "all": "everyone",
+      "roles": {
+        "space_admin": "space-admins",
+        "room_admin": "room-admins",
+        "moderator": "moderators",
+        "member": "members",
+        "reader": "readers"
+      },
+      "aria": {
+        "user": "Mention of {{name}}, open profile",
+        "userLeft": "Mention of {{name}}, who left the room",
+        "userDeleted": "Mention of a deleted account",
+        "all": "Mention of everyone in the room",
+        "role": "Mention of all {{role}}",
+        "group": "Mention of the group {{name}}",
+        "groupDeleted": "Mention of a deleted group"
+      }
+    },
+    "jump": {
+      "missing": "This message is no longer available.",
+      "detached": "You are viewing older messages.",
+      "latest": "Jump to latest"
     }
   },
   "members": {
@@ -396,7 +434,8 @@
       "leave": "Leave",
       "channels": "Channels",
       "noChannels": "No channels in this space yet.",
-      "requests": "Requests"
+      "requests": "Requests",
+      "groups": "Groups"
     },
     "create": {
       "title": "Create a space or a channel",
@@ -462,6 +501,78 @@
         "member": "member",
         "reader": "reader"
       }
+    },
+    "groups": {
+      "title": "Groups",
+      "back": "Back to the room",
+      "forbidden": "You are not allowed to manage the groups of this room.",
+      "loading": "Loading groups",
+      "error": "The groups could not be loaded.",
+      "retry": "Retry",
+      "own": "Groups of this room",
+      "inherited": "Inherited groups",
+      "empty": "No group yet.",
+      "definedOn": "defined on {{name}}",
+      "memberCount_one": "{{count}} member",
+      "memberCount_other": "{{count}} members",
+      "create": {
+        "label": "New group",
+        "placeholder": "design-team",
+        "submit": "Create"
+      },
+      "nameHelp": "1 to 32 characters: lowercase letters, digits, dots, dashes and underscores. Mentioned as @name.",
+      "showMembers": "Show the members of {{name}}",
+      "hideMembers": "Hide the members of {{name}}",
+      "rename": "Rename {{name}}",
+      "delete": "Delete {{name}}",
+      "newName": "New name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "noMembers": "No member in this group.",
+      "deletedAccount": "Deleted account",
+      "removeMember": "Remove {{name}}",
+      "pickMember": "Add a member to {{name}}",
+      "pickPlaceholder": "Choose a member",
+      "addMember": "Add",
+      "confirmDelete": {
+        "title": "Delete the group {{name}}?",
+        "message": "Messages that already mention it keep their audience. This cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "errors": {
+        "nameInvalid": "Use 1 to 32 characters: lowercase letters, digits, dots, dashes and underscores.",
+        "nameReserved": "This name is reserved (@all and the role names).",
+        "nameTaken": "A group with this name already exists on this space or one of its channels.",
+        "memberNotMember": "This person is not a member of the room.",
+        "notFound": "This group no longer exists."
+      }
+    }
+  },
+  "mentions": {
+    "title": "My mentions",
+    "sidebar": {
+      "label": "Mentions",
+      "unread_one": "{{count}} unread mention",
+      "unread_other": "{{count}} unread mentions"
+    },
+    "badge": {
+      "direct_one": "{{count}} unread mention, including you by name",
+      "direct_other": "{{count}} unread mentions, including you by name",
+      "collective_one": "{{count}} unread group mention",
+      "collective_other": "{{count}} unread group mentions"
+    },
+    "list": {
+      "loading": "Loading your mentions",
+      "error": "Your mentions could not be loaded.",
+      "retry": "Retry",
+      "empty": "Nobody has mentioned you yet.",
+      "loadMore": "Load more",
+      "deletedAccount": "Deleted account",
+      "open": "Open {{room}} at this message",
+      "direct": "Mentions you",
+      "collective": "Mentions a group",
+      "unread": "Unread"
     }
   }
 }

@@ -1,6 +1,6 @@
 # Web client mentions
 
-**Status**: designed, see [technical.md](./technical.md)
+**Status**: done, see [technical.md](./technical.md)
 
 ## Context
 

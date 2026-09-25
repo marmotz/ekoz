@@ -17,7 +17,7 @@ _done, see [technical.md](features/web-client-members/technical.md)_ — 6/6 tas
 
 ## Web client mentions ·  [overview](features/web-client-mentions/overview.md)
 
-_designed, see [technical.md](features/web-client-mentions/technical.md)_ — 5/11 tasks done
+_done, see [technical.md](features/web-client-mentions/technical.md)_ — 11/11 tasks done
 
 | Done | Issue                                              | Title                                                                               | Blocked by             |
 |------|----------------------------------------------------|-------------------------------------------------------------------------------------|------------------------|
@@ -26,12 +26,12 @@ _designed, see [technical.md](features/web-client-mentions/technical.md)_ — 5/
 | [x]  | [#173](https://github.com/marmotz/ekoz/issues/173) | Mentions server: mention targets, audience, edit and mentionsMe                     | #168                   |
 | [x]  | [#174](https://github.com/marmotz/ekoz/issues/174) | Mentions server: unread mention counters and GET /me/mentions                       | #173                   |
 | [x]  | [#175](https://github.com/marmotz/ekoz/issues/175) | Mentions SDK: mention targets, edit, after/around, mentions and groups resources    | #168, #173, #174, #169 |
-| [ ]  | [#176](https://github.com/marmotz/ekoz/issues/176) | Mentions client: mention chips, highlight, live mentionsMe and shared groups query  | #175, #125, #126       |
-| [ ]  | [#177](https://github.com/marmotz/ekoz/issues/177) | Mentions client: TipTap composer with @ suggestions                                 | #176                   |
-| [ ]  | [#178](https://github.com/marmotz/ekoz/issues/178) | Mentions client: room groups settings                                               | #176                   |
-| [ ]  | [#179](https://github.com/marmotz/ekoz/issues/179) | Mentions client: jump to a message and detached timeline                            | #175                   |
-| [ ]  | [#180](https://github.com/marmotz/ekoz/issues/180) | Mentions client: unread mention badges and My mentions page                         | #176, #179             |
-| [ ]  | [#181](https://github.com/marmotz/ekoz/issues/181) | Mentions docs: docs/technical/web-client-mentions.md                                | #177, #178, #180       |
+| [x]  | [#176](https://github.com/marmotz/ekoz/issues/176) | Mentions client: mention chips, highlight, live mentionsMe and shared groups query  | #175, #125, #126       |
+| [x]  | [#177](https://github.com/marmotz/ekoz/issues/177) | Mentions client: TipTap composer with @ suggestions                                 | #176                   |
+| [x]  | [#178](https://github.com/marmotz/ekoz/issues/178) | Mentions client: room groups settings                                               | #176                   |
+| [x]  | [#179](https://github.com/marmotz/ekoz/issues/179) | Mentions client: jump to a message and detached timeline                            | #175                   |
+| [x]  | [#180](https://github.com/marmotz/ekoz/issues/180) | Mentions client: unread mention badges and My mentions page                         | #176, #179             |
+| [x]  | [#181](https://github.com/marmotz/ekoz/issues/181) | Mentions docs: docs/technical/web-client-mentions.md                                | #177, #178, #180       |
 
 ## Web client composer formatting ·  [overview](features/web-client-composer-formatting/overview.md)
 

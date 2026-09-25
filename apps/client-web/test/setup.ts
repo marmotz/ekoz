@@ -52,6 +52,12 @@ if (typeof window !== 'undefined') {
   // jsdom does not implement scrollTo; TanStack Router's scroll restoration calls it on every navigation.
   window.scrollTo = () => {};
 
+  // ProseMirror (TipTap) measures ranges and hit-tests points, which jsdom does not implement.
+  const emptyRects = Object.assign([] as unknown as DOMRect[], { item: () => null });
+  Range.prototype.getClientRects = () => emptyRects as unknown as DOMRectList;
+  Range.prototype.getBoundingClientRect = () => new DOMRect();
+  document.elementFromPoint = () => null;
+
   // jsdom does not implement matchMedia.
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,

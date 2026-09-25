@@ -63,3 +63,21 @@ No Tiptap Cloud or Pro extension.
 - The web client renders on the server (TanStack Start). The editor is created
   on the client only (`immediatelyRender: false`, as TipTap documents for SSR),
   and the composer shows a disabled placeholder until then.
+
+## As built
+
+The composer was rebuilt by [web client mentions](web-client-mentions.md) as decided
+here, with these details:
+
+- `StarterKit` keeps only the nodes and marks listed above (heading, horizontal rule
+  and underline are off; the link does not open on click and does not autolink).
+- The mention node extends `@tiptap/extension-mention` with the attributes
+  `{ type, target, token, label }` and serialises to its `token`; the extension's own
+  Markdown syntax is switched off.
+- The `@` popup is a React listbox rendered by the composer, fed by the
+  `suggestion` options of the extension; no floating-UI dependency.
+- Loading a message for editing parses the body with `editor.markdown.parse` and
+  `injectMentionNodes` turns the message's tokens back into nodes.
+- `@tiptap/core` is used through `@tiptap/react`'s re-export, so it is not a direct
+  dependency.
+

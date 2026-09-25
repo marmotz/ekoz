@@ -5,6 +5,8 @@
  */
 export interface ChatRoom {
   id: string;
+  /** `channel` is the only type that accepts `@all`, role and group mentions. */
+  type: string;
   readOnly: boolean;
 }
 

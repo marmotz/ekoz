@@ -81,10 +81,11 @@ after the first. `EventSource` is injectable, like `fetch`.
 src/shared/realtime/   provider, subscription hooks, unseen-rooms store
 src/features/chat/
   api/         query keys and queryFns (timeline first page, older page)
-  lib/         timeline.ts (pure reducer), markdown-allow-list.ts, composer-state.ts
-  hooks/       use-timeline, use-timeline-sync, use-send-message, use-authors
-  components/  room-chat, message-list, message-item, message-body, composer,
+  lib/         timeline.ts (pure reducer), composer-state.ts, mention-node.ts, ...
+  hooks/       use-timeline, use-timeline-sync, use-send-message, use-authors, ...
+  components/  room-chat, message-list, message-item, composer (TipTap),
                connection-banner
+src/shared/messages/  message-body, markdown-allow-list (shared with My mentions)
 src/routes/_app/rooms/$roomId.tsx
 ```
 
@@ -109,13 +110,15 @@ Everything else is interpreted by the feature that owns the state.
 ### Timeline state
 
 A TanStack Query entry per room (`['chat', 'timeline', roomId]`), holding
-`{ messages, hasMoreOlder, lastSeq, pending }`, updated by the pure functions of
+`{ messages, hasMoreOlder, hasMoreNewer, lastSeq, pending }`, updated by the pure functions of
 `lib/timeline.ts`, the only place room events are interpreted:
 
 - an event with `seq <= lastSeq` is ignored, which is what makes the overlapping
   sources (stream, feed replay by `lastEventId`, `/sync` catch-up, the `POST`
   response) harmless;
-- `message_created` inserts by `seq`, skipped when the id is already present;
+- `message_created` inserts by `seq`, skipped when the id is already present, and
+  paused while the timeline is detached (`hasMoreNewer`, see
+  [web client mentions](web-client-mentions.md));
 - `message_edited` carries no body on purpose: the message is refetched and replaced;
 - `message_deleted` (and `message_redacted` seen through `/sync`) replaces the
   message with a tombstone.
@@ -126,7 +129,8 @@ never refetched on its own (that would drop live state). Events arriving before 
 first page has loaded are buffered and applied afterwards.
 
 **Open a room.** First page from `messages.list`, then older pages on scroll with
-`before` set to the first loaded `seq`.
+`before` set to the first loaded `seq`. With `?at=<seq>` the first page is the window
+`around` that message, and newer pages load with `after`.
 
 **Reconnect.** On `reconnected`, `/sync` from `lastSeq` runs for up to 5 pages
 through the same reducer; a larger gap, or a failure, resets the query and reloads
@@ -139,7 +143,9 @@ entry is replaced by the message, idempotently with the stream. On failure it st
 The composer is enabled only for `membership === 'member'` with `room.post` and, on a
 read-only room, `room.edit_any`, mirroring the server rule. The client does not know
 `messages.body_max_length`, so it does not pre-validate length; the server `422` is
-displayed. `mentions` are never sent.
+displayed. Mentions are sent since [web client mentions](web-client-mentions.md): the
+composer hands `{ body, mentions }` over, and `message.mention_not_member` /
+`message.mention_invalid` map to a `mention_invalid` failure.
 
 ### Authors and rendering
 
@@ -151,9 +157,9 @@ See [web client members](web-client-members.md). Strings live under
 `chat.*` in `common.json` (French and English), like the `rooms.*` keys, because key
 typing derives from that file only.
 
-Bodies are rendered with `react-markdown` and `remark-gfm`: `skipHtml`, an
-allow-list of elements (`p`, `em`, `strong`, `del`, `code`, `pre`, `blockquote`,
-`ul`, `ol`, `li`, `a`, `br`), `unwrapDisallowed`, and a `urlTransform` accepting only
+Bodies are rendered with `react-markdown` and `remark-gfm`, by `MessageBody` in
+`shared/messages`: `skipHtml`, an allow-list of elements (`p`, `em`, `strong`, `del`,
+`code`, `pre`, `blockquote`, `ul`, `ol`, `li`, `a`, `br`, and `mention` for the chips), `unwrapDisallowed`, and a `urlTransform` accepting only
 `http:`, `https:` and `mailto:`, the schemes the server accepts. Links open with
 `target="_blank"` and `rel="noopener noreferrer nofollow"`. Tombstones render a
 "message deleted" line, edited messages an "edited" marker, and messages with
@@ -196,6 +202,7 @@ allow-list of elements (`p`, `em`, `strong`, `del`, `code`, `pre`, `blockquote`,
 - A fresh `GET /events` connection no longer replays the retained feed: clients that
   need history read `/messages` and `/sync`.
 - Only the open room updates live; everything else is invalidated or refetched when
-  opened. Edit and delete actions, reactions, pins, read markers, typing, presence
-  and unread counters are follow-ups.
+  opened. Edit and delete actions, reactions, pins, read markers, typing and presence
+  are follow-ups (unread mention counters shipped with
+  [web client mentions](web-client-mentions.md)).
 - A gap in the SDK is fixed in `packages/sdk`, never worked around in the client.

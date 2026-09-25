@@ -4,14 +4,16 @@ import { beforeEach, expect, it, vi } from 'vitest';
 
 import { RoomChat } from '@/features/chat/components/room-chat';
 import { getActiveRoom, markUnseen, resetUnseenRooms } from '@/shared/realtime/unseen-rooms';
+import { toast } from '@/shared/ui/sonner';
 import { type Configure, type Fake, renderSignedIn } from '../../../../test/render-signed-in';
 import { createClientMock } from '../../../../test/sdk-mock';
 
+vi.mock('@/shared/ui/sonner', () => ({ toast: { info: vi.fn(), success: vi.fn() } }));
 vi.mock('@ekozhq/sdk', async (importOriginal) =>
   (await import('../../../../test/sdk-mock')).mockSdkModule(await importOriginal()),
 );
 
-const room = { id: 'r1', readOnly: false };
+const room = { id: 'r1', type: 'channel', readOnly: false };
 const CAN_POST = ['room.read', 'room.post'];
 
 function wireMessage(seq: number, overrides: Record<string, unknown> = {}) {
@@ -60,8 +62,10 @@ interface SetupOptions {
   members?: unknown[];
   capabilities?: string[];
   membership?: 'member' | 'invited' | 'joinable';
-  room?: { id: string; readOnly: boolean };
+  room?: { id: string; type: string; readOnly: boolean };
   configure?: Configure;
+  at?: string;
+  onJumpToLatest?: () => void;
 }
 
 function setup({
@@ -73,9 +77,17 @@ function setup({
   membership = 'member',
   room: roomProp = room,
   configure,
+  at,
+  onJumpToLatest,
 }: SetupOptions = {}) {
   return renderSignedIn(
-    <RoomChat room={roomProp} capabilities={capabilities} membership={membership} />,
+    <RoomChat
+      room={roomProp}
+      capabilities={capabilities}
+      membership={membership}
+      at={at}
+      onJumpToLatest={onJumpToLatest}
+    />,
     {
       configure: (fake) => {
         fake.stubs.messages.list.mockImplementation(
@@ -96,6 +108,7 @@ const emit = (fake: Fake, name: Parameters<Fake['streamControl']['emit']>[0], ..
 beforeEach(() => {
   createClientMock.mockReset();
   resetUnseenRooms();
+  vi.mocked(toast.info).mockClear();
 });
 
 // --- history ---------------------------------------------------------------
@@ -549,7 +562,8 @@ it('sends a message optimistically and reconciles it with the confirmed one', as
   expect(await screen.findByText('hello there')).toBeInTheDocument();
   expect(screen.getByText('Sending')).toBeInTheDocument();
   expect(fake.stubs.messages.send).toHaveBeenCalledWith('r1', { body: 'hello there' });
-  expect(composer()).toHaveValue('');
+  expect(composer()).toHaveTextContent('');
+  expect(composer().textContent).toBe('');
 
   await act(async () => confirm(wireMessage(3, { body: 'hello there', authorId: 'u1' })));
 
@@ -601,10 +615,11 @@ it('inserts a newline on Shift+Enter instead of sending', async () => {
   await user.type(composer(), 'line one{Shift>}{Enter}{/Shift}line two');
 
   expect(fake.stubs.messages.send).not.toHaveBeenCalled();
-  expect(composer()).toHaveValue('line one\nline two');
+  expect(composer()).toHaveTextContent('line oneline two');
+  expect(composer().querySelector('br')).not.toBeNull();
 });
 
-it('sends with the button and never sends mentions', async () => {
+it('sends with the button, and sends no mentions for a typed @text', async () => {
   const { fake, user } = setup();
   await screen.findByText('message 2');
 
@@ -639,6 +654,16 @@ const failures: [string, unknown, string][] = [
     'network',
     new NetworkError({ code: 'network_error', status: 0 }),
     'The server could not be reached.',
+  ],
+  [
+    'message.mention_not_member',
+    new EkozError({ code: 'message.mention_not_member', status: 422 }),
+    'A mention is no longer valid. Remove it and try again.',
+  ],
+  [
+    'message.mention_invalid',
+    new EkozError({ code: 'message.mention_invalid', status: 422 }),
+    'A mention is no longer valid. Remove it and try again.',
   ],
   ['other', new Error('boom'), 'The message could not be sent.'],
 ];
@@ -683,13 +708,19 @@ it('enables the composer for a member who can post', async () => {
   setup();
   await screen.findByText('message 2');
 
-  expect(composer()).toBeEnabled();
+  expect(composer()).toHaveAttribute('contenteditable', 'true');
 });
 
 it.each([
   ['invited', 'invited', CAN_POST, room, 'Join the room to write.'],
   ['joinable', 'joinable', CAN_POST, room, 'Join the room to write.'],
-  ['read-only room', 'member', CAN_POST, { id: 'r1', readOnly: true }, 'This room is read-only.'],
+  [
+    'read-only room',
+    'member',
+    CAN_POST,
+    { id: 'r1', type: 'channel', readOnly: true },
+    'This room is read-only.',
+  ],
   [
     'missing permission',
     'member',
@@ -703,15 +734,366 @@ it.each([
     setup({ membership, capabilities: [...capabilities], room: roomProp });
     await screen.findByText('message 2');
 
-    expect(composer()).toBeDisabled();
+    expect(composer()).toHaveAttribute('contenteditable', 'false');
+    expect(composer()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(text)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled();
   },
 );
 
 it('lets a caller with room.edit_any post in a read-only room', async () => {
-  setup({ room: { id: 'r1', readOnly: true }, capabilities: [...CAN_POST, 'room.edit_any'] });
+  setup({
+    room: { id: 'r1', type: 'channel', readOnly: true },
+    capabilities: [...CAN_POST, 'room.edit_any'],
+  });
   await screen.findByText('message 2');
 
-  expect(composer()).toBeEnabled();
+  expect(composer()).toHaveAttribute('contenteditable', 'true');
+});
+
+// --- mentions ---------------------------------------------------------------
+
+const ME = '01ARZ3NDEKTSV4RRFFQ69G5FAV';
+const itemOf = (text: string) => screen.getByText(text).closest('li') as HTMLElement;
+
+it('highlights the messages the server says concern the caller', async () => {
+  setup({
+    items: [
+      wireMessage(1, { mentionsMe: 'direct' }),
+      wireMessage(2, { mentionsMe: 'collective' }),
+      wireMessage(3),
+    ],
+    lastSeq: '3',
+  });
+  await screen.findByText('message 1');
+
+  expect(itemOf('message 1')).toHaveAttribute('data-mentions-me', 'direct');
+  expect(itemOf('message 2')).toHaveAttribute('data-mentions-me', 'collective');
+  expect(itemOf('message 3')).not.toHaveAttribute('data-mentions-me');
+});
+
+it('derives a direct highlight for a live message that names the caller', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+
+  await emit(
+    fake,
+    'room_event',
+    created(3, {
+      content: {
+        messageId: 'm3',
+        body: 'live hi @me',
+        replyToId: null,
+        mentions: [{ type: 'user', target: ME, token: '@me' }],
+      },
+    }),
+  );
+
+  expect(await screen.findByText('live hi')).toBeInTheDocument();
+  expect(itemOf('live hi')).toHaveAttribute('data-mentions-me', 'direct');
+});
+
+it('derives a collective highlight for the caller role and group, but not for others', async () => {
+  const { fake } = setup({
+    members: [member('u1', 'Alice'), { ...member(ME, 'Jane'), role: 'moderator' }],
+    configure: (f) => {
+      f.stubs.groups.list.mockResolvedValue({
+        items: [
+          {
+            id: 'g1',
+            nodeId: 'r1',
+            name: 'design',
+            memberCount: 1,
+            inherited: false,
+            isMember: true,
+          },
+          {
+            id: 'g2',
+            nodeId: 'r1',
+            name: 'ops',
+            memberCount: 1,
+            inherited: false,
+            isMember: false,
+          },
+        ],
+      } as never);
+    },
+  });
+  await screen.findByText('message 2');
+  await waitFor(() => expect(fake.stubs.groups.list).toHaveBeenCalled());
+  await screen.findAllByText('Jane').catch(() => {});
+
+  const live = (seq: number, mentions: unknown[]) =>
+    created(seq, {
+      content: { messageId: `m${seq}`, body: `live ${seq}`, replyToId: null, mentions },
+    });
+  await emit(
+    fake,
+    'room_event',
+    live(3, [{ type: 'role', target: 'moderator', token: '@moderator' }]),
+  );
+  await emit(fake, 'room_event', live(4, [{ type: 'role', target: 'reader', token: '@reader' }]));
+  await emit(fake, 'room_event', live(5, [{ type: 'group', target: 'g1', token: '@design' }]));
+  await emit(fake, 'room_event', live(6, [{ type: 'group', target: 'g2', token: '@ops' }]));
+
+  await screen.findByText('live 6');
+  expect(itemOf('live 3')).toHaveAttribute('data-mentions-me', 'collective');
+  expect(itemOf('live 4')).not.toHaveAttribute('data-mentions-me');
+  expect(itemOf('live 5')).toHaveAttribute('data-mentions-me', 'collective');
+  expect(itemOf('live 6')).not.toHaveAttribute('data-mentions-me');
+});
+
+it('never highlights the caller own live message', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+
+  await emit(
+    fake,
+    'room_event',
+    created(3, {
+      senderId: ME,
+      content: {
+        messageId: 'm3',
+        body: 'live self',
+        replyToId: null,
+        mentions: [{ type: 'all', target: null, token: '@all' }],
+      },
+    }),
+  );
+
+  expect(await screen.findByText('live self')).toBeInTheDocument();
+  expect(itemOf('live self')).not.toHaveAttribute('data-mentions-me');
+});
+
+it('renders the chips of a message body', async () => {
+  setup({
+    items: [
+      wireMessage(1, {
+        body: 'ping @u1/example.test and @all',
+        mentions: [
+          { type: 'user', target: 'u1', token: '@u1/example.test' },
+          { type: 'all', target: null, token: '@all' },
+        ],
+      }),
+    ],
+    lastSeq: '1',
+  });
+
+  expect(
+    await screen.findByRole('button', { name: 'Mention of Alice, open profile' }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('img', { name: 'Mention of everyone in the room' })).toBeInTheDocument();
+});
+
+it('sends the mentioned targets and keeps them when a failed send is retried', async () => {
+  const { fake, user } = setup();
+  await screen.findByText('message 2');
+  fake.stubs.messages.send.mockRejectedValueOnce(
+    new EkozError({ code: 'message.mention_invalid', status: 422 }) as never,
+  );
+
+  await user.type(composer(), '@bo');
+  await screen.findByRole('listbox');
+  await user.keyboard('{Enter}');
+  await user.keyboard('hi{Enter}');
+
+  await screen.findByRole('alert');
+  expect(fake.stubs.messages.send).toHaveBeenCalledWith('r1', {
+    body: '@u2/example.test hi',
+    mentions: [{ type: 'user', userId: 'u2' }],
+  });
+  // The pending message shows the chip while it is not delivered.
+  expect(screen.getByRole('button', { name: 'Mention of Bob, open profile' })).toBeInTheDocument();
+
+  fake.stubs.messages.send.mockResolvedValueOnce(wireMessage(3) as never);
+  await user.click(screen.getByRole('button', { name: 'Retry' }));
+
+  await waitFor(() => expect(fake.stubs.messages.send).toHaveBeenCalledTimes(2));
+  expect(fake.stubs.messages.send).toHaveBeenLastCalledWith('r1', {
+    body: '@u2/example.test hi',
+    mentions: [{ type: 'user', userId: 'u2' }],
+  });
+});
+
+it('sends collective targets as their wire inputs', async () => {
+  const { fake, user } = setup();
+  await screen.findByText('message 2');
+
+  await user.type(composer(), '@every');
+  await screen.findByRole('listbox');
+  await user.keyboard('{Enter}');
+  await user.type(composer(), '@moder');
+  await user.keyboard('{Enter}');
+  await user.keyboard('x{Enter}');
+
+  expect(fake.stubs.messages.send).toHaveBeenCalledWith('r1', {
+    body: '@all @moderator x',
+    mentions: [{ type: 'all' }, { type: 'role', role: 'moderator' }],
+  });
+});
+
+it('offers no collective entries in a direct message', async () => {
+  const { user } = setup({ room: { id: 'r1', type: 'dm', readOnly: false } });
+  await screen.findByText('message 2');
+
+  await user.type(composer(), '@');
+  await screen.findByRole('listbox');
+
+  expect(screen.getByText('People')).toBeInTheDocument();
+  expect(screen.queryByText('Roles')).toBeNull();
+  expect(screen.queryByText('Everyone')).toBeNull();
+});
+
+// --- jump to a message and detached timeline ---------------------------------
+
+/** A room of 10 messages whose window around `at` ends at 12, with 14 as the newest. */
+function detachedSetup(options: SetupOptions = {}) {
+  const scrollIntoView = vi.fn();
+  Element.prototype.scrollIntoView = scrollIntoView;
+  const result = setup({
+    at: '11',
+    configure: (fake) => {
+      fake.stubs.messages.list.mockImplementation((async (
+        _room: string,
+        params?: { around?: string; after?: string },
+      ) => {
+        if (params?.around)
+          return {
+            items: [wireMessage(10), wireMessage(11), wireMessage(12)],
+            lastSeq: '14',
+            hasMore: false,
+            hasMoreNewer: true,
+          };
+        if (params?.after === '12')
+          return {
+            items: [wireMessage(13), wireMessage(14)],
+            lastSeq: '14',
+            hasMore: false,
+            hasMoreNewer: false,
+          };
+        return { items: [], lastSeq: '14', hasMore: false, hasMoreNewer: false };
+      }) as never);
+    },
+    ...options,
+  });
+  return { ...result, scrollIntoView };
+}
+
+const scrollList = () => screen.getByRole('list').parentElement as HTMLElement;
+
+it('opens the room around the message it was asked at, scrolls to it and outlines it', async () => {
+  const { fake, scrollIntoView } = detachedSetup();
+
+  expect(await screen.findByText('message 11')).toBeInTheDocument();
+
+  expect(fake.stubs.messages.list).toHaveBeenCalledWith('r1', { around: '11' });
+  await waitFor(() => expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' }));
+  expect(itemOf('message 11')).toHaveAttribute('data-jump-target');
+  expect(itemOf('message 10')).not.toHaveAttribute('data-jump-target');
+  expect(toast.info).not.toHaveBeenCalled();
+});
+
+it('shows an info toast and stays at the loaded window when the target is not there', async () => {
+  const { scrollIntoView } = detachedSetup({ at: '5' });
+
+  await screen.findByText('message 11');
+
+  expect(toast.info).toHaveBeenCalledWith('This message is no longer available.');
+  expect(scrollIntoView).not.toHaveBeenCalled();
+  expect(document.querySelector('[data-jump-target]')).toBeNull();
+});
+
+it('does not open at a message without at', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+
+  expect(fake.stubs.messages.list).toHaveBeenCalledWith('r1');
+  expect(toast.info).not.toHaveBeenCalled();
+});
+
+it('loads newer pages when scrolled to the bottom until it reaches the newest message', async () => {
+  const { fake } = detachedSetup();
+  await screen.findByText('message 12');
+  expect(screen.getByRole('button', { name: 'Load newer messages' })).toBeInTheDocument();
+
+  fireEvent.scroll(scrollList());
+
+  expect(await screen.findByText('message 14')).toBeInTheDocument();
+  expect(fake.stubs.messages.list).toHaveBeenLastCalledWith('r1', { after: '12' });
+  const order = within(screen.getByRole('list'))
+    .getAllByRole('listitem')
+    .map((item) => item.getAttribute('data-message-id'));
+  expect(order).toEqual(['m10', 'm11', 'm12', 'm13', 'm14']);
+  expect(screen.queryByRole('button', { name: 'Load newer messages' })).toBeNull();
+});
+
+it('loads newer messages from the button, and reports a failure', async () => {
+  const { fake, user } = detachedSetup();
+  await screen.findByText('message 12');
+  const list = fake.stubs.messages.list.getMockImplementation();
+  fake.stubs.messages.list.mockRejectedValueOnce(new Error('boom'));
+
+  await user.click(screen.getByRole('button', { name: 'Load newer messages' }));
+  expect(
+    await screen.findByRole('button', { name: /Could not load newer messages/ }),
+  ).toBeInTheDocument();
+
+  fake.stubs.messages.list.mockImplementation(list as never);
+  await user.click(screen.getByRole('button', { name: /Could not load newer messages/ }));
+  expect(await screen.findByText('message 14')).toBeInTheDocument();
+});
+
+it('leaves live messages out while detached and inserts them once caught up with the head', async () => {
+  const { fake } = detachedSetup();
+  await screen.findByText('message 12');
+
+  await emit(fake, 'room_event', created(15));
+  expect(screen.queryByText('live 15')).toBeNull();
+
+  fireEvent.scroll(scrollList());
+  await screen.findByText('message 14');
+  await emit(fake, 'room_event', created(16));
+
+  expect(await screen.findByText('live 16')).toBeInTheDocument();
+});
+
+it('still applies a deletion to a loaded message while detached', async () => {
+  const { fake } = detachedSetup();
+  await screen.findByText('message 12');
+
+  await emit(fake, 'room_event', {
+    roomId: 'r1',
+    feedSeq: '20',
+    event: {
+      type: 'message_deleted',
+      roomId: 'r1',
+      seq: '20',
+      senderId: 'u1',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { messageId: 'm12', messageSeq: '12', reason: 'user' },
+    },
+  });
+
+  expect(await screen.findByText('Message deleted')).toBeInTheDocument();
+});
+
+it('offers to jump to the latest messages while detached, and only then', async () => {
+  const onJumpToLatest = vi.fn();
+  const { user } = detachedSetup({ onJumpToLatest });
+  await screen.findByText('message 12');
+
+  expect(screen.getByText('You are viewing older messages.')).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Jump to latest' }));
+  expect(onJumpToLatest).toHaveBeenCalledTimes(1);
+
+  fireEvent.scroll(scrollList());
+  await screen.findByText('message 14');
+  await waitFor(() => expect(screen.queryByRole('button', { name: 'Jump to latest' })).toBeNull());
+});
+
+it('shows no jump button on a room opened at the newest message', async () => {
+  setup({ onJumpToLatest: vi.fn() });
+  await screen.findByText('message 2');
+
+  expect(screen.queryByRole('button', { name: 'Jump to latest' })).toBeNull();
 });
