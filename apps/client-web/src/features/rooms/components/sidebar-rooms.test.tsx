@@ -96,6 +96,65 @@ describe('SidebarRooms', () => {
     expect(JSON.parse(localStorage.getItem(COLLAPSED_ROOMS_STORAGE_KEY) ?? '[]')).toEqual(['team']);
   });
 
+  describe('unread badges', () => {
+    const unreadItems = [
+      roomItem({
+        id: 'org',
+        name: 'Org',
+        type: 'space',
+        access: 'context',
+        role: null,
+        unreadCount: null,
+      }),
+      roomItem({ id: 'team', name: 'Team', type: 'space', parentId: 'org', unreadCount: 9 }),
+      roomItem({
+        id: 'general',
+        name: 'General',
+        parentId: 'team',
+        access: 'inherited',
+        unreadCount: 3,
+      }),
+      roomItem({ id: 'dev', name: 'Dev', parentId: 'team', unreadCount: 4 }),
+      roomItem({ id: 'random', name: 'Random', unreadCount: 0 }),
+      roomItem({ id: 'busy', name: 'Busy', unreadCount: 100 }),
+    ];
+    const withUnread: Configure = ({ stubs }) => {
+      stubs.rooms.list.mockResolvedValue({ items: unreadItems });
+    };
+
+    it('badges member and inherited rows, and nothing for a zero count', async () => {
+      renderSignedIn(<SidebarRooms />, { configure: withUnread });
+
+      expect(await screen.findByRole('link', { name: /General/ })).toHaveTextContent('3');
+      expect(screen.getByRole('link', { name: /Dev/ })).toHaveTextContent('4');
+      expect(screen.getByRole('link', { name: /Busy/ })).toHaveTextContent('99+');
+      expect(screen.getByRole('link', { name: /Random/ })).not.toHaveTextContent(/\d/);
+    });
+
+    it('never shows the own count of a space, expanded or not', async () => {
+      renderSignedIn(<SidebarRooms />, { configure: withUnread });
+
+      const team = await screen.findByRole('link', { name: /^Team/ });
+      expect(within(team).queryByRole('status')).not.toBeInTheDocument();
+      expect(screen.queryByText('9')).not.toBeInTheDocument();
+    });
+
+    it('shows the sum of the descendants on a collapsed space only', async () => {
+      const { user } = renderSignedIn(<SidebarRooms />, { configure: withUnread });
+
+      await user.click(await screen.findByRole('button', { name: 'Collapse Team' }));
+
+      const team = screen.getByRole('link', { name: /^Team/ });
+      expect(within(team).getByRole('status', { name: '7 unread messages' })).toHaveTextContent(
+        '7',
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Expand Team' }));
+
+      expect(within(screen.getByRole('link', { name: /^Team/ })).queryByRole('status')).toBeNull();
+    });
+  });
+
   it('restores the collapsed spaces from storage', async () => {
     localStorage.setItem(COLLAPSED_ROOMS_STORAGE_KEY, JSON.stringify(['org']));
 

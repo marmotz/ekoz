@@ -1,40 +1,23 @@
-import { useEffect, useRef } from 'react';
-import { getActiveRoom, markUnseen, resetUnseenRooms } from '@/shared/realtime/unseen-rooms';
-import { useRoomEvents } from '@/shared/realtime/use-realtime';
+import { useEffect } from 'react';
+import { resetActiveRooms } from '@/shared/realtime/active-room';
 import { useSession } from '@/shared/sdk/session';
-import { useMe } from '@/shared/sdk/use-me';
 import { useSdk } from '@/shared/sdk/use-sdk';
 
 /**
- * Opens the SDK stream for the signed-in session. The only interpretation it
- * does: a `message_created` from someone else in a room that is not the active
- * one marks that room unseen.
+ * Opens the SDK stream for the signed-in session. It interprets no event: each
+ * feature subscribes and updates its own cache.
  */
 function RealtimeConnection() {
   const sdk = useSdk();
-  const me = useMe();
-  const meId = useRef<string | undefined>(undefined);
-  const currentMeId = me.data?.id;
-  useEffect(() => {
-    meId.current = currentMeId;
-  }, [currentMeId]);
 
   useEffect(() => {
     if (!sdk) return undefined;
     sdk.stream.connect();
     return () => {
       sdk.stream.disconnect();
-      resetUnseenRooms();
+      resetActiveRooms();
     };
   }, [sdk]);
-
-  useRoomEvents(({ roomId, event }) => {
-    if (event.type !== 'message_created') return;
-    // Until the caller is known, an own message cannot be told from someone else's.
-    if (meId.current === undefined || event.senderId === meId.current) return;
-    if (roomId === getActiveRoom()) return;
-    markUnseen(roomId);
-  });
 
   return null;
 }
@@ -42,7 +25,7 @@ function RealtimeConnection() {
 /**
  * Mounted once in `app/providers`. The stream lives exactly as long as the
  * session is authenticated: leaving that state unmounts the connection, which
- * disconnects and forgets the unseen rooms.
+ * disconnects and forgets the active and reading rooms.
  */
 export function RealtimeProvider() {
   const { status } = useSession();

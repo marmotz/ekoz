@@ -3,7 +3,7 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest';
 
 import { RoomChat } from '@/features/chat/components/room-chat';
-import { getActiveRoom, markUnseen, resetUnseenRooms } from '@/shared/realtime/unseen-rooms';
+import { getActiveRoom, resetActiveRooms } from '@/shared/realtime/active-room';
 import { toast } from '@/shared/ui/sonner';
 import { type Configure, type Fake, renderSignedIn } from '../../../../test/render-signed-in';
 import { createClientMock } from '../../../../test/sdk-mock';
@@ -107,7 +107,7 @@ const emit = (fake: Fake, name: Parameters<Fake['streamControl']['emit']>[0], ..
 
 beforeEach(() => {
   createClientMock.mockReset();
-  resetUnseenRooms();
+  resetActiveRooms();
   vi.mocked(toast.info).mockClear();
 });
 
@@ -501,8 +501,7 @@ it('reloads the first page when catch-up fails', async () => {
 
 // --- active room and lifecycle --------------------------------------------
 
-it('marks the room active, clears its unseen dot, and releases it on unmount', async () => {
-  markUnseen('r1');
+it('marks the room active and releases it on unmount', async () => {
   const { unmount } = setup();
   await screen.findByText('message 2');
 
@@ -510,6 +509,170 @@ it('marks the room active, clears its unseen dot, and releases it on unmount', a
 
   unmount();
   expect(getActiveRoom()).toBeNull();
+});
+
+it('sends the read marker of the newest message once the list is at the bottom', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+
+  await waitFor(() => expect(fake.stubs.receipts.set).toHaveBeenCalledWith('r1', '2'), {
+    timeout: 3000,
+  });
+  expect(fake.stubs.receipts.set).toHaveBeenCalledTimes(1);
+});
+
+it('sends the marker of the newest message, not of the last event, when the chat closes', async () => {
+  const { fake, unmount } = setup();
+  await screen.findByText('message 2');
+  emit(fake, 'room_event', {
+    roomId: 'r1',
+    feedSeq: '3',
+    event: {
+      type: 'receipt_updated',
+      roomId: 'r1',
+      seq: '3',
+      senderId: 'u2',
+      createdAt: '2026-01-01T11:00:00.000Z',
+      content: { userId: 'u2', seq: '2' },
+    },
+  });
+
+  unmount();
+
+  expect(fake.stubs.receipts.set).toHaveBeenCalledTimes(1);
+  expect(fake.stubs.receipts.set).toHaveBeenCalledWith('r1', '2');
+});
+
+it('does not send a marker for an empty room', async () => {
+  const { fake, unmount } = setup({ items: [], lastSeq: '0' });
+  await screen.findByText('No messages yet.');
+
+  unmount();
+
+  expect(fake.stubs.receipts.set).not.toHaveBeenCalled();
+});
+
+// --- read receipts ---------------------------------------------------------
+
+const receiptEvent = (userId: string, seq: number, eventSeq = 10) => ({
+  roomId: 'r1',
+  feedSeq: String(eventSeq),
+  event: {
+    type: 'receipt_updated',
+    roomId: 'r1',
+    seq: String(eventSeq),
+    senderId: userId,
+    createdAt: '2026-01-01T11:00:00.000Z',
+    content: { userId, seq: String(seq) },
+  },
+});
+
+const marker = (userId: string, seq: number) => ({
+  roomId: 'r1',
+  userId,
+  seq: String(seq),
+  updatedAt: '2026-01-01T11:00:00.000Z',
+});
+
+const readBy = (name: string) => screen.queryByRole('group', { name: `Read by ${name}` });
+const messageItem = (text: string) => screen.getByText(text).closest('li') as HTMLElement;
+
+it('draws the readers under the message their marker sits on, not the caller nor former members', async () => {
+  setup({
+    items: [wireMessage(1), wireMessage(2), wireMessage(3)],
+    lastSeq: '3',
+    members: [member('u1', 'Alice'), member('u2', 'Bob'), member('u3', 'Carol')],
+    configure: (fake) => {
+      fake.stubs.receipts.list.mockResolvedValue([
+        marker('u2', 2),
+        marker('u3', 3),
+        marker('01ARZ3NDEKTSV4RRFFQ69G5FAV', 3),
+        marker('gone', 3),
+      ] as never);
+    },
+  });
+  await screen.findByText('message 3');
+
+  await waitFor(() => expect(readBy('Bob')).toBeInTheDocument());
+  expect(
+    within(messageItem('message 2')).getByRole('group', { name: 'Read by Bob' }),
+  ).toBeVisible();
+  expect(
+    within(messageItem('message 3')).getByRole('group', { name: 'Read by Carol' }),
+  ).toBeVisible();
+  expect(within(messageItem('message 1')).queryByRole('group')).toBeNull();
+  expect(screen.getAllByRole('group')).toHaveLength(2);
+});
+
+it('moves the readers live on receipt_updated', async () => {
+  const { fake } = setup({
+    items: [wireMessage(1), wireMessage(2)],
+    configure: (f) => {
+      f.stubs.receipts.list.mockResolvedValue([marker('u2', 1)] as never);
+    },
+  });
+  await screen.findByText('message 2');
+  await waitFor(() =>
+    expect(
+      within(messageItem('message 1')).getByRole('group', { name: 'Read by Bob' }),
+    ).toBeVisible(),
+  );
+
+  emit(fake, 'room_event', receiptEvent('u2', 2));
+
+  await waitFor(() =>
+    expect(
+      within(messageItem('message 2')).getByRole('group', { name: 'Read by Bob' }),
+    ).toBeVisible(),
+  );
+  expect(within(messageItem('message 1')).queryByRole('group')).toBeNull();
+});
+
+it('draws a reader who had no marker yet when their receipt arrives', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+  await waitFor(() => expect(fake.stubs.receipts.list).toHaveBeenCalledWith('r1'));
+
+  emit(fake, 'room_event', receiptEvent('u2', 2));
+
+  await waitFor(() => expect(readBy('Bob')).toBeInTheDocument());
+});
+
+it('never moves a reader back on a stale receipt', async () => {
+  const { fake } = setup({
+    configure: (f) => {
+      f.stubs.receipts.list.mockResolvedValue([marker('u2', 2)] as never);
+    },
+  });
+  await screen.findByText('message 2');
+  await waitFor(() => expect(readBy('Bob')).toBeInTheDocument());
+
+  emit(fake, 'room_event', receiptEvent('u2', 1, 11));
+
+  expect(
+    within(messageItem('message 2')).getByRole('group', { name: 'Read by Bob' }),
+  ).toBeVisible();
+});
+
+it('ignores the receipts of another room', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+  await waitFor(() => expect(fake.stubs.receipts.list).toHaveBeenCalled());
+
+  emit(fake, 'room_event', { ...receiptEvent('u2', 2), roomId: 'other' });
+
+  expect(screen.queryByRole('group')).toBeNull();
+});
+
+it('refetches the markers after a reconnection', async () => {
+  const { fake } = setup();
+  await screen.findByText('message 2');
+  await waitFor(() => expect(fake.stubs.receipts.list).toHaveBeenCalledTimes(1));
+  fake.stubs.receipts.list.mockResolvedValue([marker('u2', 2)] as never);
+
+  await emit(fake, 'reconnected');
+
+  await waitFor(() => expect(readBy('Bob')).toBeInTheDocument());
 });
 
 it('removes the timeline from the cache on unmount and unsubscribes from the stream', async () => {

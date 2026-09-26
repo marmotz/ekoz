@@ -8,6 +8,8 @@ that does not touch this file.
 
 ### Added
 
+- `bun run db:mark-read <channel name>` marks a channel as read by all its members, for local testing of read receipts.
+- `bun run db:seed` seeds a local "Test" space with a public "test" channel joined by 100 throwaway users.
 - `GET /users?ids=` returns user summaries by id, in request order. (#123)
 - Room groups: create, rename and delete named member sets on a room or space, and manage their members, with the `room.manage_groups` capability. (#168)
 - `GET /rooms/:id/messages` accepts `after` and `around`, and reports `hasMoreNewer`. (#169)

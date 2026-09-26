@@ -78,4 +78,21 @@ describe('buildRoomTree', () => {
 
     expect(shape(tree)).toEqual([['self', []]]);
   });
+
+  it('sums the unread counts of every descendant, null counting as 0', () => {
+    const tree = buildRoomTree([
+      roomItem({ id: 'org', type: 'space', access: 'context', role: null, unreadCount: null }),
+      roomItem({ id: 'team', type: 'space', parentId: 'org', unreadCount: 0 }),
+      roomItem({ id: 'general', parentId: 'team', unreadCount: 3 }),
+      roomItem({ id: 'random', parentId: 'team', unreadCount: 4 }),
+      roomItem({ id: 'ctx', parentId: 'org', access: 'context', unreadCount: null }),
+      roomItem({ id: 'top', parentId: 'org', unreadCount: 100 }),
+    ]);
+
+    const org = tree[0];
+    const team = org?.children.find((node) => node.room.id === 'team');
+    expect(org?.descendantsUnread).toBe(107);
+    expect(team?.descendantsUnread).toBe(7);
+    expect(team?.children.every((node) => node.descendantsUnread === 0)).toBe(true);
+  });
 });

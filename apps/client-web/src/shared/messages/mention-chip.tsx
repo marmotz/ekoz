@@ -88,12 +88,13 @@ function UserChip({ roomId, target }: { roomId: string; target: MentionTarget })
     const name = summary.displayName;
     return (
       <Chip kind="user" label={t('chat.mentions.aria.userLeft', { name })}>
-        @{name} <span aria-hidden="true">🚪</span>
+        @{name} ({t('chat.mentions.markers.left')})
       </Chip>
     );
   }
 
-  // Deleted account, or still loading: the raw token is all there is.
+  // Deleted account: its handle may now belong to someone else, so it is not shown.
+  // Still loading: the raw token is all there is.
   const deleted =
     (member && member.user.displayName === null) || summary !== undefined || summaries.isError;
   return (
@@ -106,8 +107,7 @@ function UserChip({ roomId, target }: { roomId: string; target: MentionTarget })
           : t('chat.mentions.aria.user', { name: target.token })
       }
     >
-      {target.token}
-      {deleted ? ' 💀' : ''}
+      {deleted ? t('chat.mentions.deletedAccount') : target.token}
     </Chip>
   );
 }

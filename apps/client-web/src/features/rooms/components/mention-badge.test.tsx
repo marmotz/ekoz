@@ -69,9 +69,10 @@ describe('RoomTree', () => {
       {
         room: roomItem({ id: 's1', name: 'Space', type: 'space', access: 'context' }),
         children: [
-          { room: roomItem({ id: 'r1', name: 'General' }), children: [] },
-          { room: roomItem({ id: 'r2', name: 'Random' }), children: [] },
+          { room: roomItem({ id: 'r1', name: 'General' }), children: [], descendantsUnread: 0 },
+          { room: roomItem({ id: 'r2', name: 'Random' }), children: [], descendantsUnread: 0 },
         ],
+        descendantsUnread: 0,
       },
     ];
     renderSignedIn(<RoomTree nodes={nodes} collapsed={new Set()} onToggle={() => {}} />, {

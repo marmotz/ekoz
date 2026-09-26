@@ -4,18 +4,20 @@ import { act, render, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, expect, it } from 'vitest';
 
+import {
+  getActiveRoom,
+  getReadingRoom,
+  resetActiveRooms,
+  setActiveRoom,
+  setReadingRoom,
+} from '@/shared/realtime/active-room';
 import { RealtimeProvider } from '@/shared/realtime/realtime-provider';
-import { resetUnseenRooms, setActiveRoom, useRoomHasUnseen } from '@/shared/realtime/unseen-rooms';
 import { SdkContext } from '@/shared/sdk/use-sdk';
-import { createFakeSdk, defaultMe } from '../../../test/sdk-mock';
+import { createFakeSdk } from '../../../test/sdk-mock';
 
 beforeEach(() => {
-  resetUnseenRooms();
+  resetActiveRooms();
 });
-
-function Dot({ roomId }: { roomId: string }) {
-  return <span data-testid={roomId}>{String(useRoomHasUnseen(roomId))}</span>;
-}
 
 const SIGNED_IN = { identifier: 'jane/example.test', sessionId: 's1' };
 
@@ -27,15 +29,7 @@ function mount({ signedIn = true } = {}) {
       <SdkContext.Provider value={fake.sdk as EkozClient}>{children}</SdkContext.Provider>
     </QueryClientProvider>
   );
-  const view = render(
-    <>
-      <RealtimeProvider />
-      <Dot roomId="r1" />
-      <Dot roomId="r2" />
-      <Dot roomId="probe" />
-    </>,
-    { wrapper },
-  );
+  const view = render(<RealtimeProvider />, { wrapper });
   return { fake, ...view };
 }
 
@@ -45,20 +39,6 @@ function created(roomId: string, senderId: string | null, seq = '1') {
     feedSeq: seq,
     event: { type: 'message_created', roomId, seq, senderId, content: {} },
   };
-}
-
-/**
- * Waits until the caller is known: an event is only classified once `useMe` has
- * resolved, so a probe from someone else is replayed until it is flagged.
- */
-async function callerKnown(
-  fake: ReturnType<typeof createFakeSdk>,
-  view: { getByTestId: (id: string) => HTMLElement },
-) {
-  await waitFor(() => {
-    act(() => fake.streamControl.emit('room_event', created('probe', 'someone-else')));
-    expect(view.getByTestId('probe')).toHaveTextContent('true');
-  });
 }
 
 it('connects the stream while the session is authenticated', () => {
@@ -99,63 +79,22 @@ it('disconnects on unmount', () => {
   expect(fake.streamControl.stream.disconnect).toHaveBeenCalledTimes(1);
 });
 
-it("marks a room unseen when someone else's message arrives in it", async () => {
-  const view = mount();
-  const { fake, getByTestId } = view;
-  await callerKnown(fake, view);
-
-  act(() => fake.streamControl.emit('room_event', created('r1', 'someone-else')));
-
-  expect(getByTestId('r1')).toHaveTextContent('true');
-  expect(getByTestId('r2')).toHaveTextContent('false');
-});
-
-it('ignores the caller own message', async () => {
-  const view = mount();
-  const { fake, getByTestId } = view;
-  await callerKnown(fake, view);
-
-  act(() => fake.streamControl.emit('room_event', created('r1', defaultMe.id)));
-
-  expect(getByTestId('r1')).toHaveTextContent('false');
-});
-
-it('ignores messages of the active room', async () => {
-  const view = mount();
-  const { fake, getByTestId } = view;
-  await callerKnown(fake, view);
+it('forgets the active and reading rooms when the connection ends', () => {
+  const { unmount } = mount();
   setActiveRoom('r1');
-
-  act(() => fake.streamControl.emit('room_event', created('r1', 'someone-else')));
-
-  expect(getByTestId('r1')).toHaveTextContent('false');
-});
-
-it('ignores events that are not new messages', async () => {
-  const view = mount();
-  const { fake, getByTestId } = view;
-  await callerKnown(fake, view);
-
-  act(() =>
-    fake.streamControl.emit('room_event', {
-      roomId: 'r1',
-      feedSeq: '1',
-      event: { type: 'message_edited', roomId: 'r1', seq: '2', senderId: 'someone-else' },
-    }),
-  );
-
-  expect(getByTestId('r1')).toHaveTextContent('false');
-});
-
-it('forgets unseen rooms when the connection ends', async () => {
-  const view = mount();
-  const { fake, getByTestId, unmount } = view;
-  await callerKnown(fake, view);
-  act(() => fake.streamControl.emit('room_event', created('r1', 'someone-else')));
-  expect(getByTestId('r1')).toHaveTextContent('true');
+  setReadingRoom('r1');
 
   unmount();
 
-  const probe = render(<Dot roomId="r1" />);
-  expect(probe.getByTestId('r1')).toHaveTextContent('false');
+  expect(getActiveRoom()).toBeNull();
+  expect(getReadingRoom()).toBeNull();
+});
+
+it('does not interpret room events', () => {
+  const { fake } = mount();
+
+  act(() => fake.streamControl.emit('room_event', created('r1', 'someone-else')));
+
+  expect(getActiveRoom()).toBeNull();
+  expect(getReadingRoom()).toBeNull();
 });

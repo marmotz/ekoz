@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Show "Read by everyone" instead of the avatar list once every other member has read a message.
+- Show unread state on the mobile menu button: a grey badge with the total of unread messages and a dark one with the unread mentions.
+- Send the read marker while a room is read (list at the bottom, window visible and focused), replacing the unseen-rooms store with the active and reading room (#221, #222).
+- Add unread message badges in the rooms tree (with the sum on a collapsed space) and keep the rooms list and invitations live from the stream, dropping the timer-and-focus refetch override (#223).
+- Draw read receipts under messages: up to five avatars and `+N` of the members whose marker sits on each message (#224).
+- Document the read state client in `docs/technical/web-client-read-state.md` (#225).
 - Focus the message composer by default when a room is opened.
 - Add the mentions UI: chips for user, role, `@all` and group mentions in messages (member, left, deleted and deleted-group states), a highlight for messages that concern the caller, the shared `shared/messages` renderer and `shared/groups` query, and a live derivation of `mentionsMe` for incoming messages (#176).
 - Rebuild the composer on TipTap with `@` suggestions (people, groups, roles, `@all` in channels), send the mentioned targets, map `message.mention_not_member` and `message.mention_invalid` to a failure, and add the helper that turns a body back into mention nodes for editing (#177).
@@ -58,3 +64,12 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Add the public profile card (`shared/profile`, shadcn/ui `popover`), opened from message authors and from a "My public profile" user menu entry, with left-the-room and deleted account markers (#126).
 - Add the members panel: header toggle with the count, list grouped by role or A to Z with search, an inline column from `lg` and a sheet below, its state kept in `localStorage` (#127).
 - Draw default avatars (no uploaded picture) as initials on a color derived from the account id, with dark or light text chosen for contrast.
+
+### Changed
+
+- Replace the door and skull emoji next to authors and mentions who left the room or deleted their account with a text note, and show a deleted account mention as "@Deleted account" instead of its handle, which a new account may reuse.
+
+### Fixed
+
+- Scale the initials of a default avatar with its size instead of a fixed font size.
+

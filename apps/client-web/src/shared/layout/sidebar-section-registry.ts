@@ -11,6 +11,11 @@ export interface SidebarSection {
   /** Ascending sort key; sections without one go last. */
   order?: number;
   component: ComponentType<SidebarSectionProps>;
+  /**
+   * Hook returning the section's unread total. The shell sums them into a badge on the
+   * menu button, so an unread item stays visible while the sidebar is folded.
+   */
+  useUnreadCount?: () => number;
 }
 
 const sections: SidebarSection[] = [];

@@ -8,7 +8,7 @@ import {
   UNREAD_MENTIONS_COALESCE_MS,
   useUnreadMentionsLive,
 } from '@/shared/mentions/use-unread-mentions-live';
-import { resetUnseenRooms, setActiveRoom } from '@/shared/realtime/unseen-rooms';
+import { resetActiveRooms, setActiveRoom } from '@/shared/realtime/active-room';
 import { ME_QUERY_KEY } from '@/shared/sdk/use-me';
 import { SdkContext } from '@/shared/sdk/use-sdk';
 import { createFakeSdk, defaultMe } from '../../../test/sdk-mock';
@@ -57,12 +57,12 @@ function setup() {
 }
 
 beforeEach(() => {
-  resetUnseenRooms();
+  resetActiveRooms();
 });
 
 afterEach(() => {
   vi.useRealTimers();
-  resetUnseenRooms();
+  resetActiveRooms();
 });
 
 const direct = { type: 'user', target: ME, token: '@me' };

@@ -78,7 +78,7 @@ after the first. `EventSource` is injectable, like `fetch`.
 ### Client layout and boundaries
 
 ```
-src/shared/realtime/   provider, subscription hooks, unseen-rooms store
+src/shared/realtime/   provider, subscription hooks, active-room store
 src/features/chat/
   api/         query keys and queryFns (timeline first page, older page)
   lib/         timeline.ts (pure reducer), composer-state.ts, mention-node.ts, ...
@@ -99,12 +99,13 @@ the features still never import each other.
 
 One SSE connection per authenticated session. `RealtimeProvider`, mounted once in
 `app/providers`, connects the SDK stream while the session is `authenticated` and
-disconnects (and forgets the unseen rooms) when it leaves that state. `shared/realtime`
-only dispatches: `useConnectionStatus`, `useRoomEvents`, `useAccountEvents`,
-`useReconnected`. It interprets a single thing, that a `message_created` from
-someone other than the caller in a room that is not the active one marks the room
-unseen. That store is in memory (reset on reload) and `shared` exposes it as
-`useRoomHasUnseen`, so the room tree can read it without importing the chat.
+disconnects (and forgets the active and reading rooms) when it leaves that state.
+`shared/realtime` only dispatches: `useConnectionStatus`, `useRoomEvents`,
+`useAccountEvents`, `useReconnected`. It interprets nothing. The `active-room` store keeps
+two in-memory ids (reset on reload): the room that is open, set by `RoomChat`, and the room
+being read, set by the read marker hook. It replaced the earlier unseen-rooms set, which had
+no consumer; see [web client read state](web-client-read-state.md). `shared` exposes both
+so the rooms feature can read them without importing the chat.
 Everything else is interpreted by the feature that owns the state.
 
 ### Timeline state
@@ -202,7 +203,8 @@ Bodies are rendered with `react-markdown` and `remark-gfm`, by `MessageBody` in
 - A fresh `GET /events` connection no longer replays the retained feed: clients that
   need history read `/messages` and `/sync`.
 - Only the open room updates live; everything else is invalidated or refetched when
-  opened. Edit and delete actions, reactions, pins, read markers, typing and presence
+  opened. Edit and delete actions, reactions, pins, typing and presence
   are follow-ups (unread mention counters shipped with
-  [web client mentions](web-client-mentions.md)).
+  [web client mentions](web-client-mentions.md), read markers and receipts with
+  [web client read state](web-client-read-state.md)).
 - A gap in the SDK is fixed in `packages/sdk`, never worked around in the client.

@@ -95,10 +95,10 @@ it('opens the same card from the avatar, which stays out of the tab order', asyn
   expect(await screen.findByText('Alice bio')).toBeInTheDocument();
 });
 
-it('marks someone who left with a door and shows the left note in their card', async () => {
+it('marks someone who left with a text note and shows the left note in their card', async () => {
   const { user } = setup(left);
 
-  expect(await screen.findByRole('img', { name: 'Left the room' })).toHaveTextContent('🚪');
+  expect(await screen.findByText('(Left the room)')).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Alice' }));
 
   expect(await screen.findByText('Alice bio')).toBeInTheDocument();
@@ -106,11 +106,11 @@ it('marks someone who left with a door and shows the left note in their card', a
   expect(screen.queryByText(/^Role:/)).not.toBeInTheDocument();
 });
 
-it('shows a deleted account as plain text with a skull marker', async () => {
+it('shows a deleted account as plain text without any emoji marker', async () => {
   const { fake } = setup(deleted);
 
   expect(await screen.findByText('Deleted account')).toBeInTheDocument();
-  expect(screen.getByRole('img', { name: 'Deleted account' })).toHaveTextContent('💀');
+  expect(screen.queryByText('💀')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Deleted account' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
   expect(fake.stubs.users.getProfile).not.toHaveBeenCalled();

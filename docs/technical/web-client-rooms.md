@@ -174,9 +174,11 @@ through the server Hurl collection.
 | `['rooms','directory',query]`    | `GET /directory`, infinite      |
 | `['rooms','join-requests',id]`   | `GET /rooms/:id/join-requests`, infinite |
 
-The list and the invitations override the global query defaults with
-`staleTime: 10_000` and `refetchOnWindowFocus: true`; everything else keeps the global
-`false`. Every mutation invalidates what it changes:
+Every query keeps the global defaults: the list and the invitations used to override them
+with `staleTime: 10_000` and `refetchOnWindowFocus: true` because nothing refreshed them
+live, and that override is gone now that `useRoomsLive` does (see
+[web client read state](web-client-read-state.md)). Every mutation invalidates what it
+changes:
 
 - create a space or a channel -> `list`;
 - join, leave -> `list`, `permissions` of the room (join also on
@@ -188,12 +190,12 @@ The list and the invitations override the global query defaults with
 - approve -> `join-requests` of the room and `list`; reject -> `join-requests`. Both
   run on failure too, for the same reason.
 
-These keys are the contract with `shared/realtime`: the SSE-driven invalidation of
-this feature (`room_updated`, `role_changed`, `permission_override_changed` and the
-caller's `member_*` events -> `list`, `detail`, `permissions` of the room;
-reconnection -> `list` and `invitations`; invitation and join request frames on the
-account feed -> `invitations` and `list`, once the protocol emits them) subscribes
-from inside the feature and touches no other feature's keys.
+These keys are the contract with `shared/realtime`: the SSE-driven refresh of the list
+and the invitations (`useRoomsLive`, mounted by the `_app` layout; structural room and
+member events -> `list`, coalesced to one per 500 ms; reconnection -> `list` and
+`invitations`; the `invitation_created` and `join_request_resolved` account frames ->
+`invitations` and `list`) subscribes from inside the feature and touches no other
+feature's keys. It also keeps the `unreadCount` of each list item current.
 The chat feature never touches them.
 
 ## Alternatives
@@ -206,7 +208,7 @@ The chat feature never touches them.
 | Role in the list                | SQL over the closure table, guarded by an equivalence spec  | The permission resolver per room                            | One query instead of N resolver runs; the drift risk is covered by the spec.                          |
 | Non-member of an `invite` room  | `GET /rooms/:id/preview` with the caller's request          | A generic screen; a pending state inferred from `409`       | Shows name, topic and request state without revealing `private` rooms.                                |
 | Who invites / requests          | Embedded `UserSummary`                                      | `GET /users/by-id/:id`                                      | No new public lookup surface, no N+1.                                                                 |
-| Freshness                       | Focus and mutation refetch; the keys as the SSE contract    | Polling                                                     | Nothing throwaway once the live invalidation lands.                                                   |
+| Freshness                       | Live invalidation from the stream, plus mutation refetch    | Polling; a short `staleTime` with focus refetch             | The stream already reaches every effective member; the timer heuristic is gone.                       |
 | Sidebar tree placement          | `registerSidebarSection` slot                               | A secondary route pane; the shell importing the feature     | Keeps the shell feature-agnostic and the tree visible on every page.                                  |
 | Room access for the chat        | `RoomGate` render function `{ room, capabilities, membership }` | Each feature fetching the room and its permissions      | One owner, one cache, no duplicate requests; the route composes both features.                        |
 | Creation UI                     | `/rooms/new` route                                          | Dialog                                                      | Linkable and testable, no dialog state.                                                               |
@@ -226,7 +228,5 @@ The chat feature never touches them.
   `Room.parentId` already pointed at it.
 - An `inherited` room with a `room.read` deny override is listed but answers `403`:
   `GET /rooms` does not evaluate overrides.
-- Until the live invalidation lands, the rooms list and the invitations update on
-  focus, on mutation and on open only; so does `RoomGate` when access is gained or
-  lost while a room is open. The unseen dot in the tree, read from
-  `shared/realtime/unseen-rooms.ts`, is the other follow-up of this feature.
+- The list and the invitations follow the stream; a room the stream does not deliver (for
+  example after losing membership) converges on the next invalidation or reload.

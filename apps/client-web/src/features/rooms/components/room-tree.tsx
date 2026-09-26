@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { ChevronDown, ChevronRight, Folder, Hash } from 'lucide-react';
 import type { RoomNode } from '@/features/rooms/components/build-room-tree';
 import { MentionBadge } from '@/features/rooms/components/mention-badge';
+import { UnreadBadge } from '@/features/rooms/components/unread-badge';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { cn } from '@/shared/lib/utils';
 
@@ -46,6 +47,9 @@ function RoomTreeItem({
   const name = room.name ?? t('rooms.unnamed');
   const isCollapsed = collapsed.has(room.id);
   const Icon = room.type === 'space' ? Folder : Hash;
+  // A space holds no message: it shows the sum of its descendants while collapsed, never its own count.
+  const unread =
+    room.type === 'space' ? (isCollapsed ? node.descendantsUnread : null) : room.unreadCount;
 
   return (
     <li>
@@ -83,7 +87,10 @@ function RoomTreeItem({
           >
             <Icon className="size-4 shrink-0" />
             <span className="truncate">{name}</span>
-            <MentionBadge roomId={room.id} />
+            <span className="ml-auto flex shrink-0 items-center gap-1">
+              <MentionBadge roomId={room.id} />
+              <UnreadBadge count={unread} />
+            </span>
           </Link>
         )}
       </div>
