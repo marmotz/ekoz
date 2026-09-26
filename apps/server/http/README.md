@@ -139,6 +139,15 @@ http/
     revoke-unauthenticated.hurl       DELETE /sessions/:id             401 auth.unauthenticated
     revoke-all.hurl                   DELETE /sessions?all=true        200 · needs access_token
     revoke-all-unauthenticated.hurl   DELETE /sessions?all=true        401 auth.unauthenticated
+  presence/
+    heartbeat.hurl                     POST   /presence/heartbeat     201 · needs access_token
+    heartbeat-invalid.hurl             POST   /presence/heartbeat     422 · empty clientId
+    heartbeat-unauthenticated.hurl     POST   /presence/heartbeat     401 auth.unauthenticated
+    preference.hurl                    PUT    /presence/preference    200 · needs access_token
+    preference-invalid.hurl            PUT    /presence/preference    422 · manualAway missing
+    preference-unauthenticated.hurl    PUT    /presence/preference    401 auth.unauthenticated
+    typing.hurl                        POST   /rooms/:id/typing       204 · needs room.post + room_id
+    typing-unauthenticated.hurl        POST   /rooms/:id/typing       401 auth.unauthenticated
   stream/
     ticket.hurl                       POST   /stream/ticket           200 · needs access_token
     ticket-unauthenticated.hurl       POST   /stream/ticket           401 auth.unauthenticated

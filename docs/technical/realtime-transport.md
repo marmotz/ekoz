@@ -15,9 +15,10 @@ and typing indicators are part of the messaging increment.
   events (notifications, presence of co-members).
 - All writes go through REST endpoints: send, edit, react, read receipt, typing,
   presence heartbeat.
-- Typing: at most 1 POST every 3-5 s while typing. Presence: heartbeat every
-  30-60 s and on tab visibility change; the server derives online / away /
-  offline from the last heartbeat.
+- Typing: at most 1 POST per room every `typingTtl / 2` while typing. Presence:
+  heartbeat every `heartbeatInterval` and on an activity change; the server
+  derives online / away / offline from the heartbeats of every client instance of
+  the user. See [presence and typing](presence-and-typing.md).
 - Sync cursor: per-room `seq`. The client keeps a `{roomId: seq}` map.
 - Reconnection: the SDK runs a `GET /sync?room=&since=<seq>` reconciliation for
   each stale room, then trusts the live stream. The server is not required to

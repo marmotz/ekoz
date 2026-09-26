@@ -27,6 +27,7 @@ import { RoleDefaultCapabilitiesSeeder } from './permissions/role-default-capabi
 import { PresenceController } from './presence/presence.controller.js';
 import { PresenceService } from './presence/presence.service.js';
 import { InProcessPresenceStore, PRESENCE_STORE } from './presence/presence.store.js';
+import { PresenceSweepService } from './presence/presence-sweep.service.js';
 import { TypingController } from './presence/typing.controller.js';
 import { TypingService } from './presence/typing.service.js';
 import { ReactionsController } from './reactions/reactions.controller.js';
@@ -95,6 +96,7 @@ import { SyncService } from './streaming/sync.service.js';
     SyncService,
     EphemeralBroadcaster,
     PresenceService,
+    PresenceSweepService,
     TypingService,
     { provide: PRESENCE_STORE, useClass: InProcessPresenceStore },
     RetentionService,

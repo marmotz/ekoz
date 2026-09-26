@@ -17,6 +17,7 @@ that does not touch this file.
 - Messages can mention everyone, a role or a group in channels; mentions carry a frozen token and audience, and editing a message can change them. (#173)
 - Messages report `mentionsMe` for the caller. (#173)
 - `GET /me/mentions/unread` and `GET /me/mentions` list unread mention counters and the messages that mention the caller. (#174)
+- `PUT /presence/preference` persists a manual "appear away" preference. (#131)
 - `GET /rooms` items carry `unreadCount`, the unread messages since the read marker or the join. (#219)
 - Public `GET /messages/policy` exposing the maximum message body length. (#190)
 - Messages carry their reactions, grouped by emoji. (#207)
@@ -25,12 +26,17 @@ that does not touch this file.
 
 ### Changed
 
+- Presence frames are pushed when a user's status changes, including when it lapses, and a snapshot of the visible peers is written when `GET /events` opens. (#130)
+- Presence heartbeats accept a `clientId` and are aggregated per client instance. (#130)
+- `POST /presence/heartbeat` also returns `manualAway`, `heartbeatInterval` and `typingTtl`. (#131)
 - Read markers can be set and listed by members inherited from an ancestor space. (#218)
 - Breaking: message `mentions` are now `{ type, target, token }` targets instead of user ids. (#173)
 - A member of the parent space can be mentioned in one of its channels. (#173)
 
 ### Fixed
 
+- Presence is delivered to the peers of the user instead of the peers of their peers. (#129)
+- Typing signals reach the members of a space reading a channel by inheritance, without a reconnect, and are no longer echoed to the sender. (#129)
 - Pinning or reacting to a deleted message now answers 404. (#207)
 - Moving a room now drops all of its outdated ancestor links, not only one.
 - Deleting a message now removes all of its reactions, not only one. (#173)

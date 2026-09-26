@@ -1,5 +1,5 @@
 import type { Message } from '@ekozhq/sdk';
-import { useQuery } from '@tanstack/react-query';
+import { skipToken, useQuery } from '@tanstack/react-query';
 
 import { chatKeys } from '@/features/chat/api/query-keys';
 import {
@@ -18,10 +18,10 @@ import { useSdk } from '@/shared/sdk/use-sdk';
 export function useMessageLookup(roomId: string, messageId: string) {
   const sdk = useSdk();
 
-  // Reads the timeline entry reactively without ever fetching it (`enabled: false`).
+  // Reads the timeline entry reactively without ever fetching it (`skipToken`).
   const inTimeline = useQuery<Timeline, Error, TimelineMessage | undefined>({
     queryKey: chatKeys.timeline(roomId),
-    enabled: false,
+    queryFn: skipToken,
     select: (timeline) => timeline.messages.find((message) => message.id === messageId),
   });
   const loaded = inTimeline.data;

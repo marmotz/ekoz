@@ -18,6 +18,10 @@ export interface TypingSignal {
  * `AccountFeedEvent` fan-out (#11) — `GET /events` subscribes to both, but
  * only the durable half survives a reconnect via `Last-Event-ID`; a missed
  * ephemeral signal is simply gone, which matches "never in the event log".
+ *
+ * Both signals are delivered per recipient: the emitter resolves who must
+ * receive a signal at emission time, and a connection only listens on its own
+ * user's channels.
  */
 @Injectable()
 export class EphemeralBroadcaster {
@@ -40,15 +44,16 @@ export class EphemeralBroadcaster {
     this.emitter.off(`presence:${userId}`, handler);
   }
 
-  emitTyping(signal: TypingSignal): void {
-    this.emitter.emit(`typing:${signal.roomId}`, signal);
+  /** Notify `recipientUserId` that `signal.userId` is typing in `signal.roomId`. */
+  notifyTyping(recipientUserId: string, signal: TypingSignal): void {
+    this.emitter.emit(`typing:${recipientUserId}`, signal);
   }
 
-  onTyping(roomId: string, handler: (signal: TypingSignal) => void): void {
-    this.emitter.on(`typing:${roomId}`, handler);
+  onTyping(userId: string, handler: (signal: TypingSignal) => void): void {
+    this.emitter.on(`typing:${userId}`, handler);
   }
 
-  offTyping(roomId: string, handler: (signal: TypingSignal) => void): void {
-    this.emitter.off(`typing:${roomId}`, handler);
+  offTyping(userId: string, handler: (signal: TypingSignal) => void): void {
+    this.emitter.off(`typing:${userId}`, handler);
   }
 }

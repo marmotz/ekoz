@@ -372,6 +372,7 @@ export type { EnumMyPermissionsResponseDtoCapabilitiesFilter } from './typescrip
 export type { EnumMyRoomInvitationListViewDtoItemsRoleFilter } from './typescript/index.js';
 export type { EnumMyRoomInvitationListViewDtoItemsRoomTypeFilter } from './typescript/index.js';
 export type { EnumMyRoomInvitationListViewDtoItemsRoomVisibilityFilter } from './typescript/index.js';
+export type { EnumPresencePreferenceResponseDtoStatusFilter } from './typescript/index.js';
 export type { EnumRoomInvitationViewDtoRoleFilter } from './typescript/index.js';
 export type { EnumRoomListViewDtoItemsAccessFilter } from './typescript/index.js';
 export type { EnumRoomListViewDtoItemsDefaultRoleFilter } from './typescript/index.js';
@@ -1038,6 +1039,20 @@ export type { PermissionsController_setRolePermission422ResponseProblemJson } fr
 export type { PresenceController_heartbeat200ResponseJson } from './typescript/index.js';
 export type { PresenceController_heartbeat401ResponseProblemJson } from './typescript/index.js';
 export type { PresenceController_heartbeat422ResponseProblemJson } from './typescript/index.js';
+export type { PresenceController_setPreference200ResponseJson } from './typescript/index.js';
+export type { PresenceController_setPreference401ResponseProblemJson } from './typescript/index.js';
+export type { PresenceController_setPreference422ResponseProblemJson } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoCreateDeepDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoCreateDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoDeepDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoSelectDeepDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoSelectDto } from './typescript/index.js';
+export { PresencePreferenceResponseDtoStatus } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoUpdateDeepDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoUpdateDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoWhereDeepDto } from './typescript/index.js';
+export type { PresencePreferenceResponseDtoWhereDto } from './typescript/index.js';
 export type { ProblemDetailsDtoCreateDeepDto } from './typescript/index.js';
 export type { ProblemDetailsDtoCreateDto } from './typescript/index.js';
 export type { ProblemDetailsDtoDeepDto } from './typescript/index.js';

@@ -52,6 +52,10 @@
       "model": "PasswordReset",
       "namespace": "public"
     },
+    "presence_preference": {
+      "model": "PresencePreference",
+      "namespace": "public"
+    },
     "reaction": {
       "model": "Reaction",
       "namespace": "public"
@@ -1345,6 +1349,47 @@
               },
               "namespaceId": "public",
               "table": "password_reset"
+            }
+          },
+          "PresencePreference": {
+            "fields": {
+              "manualAway": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "manualAway": {
+                  "column": "manual_away"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "presence_preference"
             }
           },
           "Reaction": {
@@ -3955,6 +4000,37 @@
                 }
               ]
             },
+            "presence_preference": {
+              "columns": {
+                "manual_away": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "user_id"
+                ]
+              },
+              "uniques": []
+            },
             "reaction": {
               "columns": {
                 "created_at": {
@@ -5539,10 +5615,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6299cf899070292540d8f1ac30a762ac8e0b8daca7b265c646787db5c8c12d20"
+    "storageHash": "2304c06f408a2b4098270a2a5aa822173011bddc543e6b9974e35de62631afa5"
   },
   "execution": {
-    "executionHash": "0d7e92451c7c33c0d650a9d770dae222b1cb293f180758a7fe96283497afc9f6",
+    "executionHash": "47cc06385b7410ec6ef8201a5f857cb1634859bb74f3f1fedadad629339cda35",
     "mutations": {
       "defaults": [
         {
@@ -5620,6 +5696,21 @@
             "column": "id",
             "namespace": "public",
             "table": "password_reset"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updated_at",
+            "namespace": "public",
+            "table": "presence_preference"
           }
         },
         {

@@ -67,6 +67,7 @@ per-resource constructors:
 | `client.mentions`          | The caller's mentions: `list` ("My mentions") and per-room `unread` counters |
 | `client.groups`            | Room groups: `list`, `get`, `create`, `rename`, `remove`, `addMember`, `removeMember` |
 | `client.receipts`          | Read markers: `set` (monotonic) and `list` for a room            |
+| `client.presence`          | Heartbeat, manual away (`setManualAway`), typing signal, and `reporter`: the heartbeat loop with idle state and throttled typing, `signOff()` before a sign-out |
 | `client.sync`              | Per-room catch-up (`get`), events typed as `RoomEvent`           |
 | `client.stream`            | Account SSE stream (`connect` / `disconnect` / `status` / `on`) with fresh-ticket reconnection |
 | `client.discovery`         | The resolved discovery document (`get` / `refresh`)              |

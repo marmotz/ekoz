@@ -1,8 +1,8 @@
 import { EkozError, type Room, type RoomListItem } from '@ekozhq/sdk';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { RoomHeader } from '@/features/rooms/components/room-header';
+import { resetPresence, setPresence } from '@/shared/realtime/presence-store';
 import { type Configure, renderSignedIn } from '../../../../test/render-signed-in';
 import { roomItem } from '../../../../test/room-fixtures';
 import { createClientMock } from '../../../../test/sdk-mock';
@@ -146,5 +146,50 @@ describe('RoomHeader', () => {
 
     expect(await screen.findByRole('heading', { name: 'General' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Groups' })).not.toBeInTheDocument();
+  });
+});
+
+describe('RoomHeader direct conversation presence', () => {
+  const member = (id: string, name: string) => ({
+    role: 'member',
+    joinedAt: '2026-01-01T00:00:00.000Z',
+    user: { id, identifier: `${name}/example.test`, displayName: name, avatarUrl: null },
+  });
+  const withPartner: Configure = ({ stubs }) => {
+    stubs.me.get.mockResolvedValue({ id: 'me', displayName: 'Jane' } as never);
+    stubs.rooms.members.mockResolvedValue({
+      items: [member('me', 'jane'), member('u2', 'alice')],
+      nextCursor: null,
+    } as never);
+  };
+
+  beforeEach(() => {
+    resetPresence();
+  });
+
+  it('shows the presence of the other participant of a dm, following the store', async () => {
+    const room = roomItem({ id: 'd1', name: 'Alice', type: 'dm' });
+    renderHeader(room, {}, withPartner);
+
+    expect(await screen.findByRole('img', { name: 'Offline' })).toBeInTheDocument();
+
+    act(() => setPresence('u2', 'online'));
+
+    expect(await screen.findByRole('img', { name: 'Online' })).toBeInTheDocument();
+  });
+
+  it('shows no dot for a channel, and does not load its members', async () => {
+    const { fake } = renderHeader(roomItem({ id: 'r1', name: 'General' }));
+
+    await screen.findByRole('heading', { name: 'General' });
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(fake.stubs.rooms.members).not.toHaveBeenCalled();
+  });
+
+  it('shows no dot for a group conversation', async () => {
+    renderHeader(roomItem({ id: 'g1', name: 'Team', type: 'group_dm' }), {}, withPartner);
+
+    await screen.findByRole('heading', { name: 'Team' });
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });

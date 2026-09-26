@@ -63,6 +63,10 @@ connection carries everything, distinguished by the SSE `event:` field
   room without a second lookup. A `presence` frame's `data:` is `{ userId,
   status }`; a `typing` frame's is `{ roomId, userId, ttl }` — neither carries
   an `id:`.
+- Snapshot: right after the connection is subscribed, one `presence` frame is
+  written per visible peer whose status is not `offline` (see
+  [Presence and typing](presence-and-typing.md)). It is a live frame like any
+  other `presence` frame: no `id:`, not replayed.
 - Errors (before the stream opens): `auth.unauthenticated` (`401`, missing,
   unknown, already-used or expired ticket).
 

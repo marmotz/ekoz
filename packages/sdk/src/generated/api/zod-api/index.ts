@@ -93,6 +93,7 @@ export * from './ReadMarkerViewDto.schema.js';
 export * from './SyncResponseDtoEvents.schema.js';
 export * from './SyncResponseDto.schema.js';
 export * from './HeartbeatResponseDto.schema.js';
+export * from './PresencePreferenceResponseDto.schema.js';
 export * from './RoomRetentionViewDto.schema.js';
 export * from './ModerationLogEntryDto.schema.js';
 export * from './GroupListViewDtoItems.schema.js';

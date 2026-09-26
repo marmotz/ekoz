@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { usePublicProfile } from '@/shared/profile/use-public-profile';
+import { useUserPresence } from '@/shared/realtime/own-presence';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { UserAvatar } from '@/shared/ui/user-avatar';
@@ -34,6 +35,7 @@ export interface ProfileCardProps {
 export function ProfileCard({ userId, identifier, fallback, role, left }: ProfileCardProps) {
   const { t } = useTranslation();
   const profile = usePublicProfile(identifier);
+  const presence = useUserPresence(userId);
   const displayName = profile.data?.displayName ?? fallback.displayName;
   const avatarUrl = profile.data?.avatarUrl ?? fallback.avatarUrl;
 
@@ -49,6 +51,7 @@ export function ProfileCard({ userId, identifier, fallback, role, left }: Profil
           avatarUrl={avatarUrl}
           displayName={displayName}
           className="size-12"
+          presence={userId ? presence : undefined}
         />
         <div className="min-w-0">
           <p className="truncate font-medium">{displayName ?? identifier}</p>

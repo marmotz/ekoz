@@ -71,6 +71,9 @@ export type MyRoomInvitationListViewDtoItemsRoomType = (typeof MyRoomInvitationL
 export const MyRoomInvitationListViewDtoItemsRoomVisibility = ["public", "private", "invite"] as const;
 export type MyRoomInvitationListViewDtoItemsRoomVisibility = (typeof MyRoomInvitationListViewDtoItemsRoomVisibility)[number];
 
+export const PresencePreferenceResponseDtoStatus = ["online", "away", "offline"] as const;
+export type PresencePreferenceResponseDtoStatus = (typeof PresencePreferenceResponseDtoStatus)[number];
+
 export const RoomInvitationViewDtoRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export type RoomInvitationViewDtoRole = (typeof RoomInvitationViewDtoRole)[number];
 

@@ -20,6 +20,8 @@ export interface ComposerProps {
   /** True until the history is loaded: there is nowhere to add a pending message yet. */
   loading?: boolean;
   onSend: (message: ComposerMessage) => void;
+  /** Called when the user changes the draft while it has content. */
+  onTyping?: () => void;
 }
 
 /**
@@ -32,6 +34,7 @@ export function Composer({
   block,
   loading = false,
   onSend,
+  onTyping,
 }: ComposerProps) {
   const { t } = useTranslation();
 
@@ -43,6 +46,7 @@ export function Composer({
         allowCollective={allowCollective}
         disabled={block !== null || loading}
         onSubmit={onSend}
+        onTyping={onTyping}
       >
         {({ canSubmit, submit }) => (
           <Button type="button" disabled={!canSubmit} onClick={submit}>

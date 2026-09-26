@@ -5320,7 +5320,54 @@
             "bearer": []
           }
         ],
-        "summary": "Record a presence heartbeat; optionally declare yourself away.",
+        "summary": "Record a presence heartbeat; returns the status and the client timing settings.",
+        "tags": [
+          "Conversations — presence"
+        ]
+      }
+    },
+    "/presence/preference": {
+      "put": {
+        "operationId": "PresenceController_setPreference",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresencePreferenceResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Persist the manual \"appear away\" preference.",
         "tags": [
           "Conversations — presence"
         ]
@@ -8876,10 +8923,46 @@
               "away",
               "offline"
             ]
+          },
+          "manualAway": {
+            "type": "boolean"
+          },
+          "heartbeatInterval": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "typingTtl": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           }
         },
         "required": [
-          "status"
+          "status",
+          "manualAway",
+          "heartbeatInterval",
+          "typingTtl"
+        ]
+      },
+      "PresencePreferenceResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "online",
+              "away",
+              "offline"
+            ]
+          },
+          "manualAway": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "status",
+          "manualAway"
         ]
       },
       "RoomRetentionViewDto": {

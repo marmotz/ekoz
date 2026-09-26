@@ -13,6 +13,7 @@ export * from './MessageMentionRecipient.schema.js';
 export * from './MessageMentionTarget.schema.js';
 export * from './MessagePin.schema.js';
 export * from './PasswordReset.schema.js';
+export * from './PresencePreference.schema.js';
 export * from './Reaction.schema.js';
 export * from './ReadMarker.schema.js';
 export * from './RefreshToken.schema.js';

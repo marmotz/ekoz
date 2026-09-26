@@ -425,6 +425,12 @@
       "pinFailed": "The message could not be pinned.",
       "unpinFailed": "The message could not be unpinned.",
       "banner": "Latest pinned message"
+    },
+    "typing": {
+      "one": "{{name}} is typing…",
+      "many": "{{names}} and {{last}} are typing…",
+      "several": "Several people are typing…",
+      "indicator": "Someone is typing"
     }
   },
   "members": {
@@ -699,6 +705,17 @@
       "direct": "Mentions you",
       "collective": "Mentions a group",
       "unread": "Unread"
+    }
+  },
+  "presence": {
+    "status": {
+      "online": "Online",
+      "away": "Away",
+      "offline": "Offline"
+    },
+    "menu": {
+      "appearAway": "Appear away",
+      "appearOnline": "Appear online"
     }
   }
 }

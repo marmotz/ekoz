@@ -2,12 +2,14 @@ import type { Member } from '@ekozhq/sdk';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { ProfileCardPopover } from '@/shared/profile/profile-card';
+import { useUserPresence } from '@/shared/realtime/own-presence';
 import { UserAvatar } from '@/shared/ui/user-avatar';
 
 /** One member; the row opens their profile card, with their role. */
 export function MemberRow({ member }: { member: Member }) {
   const { t } = useTranslation();
   const { user } = member;
+  const presence = useUserPresence(user.id);
   if (user.identifier === null) return null;
 
   return (
@@ -28,6 +30,7 @@ export function MemberRow({ member }: { member: Member }) {
             avatarUrl={user.avatarUrl}
             displayName={user.displayName}
             className="size-7"
+            presence={presence}
           />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">{user.displayName ?? user.identifier}</span>

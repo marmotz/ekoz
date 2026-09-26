@@ -5,6 +5,9 @@ import { MentionBadge } from '@/features/rooms/components/mention-badge';
 import { UnreadBadge } from '@/features/rooms/components/unread-badge';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { cn } from '@/shared/lib/utils';
+import { useRoomHasTyping } from '@/shared/realtime/typing-store';
+import { useDirectPresence } from '@/shared/realtime/use-direct-presence';
+import { PresenceDot } from '@/shared/ui/presence-dot';
 
 interface RoomTreeProps {
   nodes: readonly RoomNode[];
@@ -46,6 +49,7 @@ function RoomTreeItem({
   const { room, children } = node;
   const name = room.name ?? t('rooms.unnamed');
   const isCollapsed = collapsed.has(room.id);
+  const directPresence = useDirectPresence(room.id, room.type);
   const Icon = room.type === 'space' ? Folder : Hash;
   // A space holds no message: it shows the sum of its descendants while collapsed, never its own count.
   const unread =
@@ -85,12 +89,18 @@ function RoomTreeItem({
             )}
             activeProps={{ className: 'bg-accent text-accent-foreground' }}
           >
-            <Icon className="size-4 shrink-0" />
-            <span className="truncate">{name}</span>
-            <span className="ml-auto flex shrink-0 items-center gap-1">
-              <MentionBadge roomId={room.id} />
-              <UnreadBadge count={unread} />
-            </span>
+            {({ isActive }) => (
+              <>
+                <Icon className="size-4 shrink-0" />
+                <span className="truncate">{name}</span>
+                {directPresence ? <PresenceDot status={directPresence} /> : null}
+                <span className="ml-auto flex shrink-0 items-center gap-1">
+                  {isActive ? null : <TypingIndicator roomId={room.id} />}
+                  <MentionBadge roomId={room.id} />
+                  <UnreadBadge count={unread} />
+                </span>
+              </>
+            )}
           </Link>
         )}
       </div>
@@ -105,5 +115,27 @@ function RoomTreeItem({
         </div>
       )}
     </li>
+  );
+}
+
+/** Animated dots while someone types in a room the user is not looking at. */
+function TypingIndicator({ roomId }: { roomId: string }) {
+  const { t } = useTranslation();
+  if (!useRoomHasTyping(roomId)) return null;
+
+  return (
+    <span
+      role="img"
+      aria-label={t('chat.typing.indicator')}
+      className="flex items-center gap-0.5 text-muted-foreground"
+    >
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="size-1 animate-bounce rounded-full bg-current"
+          style={{ animationDelay: `${delay}ms` }}
+        />
+      ))}
+    </span>
   );
 }

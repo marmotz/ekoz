@@ -20,6 +20,7 @@ import { useTranslation } from '@/shared/i18n/use-translation';
 import { cn } from '@/shared/lib/utils';
 import { MessageBody } from '@/shared/messages/message-body';
 import { ProfileCardPopover } from '@/shared/profile/profile-card';
+import { useUserPresence } from '@/shared/realtime/own-presence';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { UserAvatar } from '@/shared/ui/user-avatar';
@@ -107,6 +108,7 @@ export function MessageItem({
 }) {
   const { t, i18n } = useTranslation();
   const label = useAuthorLabel()(author);
+  const presence = useUserPresence(author.userId);
   const actions = useMessageActionsContext();
   const [pickerOpen, setPickerOpen] = useState(false);
   const deleted = message.redactedAt !== null;
@@ -158,6 +160,7 @@ export function MessageItem({
               avatarUrl={author.avatarUrl}
               displayName={author.displayName}
               className="mt-0.5 size-8"
+              presence={author.kind === 'member' ? presence : undefined}
             />
           </AuthorCard>
           <div className="min-w-0 flex-1">
