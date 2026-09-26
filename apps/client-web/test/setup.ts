@@ -58,6 +58,13 @@ if (typeof window !== 'undefined') {
   Range.prototype.getBoundingClientRect = () => new DOMRect();
   document.elementFromPoint = () => null;
 
+  // jsdom does not implement ResizeObserver; Radix popper (tooltips) measures with it.
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+
   // jsdom does not implement matchMedia.
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,

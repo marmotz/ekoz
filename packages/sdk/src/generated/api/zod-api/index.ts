@@ -83,6 +83,7 @@ export * from './MessagePageDtoItemsMentions.schema.js';
 export * from './MessagePageDtoItems.schema.js';
 export * from './MessagePageDto.schema.js';
 export * from './MessagePinViewDto.schema.js';
+export * from './MessagesPolicyDto.schema.js';
 export * from './ReadMarkerViewDto.schema.js';
 export * from './SyncResponseDtoEvents.schema.js';
 export * from './SyncResponseDto.schema.js';

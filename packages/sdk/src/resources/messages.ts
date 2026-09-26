@@ -3,7 +3,7 @@
  */
 
 import type { SessionManager } from '../session/session-manager.js';
-import type { Membership, Message, MessagesPage } from '../types/wire.js';
+import type { Membership, Message, MessagesPage, MessagesPolicy } from '../types/wire.js';
 
 /** A room role, as carried by a membership. */
 export type MentionRole = Membership['role'];
@@ -44,6 +44,8 @@ export interface EditMessageBody {
 }
 
 export interface MessagesResource {
+  /** `GET /messages/policy`: the limits applied to message bodies (`bodyMaxLength`). */
+  policy(): Promise<MessagesPolicy>;
   list(roomId: string, params?: ListMessagesParams): Promise<MessagesPage>;
   get(roomId: string, messageId: string): Promise<Message>;
   send(roomId: string, body: SendMessageBody): Promise<Message>;
@@ -54,6 +56,10 @@ export function createMessagesResource(session: SessionManager): MessagesResourc
   const base = (roomId: string) => `/rooms/${encodeURIComponent(roomId)}/messages`;
 
   return {
+    policy() {
+      return session.request<MessagesPolicy>('GET', '/messages/policy');
+    },
+
     list(roomId, params = {}) {
       return session.request<MessagesPage>('GET', base(roomId), {
         query: {

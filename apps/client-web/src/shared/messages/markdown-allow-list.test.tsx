@@ -61,3 +61,44 @@ it('accepts only http, https and mailto URLs', () => {
   expect(transformUrl('data:text/html,x')).toBeNull();
   expect(transformUrl('/relative/path')).toBeNull();
 });
+
+it('highlights a block with a declared language', () => {
+  const { container } = renderMarkdown('```ts\nconst a: number = 1;\n```');
+
+  const code = container.querySelector('pre code');
+  expect(code).toHaveClass('hljs', 'language-ts');
+  expect(code?.querySelector('span.hljs-keyword')).not.toBeNull();
+});
+
+it('detects the language of a block without one', () => {
+  const { container } = renderMarkdown('```\ndef add(a, b):\n    return a + b\n```');
+
+  const code = container.querySelector('pre code');
+  expect(code).toHaveClass('hljs');
+  expect(code?.className).toMatch(/language-\w+/);
+  expect(code?.querySelector('span[class^="hljs-"]')).not.toBeNull();
+});
+
+it('leaves a plain text block unhighlighted', () => {
+  const { container } = renderMarkdown('```text\nconst a = 1;\n```');
+
+  const code = container.querySelector('pre code');
+  expect(code).not.toHaveClass('hljs');
+  expect(code?.querySelector('span')).toBeNull();
+});
+
+it('leaves a block with an unknown language unhighlighted', () => {
+  const { container } = renderMarkdown('```klingon\nconst a = 1;\n```');
+
+  const code = container.querySelector('pre code');
+  expect(code?.querySelector('span')).toBeNull();
+});
+
+it('keeps a raw span in a body inert', () => {
+  const { container } = renderMarkdown(
+    'hello <span class="hljs-keyword" onclick="x()">there</span>',
+  );
+
+  expect(container.querySelector('span')).toBeNull();
+  expect(container.innerHTML).not.toContain('onclick');
+});

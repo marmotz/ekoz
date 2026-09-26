@@ -8,6 +8,7 @@ import {
   MembersPageSchema,
   MessageSchema,
   MessagesPageSchema,
+  MessagesPolicySchema,
   MyMentionsPageSchema,
   StreamTicketSchema,
   UnreadMentionsResponseSchema,
@@ -87,6 +88,16 @@ describe('schemas', () => {
     const result = AuthPolicySchema.safeParse({ registrationMode: 'open' });
 
     expect(result.success).toBe(false);
+  });
+
+  it('accepts a valid MessagesPolicy payload', () => {
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 16000 }).success).toBe(true);
+  });
+
+  it('rejects a MessagesPolicy payload with a missing or non-integer limit', () => {
+    expect(MessagesPolicySchema.safeParse({}).success).toBe(false);
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 1.5 }).success).toBe(false);
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: '16000' }).success).toBe(false);
   });
 
   it('validates ChangePasswordBody and rejects an empty current password', () => {

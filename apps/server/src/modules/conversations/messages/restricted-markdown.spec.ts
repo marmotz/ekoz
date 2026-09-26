@@ -21,6 +21,13 @@ describe('restricted markdown (unit)', () => {
     expect(() => validateRestrictedMarkdown(source)).not.toThrow();
   });
 
+  it('accepts a fenced code block with an info string, whatever it says', () => {
+    for (const info of ['ts', 'text', 'not-a-known-language']) {
+      const source = [`\`\`\`${info}`, 'const a = 1;', '```'].join('\n');
+      expect(() => validateRestrictedMarkdown(source)).not.toThrow();
+    }
+  });
+
   it('rejects raw HTML', () => {
     expect(() => validateRestrictedMarkdown('hi <script>alert(1)</script>')).toThrow(
       RestrictedMarkdownError,

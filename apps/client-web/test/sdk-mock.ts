@@ -143,6 +143,7 @@ export function createFakeSdk(initial?: FakeSession) {
       avatar: vi.fn(async () => new Blob(['avatar'], { type: 'image/png' })),
     },
     messages: {
+      policy: vi.fn(async () => ({ bodyMaxLength: 16_000 })),
       list: vi.fn(async () => ({ items: [], lastSeq: '0', hasMore: false, hasMoreNewer: false })),
       get: vi.fn(async () => ({})),
       send: vi.fn(async () => ({})),

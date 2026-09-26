@@ -49,6 +49,7 @@ export {
   MemberListViewDtoSchema as MembersPageSchema,
   MembershipViewDtoSchema as MembershipSchema,
   MessagePageDtoSchema as MessagesPageSchema,
+  MessagesPolicyDtoSchema as MessagesPolicySchema,
   MessageViewDtoMentionsSchema as MentionTargetSchema,
   MessageViewDtoSchema as MessageSchema,
   MeUsernameController_change200ResponseJsonSchema as UsernameChangeOutcomeSchema,

@@ -13,6 +13,7 @@ has its own page with full context, alternatives and consequences:
 - [Web client mentions](web-client-mentions.md): composer suggestions, chips and highlight, live `mentionsMe`, room groups settings, unread counters, "My mentions" and the detached timeline behind a jump to a message.
 - [Web client read state](web-client-read-state.md): read markers sent while reading, unread badges in the rooms tree, read receipts under messages and the live rooms list.
 - [Web client composer editor](web-client-composer-editor.md): TipTap 3 as the composer editor, restricted-Markdown schema, mention node.
+- [Web client composer formatting](web-client-composer-formatting.md): toolbar and shortcuts, Enter rules, links, code blocks and their highlighting, message length counter and the messages policy endpoint.
 - [Web client rooms](web-client-rooms.md): sidebar section slot and rooms tree, `RoomGate` states, rooms pages, query keys and the server, protocol and SDK changes behind them.
 - [Web client members](web-client-members.md): shared members query and live refresh, authors who left, public profile card, members panel and the `GET /users?ids=` endpoint behind them.
 - [Admin console Node entry point](admin-console-node-entry.md) — the `server.entry.mjs` adapter.

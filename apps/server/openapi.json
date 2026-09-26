@@ -4843,6 +4843,28 @@
         ]
       }
     },
+    "/messages/policy": {
+      "get": {
+        "operationId": "MessagesPolicyController_policy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagesPolicyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Limits applied to message bodies.",
+        "tags": [
+          "Conversations — messages"
+        ]
+      }
+    },
     "/dms": {
       "post": {
         "operationId": "DmController_createDm",
@@ -8579,6 +8601,19 @@
           "messageId",
           "pinnedById",
           "pinnedAt"
+        ]
+      },
+      "MessagesPolicyDto": {
+        "type": "object",
+        "properties": {
+          "bodyMaxLength": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "bodyMaxLength"
         ]
       },
       "ReadMarkerViewDto": {

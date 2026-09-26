@@ -143,6 +143,7 @@ http/
     ticket.hurl                       POST   /stream/ticket           200 · needs access_token
     ticket-unauthenticated.hurl       POST   /stream/ticket           401 auth.unauthenticated
   messages/
+    policy.hurl                        GET    /messages/policy         200 · public, any state
     list.hurl                          GET    /rooms/:id/messages      200 · needs access_token + room_id
     list-after.hurl                    GET    /rooms/:id/messages?after=  200 · needs access_token + room_id + message_seq
     list-around.hurl                   GET    /rooms/:id/messages?around= 200 · needs access_token + room_id + message_seq

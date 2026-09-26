@@ -25,6 +25,7 @@ const IN_SCOPE_PATHS = [
   '/setup/owner',
   '/.well-known/ekoz',
   '/blobs/{id}',
+  '/messages/policy',
   '/rooms/{id}/messages',
   '/rooms/{id}/members',
 ];

@@ -60,10 +60,15 @@ export function useSendMessage(roomId: string) {
         });
         update((timeline) => reconcilePending(timeline, localId, toTimelineMessage(message)));
       } catch (error) {
-        update((timeline) => markPendingFailed(timeline, localId, toFailureReason(error)));
+        const reason = toFailureReason(error);
+        // The limit was lowered on the server: pick the new one up.
+        if (reason === 'body_too_long') {
+          void queryClient.invalidateQueries({ queryKey: chatKeys.messagesPolicy() });
+        }
+        update((timeline) => markPendingFailed(timeline, localId, reason));
       }
     },
-    [sdk, roomId, update],
+    [sdk, roomId, update, queryClient],
   );
 
   const send = useCallback(

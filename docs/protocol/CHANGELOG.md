@@ -24,6 +24,10 @@ All notable changes to the Ekoz protocol. Format
 - Identity surface (draft): `name/server` identifier rules, auth token model
   (JWT access + rotating opaque refresh, reuse detection), session objects,
   SSE stream ticket.
+- Public `GET /messages/policy` in
+  [`messages-and-interactions.md`](messages-and-interactions.md): the maximum
+  message body length, read live and never cached. The info string of a fenced
+  code block is documented as preserved and not validated.
 - Public `GET /auth/policy` in [`identity.md`](identity.md): registration mode,
   email-verification requirement and minimum password length, read live and
   never cached.

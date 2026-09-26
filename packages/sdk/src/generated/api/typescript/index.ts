@@ -83,6 +83,7 @@ export type * from './MessagePageDtoItemsMentions.type.js';
 export type * from './MessagePageDtoItems.type.js';
 export type * from './MessagePageDto.type.js';
 export type * from './MessagePinViewDto.type.js';
+export type * from './MessagesPolicyDto.type.js';
 export type * from './ReadMarkerViewDto.type.js';
 export type * from './SyncResponseDtoEvents.type.js';
 export type * from './SyncResponseDto.type.js';

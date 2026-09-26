@@ -35,18 +35,18 @@ _done, see [technical.md](features/web-client-mentions/technical.md)_ — 11/11 
 
 ## Web client composer formatting ·  [overview](features/web-client-composer-formatting/overview.md)
 
-_designed, see [technical.md](features/web-client-composer-formatting/technical.md)_ — 0/8 tasks done
+_done, see [technical.md](features/web-client-composer-formatting/technical.md)_ — 8/8 tasks done
 
 | Done | Issue                                              | Title                                                                             | Blocked by                   |
 |------|----------------------------------------------------|-----------------------------------------------------------------------------------|------------------------------|
-| [ ]  | [#190](https://github.com/marmotz/ekoz/issues/190) | Composer formatting server: public messages policy endpoint                       | —                            |
-| [ ]  | [#191](https://github.com/marmotz/ekoz/issues/191) | Composer formatting SDK: messages policy binding                                  | #190                         |
-| [ ]  | [#192](https://github.com/marmotz/ekoz/issues/192) | Composer formatting client: highlighted code blocks with label and copy           | #176                         |
-| [ ]  | [#193](https://github.com/marmotz/ekoz/issues/193) | Composer formatting client: editor extensions, Enter rules, toolbar and shortcuts | #177                         |
-| [ ]  | [#194](https://github.com/marmotz/ekoz/issues/194) | Composer formatting client: link popover and link rules                           | #193                         |
-| [ ]  | [#195](https://github.com/marmotz/ekoz/issues/195) | Composer formatting client: code block language selector                          | #193, #192                   |
-| [ ]  | [#196](https://github.com/marmotz/ekoz/issues/196) | Composer formatting client: message length counter                                | #193, #191                   |
-| [ ]  | [#197](https://github.com/marmotz/ekoz/issues/197) | Composer formatting docs: docs/technical/web-client-composer-formatting.md        | #192, #193, #194, #195, #196 |
+| [x]  | [#190](https://github.com/marmotz/ekoz/issues/190) | Composer formatting server: public messages policy endpoint                       | —                            |
+| [x]  | [#191](https://github.com/marmotz/ekoz/issues/191) | Composer formatting SDK: messages policy binding                                  | #190                         |
+| [x]  | [#192](https://github.com/marmotz/ekoz/issues/192) | Composer formatting client: highlighted code blocks with label and copy           | #176                         |
+| [x]  | [#193](https://github.com/marmotz/ekoz/issues/193) | Composer formatting client: editor extensions, Enter rules, toolbar and shortcuts | #177                         |
+| [x]  | [#194](https://github.com/marmotz/ekoz/issues/194) | Composer formatting client: link popover and link rules                           | #193                         |
+| [x]  | [#195](https://github.com/marmotz/ekoz/issues/195) | Composer formatting client: code block language selector                          | #193, #192                   |
+| [x]  | [#196](https://github.com/marmotz/ekoz/issues/196) | Composer formatting client: message length counter                                | #193, #191                   |
+| [x]  | [#197](https://github.com/marmotz/ekoz/issues/197) | Composer formatting docs: docs/technical/web-client-composer-formatting.md        | #192, #193, #194, #195, #196 |
 
 ## Web client message actions ·  [overview](features/web-client-message-actions/overview.md)
 
