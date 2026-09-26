@@ -7706,6 +7706,12 @@
                     "inherited",
                     "context"
                   ]
+                },
+                "unreadCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "nullable": true
                 }
               },
               "required": [
@@ -7724,7 +7730,8 @@
                 "createdAt",
                 "updatedAt",
                 "role",
-                "access"
+                "access",
+                "unreadCount"
               ]
             }
           }

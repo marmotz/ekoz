@@ -163,4 +163,85 @@ describe('conversations — reactions and receipts (integration)', () => {
       .expect(403);
     expect(res.body.code).toBe('room.permission_denied');
   });
+
+  it('lets an inherited space member set and list read markers, and still rejects non-members', async () => {
+    const ownerToken = await login('owner');
+    const space = (
+      await request(server())
+        .post('/spaces')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ name: 'inherited-space', visibility: 'public' })
+        .expect(201)
+    ).body;
+    const channel = (
+      await request(server())
+        .post('/rooms')
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ parentId: space.id, name: 'inherited-channel', visibility: 'public' })
+        .expect(201)
+    ).body;
+
+    await accounts.createAccount({
+      name: 'carol',
+      email: 'carol@ekoz.example.com',
+      password,
+      displayName: 'Carol',
+      emailVerified: true,
+    });
+    await accounts.createAccount({
+      name: 'dave',
+      email: 'dave@ekoz.example.com',
+      password,
+      displayName: 'Dave',
+      emailVerified: true,
+    });
+    const carolToken = await login('carol');
+    const daveToken = await login('dave');
+    const carolId = (await accounts.findByIdentifier('carol'))!.id;
+
+    // Carol joins the space only: her access to the channel is inherited.
+    await request(server())
+      .post(`/rooms/${space.id}/join`)
+      .set('Authorization', `Bearer ${carolToken}`)
+      .expect(201);
+
+    const set = await request(server())
+      .put(`/rooms/${channel.id}/receipt`)
+      .set('Authorization', `Bearer ${carolToken}`)
+      .send({ seq: '3' })
+      .expect(200);
+    expect(set.body.seq).toBe('3');
+
+    const list = await request(server())
+      .get(`/rooms/${channel.id}/receipts`)
+      .set('Authorization', `Bearer ${carolToken}`)
+      .expect(200);
+    expect(list.body.map((m: { userId: string }) => m.userId)).toContain(carolId);
+
+    // `receipt_updated` reaches the room.
+    const events = await request(server())
+      .get('/sync')
+      .query({ room: channel.id, since: '0' })
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    const receiptEvents = (events.body.events as Array<{ type: string; content: unknown }>).filter(
+      (event) => event.type === 'receipt_updated',
+    );
+    expect(receiptEvents.map((event) => event.content)).toContainEqual({
+      userId: carolId,
+      seq: '3',
+    });
+
+    // A non-member is still rejected on both endpoints.
+    const putDenied = await request(server())
+      .put(`/rooms/${channel.id}/receipt`)
+      .set('Authorization', `Bearer ${daveToken}`)
+      .send({ seq: '3' })
+      .expect(403);
+    expect(putDenied.body.code).toBe('room.permission_denied');
+    await request(server())
+      .get(`/rooms/${channel.id}/receipts`)
+      .set('Authorization', `Bearer ${daveToken}`)
+      .expect(403);
+  });
 });

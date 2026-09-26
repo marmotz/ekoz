@@ -11,6 +11,8 @@ function describeEvent(event: RoomEvent): string {
       return `deleted:${event.content.messageSeq}:${event.content.reason}`;
     case 'message_redacted':
       return `redacted:${event.content.reason}`;
+    case 'receipt_updated':
+      return `receipt:${event.content.userId}:${event.content.seq}`;
     case 'group_changed':
       return `group:${event.content.change}:${event.content.name}:${event.content.userId ?? '-'}`;
     default:
@@ -60,6 +62,16 @@ describe('RoomEvent', () => {
       '@all',
       '@bob/example.com',
     ]);
+  });
+
+  it('narrows receipt_updated content', () => {
+    expect(
+      describeEvent({
+        ...base,
+        type: 'receipt_updated',
+        content: { userId: 'u2', seq: '17' },
+      }),
+    ).toBe('receipt:u2:17');
   });
 
   it('narrows group_changed content', () => {

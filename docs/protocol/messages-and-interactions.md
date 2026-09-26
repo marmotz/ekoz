@@ -270,30 +270,32 @@ Removes the caller's own reaction. Emits `reaction_removed`.
 
 ## Read markers
 
-One row per `(room, user)`: the highest `seq` the user has read. Visible to
-every room participant (not just the reader), per the functional spec —
-gated on actual `Membership`, not `room.read` (a `public` room's non-member
-default-role reader does not get this).
+One row per `(room, user)`: the highest `seq` the user has read. Available to
+the room's effective members (an explicit `Membership` on the room or on one of
+its ancestor spaces) and visible to all of them, per the functional spec —
+not gated on `room.read` (a `public` room's non-member default-role reader does
+not get this). A user who left keeps a stale row; clients filter by the current
+members.
 
 ### `PUT /rooms/:id/receipt`
 
-Needs to be a member. Monotonic: a `seq` lower than the caller's current
+Needs to be an effective member. Monotonic: a `seq` lower than the caller's current
 marker is ignored (not an error, and the previous marker is returned
 unchanged). Emits `receipt_updated { userId, seq }` to the room.
 
 - Body: `{ seq }` — decimal string.
 - `200`: `{ roomId, userId, seq, updatedAt }`.
-- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`, not a
-  participant), validation (`422`).
+- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`, not an
+  effective member), validation (`422`).
 
 ### `GET /rooms/:id/receipts`
 
-Needs to be a member.
+Needs to be an effective member.
 
-- `200`: `{ roomId, userId, seq, updatedAt }[]`, one entry per member with a
+- `200`: `{ roomId, userId, seq, updatedAt }[]`, one entry per user with a
   marker.
-- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`, not a
-  participant).
+- Errors: `room.not_found` (`404`), `room.permission_denied` (`403`, not an
+  effective member).
 
 ## Room events
 

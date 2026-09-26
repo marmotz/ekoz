@@ -66,6 +66,7 @@ per-resource constructors:
 | `client.messages`          | Room messages (`list` with `before` / `after` / `around`, `get`, `send`, `edit`), with mention targets |
 | `client.mentions`          | The caller's mentions: `list` ("My mentions") and per-room `unread` counters |
 | `client.groups`            | Room groups: `list`, `get`, `create`, `rename`, `remove`, `addMember`, `removeMember` |
+| `client.receipts`          | Read markers: `set` (monotonic) and `list` for a room            |
 | `client.sync`              | Per-room catch-up (`get`), events typed as `RoomEvent`           |
 | `client.stream`            | Account SSE stream (`connect` / `disconnect` / `status` / `on`) with fresh-ticket reconnection |
 | `client.discovery`         | The resolved discovery document (`get` / `refresh`)              |

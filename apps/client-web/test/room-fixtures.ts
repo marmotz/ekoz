@@ -18,6 +18,7 @@ export function roomItem(overrides: Partial<RoomListItem> & { id: string }): Roo
     updatedAt: new Date('2026-01-01T00:00:00Z'),
     role: 'member',
     access: 'member',
+    unreadCount: 0,
     ...overrides,
   };
 }

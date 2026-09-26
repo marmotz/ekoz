@@ -14,6 +14,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Add jump to a message: the `at` search param of a room, a detached timeline that loads newer pages up to the newest message, a "Jump to latest" bar and a brief outline of the target (#179).
 - Add unread mention badges in the rooms tree, live counters, and the "My mentions" page with a sidebar entry (#180).
 - Document the mentions client in `docs/technical/web-client-mentions.md` (#181).
+- Regenerate the API types from the server contract: `unreadCount` on room list items (#219).
 - Regenerate the API types from the server contract: structured message mention targets, `mentionsMe`, `hasMoreNewer`, room groups and mention counters, and type the timeline mentions accordingly (#173, #175).
 - Tint the sidebar and members panel with a dedicated `surface-panel` surface (light and dark) so they stand out from the chat.
 - Scaffold the web client on TanStack Start (Vite, Tailwind CSS 4, strict TypeScript, `@/*` alias), with a placeholder home route and Vitest + Testing Library setup.

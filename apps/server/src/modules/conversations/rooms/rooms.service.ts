@@ -24,6 +24,7 @@ import {
   toRoomListItem,
   toRoomPreview,
   toRoomView,
+  UNREAD_COUNT_CAP,
 } from './room.view.js';
 import type { CreateChannel, CreateSpace, MoveRoom, UpdateRoom } from './rooms.dto.js';
 
@@ -92,20 +93,22 @@ export class RoomsService {
    * as {@link PermissionsService.effectiveRole} does), and the ancestor spaces
    * needed to place them in the tree (`context`, `role: null`). Overrides are
    * not evaluated: an inherited room with a `room.read` deny is still listed.
+   * Each listed room also carries `unreadCount` (capped `message_created`
+   * events from others since the caller's marker, or since they joined).
    */
   async listMine(actor: RoomActor): Promise<RoomListView> {
     const plan = this.prisma.raw.sql`
       WITH mine AS (
-        SELECT room_id, role FROM membership WHERE user_id = ${actor.userId}
+        SELECT room_id, role, joined_at FROM membership WHERE user_id = ${actor.userId}
       ),
       reached AS (
-        SELECT room_id, role, 0 AS depth FROM mine
+        SELECT room_id, role, joined_at, 0 AS depth FROM mine
         UNION ALL
-        SELECT c.descendant_id, mine.role, c.depth
+        SELECT c.descendant_id, mine.role, mine.joined_at, c.depth
         FROM mine JOIN room_closure c ON c.ancestor_id = mine.room_id AND c.depth > 0
       ),
       reach AS (
-        SELECT DISTINCT ON (r.id) r.id AS room_id, reached.role, reached.depth
+        SELECT DISTINCT ON (r.id) r.id AS room_id, reached.role, reached.joined_at, reached.depth
         FROM reached JOIN room r ON r.id = reached.room_id
         WHERE r.type IN ('space', 'channel') AND r.deleted_at IS NULL
         ORDER BY r.id, reached.depth ASC
@@ -123,9 +126,21 @@ export class RoomsService {
              reach.role AS "role",
              CASE WHEN reach.room_id IS NULL THEN 'context'
                   WHEN reach.depth = 0 THEN 'member'
-                  ELSE 'inherited' END AS "access"
+                  ELSE 'inherited' END AS "access",
+             unread.n AS "unreadCount"
       FROM room r
       LEFT JOIN reach ON reach.room_id = r.id
+      LEFT JOIN read_marker rm ON rm.room_id = r.id AND rm.user_id = ${actor.userId}
+      LEFT JOIN LATERAL (
+        SELECT count(*)::int AS n FROM (
+          SELECT 1 FROM room_event e
+          WHERE e.room_id = r.id AND e.type = 'message_created'
+            AND e.sender_id IS DISTINCT FROM ${actor.userId}
+            AND e.created_at >= reach.joined_at
+            AND (rm.seq IS NULL OR e.seq > rm.seq)
+          LIMIT ${UNREAD_COUNT_CAP}
+        ) capped
+      ) unread ON reach.room_id IS NOT NULL
       WHERE (reach.room_id IS NOT NULL OR r.id IN (SELECT room_id FROM context))
         AND r.type IN ('space', 'channel') AND r.deleted_at IS NULL
       ORDER BY r.created_at ASC, r.id ASC
@@ -147,6 +162,7 @@ export class RoomsService {
         updatedAt: { codecId: 'pg/timestamptz-string@1', nullable: false },
         role: { codecId: 'pg/text@1', nullable: true },
         access: { codecId: 'pg/text@1', nullable: false },
+        unreadCount: { codecId: 'pg/int4@1', nullable: true },
       })
       .build();
 

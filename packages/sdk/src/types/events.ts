@@ -55,7 +55,13 @@ export interface GroupChangedEvent extends RoomEventBase {
   };
 }
 
-/** Every event type the server can emit besides the five typed above. */
+/** A member's read marker moved: `seq` is the highest room `seq` they have read. */
+export interface ReceiptUpdatedEvent extends RoomEventBase {
+  type: 'receipt_updated';
+  content: { userId: string; seq: string };
+}
+
+/** Every event type the server can emit besides the ones typed above. */
 export type OtherRoomEventType =
   | 'message_hidden'
   | 'reaction_added'
@@ -73,8 +79,7 @@ export type OtherRoomEventType =
   | 'room_deleted'
   | 'pin_added'
   | 'pin_removed'
-  | 'retention_changed'
-  | 'receipt_updated';
+  | 'retention_changed';
 
 /** Fallback for every other event type: the content is left untouched. */
 export interface UnknownRoomEvent extends RoomEventBase {
@@ -88,6 +93,7 @@ export type RoomEvent =
   | MessageDeletedEvent
   | MessageRedactedEvent
   | GroupChangedEvent
+  | ReceiptUpdatedEvent
   | UnknownRoomEvent;
 
 /** `GET /sync` response, with `events` typed by {@link RoomEvent}. */

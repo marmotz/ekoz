@@ -82,13 +82,13 @@ _designed, see [technical.md](features/web-client-presence-and-typing/technical.
 
 ## Web client read state ·  [overview](features/web-client-read-state/overview.md)
 
-_designed, see [technical.md](features/web-client-read-state/technical.md)_ — 0/8 tasks done
+_designed, see [technical.md](features/web-client-read-state/technical.md)_ — 3/8 tasks done
 
 | Done | Issue                                              | Title                                                                    | Blocked by                   |
 |------|----------------------------------------------------|--------------------------------------------------------------------------|------------------------------|
-| [ ]  | [#218](https://github.com/marmotz/ekoz/issues/218) | Read state server: read markers for effective members                    | —                            |
-| [ ]  | [#219](https://github.com/marmotz/ekoz/issues/219) | Read state server: unreadCount on GET /rooms                             | #218                         |
-| [ ]  | [#220](https://github.com/marmotz/ekoz/issues/220) | Read state SDK: receipts resource, receipt_updated event and unreadCount | #218, #219                   |
+| [x]  | [#218](https://github.com/marmotz/ekoz/issues/218) | Read state server: read markers for effective members                    | —                            |
+| [x]  | [#219](https://github.com/marmotz/ekoz/issues/219) | Read state server: unreadCount on GET /rooms                             | #218                         |
+| [x]  | [#220](https://github.com/marmotz/ekoz/issues/220) | Read state SDK: receipts resource, receipt_updated event and unreadCount | #218, #219                   |
 | [ ]  | [#221](https://github.com/marmotz/ekoz/issues/221) | Read state client: replace the unseen store with active and reading room | —                            |
 | [ ]  | [#222](https://github.com/marmotz/ekoz/issues/222) | Read state client: send the read marker while reading                    | #220, #221                   |
 | [ ]  | [#223](https://github.com/marmotz/ekoz/issues/223) | Read state client: unread badges and live rooms list                     | #220, #221                   |

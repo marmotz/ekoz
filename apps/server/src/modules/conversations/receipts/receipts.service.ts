@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { RoomNotFoundError, RoomPermissionDeniedError } from '../conversations.errors.js';
 import { EventLogService } from '../events/event-log.service.js';
+import { EffectiveMembersQuery } from '../membership/effective-members.query.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { type ReadMarkerRow, type ReadMarkerView, toReadMarkerView } from './receipt.view.js';
 
@@ -11,6 +12,7 @@ export class ReceiptsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventLog: EventLogService,
+    private readonly effectiveMembers: EffectiveMembersQuery,
   ) {}
 
   /** Monotonic: a `seq` lower than the current marker is silently ignored. */
@@ -59,7 +61,7 @@ export class ReceiptsService {
     return rows.map(toReadMarkerView);
   }
 
-  /** Visible to participants only (technical.md §14) — not gated by a capability. */
+  /** Visible to effective members only: an explicit membership on the room or on an ancestor space. */
   private async assertParticipant(actor: PermissionPrincipal, roomId: string): Promise<void> {
     if (actor.isOwner) {
       return;
@@ -72,12 +74,8 @@ export class ReceiptsService {
       throw new RoomNotFoundError();
     }
 
-    const membership = (await this.prisma.orm.public.Membership.where({
-      roomId,
-      userId: actor.userId,
-    }).first()) as unknown;
-    if (!membership) {
-      throw new RoomPermissionDeniedError('Only room participants can see or set read markers.');
+    if (!(await this.effectiveMembers.isMember(roomId, actor.userId))) {
+      throw new RoomPermissionDeniedError('Only room members can see or set read markers.');
     }
   }
 }
