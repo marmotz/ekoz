@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { chatKeys } from '@/features/chat/api/query-keys';
+import { removePinLocally } from '@/features/chat/hooks/use-pins';
 import {
   applyRoomEvent,
   replaceMessage,
@@ -55,6 +56,44 @@ export function useTimelineSync(roomId: string) {
     [sdk, queryClient, roomId, timelineKey],
   );
 
+  /**
+   * What an event means outside the timeline: the pins list, and the cached parents
+   * quoted by replies (`chatKeys.message`).
+   */
+  const syncSideQueries = useCallback(
+    (event: RoomEvent, timeline: Timeline) => {
+      switch (event.type) {
+        case 'pin_added':
+        case 'pin_removed':
+          // A new pin needs its embedded message: refetch rather than patch.
+          void queryClient.invalidateQueries({ queryKey: chatKeys.pins(roomId) });
+          break;
+        case 'message_edited':
+          void queryClient.invalidateQueries({
+            queryKey: chatKeys.message(roomId, event.content.messageId),
+          });
+          break;
+        case 'message_deleted':
+          removePinLocally(queryClient, roomId, { messageId: event.content.messageId });
+          void queryClient.invalidateQueries({
+            queryKey: chatKeys.message(roomId, event.content.messageId),
+          });
+          break;
+        case 'message_redacted': {
+          removePinLocally(queryClient, roomId, { seq: event.seq });
+          const redacted = timeline.messages.find((message) => message.seq === event.seq);
+          if (redacted) {
+            void queryClient.invalidateQueries({ queryKey: chatKeys.message(roomId, redacted.id) });
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    },
+    [queryClient, roomId],
+  );
+
   /** Applies `event` to the cached timeline; false when there is no timeline yet. */
   const apply = useCallback(
     (event: RoomEvent): boolean => {
@@ -68,9 +107,10 @@ export function useTimelineSync(roomId: string) {
       );
       if (timeline !== current) queryClient.setQueryData(timelineKey, timeline);
       refetchMessages(refetch);
+      syncSideQueries(event, current);
       return true;
     },
-    [queryClient, roomId, timelineKey, refetchMessages],
+    [queryClient, roomId, timelineKey, refetchMessages, syncSideQueries],
   );
 
   const flushBuffer = useCallback(() => {

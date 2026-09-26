@@ -247,7 +247,8 @@
       "deletedAccount": "Deleted account",
       "sending": "Sending",
       "failed": "Not sent",
-      "retry": "Retry"
+      "retry": "Retry",
+      "editedAt": "Edited {{date}}"
     },
     "receipts": {
       "readBy": "Read by {{names}}",
@@ -358,6 +359,72 @@
       "missing": "This message is no longer available.",
       "detached": "You are viewing older messages.",
       "latest": "Jump to latest"
+    },
+    "actions": {
+      "more": "Message actions",
+      "reply": "Reply",
+      "react": "React",
+      "edit": "Edit",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Delete this message?",
+      "description": "The message is replaced by a \"Message deleted\" placeholder for everyone in the room. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "errors": {
+        "permissionDenied": "You do not have permission to delete this message.",
+        "notFound": "This message no longer exists.",
+        "network": "The server could not be reached.",
+        "generic": "The message could not be deleted."
+      }
+    },
+    "reactions": {
+      "label": "Reactions",
+      "chip": "{{emoji}} {{count}}",
+      "failed": "The reaction could not be saved.",
+      "picker": "Choose a reaction",
+      "loading": "Loading emojis",
+      "unknownUser": "Unknown user"
+    },
+    "reply": {
+      "replyingTo": "Replying to {{name}}",
+      "cancel": "Cancel reply",
+      "deleted": "Message deleted",
+      "unavailable": "Message unavailable",
+      "jump": "Go to the original message"
+    },
+    "edit": {
+      "label": "Edit message",
+      "save": "Save",
+      "cancel": "Cancel",
+      "hint": "Enter to save, Escape to cancel.",
+      "discard": "Discard your changes to the message being edited?",
+      "deleted": "The message you were editing was deleted.",
+      "errors": {
+        "permissionDenied": "You can no longer edit this message.",
+        "bodyTooLong": "This message is too long.",
+        "bodyInvalid": "This message is not valid.",
+        "mentionInvalid": "A mention is no longer valid. Remove it and try again.",
+        "notFound": "This message no longer exists.",
+        "network": "The server could not be reached.",
+        "generic": "The message could not be saved."
+      }
+    },
+    "pins": {
+      "toggle": "Pinned",
+      "title": "Pinned messages",
+      "description": "The messages pinned in this room, newest first.",
+      "list": "Pinned messages",
+      "empty": "No pinned messages.",
+      "loading": "Loading pinned messages",
+      "pinnedBy": "Pinned by {{name}}",
+      "indicator": "Pinned",
+      "pinFailed": "The message could not be pinned.",
+      "unpinFailed": "The message could not be unpinned.",
+      "banner": "Latest pinned message"
     }
   },
   "members": {
@@ -389,6 +456,7 @@
       "close": "Close the members panel",
       "viewLabel": "Sort members",
       "views": {
+        "group": "By group",
         "role": "By role",
         "alpha": "A to Z"
       },
@@ -400,6 +468,7 @@
       "noMatch": "No member matches your search.",
       "truncated": "Only the first {{count}} members are listed.",
       "sections": {
+        "noGroup": "No group",
         "space_admin": "Space admins",
         "room_admin": "Room admins",
         "moderator": "Moderators",
@@ -587,7 +656,9 @@
       "deletedAccount": "Deleted account",
       "removeMember": "Remove {{name}}",
       "pickMember": "Add a member to {{name}}",
-      "pickPlaceholder": "Choose a member",
+      "pickPlaceholder": "Choose members",
+      "pickEmpty": "No matching member",
+      "unpickMember": "Remove {{name}} from the selection",
       "addMember": "Add",
       "confirmDelete": {
         "title": "Delete the group {{name}}?",

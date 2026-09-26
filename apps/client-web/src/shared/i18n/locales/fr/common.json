@@ -247,7 +247,8 @@
       "deletedAccount": "Compte supprimé",
       "sending": "Envoi en cours",
       "failed": "Non envoyé",
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "editedAt": "Modifié le {{date}}"
     },
     "receipts": {
       "readBy": "Lu par {{names}}",
@@ -358,6 +359,72 @@
       "missing": "Ce message n'est plus disponible.",
       "detached": "Vous consultez d'anciens messages.",
       "latest": "Aller au dernier message"
+    },
+    "actions": {
+      "more": "Actions du message",
+      "reply": "Répondre",
+      "react": "Réagir",
+      "edit": "Modifier",
+      "pin": "Épingler",
+      "unpin": "Désépingler",
+      "delete": "Supprimer"
+    },
+    "delete": {
+      "title": "Supprimer ce message ?",
+      "description": "Le message est remplacé par « Message supprimé » pour tous les membres du salon. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "errors": {
+        "permissionDenied": "Vous n'avez pas le droit de supprimer ce message.",
+        "notFound": "Ce message n'existe plus.",
+        "network": "Le serveur n'a pas pu être joint.",
+        "generic": "Le message n'a pas pu être supprimé."
+      }
+    },
+    "reactions": {
+      "label": "Réactions",
+      "chip": "{{emoji}} {{count}}",
+      "failed": "La réaction n'a pas pu être enregistrée.",
+      "picker": "Choisir une réaction",
+      "loading": "Chargement des émojis",
+      "unknownUser": "Utilisateur inconnu"
+    },
+    "reply": {
+      "replyingTo": "Réponse à {{name}}",
+      "cancel": "Annuler la réponse",
+      "deleted": "Message supprimé",
+      "unavailable": "Message indisponible",
+      "jump": "Aller au message d'origine"
+    },
+    "edit": {
+      "label": "Modifier le message",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "hint": "Entrée pour enregistrer, Échap pour annuler.",
+      "discard": "Abandonner vos modifications du message en cours de modification ?",
+      "deleted": "Le message que vous modifiiez a été supprimé.",
+      "errors": {
+        "permissionDenied": "Vous ne pouvez plus modifier ce message.",
+        "bodyTooLong": "Ce message est trop long.",
+        "bodyInvalid": "Ce message n'est pas valide.",
+        "mentionInvalid": "Une mention n'est plus valide. Retirez-la et réessayez.",
+        "notFound": "Ce message n'existe plus.",
+        "network": "Le serveur n'a pas pu être joint.",
+        "generic": "Le message n'a pas pu être enregistré."
+      }
+    },
+    "pins": {
+      "toggle": "Épinglés",
+      "title": "Messages épinglés",
+      "description": "Les messages épinglés dans ce salon, du plus récent au plus ancien.",
+      "list": "Messages épinglés",
+      "empty": "Aucun message épinglé.",
+      "loading": "Chargement des messages épinglés",
+      "pinnedBy": "Épinglé par {{name}}",
+      "indicator": "Épinglé",
+      "pinFailed": "Le message n'a pas pu être épinglé.",
+      "unpinFailed": "Le message n'a pas pu être désépinglé.",
+      "banner": "Dernier message épinglé"
     }
   },
   "members": {
@@ -389,6 +456,7 @@
       "close": "Fermer le panneau des membres",
       "viewLabel": "Trier les membres",
       "views": {
+        "group": "Par groupe",
         "role": "Par rôle",
         "alpha": "A à Z"
       },
@@ -400,6 +468,7 @@
       "noMatch": "Aucun membre ne correspond à la recherche.",
       "truncated": "Seuls les {{count}} premiers membres sont listés.",
       "sections": {
+        "noGroup": "Sans groupe",
         "space_admin": "Administrateurs de l'espace",
         "room_admin": "Administrateurs du salon",
         "moderator": "Modérateurs",
@@ -587,7 +656,9 @@
       "deletedAccount": "Compte supprimé",
       "removeMember": "Retirer {{name}}",
       "pickMember": "Ajouter un membre à {{name}}",
-      "pickPlaceholder": "Choisir un membre",
+      "pickPlaceholder": "Choisir des membres",
+      "pickEmpty": "Aucun membre correspondant",
+      "unpickMember": "Retirer {{name}} de la sélection",
       "addMember": "Ajouter",
       "confirmDelete": {
         "title": "Supprimer le groupe {{name}} ?",

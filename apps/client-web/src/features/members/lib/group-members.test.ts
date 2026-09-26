@@ -133,4 +133,41 @@ describe('groupMembers', () => {
 
     expect(result.matches).toBe(1);
   });
+
+  it('lists a member in every group they belong to, then the members in no group, in the group view', () => {
+    const result = groupMembers(
+      [member('u1', 'Alice'), member('u2', 'Bob'), member('u3', 'Carol')],
+      {
+        view: 'group',
+        groups: [
+          { id: 'g2', name: 'Zeta', memberIds: ['u1', 'u2'] },
+          { id: 'g1', name: 'Alpha', memberIds: ['u1'] },
+          { id: 'g3', name: 'Empty', memberIds: [] },
+        ],
+      },
+    );
+
+    expect(result.sections.map((s) => s.group)).toEqual([
+      { id: 'g1', name: 'Alpha' },
+      { id: 'g2', name: 'Zeta' },
+      'none',
+    ]);
+    expect(result.sections.map((s) => names(s.members))).toEqual([
+      ['Alice'],
+      ['Alice', 'Bob'],
+      ['Carol'],
+    ]);
+    expect(result.matches).toBe(3);
+  });
+
+  it('applies the search to the group view and drops emptied sections', () => {
+    const result = groupMembers([member('u1', 'Alice'), member('u2', 'Bob')], {
+      query: 'bob',
+      view: 'group',
+      groups: [{ id: 'g1', name: 'Alpha', memberIds: ['u1'] }],
+    });
+
+    expect(result.sections.map((s) => s.group)).toEqual(['none']);
+    expect(names(result.sections[0]?.members ?? [])).toEqual(['Bob']);
+  });
 });

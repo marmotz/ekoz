@@ -239,13 +239,38 @@ describe('RoomGroups', () => {
     await actor.click(screen.getByRole('button', { name: 'Show the members of design' }));
     expect(await screen.findByText('Alice')).toBeInTheDocument();
 
-    const picker = screen.getByRole('combobox', { name: 'Add a member to design' });
+    await actor.click(screen.getByRole('combobox', { name: 'Add a member to design' }));
+    const list = screen.getByRole('listbox');
     // Alice is already in the group.
-    expect(within(picker).queryByRole('option', { name: 'Alice' })).toBeNull();
-    await actor.selectOptions(picker, 'u2');
+    expect(within(list).queryByRole('option', { name: 'Alice' })).toBeNull();
+    await actor.click(within(list).getByRole('option', { name: 'Bob' }));
     await actor.click(screen.getByRole('button', { name: 'Add' }));
 
     expect(fake.stubs.groups.addMember).toHaveBeenCalledWith('r1', 'g1', 'u2');
+  });
+
+  it('adds several members picked by filtering', async () => {
+    const { fake, user: actor } = renderGroups(({ stubs }) =>
+      stubs.groups.get.mockResolvedValue({
+        ...group('g1', 'design'),
+        members: [user('u1', 'Alice')],
+      } as never),
+    );
+    await screen.findByText('@design');
+
+    await actor.click(screen.getByRole('button', { name: 'Show the members of design' }));
+    await screen.findByText('Alice');
+    const input = screen.getByRole('combobox', { name: 'Add a member to design' });
+    await actor.type(input, 'bo');
+    await actor.click(screen.getByRole('option', { name: 'Bob' }));
+    await actor.type(input, 'car{Enter}');
+
+    expect(screen.getByRole('button', { name: 'Remove Bob from the selection' })).toBeVisible();
+    await actor.click(screen.getByRole('button', { name: 'Add' }));
+
+    await waitFor(() => expect(fake.stubs.groups.addMember).toHaveBeenCalledTimes(2));
+    expect(fake.stubs.groups.addMember).toHaveBeenNthCalledWith(1, 'r1', 'g1', 'u2');
+    expect(fake.stubs.groups.addMember).toHaveBeenNthCalledWith(2, 'r1', 'g1', 'u3');
   });
 
   it('removes a member', async () => {
@@ -267,7 +292,8 @@ describe('RoomGroups', () => {
     await screen.findByText('@design');
 
     await actor.click(screen.getByRole('button', { name: 'Show the members of design' }));
-    await actor.selectOptions(await screen.findByRole('combobox'), 'u2');
+    await actor.click(await screen.findByRole('combobox'));
+    await actor.click(screen.getByRole('option', { name: 'Bob' }));
     await actor.click(screen.getByRole('button', { name: 'Add' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('not a member of the room');

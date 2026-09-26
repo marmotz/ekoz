@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
 import { MemberList } from '@/features/members/components/member-list';
+import { useGroupMemberIds } from '@/features/members/hooks/use-group-member-ids';
 import { useMembersPanelPrefs } from '@/features/members/hooks/use-members-panel-prefs';
 import { groupMembers, type MembersView } from '@/features/members/lib/group-members';
 import { useTranslation } from '@/shared/i18n/use-translation';
@@ -15,7 +16,7 @@ import { Skeleton } from '@/shared/ui/skeleton';
 /** Tailwind's `lg` breakpoint: from there the panel is a column, below it a sheet. */
 const INLINE_QUERY = '(min-width: 1024px)';
 
-const VIEWS: readonly MembersView[] = ['role', 'alpha'];
+const VIEWS: readonly MembersView[] = ['role', 'group', 'alpha'];
 
 function PanelBody({
   roomId,
@@ -30,7 +31,10 @@ function PanelBody({
   const { view, setView } = useMembersPanelPrefs();
   const [query, setQuery] = useState('');
   const members = useRoomMembers(roomId);
-  const grouped = members.data ? groupMembers(members.data.members, { query, view }) : null;
+  const groups = useGroupMemberIds(roomId, view === 'group');
+  const grouped = members.data
+    ? groupMembers(members.data.members, { query, view, groups: groups.data })
+    : null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
@@ -75,8 +79,8 @@ function PanelBody({
         placeholder={t('members.panel.search')}
         aria-label={t('members.panel.search')}
       />
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {members.isPending ? (
+      <div className="relative min-h-0 flex-1 overflow-y-auto">
+        {members.isPending || groups.isPending ? (
           <div className="space-y-2" role="status" aria-label={t('members.panel.loading')}>
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
@@ -106,7 +110,7 @@ function PanelBody({
             ) : grouped && grouped.matches === 0 ? (
               <p className="text-sm text-muted-foreground">{t('members.panel.noMatch')}</p>
             ) : grouped ? (
-              <MemberList sections={grouped.sections} />
+              <MemberList sections={grouped.sections} forceOpen={query.trim() !== ''} />
             ) : null}
           </div>
         )}

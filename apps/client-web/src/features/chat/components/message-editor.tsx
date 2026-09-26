@@ -1,5 +1,5 @@
 import type { MentionTarget } from '@ekozhq/sdk';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { EditorContent, type JSONContent, useEditor } from '@tiptap/react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ComposerToolbar } from '@/features/chat/components/composer-toolbar';
@@ -7,6 +7,7 @@ import { useMentionSuggestions } from '@/features/chat/hooks/use-mention-suggest
 import { useMessagesPolicy } from '@/features/chat/hooks/use-messages-policy';
 import { buildComposerExtensions } from '@/features/chat/lib/composer-extensions';
 import { createComposerHandlers } from '@/features/chat/lib/composer-handlers';
+import { injectMentionNodes } from '@/features/chat/lib/mention-doc';
 import { mentionsOfDoc } from '@/features/chat/lib/mention-node';
 import { SUGGESTION_LISTBOX_ID, suggestionOptionId } from '@/features/chat/lib/mention-suggestions';
 import { useTranslation } from '@/shared/i18n/use-translation';
@@ -26,13 +27,32 @@ export interface MessageEditorApi {
   submit: () => void;
 }
 
+/** What an edit starts from: the message body and the targets it mentions. */
+export interface InitialMessage {
+  body: string;
+  mentions: readonly MentionTarget[];
+}
+
 export interface MessageEditorProps {
   roomId: string;
   /** Whether `@all`, roles and groups can be mentioned (channels only). */
   allowCollective: boolean;
   disabled: boolean;
-  /** Called with the body and mentions by Enter and by `submit()`; the editor is then cleared. */
+  /**
+   * Called with the body and mentions by Enter and by `submit()`. The editor is then
+   * cleared, unless it was loaded with `initial` (an edit keeps its content until the
+   * save is confirmed).
+   */
   onSubmit: (message: ComposerMessage) => void;
+  /** Called instead of `onSubmit` when the body is what `initial` was loaded as. */
+  onUnchanged?: () => void;
+  /** Loads a message for editing: its body parsed back, mention chips included. */
+  initial?: InitialMessage;
+  /** Escape (with no `@` popup open). */
+  onCancel?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  /** Accessible name of the editor; defaults to the composer's. */
+  label?: string;
   /** Actions rendered beside the editor. */
   children?: (api: MessageEditorApi) => ReactNode;
 }
@@ -55,6 +75,11 @@ export function MessageEditor({
   allowCollective,
   disabled,
   onSubmit,
+  initial,
+  onUnchanged,
+  onCancel,
+  onDirtyChange,
+  label: labelProp,
   children,
 }: MessageEditorProps) {
   const { t } = useTranslation();
@@ -69,7 +94,10 @@ export function MessageEditor({
   const policy = useMessagesPolicy();
   const max = policy.data?.bodyMaxLength;
   const overLimit = max !== undefined && length > max;
-  const label = t('chat.composer.label');
+  const label = labelProp ?? t('chat.composer.label');
+  // The Markdown the editor holds right after loading `initial`, the baseline of "unchanged".
+  const baseline = useRef<string | null>(null);
+  const [dirty, setDirty] = useState(false);
 
   const bridge = useMemo(() => createComposerHandlers(), []);
 
@@ -86,8 +114,37 @@ export function MessageEditor({
     onUpdate: ({ editor: current }) => {
       const markdown = current.getMarkdown().trim();
       setContentState({ empty: current.isEmpty, blank: markdown === '', length: markdown.length });
+      setDirty(baseline.current === null || markdown !== baseline.current);
     },
   });
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  // Load the message being edited once, as soon as the editor exists. The chips are
+  // named from the members and groups already loaded, else from their tokens.
+  const loadedRef = useRef(false);
+  const initialRef = useRef(initial);
+  const labelFor = suggestions.labelFor;
+  useEffect(() => {
+    const start = initialRef.current;
+    if (!editor || !start || loadedRef.current) return;
+    loadedRef.current = true;
+    const parsed = editor.markdown?.parse(start.body);
+    if (!parsed) return;
+    editor.commands.setContent(
+      injectMentionNodes(parsed as JSONContent, start.mentions, labelFor),
+      {
+        emitUpdate: false,
+      },
+    );
+    const markdown = editor.getMarkdown().trim();
+    baseline.current = markdown;
+    setContentState({ empty: editor.isEmpty, blank: markdown === '', length: markdown.length });
+    setDirty(false);
+    editor.commands.focus('end');
+  }, [editor, labelFor]);
 
   useEffect(() => {
     editor?.setEditable(!disabled);
@@ -122,12 +179,17 @@ export function MessageEditor({
     if (!editor || disabled || overLimit) return;
     const body = editor.getMarkdown().trim();
     if (body === '') return;
+    if (initial && !dirty) {
+      onUnchanged?.();
+      return;
+    }
     const mentions = mentionsOfDoc(editor.state.doc).map(({ type, target, token }) => ({
       type,
       target,
       token,
     }));
     onSubmit({ body, mentions });
+    if (initial) return;
     editor.commands.clearContent(true);
     setContentState({ empty: true, blank: true, length: 0 });
   };
@@ -140,6 +202,11 @@ export function MessageEditor({
       openLink: () => {
         setToolbarExpanded(true);
         setLinkOpen(true);
+      },
+      cancel: () => {
+        if (!onCancel || isOpen) return false;
+        onCancel();
+        return true;
       },
     });
   });

@@ -327,3 +327,78 @@ it('offers no members panel in a direct message room', async () => {
   expect(screen.queryByRole('button', { name: /Members/ })).not.toBeInTheDocument();
   expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
 });
+
+const pinEntry = (seq: number, body: string) => ({
+  roomId: 'room-42',
+  messageId: `m${seq}`,
+  pinnedById: 'u1',
+  pinnedAt: '2026-01-01T12:00:00.000Z',
+  message: {
+    id: `m${seq}`,
+    roomId: 'room-42',
+    seq: String(seq),
+    authorId: 'u1',
+    body,
+    replyToId: null,
+    mentions: [],
+    reactions: [],
+    editedAt: null,
+    redactedAt: null,
+    hiddenAt: null,
+    createdAt: '2026-01-01T10:00:00.000Z',
+  },
+});
+
+it('puts the pins toggle in the room header, with the count, and opens the pins panel', async () => {
+  Element.prototype.scrollIntoView = vi.fn();
+  const fake = renderRoom('/rooms/room-42', ['room.read', 'room.post']);
+  fake.stubs.messages.pins.mockResolvedValue([pinEntry(1, 'hello from the room')] as never);
+  const header = (await screen.findByRole('heading', { name: 'General' })).closest('header');
+
+  const toggle = await within(header as HTMLElement).findByRole('button', { name: /Pinned\s*1/ });
+  fireEvent.click(toggle);
+
+  const panel = await screen.findByRole('dialog', { name: 'Pinned messages' });
+  expect(await within(panel).findByText('hello from the room')).toBeInTheDocument();
+  expect(toggle).toHaveAttribute('aria-expanded', 'true');
+});
+
+it('jumps in place to a pinned message that is loaded, and closes the panel', async () => {
+  const scrollIntoView = vi.fn();
+  Element.prototype.scrollIntoView = scrollIntoView;
+  const fake = renderRoom('/rooms/room-42', ['room.read', 'room.post']);
+  fake.stubs.messages.pins.mockResolvedValue([pinEntry(1, 'hello from the room')] as never);
+  await screen.findAllByText('hello from the room');
+  fireEvent.click(await screen.findByRole('button', { name: /Pinned\s*1/ }));
+  const panel = await screen.findByRole('dialog', { name: 'Pinned messages' });
+
+  fireEvent.click(await within(panel).findByRole('button', { name: /hello from the room/ }));
+
+  await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Pinned messages' })).toBeNull());
+  expect(scrollIntoView).toHaveBeenCalled();
+  expect(document.querySelector('[data-message-id="m1"]')).toHaveAttribute('data-jump-target');
+  expect(fake.stubs.messages.list).toHaveBeenCalledTimes(1);
+});
+
+it('opens the room around a pinned message that is not loaded', async () => {
+  Element.prototype.scrollIntoView = vi.fn();
+  const fake = renderRoom('/rooms/room-42', ['room.read', 'room.post']);
+  fake.stubs.messages.pins.mockResolvedValue([pinEntry(77, 'a faraway pin')] as never);
+  await screen.findByText('hello from the room');
+  fireEvent.click(await screen.findByRole('button', { name: /Pinned\s*1/ }));
+  const panel = await screen.findByRole('dialog', { name: 'Pinned messages' });
+
+  fireEvent.click(await within(panel).findByRole('button', { name: /a faraway pin/ }));
+
+  await waitFor(() =>
+    expect(fake.stubs.messages.list).toHaveBeenCalledWith('room-42', { around: '77' }),
+  );
+});
+
+it('offers no pins toggle next to a child page', async () => {
+  renderRoom('/rooms/room-42/requests', ['room.read', 'room.manage_members']);
+
+  await screen.findByRole('heading', { name: 'Join requests' });
+
+  expect(screen.queryByRole('button', { name: /Pinned/ })).toBeNull();
+});

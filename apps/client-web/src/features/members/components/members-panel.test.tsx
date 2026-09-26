@@ -119,6 +119,74 @@ describe('MembersPanel, inline from lg', () => {
     });
   });
 
+  it('collapses and expands a section, keeping it open while searching', async () => {
+    const { user } = setup();
+    const panel = await screen.findByRole('complementary', { name: 'Members' });
+    await within(panel).findByText('Alice');
+
+    const toggle = within(panel).getByRole('button', { name: 'Space admins · 1' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(within(panel).queryByText('Alice')).not.toBeInTheDocument();
+    expect(within(panel).getByText('Bob')).toBeInTheDocument();
+
+    await user.type(within(panel).getByRole('searchbox', { name: 'Search members' }), 'ali');
+    expect(await within(panel).findByText('Alice')).toBeInTheDocument();
+
+    await user.clear(within(panel).getByRole('searchbox'));
+    expect(within(panel).queryByText('Alice')).not.toBeInTheDocument();
+
+    await user.click(within(panel).getByRole('button', { name: 'Space admins · 1' }));
+    expect(within(panel).getByText('Alice')).toBeInTheDocument();
+  });
+
+  it('lists a member in each of their groups in the group view', async () => {
+    const { user } = setup({
+      configure: (fake) => {
+        fake.stubs.groups.list.mockResolvedValue({
+          items: [
+            {
+              id: 'g1',
+              nodeId: 'r1',
+              name: 'Design',
+              memberCount: 2,
+              inherited: false,
+              isMember: false,
+            },
+            {
+              id: 'g2',
+              nodeId: 'r1',
+              name: 'Dev',
+              memberCount: 1,
+              inherited: false,
+              isMember: false,
+            },
+          ],
+        });
+        fake.stubs.groups.get.mockImplementation((async (_roomId: string, groupId: string) => ({
+          id: groupId,
+          members:
+            groupId === 'g1' ? [MEMBERS[0], MEMBERS[1]].map((m) => m?.user) : [MEMBERS[0]?.user],
+        })) as never);
+      },
+    });
+    const panel = await screen.findByRole('complementary', { name: 'Members' });
+    await within(panel).findByText('Alice');
+
+    await user.click(within(panel).getByRole('button', { name: 'By group' }));
+
+    await waitFor(() =>
+      expect(
+        within(panel)
+          .getAllByRole('heading', { level: 3 })
+          .map((heading) => heading.textContent),
+      ).toEqual(['Design · 2', 'Dev · 1', 'No group · 2']),
+    );
+    expect(within(panel).getAllByText('Alice')).toHaveLength(2);
+  });
+
   it('filters by the search, keeping the total, and says when nothing matches', async () => {
     const { user } = setup();
     const panel = await screen.findByRole('complementary', { name: 'Members' });

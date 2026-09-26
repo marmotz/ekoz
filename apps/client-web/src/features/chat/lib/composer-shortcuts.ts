@@ -53,6 +53,8 @@ export const shortcutLabel = (id: ComposerShortcutId, mac?: boolean) =>
 export interface ComposerShortcutsOptions {
   /** `Mod-k`: opens the link popover. */
   onLink: () => void;
+  /** `Escape`: cancels an edit. Return false to leave the key alone. */
+  onCancel: () => boolean;
 }
 
 /** Binds the formatting entries of the table to their editor command. */
@@ -61,7 +63,7 @@ export const ComposerShortcuts = Extension.create<ComposerShortcutsOptions>({
   priority: 1000,
 
   addOptions() {
-    return { onLink: () => {} };
+    return { onLink: () => {}, onCancel: () => false };
   },
 
   addKeyboardShortcuts() {
@@ -81,11 +83,14 @@ export const ComposerShortcuts = Extension.create<ComposerShortcutsOptions>({
       },
     };
 
-    return Object.fromEntries(
-      (Object.keys(run) as FormattingShortcutId[]).map((id) => [
-        COMPOSER_SHORTCUT_KEYS[id],
-        run[id],
-      ]),
-    );
+    return {
+      ...Object.fromEntries(
+        (Object.keys(run) as FormattingShortcutId[]).map((id) => [
+          COMPOSER_SHORTCUT_KEYS[id],
+          run[id],
+        ]),
+      ),
+      Escape: () => options.onCancel(),
+    };
   },
 });
