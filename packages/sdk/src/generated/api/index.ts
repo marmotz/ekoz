@@ -749,6 +749,17 @@ export type { MessagesController_sendMessage422ResponseProblemJson } from './typ
 export type { MessagesController_unpin401ResponseProblemJson } from './typescript/index.js';
 export type { MessagesController_unpin403ResponseProblemJson } from './typescript/index.js';
 export type { MessagesController_unpin404ResponseProblemJson } from './typescript/index.js';
+export type { MessagesPolicyController_policy200ResponseJson } from './typescript/index.js';
+export type { MessagesPolicyDtoCreateDeepDto } from './typescript/index.js';
+export type { MessagesPolicyDtoCreateDto } from './typescript/index.js';
+export type { MessagesPolicyDtoDeepDto } from './typescript/index.js';
+export type { MessagesPolicyDtoDto } from './typescript/index.js';
+export type { MessagesPolicyDtoSelectDeepDto } from './typescript/index.js';
+export type { MessagesPolicyDtoSelectDto } from './typescript/index.js';
+export type { MessagesPolicyDtoUpdateDeepDto } from './typescript/index.js';
+export type { MessagesPolicyDtoUpdateDto } from './typescript/index.js';
+export type { MessagesPolicyDtoWhereDeepDto } from './typescript/index.js';
+export type { MessagesPolicyDtoWhereDto } from './typescript/index.js';
 export type { MessageViewDtoCreateDeepDto } from './typescript/index.js';
 export type { MessageViewDtoCreateDto } from './typescript/index.js';
 export type { MessageViewDtoDeepDto } from './typescript/index.js';

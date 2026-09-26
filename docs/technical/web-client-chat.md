@@ -142,9 +142,11 @@ entry is replaced by the message, idempotently with the stream. On failure it st
 `failed` with a mapped reason (`room.read_only`, `room.permission_denied`,
 `message.body_too_long`, `message.body_invalid`, network, unknown) and a Retry action.
 The composer is enabled only for `membership === 'member'` with `room.post` and, on a
-read-only room, `room.edit_any`, mirroring the server rule. The client does not know
-`messages.body_max_length`, so it does not pre-validate length; the server `422` is
-displayed. Mentions are sent since [web client mentions](web-client-mentions.md): the
+read-only room, `room.edit_any`, mirroring the server rule. The client reads
+`messages.body_max_length` from the public `GET /messages/policy` and shows a length
+counter that blocks sending beyond the limit (see
+[composer formatting](web-client-composer-formatting.md)); the server `422` stays the
+safety net and is displayed. Mentions are sent since [web client mentions](web-client-mentions.md): the
 composer hands `{ body, mentions }` over, and `message.mention_not_member` /
 `message.mention_invalid` map to a `mention_invalid` failure.
 

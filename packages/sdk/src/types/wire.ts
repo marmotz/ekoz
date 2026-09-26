@@ -46,6 +46,7 @@ export type {
   MemberListViewDtoItemsDto as Member,
   MembershipViewDtoDto as Membership,
   MessagePageDtoDto as MessagesPage,
+  MessagesPolicyDtoDto as MessagesPolicy,
   MessageViewDtoDto as Message,
   MessageViewDtoMentionsDto as MentionTarget,
   MeUsernameController_change200ResponseJson as UsernameChangeOutcome,

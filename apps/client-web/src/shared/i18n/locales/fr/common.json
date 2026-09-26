@@ -280,7 +280,52 @@
           "roles": "Rôles",
           "all": "Tout le monde"
         }
+      },
+      "toolbar": {
+        "label": "Mise en forme",
+        "toggle": "Options de mise en forme"
+      },
+      "actions": {
+        "bold": "Gras",
+        "italic": "Italique",
+        "strike": "Barré",
+        "code": "Code en ligne",
+        "codeBlock": "Bloc de code",
+        "blockquote": "Citation",
+        "bulletList": "Liste à puces",
+        "orderedList": "Liste numérotée",
+        "link": "Lien",
+        "send": "Envoyer le message",
+        "newline": "Nouvelle ligne"
+      },
+      "help": {
+        "open": "Aide sur la mise en forme",
+        "title": "Aide sur la mise en forme",
+        "description": "Raccourcis et Markdown utilisables dans un message.",
+        "shortcuts": "Raccourcis",
+        "syntax": "Markdown"
+      },
+      "codeLanguage": {
+        "label": "Langage du code",
+        "auto": "Détection automatique"
+      },
+      "link": {
+        "text": "Texte",
+        "url": "URL",
+        "apply": "Appliquer",
+        "remove": "Retirer le lien",
+        "invalid": "Saisissez un lien http, https ou mailto valide."
+      },
+      "counter": {
+        "label": "Longueur du message",
+        "value": "{{used}} / {{max}}",
+        "over": "trop long"
       }
+    },
+    "codeBlock": {
+      "copy": "Copier",
+      "copied": "Copié",
+      "plainText": "Texte brut"
     },
     "connection": {
       "reconnecting": "Reconnexion...",

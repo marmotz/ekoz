@@ -63,6 +63,24 @@ still linkified by `remark-gfm` and passes through like any other link — the
 scheme check is what actually keeps rendering safe, not whether the client
 typed brackets.
 
+The info string of a fenced code block (the language written after the opening
+fence, e.g. ```` ```ts ````) is preserved verbatim and not validated: it is a
+rendering hint that a client may use for syntax highlighting and ignore when it
+does not know the value.
+
+## Policy
+
+### `GET /messages/policy`
+
+Public and unauthenticated, never cached (`Cache-Control: no-store`). Tells a
+client the limits it can enforce before sending. Read live from the server
+settings, so a change made by the owner shows on the next call.
+
+- `200`: `{ bodyMaxLength }`.
+  - `bodyMaxLength`: integer, the longest `body` the server accepts, counted in
+    UTF-16 code units (`messages.body_max_length`). A longer body is rejected
+    with `message.body_too_long`.
+
 ## Mentions
 
 Mentions are structured, not parsed from the body: the client sends the

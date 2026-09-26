@@ -1,6 +1,9 @@
 import { type ComponentProps, createElement } from 'react';
 import type { Options } from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
+import { CodeBlock } from '@/shared/messages/code-block';
+import { CODE_LANGUAGES, PLAIN_TEXT_NAMES } from '@/shared/messages/code-languages';
 
 /**
  * Markdown rendering rules for message bodies (web-client-chat technical design
@@ -22,6 +25,8 @@ export const ALLOWED_ELEMENTS = [
   'a',
   'br',
   'mention',
+  // Emitted by the highlighter only: there is no raw-HTML path to smuggle one in.
+  'span',
 ] as const;
 
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
@@ -45,11 +50,21 @@ function SafeLink({ node, ...props }: ComponentProps<'a'> & { node?: unknown }) 
   });
 }
 
+const highlightOptions = {
+  // A fence without language is detected, among the known languages only.
+  detect: true,
+  languages: Object.fromEntries(CODE_LANGUAGES.map(({ id, grammar }) => [id, grammar])),
+  aliases: Object.fromEntries(CODE_LANGUAGES.map(({ id, aliases }) => [id, [...aliases]])),
+  subset: CODE_LANGUAGES.map(({ id }) => id),
+  plainText: [...PLAIN_TEXT_NAMES],
+};
+
 export const markdownOptions: Options = {
   remarkPlugins: [remarkGfm],
+  rehypePlugins: [[rehypeHighlight, highlightOptions]],
   skipHtml: true,
   allowedElements: [...ALLOWED_ELEMENTS],
   unwrapDisallowed: true,
   urlTransform: transformUrl,
-  components: { a: SafeLink },
+  components: { a: SafeLink, pre: CodeBlock },
 };

@@ -47,7 +47,9 @@ No Tiptap Cloud or Pro extension.
   canonical token (`@alice/chat.example`, `@all`, `@moderator`, `@design`).
   Loading a message for editing parses the body back, turning the message's
   structured mention tokens into mention nodes.
-- Enter sends, Shift+Enter inserts a line break, as today.
+- Enter sends, Shift+Enter inserts a line break, as today. Formatting then extends
+  this: Enter sends in lists and code blocks too, and Shift+Enter is the new line
+  everywhere (see [composer formatting](web-client-composer-formatting.md)).
 
 ## Consequences
 
@@ -70,7 +72,10 @@ The composer was rebuilt by [web client mentions](web-client-mentions.md) as dec
 here, with these details:
 
 - `StarterKit` keeps only the nodes and marks listed above (heading, horizontal rule
-  and underline are off; the link does not open on click and does not autolink).
+  and underline are off). Its code block and link are replaced by configured ones: the
+  link does not open on click, autolinks and only accepts `http`, `https` and `mailto`.
+  Enter no longer inserts a new line in a list or a code block: it sends, and
+  Shift+Enter is the new line, see [composer formatting](web-client-composer-formatting.md).
 - The mention node extends `@tiptap/extension-mention` with the attributes
   `{ type, target, token, label }` and serialises to its `token`; the extension's own
   Markdown syntax is switched off.

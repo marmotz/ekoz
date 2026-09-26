@@ -31,6 +31,7 @@ import type { MemberListViewDtoDto } from './MemberListViewDto.type.js';
 import type { MembershipViewDtoDto } from './MembershipViewDto.type.js';
 import type { MessagePageDtoDto } from './MessagePageDto.type.js';
 import type { MessagePinViewDtoDto } from './MessagePinViewDto.type.js';
+import type { MessagesPolicyDtoDto } from './MessagesPolicyDto.type.js';
 import type { MessageViewDtoDto } from './MessageViewDto.type.js';
 import type { MeViewDtoDto } from './MeViewDto.type.js';
 import type { ModerationLogEntryDtoDto } from './ModerationLogEntryDto.type.js';
@@ -757,6 +758,8 @@ export type MessagesController_listPins401ResponseProblemJson = ProblemDetailsDt
 export type MessagesController_listPins403ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MessagesController_listPins404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesPolicyController_policy200ResponseJson = MessagesPolicyDtoDto;
 
 export type DmController_createDm201ResponseJson = RoomViewDtoDto;
 

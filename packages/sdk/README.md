@@ -63,7 +63,7 @@ per-resource constructors:
 | `client.rooms`             | The caller's tree (`list`), detail, preview, children, own permissions, create space / channel, join / leave, join requests (request, list, approve, reject), members page |
 | `client.roomInvitations`   | The caller's pending room invitations (`listMine`, `accept`, `decline`) |
 | `client.directory`         | Public room directory, search and paging (`list`)                |
-| `client.messages`          | Room messages (`list` with `before` / `after` / `around`, `get`, `send`, `edit`), with mention targets |
+| `client.messages`          | Room messages (`policy`, `list` with `before` / `after` / `around`, `get`, `send`, `edit`), with mention targets |
 | `client.mentions`          | The caller's mentions: `list` ("My mentions") and per-room `unread` counters |
 | `client.groups`            | Room groups: `list`, `get`, `create`, `rename`, `remove`, `addMember`, `removeMember` |
 | `client.receipts`          | Read markers: `set` (monotonic) and `list` for a room            |

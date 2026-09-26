@@ -17,6 +17,7 @@ that does not touch this file.
 - Messages report `mentionsMe` for the caller. (#173)
 - `GET /me/mentions/unread` and `GET /me/mentions` list unread mention counters and the messages that mention the caller. (#174)
 - `GET /rooms` items carry `unreadCount`, the unread messages since the read marker or the join. (#219)
+- Public `GET /messages/policy` exposing the maximum message body length. (#190)
 
 ### Changed
 

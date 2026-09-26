@@ -19,6 +19,16 @@ async function resource(fetchImpl: typeof fetch) {
 }
 
 describe('messages resource', () => {
+  it('policy() hits GET /messages/policy', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { bodyMaxLength: 16000 } }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.policy()).resolves.toEqual({ bodyMaxLength: 16000 });
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/messages/policy');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+  });
+
   it('list() hits GET /rooms/:id/messages with before and limit', async () => {
     const page = { items: [], lastSeq: '0', hasMore: false, hasMoreNewer: false };
     const fetchMock = createFetchMock(jsonResponse({ body: page }));

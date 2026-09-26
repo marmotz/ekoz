@@ -31,6 +31,7 @@ import { MemberListViewDtoSchema, type MemberListViewDtoDto } from './MemberList
 import { MembershipViewDtoSchema, type MembershipViewDtoDto } from './MembershipViewDto.schema.js';
 import { MessagePageDtoSchema, type MessagePageDtoDto } from './MessagePageDto.schema.js';
 import { MessagePinViewDtoSchema, type MessagePinViewDtoDto } from './MessagePinViewDto.schema.js';
+import { MessagesPolicyDtoSchema, type MessagesPolicyDtoDto } from './MessagesPolicyDto.schema.js';
 import { MessageViewDtoSchema, type MessageViewDtoDto } from './MessageViewDto.schema.js';
 import { MeViewDtoSchema, type MeViewDtoDto } from './MeViewDto.schema.js';
 import { ModerationLogEntryDtoSchema, type ModerationLogEntryDtoDto } from './ModerationLogEntryDto.schema.js';
@@ -889,6 +890,9 @@ export type MessagesController_unpin403ResponseProblemJson = z.infer<typeof Mess
 
 export const MessagesController_unpin404ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MessagesController_unpin404ResponseProblemJson = z.infer<typeof MessagesController_unpin404ResponseProblemJsonSchema>;
+
+export const MessagesPolicyController_policy200ResponseJsonSchema = MessagesPolicyDtoSchema;
+export type MessagesPolicyController_policy200ResponseJson = z.infer<typeof MessagesPolicyController_policy200ResponseJsonSchema>;
 
 export const MeUsernameController_cancelRequest401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MeUsernameController_cancelRequest401ResponseProblemJson = z.infer<typeof MeUsernameController_cancelRequest401ResponseProblemJsonSchema>;

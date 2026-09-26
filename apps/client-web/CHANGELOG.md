@@ -7,6 +7,12 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Show fenced code blocks highlighted in messages, with a language label, auto-detection without a declared language and a copy button (#192).
+- Add a formatting toolbar to the composer (bold, italic, strikethrough, code, quote, lists, link) with shortcuts in tooltips, a help panel and an "Aa" toggle on narrow screens, and make Enter send in lists and code blocks with Shift+Enter as the new line (#193).
+- Add a link popover to the composer, opened by the toolbar or Ctrl/Cmd+K, that only accepts `http`, `https` and `mailto` links and linkifies pasted and typed URLs (#194).
+- Add a language selector on composer code blocks (#195).
+- Show a length counter in the composer near the server limit and block sending beyond it (#196).
+- Document the composer formatting in `docs/technical/web-client-composer-formatting.md` (#197).
 - Show "Read by everyone" instead of the avatar list once every other member has read a message.
 - Show unread state on the mobile menu button: a grey badge with the total of unread messages and a dark one with the unread mentions.
 - Send the read marker while a room is read (list at the bottom, window visible and focused), replacing the unseen-rooms store with the active and reading room (#221, #222).

@@ -18,6 +18,7 @@ import { MentionsService } from './mentions/mentions.service.js';
 import { MentionResolver } from './messages/mention-resolver.js';
 import { MessagesController } from './messages/messages.controller.js';
 import { MessagesService } from './messages/messages.service.js';
+import { MessagesPolicyController } from './messages/messages-policy.controller.js';
 import { ModerationController } from './moderation/moderation.controller.js';
 import { ModerationService } from './moderation/moderation.service.js';
 import { PermissionsController } from './permissions/permissions.controller.js';
@@ -62,6 +63,7 @@ import { SyncService } from './streaming/sync.service.js';
     MyRoomInvitationsController,
     DirectoryController,
     MessagesController,
+    MessagesPolicyController,
     DmController,
     ReactionsController,
     ReceiptsController,
