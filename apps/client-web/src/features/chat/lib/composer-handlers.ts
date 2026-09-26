@@ -3,6 +3,8 @@ export interface ComposerHandlers {
   send: () => void;
   isSuggestionOpen: () => boolean;
   openLink: () => void;
+  /** Escape; true when it was handled (an edit was cancelled). */
+  cancel?: () => boolean;
 }
 
 /**
@@ -14,6 +16,7 @@ export function createComposerHandlers() {
     send: () => {},
     isSuggestionOpen: () => false,
     openLink: () => {},
+    cancel: () => false,
   };
 
   return {
@@ -21,6 +24,7 @@ export function createComposerHandlers() {
       send: () => latest.send(),
       isSuggestionOpen: () => latest.isSuggestionOpen(),
       openLink: () => latest.openLink(),
+      cancel: () => latest.cancel?.() ?? false,
     } satisfies ComposerHandlers,
     update(next: ComposerHandlers) {
       latest = next;

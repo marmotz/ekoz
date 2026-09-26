@@ -22,6 +22,7 @@ const REASON_BY_CODE: Record<string, SendFailureReason> = {
   'message.body_invalid': 'body_invalid',
   'message.mention_not_member': 'mention_invalid',
   'message.mention_invalid': 'mention_invalid',
+  'message.not_found': 'not_found',
 };
 
 export function toFailureReason(error: unknown): SendFailureReason {
@@ -36,7 +37,8 @@ let localCounter = 0;
  * Optimistic send. The message shows at once as a pending entry of the room
  * timeline; on success the entry is replaced by the confirmed message (idempotent
  * with the stream, which may deliver it first), on failure it is kept as `failed`
- * with a reason and can be retried. The targets of the body are sent as `mentions`.
+ * with a reason and can be retried. The targets of the body are sent as `mentions`, and
+ * `replyToId` (when set) is what the message answers.
  */
 export function useSendMessage(roomId: string) {
   const sdk = useSdk();
@@ -51,11 +53,12 @@ export function useSendMessage(roomId: string) {
   );
 
   const deliver = useCallback(
-    async (localId: string, body: string, mentions: MentionTarget[]) => {
+    async (localId: string, body: string, mentions: MentionTarget[], replyToId: string | null) => {
       if (!sdk) return;
       try {
         const message = await sdk.messages.send(roomId, {
           body,
+          ...(replyToId !== null ? { replyToId } : {}),
           ...(mentions.length > 0 ? { mentions: toMentionInputs(mentions) } : {}),
         });
         update((timeline) => reconcilePending(timeline, localId, toTimelineMessage(message)));
@@ -72,11 +75,16 @@ export function useSendMessage(roomId: string) {
   );
 
   const send = useCallback(
-    ({ body, mentions }: { body: string; mentions: MentionTarget[] }) => {
+    (
+      { body, mentions }: { body: string; mentions: MentionTarget[] },
+      replyToId: string | null = null,
+    ) => {
       localCounter += 1;
       const localId = `local-${Date.now()}-${localCounter}`;
-      update((timeline) => addPending(timeline, { localId, body, mentions, state: 'sending' }));
-      return deliver(localId, body, mentions);
+      update((timeline) =>
+        addPending(timeline, { localId, body, mentions, replyToId, state: 'sending' }),
+      );
+      return deliver(localId, body, mentions, replyToId);
     },
     [update, deliver],
   );
@@ -87,7 +95,7 @@ export function useSendMessage(roomId: string) {
       const entry = timeline?.pending.find((pending) => pending.localId === localId);
       if (entry?.state !== 'failed') return Promise.resolve();
       update((current) => markPendingSending(current, localId));
-      return deliver(localId, entry.body, entry.mentions);
+      return deliver(localId, entry.body, entry.mentions, entry.replyToId);
     },
     [queryClient, key, update, deliver],
   );

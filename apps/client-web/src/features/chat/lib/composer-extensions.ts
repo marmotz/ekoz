@@ -52,6 +52,9 @@ export function buildComposerExtensions({ suggestion, handlers }: ComposerExtens
     Markdown,
     MentionNode.configure({ suggestion }),
     SendOnEnter.configure({ send: handlers.send, isSuggestionOpen: handlers.isSuggestionOpen }),
-    ComposerShortcuts.configure({ onLink: handlers.openLink }),
+    ComposerShortcuts.configure({
+      onLink: handlers.openLink,
+      onCancel: () => handlers.cancel?.() ?? false,
+    }),
   ];
 }

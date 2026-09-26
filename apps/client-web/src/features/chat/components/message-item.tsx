@@ -1,7 +1,16 @@
-import type { ReactNode } from 'react';
+import { Pin } from 'lucide-react';
+import { type ReactNode, useState } from 'react';
 
+import { MessageEditForm } from '@/features/chat/components/message-edit-form';
+import { MessageMenu, type MessageMenuHandlers } from '@/features/chat/components/message-menu';
+import { ReactionBar } from '@/features/chat/components/reaction-bar';
+import { ReactionPicker } from '@/features/chat/components/reaction-picker';
 import { ReadReceipts } from '@/features/chat/components/read-receipts';
+import { ReplyQuote } from '@/features/chat/components/reply-quote';
+import { useMessageActionsContext } from '@/features/chat/hooks/message-actions-context';
+import { useAuthorLabel } from '@/features/chat/hooks/use-author-label';
 import type { Author } from '@/features/chat/hooks/use-authors';
+import { availableActions } from '@/features/chat/lib/message-actions';
 import type {
   PendingMessage,
   SendFailureReason,
@@ -21,17 +30,10 @@ const FAILURE_KEYS = {
   body_too_long: 'chat.composer.errors.bodyTooLong',
   body_invalid: 'chat.composer.errors.bodyInvalid',
   mention_invalid: 'chat.composer.errors.mentionInvalid',
+  not_found: 'chat.composer.errors.generic',
   network: 'chat.composer.errors.network',
   unknown: 'chat.composer.errors.generic',
 } as const satisfies Record<SendFailureReason, string>;
-
-function useAuthorLabel() {
-  const { t } = useTranslation();
-  return (author: Author) => {
-    if (author.kind === 'deleted') return t('chat.message.deletedAccount');
-    return author.displayName ?? '';
-  };
-}
 
 function Time({ iso }: { iso: string }) {
   const { i18n } = useTranslation();
@@ -103,56 +105,137 @@ export function MessageItem({
   readers?: readonly Author[];
   audienceSize?: number | undefined;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const label = useAuthorLabel()(author);
+  const actions = useMessageActionsContext();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const deleted = message.redactedAt !== null;
+  const pinned = !deleted && (actions?.pinnedIds.has(message.id) ?? false);
+  const editing = !deleted && actions?.editingId === message.id;
+  const canReact = actions?.capabilities.includes('room.react') ?? false;
+
+  const available = actions
+    ? availableActions({
+        message,
+        myId: actions.myId,
+        capabilities: actions.capabilities,
+        editWindow: actions.editWindow,
+        now: actions.now,
+        canPost: actions.canPost,
+        pinned,
+      })
+    : [];
+  const handlers: MessageMenuHandlers = actions
+    ? {
+        reply: () => actions.onReply(message),
+        react: () => setPickerOpen(true),
+        edit: () => actions.onEdit(message),
+        pin: () => actions.onPin(message),
+        unpin: () => actions.onUnpin(message),
+        delete: () => actions.onDelete(message),
+      }
+    : {};
+  const editedAt = message.editedAt === null ? null : new Date(message.editedAt);
 
   return (
-    <li
-      className={cn(
-        'flex gap-3 rounded-md py-1.5',
-        !deleted && message.mentionsMe === 'direct' && 'bg-primary/15',
-        !deleted && message.mentionsMe === 'collective' && 'bg-primary/5',
-        // Set on the element by the list after a jump to this message.
-        'data-[jump-target]:ring-2 data-[jump-target]:ring-primary',
-      )}
-      data-message-id={message.id}
-      data-mentions-me={deleted ? undefined : (message.mentionsMe ?? undefined)}
-    >
-      <AuthorCard author={author} decorative>
-        <UserAvatar
-          userId={author.userId}
-          identifier={author.identifier}
-          avatarUrl={author.avatarUrl}
-          displayName={author.displayName}
-          className="mt-0.5 size-8"
-        />
-      </AuthorCard>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
-          {author.kind === 'pending' ? (
-            <Skeleton className="h-4 w-24" aria-hidden="true" data-testid="author-pending" />
-          ) : (
-            <>
-              <AuthorCard author={author}>
-                <span className="text-sm font-medium">{label}</span>
-              </AuthorCard>
-              <AuthorMarker kind={author.kind} />
-            </>
+    <MessageMenu actions={available} handlers={handlers}>
+      {(moreButton) => (
+        <li
+          className={cn(
+            'group relative flex gap-3 rounded-md py-1.5',
+            !deleted && message.mentionsMe === 'direct' && 'bg-primary/15',
+            !deleted && message.mentionsMe === 'collective' && 'bg-primary/5',
+            // Set on the element by the list after a jump to this message.
+            'data-[jump-target]:ring-2 data-[jump-target]:ring-primary',
           )}
-          <Time iso={message.createdAt} />
-          {!deleted && message.editedAt !== null ? (
-            <span className="text-xs text-muted-foreground">({t('chat.message.edited')})</span>
+          data-message-id={message.id}
+          data-mentions-me={deleted ? undefined : (message.mentionsMe ?? undefined)}
+        >
+          <AuthorCard author={author} decorative>
+            <UserAvatar
+              userId={author.userId}
+              identifier={author.identifier}
+              avatarUrl={author.avatarUrl}
+              displayName={author.displayName}
+              className="mt-0.5 size-8"
+            />
+          </AuthorCard>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-2">
+              {author.kind === 'pending' ? (
+                <Skeleton className="h-4 w-24" aria-hidden="true" data-testid="author-pending" />
+              ) : (
+                <>
+                  <AuthorCard author={author}>
+                    <span className="text-sm font-medium">{label}</span>
+                  </AuthorCard>
+                  <AuthorMarker kind={author.kind} />
+                </>
+              )}
+              <Time iso={message.createdAt} />
+              {!deleted && editedAt !== null && !Number.isNaN(editedAt.getTime()) ? (
+                <time
+                  dateTime={message.editedAt ?? undefined}
+                  title={t('chat.message.editedAt', {
+                    date: editedAt.toLocaleString(i18n.language, {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    }),
+                  })}
+                  className="text-xs text-muted-foreground"
+                >
+                  ({t('chat.message.edited')})
+                </time>
+              ) : null}
+              {pinned ? (
+                <Pin
+                  className="size-3 self-center text-muted-foreground"
+                  aria-label={t('chat.pins.indicator')}
+                  role="img"
+                />
+              ) : null}
+            </div>
+            {!deleted && message.replyToId !== null ? (
+              <ReplyQuote roomId={message.roomId} replyToId={message.replyToId} />
+            ) : null}
+            {deleted ? (
+              <p className="text-sm italic text-muted-foreground">{t('chat.message.deleted')}</p>
+            ) : editing && actions ? (
+              <MessageEditForm
+                message={message}
+                allowCollective={actions.allowCollective}
+                onFinished={actions.onEditFinished}
+                onDirtyChange={actions.onEditDirtyChange}
+              />
+            ) : (
+              <MessageBody
+                body={message.body}
+                roomId={message.roomId}
+                mentions={message.mentions}
+              />
+            )}
+            {!deleted && actions ? (
+              <ReactionBar
+                roomId={message.roomId}
+                reactions={message.reactions}
+                myId={actions.myId}
+                canReact={canReact}
+                onToggle={(emoji) => actions.onToggleReaction(message, emoji)}
+              />
+            ) : null}
+            <ReadReceipts readers={readers} audienceSize={audienceSize} />
+          </div>
+          {actions && handlers.react && available.includes('react') ? (
+            <ReactionPicker
+              open={pickerOpen}
+              onOpenChange={setPickerOpen}
+              onPick={(emoji) => actions.onToggleReaction(message, emoji)}
+            />
           ) : null}
-        </div>
-        {deleted ? (
-          <p className="text-sm italic text-muted-foreground">{t('chat.message.deleted')}</p>
-        ) : (
-          <MessageBody body={message.body} roomId={message.roomId} mentions={message.mentions} />
-        )}
-        <ReadReceipts readers={readers} audienceSize={audienceSize} />
-      </div>
-    </li>
+          {moreButton}
+        </li>
+      )}
+    </MessageMenu>
   );
 }
 
@@ -173,6 +256,9 @@ export function PendingItem({
     <li className="flex gap-3 py-1.5 opacity-70" data-pending-id={pending.localId}>
       <div className="size-8 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
+        {pending.replyToId !== null ? (
+          <ReplyQuote roomId={roomId} replyToId={pending.replyToId} />
+        ) : null}
         <MessageBody body={pending.body} roomId={roomId} mentions={pending.mentions} />
         {failed ? (
           <p

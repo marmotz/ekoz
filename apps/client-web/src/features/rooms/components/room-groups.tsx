@@ -18,7 +18,6 @@ import {
 import { useMyPermissions, useRooms } from '@/features/rooms/hooks/use-room-queries';
 import { useRoomGroups } from '@/shared/groups/room-groups';
 import { useTranslation } from '@/shared/i18n/use-translation';
-import { cn } from '@/shared/lib/utils';
 import { useRoomMembers } from '@/shared/members/room-members';
 import { Button } from '@/shared/ui/button';
 import {
@@ -30,14 +29,10 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog';
 import { Input } from '@/shared/ui/input';
+import { MultiSelect } from '@/shared/ui/multi-select';
 import { Skeleton } from '@/shared/ui/skeleton';
 
 const MANAGE_GROUPS = 'room.manage_groups';
-
-const selectClass = cn(
-  'flex h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs',
-  'outline-none focus-visible:ring-2 focus-visible:ring-ring',
-);
 
 /**
  * `/rooms/$roomId/groups`: the groups defined on a room or space (web-client-mentions
@@ -363,7 +358,7 @@ function GroupMembers({
   const roomMembers = useRoomMembers(roomId);
   const add = useAddGroupMember(roomId);
   const remove = useRemoveGroupMember(roomId);
-  const [picked, setPicked] = useState('');
+  const [picked, setPicked] = useState<string[]>([]);
 
   if (detail.isPending) return <Loading />;
   if (detail.isError) {
@@ -380,6 +375,19 @@ function GroupMembers({
     ({ user }) => user.displayName !== null && !inGroup.has(user.id),
   );
   const error = add.error ?? remove.error;
+
+  /** One request per member, in order; stops at the first failure and keeps the members not added yet. */
+  const addPicked = async () => {
+    remove.reset();
+    for (const userId of picked) {
+      try {
+        await add.mutateAsync({ groupId: group.id, userId });
+      } catch {
+        return;
+      }
+      setPicked((current) => current.filter((id) => id !== userId));
+    }
+  };
 
   return (
     <div className="space-y-2 rounded-md bg-muted/40 p-3">
@@ -413,28 +421,27 @@ function GroupMembers({
         </ul>
       )}
       {editable && (
-        <div className="flex gap-2">
-          <select
-            className={selectClass}
-            aria-label={t('rooms.groups.pickMember', { name: group.name })}
+        <div className="flex items-end gap-2">
+          <MultiSelect
+            className="flex-1"
+            label={t('rooms.groups.pickMember', { name: group.name })}
+            placeholder={t('rooms.groups.pickPlaceholder')}
+            emptyText={t('rooms.groups.pickEmpty')}
+            removeLabel={(name) => t('rooms.groups.unpickMember', { name })}
+            options={candidates.map(({ user }) => ({
+              value: user.id,
+              label: user.displayName ?? '',
+            }))}
             value={picked}
-            onChange={(event) => setPicked(event.target.value)}
-          >
-            <option value="">{t('rooms.groups.pickPlaceholder')}</option>
-            {candidates.map(({ user }) => (
-              <option key={user.id} value={user.id}>
-                {user.displayName}
-              </option>
-            ))}
-          </select>
+            onChange={setPicked}
+            disabled={add.isPending}
+          />
           <Button
             type="button"
             size="sm"
-            disabled={picked === '' || add.isPending}
-            onClick={() => {
-              remove.reset();
-              add.mutate({ groupId: group.id, userId: picked }, { onSuccess: () => setPicked('') });
-            }}
+            className="h-9"
+            disabled={picked.length === 0 || add.isPending}
+            onClick={() => void addPicked()}
           >
             {t('rooms.groups.addMember')}
           </Button>

@@ -27,6 +27,7 @@ const message: TimelineMessage = {
   redactedAt: null,
   hiddenAt: null,
   createdAt: '2026-01-01T10:00:00.000Z',
+  reactions: [],
 };
 
 const member: Author = {

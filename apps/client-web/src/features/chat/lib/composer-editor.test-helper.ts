@@ -39,6 +39,7 @@ export interface TestEditor {
   editor: Editor;
   send: ReturnType<typeof vi.fn>;
   openLink: ReturnType<typeof vi.fn>;
+  cancel: ReturnType<typeof vi.fn>;
   setSuggestionOpen: (open: boolean) => void;
 }
 
@@ -47,8 +48,9 @@ export function createTestEditor(markdown = ''): TestEditor {
   const bridge = createComposerHandlers();
   const send = vi.fn();
   const openLink = vi.fn();
+  const cancel = vi.fn(() => true);
   let suggestionOpen = false;
-  bridge.update({ send, openLink, isSuggestionOpen: () => suggestionOpen });
+  bridge.update({ send, openLink, cancel, isSuggestionOpen: () => suggestionOpen });
 
   const editor = new Editor({
     element: document.createElement('div'),
@@ -64,6 +66,7 @@ export function createTestEditor(markdown = ''): TestEditor {
     editor,
     send,
     openLink,
+    cancel,
     setSuggestionOpen: (open) => {
       suggestionOpen = open;
     },

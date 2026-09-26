@@ -17,6 +17,12 @@ import {
  * `Date` while the wire carries ISO strings (technical design F9), so the timeline
  * normalises them to strings and never relies on `Date` instances.
  */
+export interface Reaction {
+  emoji: string;
+  /** In order of first reaction; the count is `userIds.length`. */
+  userIds: string[];
+}
+
 export interface TimelineMessage {
   id: string;
   roomId: string;
@@ -32,6 +38,8 @@ export interface TimelineMessage {
   redactedAt: string | null;
   hiddenAt: string | null;
   createdAt: string;
+  /** Driven by `reaction_*` events; empty for a tombstone. */
+  reactions: Reaction[];
 }
 
 export type SendFailureReason =
@@ -40,6 +48,7 @@ export type SendFailureReason =
   | 'body_too_long'
   | 'body_invalid'
   | 'mention_invalid'
+  | 'not_found'
   | 'network'
   | 'unknown';
 
@@ -49,6 +58,8 @@ export interface PendingMessage {
   body: string;
   /** The targets the body mentions, so the pending message can show its chips. */
   mentions: MentionTarget[];
+  /** The message this one answers, so a pending or retried reply already shows its quote. */
+  replyToId: string | null;
   state: 'sending' | 'failed';
   reason?: SendFailureReason;
 }
@@ -101,6 +112,10 @@ export function toTimelineMessage(message: Message): TimelineMessage {
     redactedAt: toIso(message.redactedAt),
     hiddenAt: toIso(message.hiddenAt),
     createdAt: toIso(message.createdAt) ?? '',
+    reactions: (message.reactions ?? []).map(({ emoji, userIds }) => ({
+      emoji,
+      userIds: [...userIds],
+    })),
   };
 }
 
@@ -126,7 +141,72 @@ function insertBySeq(messages: TimelineMessage[], message: TimelineMessage): Tim
 }
 
 function toTombstone(message: TimelineMessage, redactedAt: string): TimelineMessage {
-  return { ...message, body: '', redactedAt: message.redactedAt ?? redactedAt };
+  return { ...message, body: '', redactedAt: message.redactedAt ?? redactedAt, reactions: [] };
+}
+
+/** Set semantics: nothing changes when the user is already in the emoji's entry. */
+function withReaction(reactions: Reaction[], emoji: string, userId: string): Reaction[] {
+  const entry = reactions.find((reaction) => reaction.emoji === emoji);
+  if (!entry) return [...reactions, { emoji, userIds: [userId] }];
+  if (entry.userIds.includes(userId)) return reactions;
+  return reactions.map((reaction) =>
+    reaction === entry ? { emoji, userIds: [...reaction.userIds, userId] } : reaction,
+  );
+}
+
+/** Drops the user, and the entry when it empties; nothing changes when the user is absent. */
+function withoutReaction(reactions: Reaction[], emoji: string, userId: string): Reaction[] {
+  const entry = reactions.find((reaction) => reaction.emoji === emoji);
+  if (!entry?.userIds.includes(userId)) return reactions;
+  const userIds = entry.userIds.filter((id) => id !== userId);
+  if (userIds.length === 0) return reactions.filter((reaction) => reaction !== entry);
+  return reactions.map((reaction) => (reaction === entry ? { emoji, userIds } : reaction));
+}
+
+function changeReaction(
+  timeline: Timeline,
+  messageId: string,
+  emoji: string,
+  userId: string,
+  on: boolean,
+): Timeline {
+  const messages = replaceWhere(
+    timeline.messages,
+    (message) => message.id === messageId && message.redactedAt === null,
+    (message) => {
+      const reactions = on
+        ? withReaction(message.reactions, emoji, userId)
+        : withoutReaction(message.reactions, emoji, userId);
+      return reactions === message.reactions ? message : { ...message, reactions };
+    },
+  );
+  // Nothing changed (unknown message, replayed event): keep the state, so nothing re-renders.
+  return messages.every((message, index) => message === timeline.messages[index])
+    ? timeline
+    : { ...timeline, messages };
+}
+
+/** Optimistic reaction of `userId` (the caller): the same code path as the stream events. */
+export function toggleReactionLocally(
+  timeline: Timeline,
+  messageId: string,
+  emoji: string,
+  userId: string,
+  on: boolean,
+): Timeline {
+  return changeReaction(timeline, messageId, emoji, userId, on);
+}
+
+/** Turns a message into a tombstone after a successful delete; idempotent with the stream echo. */
+export function redactLocally(timeline: Timeline, messageId: string, at: string): Timeline {
+  return {
+    ...timeline,
+    messages: replaceWhere(
+      timeline.messages,
+      (message) => message.id === messageId,
+      (message) => toTombstone(message, at),
+    ),
+  };
 }
 
 function replaceWhere(
@@ -178,7 +258,11 @@ export function appendNewer(timeline: Timeline, page: MessagesPageLike): Timelin
   };
 }
 
-/** Replaces a message by id with a freshly fetched one (after a `message_edited`). */
+/**
+ * Replaces a message by id with a freshly fetched one (after a `message_edited`). The
+ * reactions of the message already in the timeline are kept: they are driven by events,
+ * and a fetch that raced a reaction event must not roll it back.
+ */
 export function replaceMessage(timeline: Timeline, message: TimelineMessage): Timeline {
   if (!timeline.messages.some((existing) => existing.id === message.id)) return timeline;
   return {
@@ -186,7 +270,7 @@ export function replaceMessage(timeline: Timeline, message: TimelineMessage): Ti
     messages: replaceWhere(
       timeline.messages,
       (existing) => existing.id === message.id,
-      () => message,
+      (existing) => ({ ...message, reactions: existing.reactions }),
     ),
   };
 }
@@ -237,6 +321,7 @@ export function applyRoomEvent(
         redactedAt: null,
         hiddenAt: null,
         createdAt: event.createdAt,
+        reactions: [],
       };
       return {
         timeline: { ...advanced, messages: insertBySeq(timeline.messages, message) },
@@ -254,6 +339,20 @@ export function applyRoomEvent(
         (message) => toTombstone(message, event.createdAt),
       );
       return { timeline: { ...advanced, messages }, refetch: [] };
+    }
+    case 'reaction_added':
+    case 'reaction_removed': {
+      if (event.senderId === null) return { timeline: advanced, refetch: [] };
+      return {
+        timeline: changeReaction(
+          advanced,
+          event.content.messageId,
+          event.content.emoji,
+          event.senderId,
+          event.type === 'reaction_added',
+        ),
+        refetch: [],
+      };
     }
     default:
       return { timeline: advanced, refetch: [] };

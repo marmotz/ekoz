@@ -77,4 +77,19 @@ describe('keymap', () => {
 
     expect(current.openLink).toHaveBeenCalledTimes(1);
   });
+
+  it('cancels an edit with Escape when the handler takes it', () => {
+    current = createTestEditor('text');
+
+    expect(press(current.editor, 'Escape')).toBe(true);
+
+    expect(current.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves Escape alone when there is nothing to cancel', () => {
+    current = createTestEditor('text');
+    current.cancel.mockReturnValue(false);
+
+    expect(press(current.editor, 'Escape')).toBe(false);
+  });
 });

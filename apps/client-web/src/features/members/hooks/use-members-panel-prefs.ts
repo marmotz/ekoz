@@ -16,7 +16,10 @@ function read(): MembersPanelPrefs {
     const stored = JSON.parse(window.localStorage.getItem(MEMBERS_PANEL_STORAGE_KEY) ?? 'null');
     return {
       open: typeof stored?.open === 'boolean' ? stored.open : DEFAULTS.open,
-      view: stored?.view === 'alpha' || stored?.view === 'role' ? stored.view : DEFAULTS.view,
+      view:
+        stored?.view === 'alpha' || stored?.view === 'role' || stored?.view === 'group'
+          ? stored.view
+          : DEFAULTS.view,
     };
   } catch {
     return DEFAULTS;

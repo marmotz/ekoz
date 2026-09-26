@@ -1,6 +1,9 @@
 import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
+import { useRef, useState } from 'react';
 
-import { RoomChat } from '@/features/chat/components/room-chat';
+import { PinsPanel } from '@/features/chat/components/pins-panel';
+import { PinsToggle } from '@/features/chat/components/pins-toggle';
+import { RoomChat, type RoomChatHandle } from '@/features/chat/components/room-chat';
 import { MembersPanel } from '@/features/members/components/members-panel';
 import { MembersToggle } from '@/features/members/components/members-toggle';
 import { RoomGate } from '@/features/rooms/components/room-gate';
@@ -21,6 +24,8 @@ function RoomPage() {
   const { at } = Route.useSearch();
   const navigate = useNavigate();
   const hasChildPage = useChildMatches().length > 0;
+  const chatRef = useRef<RoomChatHandle>(null);
+  const [pinsOpen, setPinsOpen] = useState(false);
   useMembersLive(roomId);
   useGroupsLive(roomId);
 
@@ -28,13 +33,26 @@ function RoomPage() {
     <RoomGate roomId={roomId}>
       {({ room, capabilities, membership }) => {
         const hasMembers = room.type === 'space' || room.type === 'channel';
+        const canRead = capabilities.includes('room.read');
 
         return (
           <>
             <RoomHeader
               room={room}
               capabilities={capabilities}
-              actions={hasMembers ? <MembersToggle roomId={room.id} /> : null}
+              actions={
+                <>
+                  {hasChildPage ? null : (
+                    <PinsToggle
+                      roomId={room.id}
+                      enabled={canRead}
+                      open={pinsOpen}
+                      onToggle={() => setPinsOpen((open) => !open)}
+                    />
+                  )}
+                  {hasMembers ? <MembersToggle roomId={room.id} /> : null}
+                </>
+              }
             />
             <div className="flex min-h-0 flex-1">
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -42,11 +60,19 @@ function RoomPage() {
                   <Outlet />
                 ) : (
                   <RoomChat
+                    ref={chatRef}
                     key={`${room.id}:${at ?? ''}`}
                     room={room}
                     capabilities={capabilities}
                     membership={membership}
                     at={at}
+                    onJumpToSeq={(seq) =>
+                      void navigate({
+                        to: '/rooms/$roomId',
+                        params: { roomId: room.id },
+                        search: { at: seq },
+                      })
+                    }
                     onJumpToLatest={() =>
                       void navigate({
                         to: '/rooms/$roomId',
@@ -59,6 +85,13 @@ function RoomPage() {
               </div>
               {hasMembers ? <MembersPanel roomId={room.id} /> : null}
             </div>
+            <PinsPanel
+              roomId={room.id}
+              enabled={canRead}
+              open={pinsOpen && !hasChildPage}
+              onOpenChange={setPinsOpen}
+              onSelect={(pin) => chatRef.current?.jumpToMessage(pin.messageId, pin.message.seq)}
+            />
           </>
         );
       }}

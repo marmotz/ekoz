@@ -7,6 +7,16 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Add several members to a group at once with a multiple-selection combobox: typing filters the room members and each pick becomes a chip in the field.
+- Make the sections of the members panel (roles, groups) collapsible, kept open while searching.
+- Add a "By group" view to the members panel listing each user group with its members, a member of several groups appearing in each.
+- Add a context menu and a "..." button on messages listing the actions the caller can take, and a confirmed delete that leaves a tombstone (#211).
+- Show reactions under messages as chips with their reactors on hover, toggle them, and pick an emoji from a quick row or the full picker, live from the stream (#212).
+- Add replying to a message, with a banner above the composer and the quoted parent above the reply (#213).
+- Add pinning and unpinning messages, a pin indicator, a pinned messages panel opened from the room header, and the latest pin shown under the header (#214).
+- Add jumping from a reply quote or a pinned message to the message it points to (#215).
+- Edit a message inline in the composer editor, with the edit date shown on hover of the "(edited)" label (#216).
+- Document the message actions client in `docs/technical/web-client-message-actions.md` (#217).
 - Regenerate the API types: messages carry reactions, pins embed their message and the messages policy has the edit window (#207, #208, #209).
 - Show fenced code blocks highlighted in messages, with a language label, auto-detection without a declared language and a copy button (#192).
 - Add a formatting toolbar to the composer (bold, italic, strikethrough, code, quote, lists, link) with shortcuts in tooltips, a help panel and an "Aa" toggle on narrow screens, and make Enter send in lists and code blocks with Shift+Enter as the new line (#193).
@@ -78,5 +88,6 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Fixed
 
+- Stop the page from scrolling when the members panel of a room with many members is open: the hover action buttons of the member rows escaped the list scroll area.
 - Scale the initials of a default avatar with its size instead of a fixed font size.
 

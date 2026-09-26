@@ -1,7 +1,7 @@
 import type { Member } from '@ekozhq/sdk';
 
 export type MemberRole = Member['role'];
-export type MembersView = 'role' | 'alpha';
+export type MembersView = 'role' | 'alpha' | 'group';
 
 /** Section order of the `role` view. */
 export const ROLE_ORDER: readonly MemberRole[] = [
@@ -15,7 +15,16 @@ export const ROLE_ORDER: readonly MemberRole[] = [
 export interface MemberSection {
   /** The role every member of the section has; null for the single `alpha` section. */
   role: MemberRole | null;
+  /** The user group of a `group` view section; `'none'` for the members in no group; null otherwise. */
+  group: { id: string; name: string } | 'none' | null;
   members: Member[];
+}
+
+/** A user group and the ids of its members, as the `group` view needs them. */
+export interface GroupMemberIds {
+  id: string;
+  name: string;
+  memberIds: readonly string[];
 }
 
 export interface GroupedMembers {
@@ -55,11 +64,16 @@ function byName(a: Member, b: Member): number {
  * Prepares the members list for the panel: drops deleted accounts (no identifier),
  * filters by `query` on display name and identifier, sorts by display name then
  * identifier, and, in the `role` view, groups by role in {@link ROLE_ORDER} with
- * empty sections omitted.
+ * empty sections omitted. In the `group` view, one section per group in `groups`
+ * (a member of several groups is listed in each), then the members in no group.
  */
 export function groupMembers(
   members: readonly Member[],
-  { query = '', view }: { query?: string; view: MembersView },
+  {
+    query = '',
+    view,
+    groups = [],
+  }: { query?: string; view: MembersView; groups?: readonly GroupMemberIds[] },
 ): GroupedMembers {
   const present = members.filter((member) => member.user.identifier !== null);
   const needle = query.trim();
@@ -67,15 +81,33 @@ export function groupMembers(
     .slice()
     .sort(byName);
 
-  const sections: MemberSection[] =
-    view === 'alpha'
-      ? matching.length > 0
-        ? [{ role: null, members: matching }]
-        : []
-      : ROLE_ORDER.map((role) => ({
-          role,
-          members: matching.filter((member) => member.role === role),
-        })).filter((section) => section.members.length > 0);
+  let sections: MemberSection[];
+  if (view === 'alpha') {
+    sections = matching.length > 0 ? [{ role: null, group: null, members: matching }] : [];
+  } else if (view === 'group') {
+    const inAGroup = new Set(groups.flatMap((group) => group.memberIds));
+    sections = [
+      ...groups
+        .slice()
+        .sort((a, b) => compare(a.name, b.name))
+        .map((group) => ({
+          role: null,
+          group: { id: group.id, name: group.name },
+          members: matching.filter((member) => group.memberIds.includes(member.user.id)),
+        })),
+      {
+        role: null,
+        group: 'none' as const,
+        members: matching.filter((m) => !inAGroup.has(m.user.id)),
+      },
+    ].filter((section) => section.members.length > 0);
+  } else {
+    sections = ROLE_ORDER.map((role) => ({
+      role,
+      group: null,
+      members: matching.filter((member) => member.role === role),
+    })).filter((section) => section.members.length > 0);
+  }
 
   return { total: present.length, matches: matching.length, sections };
 }

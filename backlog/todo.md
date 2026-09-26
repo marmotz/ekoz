@@ -50,7 +50,7 @@ _done, see [technical.md](features/web-client-composer-formatting/technical.md)_
 
 ## Web client message actions ·  [overview](features/web-client-message-actions/overview.md)
 
-_designed, see [technical.md](features/web-client-message-actions/technical.md)_ — 4/11 tasks done
+_done, see [technical.md](features/web-client-message-actions/technical.md)_ — 11/11 tasks done
 
 | Done | Issue                                              | Title                                                                         | Blocked by                         |
 |------|----------------------------------------------------|-------------------------------------------------------------------------------|------------------------------------|
@@ -58,13 +58,13 @@ _designed, see [technical.md](features/web-client-message-actions/technical.md)_
 | [x]  | [#208](https://github.com/marmotz/ekoz/issues/208) | Message actions server: editWindow on the messages policy                     | —                                  |
 | [x]  | [#209](https://github.com/marmotz/ekoz/issues/209) | Message actions server: pins embed the message                                | #207                               |
 | [x]  | [#210](https://github.com/marmotz/ekoz/issues/210) | Message actions SDK: edit, delete, pins, reactions and typed events           | #207, #208, #209                   |
-| [ ]  | [#211](https://github.com/marmotz/ekoz/issues/211) | Message actions client: action availability, context menu and delete          | #210, #191, #208                   |
-| [ ]  | [#212](https://github.com/marmotz/ekoz/issues/212) | Message actions client: reactions state, chips and emoji picker               | #210, #211                         |
-| [ ]  | [#213](https://github.com/marmotz/ekoz/issues/213) | Message actions client: reply banner and quote                                | #210, #211                         |
-| [ ]  | [#214](https://github.com/marmotz/ekoz/issues/214) | Message actions client: pins query, indicator and panel                       | #209, #210, #211, #127             |
-| [ ]  | [#215](https://github.com/marmotz/ekoz/issues/215) | Message actions client: jump to the parent of a reply and to a pinned message | #213, #214, #179                   |
-| [ ]  | [#216](https://github.com/marmotz/ekoz/issues/216) | Message actions client: inline message edit                                   | #210, #211, #177                   |
-| [ ]  | [#217](https://github.com/marmotz/ekoz/issues/217) | Message actions docs: docs/technical/web-client-message-actions.md            | #211, #212, #213, #214, #215, #216 |
+| [x]  | [#211](https://github.com/marmotz/ekoz/issues/211) | Message actions client: action availability, context menu and delete          | #210, #191, #208                   |
+| [x]  | [#212](https://github.com/marmotz/ekoz/issues/212) | Message actions client: reactions state, chips and emoji picker               | #210, #211                         |
+| [x]  | [#213](https://github.com/marmotz/ekoz/issues/213) | Message actions client: reply banner and quote                                | #210, #211                         |
+| [x]  | [#214](https://github.com/marmotz/ekoz/issues/214) | Message actions client: pins query, indicator and panel                       | #209, #210, #211, #127             |
+| [x]  | [#215](https://github.com/marmotz/ekoz/issues/215) | Message actions client: jump to the parent of a reply and to a pinned message | #213, #214, #179                   |
+| [x]  | [#216](https://github.com/marmotz/ekoz/issues/216) | Message actions client: inline message edit                                   | #210, #211, #177                   |
+| [x]  | [#217](https://github.com/marmotz/ekoz/issues/217) | Message actions docs: docs/technical/web-client-message-actions.md            | #211, #212, #213, #214, #215, #216 |
 
 ## Web client presence and typing ·  [overview](features/web-client-presence-and-typing/overview.md)
 

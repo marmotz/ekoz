@@ -205,8 +205,8 @@ Bodies are rendered with `react-markdown` and `remark-gfm`, by `MessageBody` in
 - A fresh `GET /events` connection no longer replays the retained feed: clients that
   need history read `/messages` and `/sync`.
 - Only the open room updates live; everything else is invalidated or refetched when
-  opened. Edit and delete actions, reactions, pins, typing and presence
-  are follow-ups (unread mention counters shipped with
+  opened. Typing and presence are follow-ups (unread mention counters shipped with
   [web client mentions](web-client-mentions.md), read markers and receipts with
-  [web client read state](web-client-read-state.md)).
+  [web client read state](web-client-read-state.md), reply, react, edit, delete and pin with
+  [web client message actions](web-client-message-actions.md)).
 - A gap in the SDK is fixed in `packages/sdk`, never worked around in the client.

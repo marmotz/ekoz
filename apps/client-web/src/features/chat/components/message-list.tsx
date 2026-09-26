@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import {
+  type Ref,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from 'react';
 
 import { MessageItem, PendingItem } from '@/features/chat/components/message-item';
 import type { Author } from '@/features/chat/hooks/use-authors';
@@ -16,7 +23,14 @@ const FLASH_DURATION_MS = 2500;
 /** Distance from the bottom under which new messages keep the list pinned to the bottom. */
 const STICK_TO_BOTTOM_THRESHOLD = 80;
 
+/** What a parent can ask of the list. */
+export interface MessageListHandle {
+  /** Scrolls a loaded message into view and outlines it briefly; false when it is not loaded. */
+  scrollToMessage: (messageId: string) => boolean;
+}
+
 export interface MessageListProps {
+  listRef?: Ref<MessageListHandle> | undefined;
   roomId: string;
   timeline: Timeline;
   resolveAuthor: (authorId: string | null) => Author;
@@ -41,6 +55,7 @@ export interface MessageListProps {
  * pinned to the bottom unless the user scrolled up.
  */
 export function MessageList({
+  listRef,
   roomId,
   timeline,
   resolveAuthor,
@@ -72,6 +87,30 @@ export function MessageList({
     reportedAtBottom.current = atBottom;
     onAtBottomChangeRef.current?.(atBottom);
   }, []);
+
+  /** Scrolls to a message row and outlines it (a data attribute: no render is needed). */
+  const flash = useCallback((element: Element) => {
+    element.scrollIntoView?.({ block: 'center' });
+    element.setAttribute('data-jump-target', '');
+    clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(
+      () => element.removeAttribute('data-jump-target'),
+      FLASH_DURATION_MS,
+    );
+  }, []);
+
+  useImperativeHandle(
+    listRef,
+    () => ({
+      scrollToMessage: (messageId) => {
+        const element = container.current?.querySelector(`[data-message-id="${messageId}"]`);
+        if (!element) return false;
+        flash(element);
+        return true;
+      },
+    }),
+    [flash],
+  );
 
   const visible = timeline.messages.filter((message) => message.hiddenAt === null);
   const firstSeq = timeline.messages[0]?.seq;
@@ -110,13 +149,8 @@ export function MessageList({
     }
     const element = container.current?.querySelector(`[data-message-id="${target.id}"]`);
     if (!element) return;
-    element.scrollIntoView?.({ block: 'center' });
-    element.setAttribute('data-jump-target', '');
-    flashTimer.current = setTimeout(
-      () => element.removeAttribute('data-jump-target'),
-      FLASH_DURATION_MS,
-    );
-  }, [targetSeq, visible, t, reportAtBottom]);
+    flash(element);
+  }, [targetSeq, visible, t, reportAtBottom, flash]);
 
   useEffect(() => () => clearTimeout(flashTimer.current), []);
   useEffect(

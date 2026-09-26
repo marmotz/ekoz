@@ -11,9 +11,11 @@ import {
   mergeFirstPage,
   prependOlder,
   reconcilePending,
+  redactLocally,
   replaceMessage,
   type Timeline,
   type TimelineMessage,
+  toggleReactionLocally,
   toTimelineMessage,
 } from '@/features/chat/lib/timeline';
 
@@ -281,7 +283,13 @@ describe('replaceMessage', () => {
 });
 
 describe('pending messages', () => {
-  const pending = { localId: 'l1', body: 'hi', mentions: [], state: 'sending' as const };
+  const pending = {
+    localId: 'l1',
+    body: 'hi',
+    mentions: [],
+    replyToId: null,
+    state: 'sending' as const,
+  };
 
   it('adds, fails and retries an entry', () => {
     const added = addPending(timeline([1]), pending);
@@ -313,7 +321,13 @@ describe('pending messages', () => {
   });
 
   it('leaves the other pending entries alone', () => {
-    const other = { localId: 'l2', body: 'yo', mentions: [], state: 'sending' as const };
+    const other = {
+      localId: 'l2',
+      body: 'yo',
+      mentions: [],
+      replyToId: null,
+      state: 'sending' as const,
+    };
     const base = addPending(addPending(timeline([1]), pending), other);
 
     expect(reconcilePending(base, 'l1', message(2)).pending).toEqual([other]);
@@ -484,6 +498,7 @@ describe('detached timeline', () => {
       localId: 'l1',
       body: 'hi',
       mentions: [],
+      replyToId: null,
       state: 'sending',
     });
 
@@ -491,5 +506,164 @@ describe('detached timeline', () => {
 
     expect(next.pending).toEqual([]);
     expect(next.messages.map((m) => m.seq)).toEqual(['40']);
+  });
+});
+
+describe('reactions', () => {
+  const reactionEvent = (
+    type: 'reaction_added' | 'reaction_removed',
+    seq: number,
+    emoji: string,
+    senderId: string | null = 'u2',
+    messageId = 'm1',
+  ): RoomEvent => ({
+    type,
+    roomId: 'r1',
+    seq: String(seq),
+    senderId,
+    createdAt: '2026-01-02T00:00:00.000Z',
+    content: { messageId, emoji },
+  });
+
+  const withReactions = (reactions: { emoji: string; userIds: string[] }[]): Timeline => ({
+    ...timeline([1], '1'),
+    messages: [message(1, { reactions })],
+  });
+
+  it('copies the reactions of a fetched message, and starts a live message with none', () => {
+    const fetched = toTimelineMessage(
+      wireMessage(1, { reactions: [{ emoji: '👍', userIds: ['u1', 'u2'] }] }),
+    );
+
+    expect(fetched.reactions).toEqual([{ emoji: '👍', userIds: ['u1', 'u2'] }]);
+    expect(applyRoomEvent(timeline([1]), created(2)).timeline.messages[1]?.reactions).toEqual([]);
+  });
+
+  it('adds a reaction: a new entry at the end, then the actor to an existing entry', () => {
+    const start = withReactions([{ emoji: '👍', userIds: ['u1'] }]);
+
+    const first = applyRoomEvent(start, reactionEvent('reaction_added', 2, '🎉'));
+    const second = applyRoomEvent(first.timeline, reactionEvent('reaction_added', 3, '👍'));
+
+    expect(second.timeline.messages[0]?.reactions).toEqual([
+      { emoji: '👍', userIds: ['u1', 'u2'] },
+      { emoji: '🎉', userIds: ['u2'] },
+    ]);
+    expect(second.timeline.lastSeq).toBe('3');
+  });
+
+  it('removes the actor, and the entry once it is empty', () => {
+    const start = withReactions([
+      { emoji: '👍', userIds: ['u1', 'u2'] },
+      { emoji: '🎉', userIds: ['u2'] },
+    ]);
+
+    const first = applyRoomEvent(start, reactionEvent('reaction_removed', 2, '👍'));
+    const second = applyRoomEvent(first.timeline, reactionEvent('reaction_removed', 3, '🎉'));
+
+    expect(second.timeline.messages[0]?.reactions).toEqual([{ emoji: '👍', userIds: ['u1'] }]);
+  });
+
+  it('is idempotent: a replayed add or remove changes nothing', () => {
+    const start = withReactions([{ emoji: '👍', userIds: ['u2'] }]);
+
+    const again = applyRoomEvent(start, reactionEvent('reaction_added', 2, '👍'));
+    const absent = applyRoomEvent(start, reactionEvent('reaction_removed', 2, '🎉'));
+
+    expect(again.timeline.messages).toBe(start.messages);
+    expect(absent.timeline.messages).toBe(start.messages);
+  });
+
+  it('ignores an event at or below lastSeq, for an unknown message and for an unknown actor', () => {
+    const start = withReactions([]);
+
+    expect(applyRoomEvent(start, reactionEvent('reaction_added', 1, '👍')).timeline).toBe(start);
+    expect(
+      applyRoomEvent(start, reactionEvent('reaction_added', 2, '👍', 'u2', 'other')).timeline
+        .messages,
+    ).toBe(start.messages);
+    expect(
+      applyRoomEvent(start, reactionEvent('reaction_added', 2, '👍', null)).timeline.messages,
+    ).toBe(start.messages);
+  });
+
+  it('clears the reactions of a deleted or redacted message', () => {
+    const start = withReactions([{ emoji: '👍', userIds: ['u1'] }]);
+    const deleted = applyRoomEvent(start, {
+      type: 'message_deleted',
+      roomId: 'r1',
+      seq: '2',
+      senderId: 'u1',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { messageId: 'm1', messageSeq: '1', reason: 'user' },
+    } as RoomEvent);
+    const redacted = applyRoomEvent(start, {
+      type: 'message_redacted',
+      roomId: 'r1',
+      seq: '1',
+      senderId: null,
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { reason: 'retention' },
+    } as RoomEvent);
+
+    expect(deleted.timeline.messages[0]?.reactions).toEqual([]);
+    expect(redacted.timeline.messages[0]?.reactions).toEqual([]);
+  });
+
+  it('does not add a reaction to a tombstone', () => {
+    const start = redactLocally(withReactions([]), 'm1', '2026-01-02T00:00:00.000Z');
+
+    const next = applyRoomEvent(start, reactionEvent('reaction_added', 2, '👍'));
+
+    expect(next.timeline.messages[0]?.reactions).toEqual([]);
+  });
+
+  it('replaceMessage keeps the reactions of the message already in the timeline', () => {
+    const start = withReactions([{ emoji: '👍', userIds: ['u1'] }]);
+    const fetched = toTimelineMessage(
+      wireMessage(1, { body: 'edited', reactions: [{ emoji: '🎉', userIds: ['u9'] }] }),
+    );
+
+    const next = replaceMessage(start, fetched);
+
+    expect(next.messages[0]?.body).toBe('edited');
+    expect(next.messages[0]?.reactions).toEqual([{ emoji: '👍', userIds: ['u1'] }]);
+  });
+
+  it('toggleReactionLocally adds and removes the caller, and stays idempotent with the echo', () => {
+    const start = withReactions([]);
+
+    const on = toggleReactionLocally(start, 'm1', '👍', 'me', true);
+    const echo = applyRoomEvent(on, reactionEvent('reaction_added', 2, '👍', 'me'));
+    const off = toggleReactionLocally(echo.timeline, 'm1', '👍', 'me', false);
+
+    expect(on.messages[0]?.reactions).toEqual([{ emoji: '👍', userIds: ['me'] }]);
+    expect(echo.timeline.messages).toBe(on.messages);
+    expect(off.messages[0]?.reactions).toEqual([]);
+    expect(toggleReactionLocally(start, 'unknown', '👍', 'me', true)).toBe(start);
+  });
+});
+
+describe('redactLocally', () => {
+  it('turns the message into a tombstone, idempotently with the deletion echo', () => {
+    const start = timeline([1, 2], '2');
+
+    const local = redactLocally(start, 'm1', '2026-01-02T00:00:00.000Z');
+    const echo = applyRoomEvent(local, {
+      type: 'message_deleted',
+      roomId: 'r1',
+      seq: '3',
+      senderId: 'u1',
+      createdAt: '2026-01-03T00:00:00.000Z',
+      content: { messageId: 'm1', messageSeq: '1', reason: 'user' },
+    } as RoomEvent);
+
+    expect(local.messages[0]).toMatchObject({
+      body: '',
+      redactedAt: '2026-01-02T00:00:00.000Z',
+      reactions: [],
+    });
+    expect(local.messages[1]).toBe(start.messages[1]);
+    expect(echo.timeline.messages[0]?.redactedAt).toBe('2026-01-02T00:00:00.000Z');
   });
 });
