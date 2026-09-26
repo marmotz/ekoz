@@ -51,6 +51,33 @@ This replaces the informal "most restrictive wins" phrasing from the
 [conversation data model](conversation-data-model.md): conflicts are resolved by
 specificity (closest node, then per-user), not by picking the most restrictive.
 
+## Group conversation admins
+
+A `group_dm` has no space above it, so its administration cannot use the
+`room_admin` role (which would also grant `edit_any`, `delete_any`,
+`manage_roles`, ...). A **group admin** is instead an ordinary `member` holding a
+per-user `room.manage_members = allow` override on the room: the "light
+`room_admin`", scoped to member management only.
+
+- The creator receives the override at creation.
+- The override is made effective by dedicated `/group-dms/:id/*` endpoints
+  (rename, add and remove members, promote and demote admins). The generic
+  routes keep their own capabilities (`room.kick`, `room.invite`, `space.manage`),
+  which a `member` does not hold and which are not widened for groups. These
+  endpoints write the override through an internal path that skips the
+  `room.manage_permissions` check, since the admin rule is their own
+  authorisation.
+- Demoting writes `deny`, equivalent to the `member` default; no new event shape
+  is needed, `permission_override_changed` carries it.
+- A member who leaves or is removed loses every override they held on the room,
+  so a re-added former admin is a plain member.
+- A group left without any admin (last admin leaving, removed or self-demoting)
+  is deleted for everyone: `room_deleted` is appended first so fan-out reaches the
+  current members, then the room is soft-deleted and its memberships and overrides
+  removed.
+- A deleted room is unknown to everyone: the resolver answers `404 room.not_found`
+  instead of `403`.
+
 ## Consequences
 
 - One resolver, one code path, exhaustively unit-tested against a fixture tree.

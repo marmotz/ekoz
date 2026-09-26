@@ -3,6 +3,7 @@ import { StringFilter } from './filters.js';
 import { z } from 'zod';
 
 export const PublicProfileViewDtoSchema = z.object({
+  id: z.string().regex(new RegExp("^[0-9A-HJKMNP-TV-Z]{26}$")),
   identifier: z.string(),
   displayName: z.string(),
   bio: z.string().nullable(),
@@ -11,6 +12,7 @@ export const PublicProfileViewDtoSchema = z.object({
 export type PublicProfileViewDtoDto = z.infer<typeof PublicProfileViewDtoSchema>;
 
 export const PublicProfileViewDtoDeepSchema = z.object({
+  id: z.string().regex(new RegExp("^[0-9A-HJKMNP-TV-Z]{26}$")),
   identifier: z.string(),
   displayName: z.string(),
   bio: z.string().nullable(),
@@ -19,6 +21,7 @@ export const PublicProfileViewDtoDeepSchema = z.object({
 export type PublicProfileViewDtoDeepDto = z.infer<typeof PublicProfileViewDtoDeepSchema>;
 
 export const PublicProfileViewDtoCreateSchema = z.object({
+  id: z.string().regex(new RegExp("^[0-9A-HJKMNP-TV-Z]{26}$")),
   identifier: z.string(),
   displayName: z.string(),
   bio: z.string().nullable(),
@@ -27,6 +30,7 @@ export const PublicProfileViewDtoCreateSchema = z.object({
 export type PublicProfileViewDtoCreateDto = z.infer<typeof PublicProfileViewDtoCreateSchema>;
 
 export const PublicProfileViewDtoCreateDeepSchema = z.object({
+  id: z.string().regex(new RegExp("^[0-9A-HJKMNP-TV-Z]{26}$")),
   identifier: z.string(),
   displayName: z.string(),
   bio: z.string().nullable(),
@@ -35,6 +39,7 @@ export const PublicProfileViewDtoCreateDeepSchema = z.object({
 export type PublicProfileViewDtoCreateDeepDto = z.infer<typeof PublicProfileViewDtoCreateDeepSchema>;
 
 export const PublicProfileViewDtoUpdateSchema = z.object({
+  id: z.string().regex(new RegExp("^[0-9A-HJKMNP-TV-Z]{26}$")),
   identifier: z.string(),
   displayName: z.string(),
   bio: z.string().nullable(),
@@ -43,6 +48,7 @@ export const PublicProfileViewDtoUpdateSchema = z.object({
 export type PublicProfileViewDtoUpdateDto = z.infer<typeof PublicProfileViewDtoUpdateSchema>;
 
 export const PublicProfileViewDtoUpdateDeepSchema = z.object({
+  id: z.string().regex(new RegExp("^[0-9A-HJKMNP-TV-Z]{26}$")),
   identifier: z.string(),
   displayName: z.string(),
   bio: z.string().nullable(),
@@ -51,6 +57,7 @@ export const PublicProfileViewDtoUpdateDeepSchema = z.object({
 export type PublicProfileViewDtoUpdateDeepDto = z.infer<typeof PublicProfileViewDtoUpdateDeepSchema>;
 
 const PublicProfileViewDtoWhereSchemaBase = z.object({
+  id: StringFilter.optional(),
   identifier: StringFilter.optional(),
   displayName: StringFilter.optional(),
   bio: StringFilter.optional(),
@@ -64,6 +71,7 @@ export const PublicProfileViewDtoWhereSchema: z.ZodType<PublicProfileViewDtoWher
 export type PublicProfileViewDtoWhereDto = z.infer<typeof PublicProfileViewDtoWhereSchemaBase> & { AND?: PublicProfileViewDtoWhereDto | PublicProfileViewDtoWhereDto[]; OR?: PublicProfileViewDtoWhereDto | PublicProfileViewDtoWhereDto[]; NOT?: PublicProfileViewDtoWhereDto | PublicProfileViewDtoWhereDto[]; };
 
 const PublicProfileViewDtoWhereDeepSchemaBase = z.object({
+  id: StringFilter.optional(),
   identifier: StringFilter.optional(),
   displayName: StringFilter.optional(),
   bio: StringFilter.optional(),
@@ -77,6 +85,7 @@ export const PublicProfileViewDtoWhereDeepSchema: z.ZodType<PublicProfileViewDto
 export type PublicProfileViewDtoWhereDeepDto = z.infer<typeof PublicProfileViewDtoWhereDeepSchemaBase> & { AND?: PublicProfileViewDtoWhereDeepDto | PublicProfileViewDtoWhereDeepDto[]; OR?: PublicProfileViewDtoWhereDeepDto | PublicProfileViewDtoWhereDeepDto[]; NOT?: PublicProfileViewDtoWhereDeepDto | PublicProfileViewDtoWhereDeepDto[]; };
 
 export const PublicProfileViewDtoSelectSchema = z.object({
+  id: z.boolean().optional(),
   identifier: z.boolean().optional(),
   displayName: z.boolean().optional(),
   bio: z.boolean().optional(),
@@ -85,6 +94,7 @@ export const PublicProfileViewDtoSelectSchema = z.object({
 export type PublicProfileViewDtoSelectDto = z.infer<typeof PublicProfileViewDtoSelectSchema>;
 
 export const PublicProfileViewDtoSelectDeepSchema = z.object({
+  id: z.boolean().optional(),
   identifier: z.boolean().optional(),
   displayName: z.boolean().optional(),
   bio: z.boolean().optional(),

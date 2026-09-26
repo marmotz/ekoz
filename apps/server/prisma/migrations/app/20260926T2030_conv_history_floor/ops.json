@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.membership.history_from_seq",
+    "label": "Add column \"history_from_seq\" to \"membership\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "history_from_seq",
+        "table": "membership"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"history_from_seq\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "membership",
+          "history_from_seq"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"history_from_seq\"",
+        "sql": "ALTER TABLE \"public\".\"membership\" ADD COLUMN \"history_from_seq\" int8"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"history_from_seq\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "membership",
+          "history_from_seq"
+        ]
+      }
+    ]
+  }
+]

@@ -2,6 +2,9 @@
 export const AccountViewDtoStatus = ["active", "suspended", "deleted"] as const;
 export type AccountViewDtoStatus = (typeof AccountViewDtoStatus)[number];
 
+export const AddGroupDmMembersDtoHistory = ["full", "none"] as const;
+export type AddGroupDmMembersDtoHistory = (typeof AddGroupDmMembersDtoHistory)[number];
+
 export const AdminUserDetailDtoStatus = ["active", "suspended", "deleted"] as const;
 export type AdminUserDetailDtoStatus = (typeof AdminUserDetailDtoStatus)[number];
 
@@ -10,6 +13,15 @@ export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseD
 
 export const AuthPolicyDtoRegistrationMode = ["open", "invite", "admin"] as const;
 export type AuthPolicyDtoRegistrationMode = (typeof AuthPolicyDtoRegistrationMode)[number];
+
+export const ConversationListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export type ConversationListResponseDtoItemsDefaultRole = (typeof ConversationListResponseDtoItemsDefaultRole)[number];
+
+export const ConversationListResponseDtoItemsType = ["space", "channel", "dm", "group_dm"] as const;
+export type ConversationListResponseDtoItemsType = (typeof ConversationListResponseDtoItemsType)[number];
+
+export const ConversationListResponseDtoItemsVisibility = ["public", "private", "invite"] as const;
+export type ConversationListResponseDtoItemsVisibility = (typeof ConversationListResponseDtoItemsVisibility)[number];
 
 export const CreateChannelDtoVisibility = ["public", "private", "invite"] as const;
 export type CreateChannelDtoVisibility = (typeof CreateChannelDtoVisibility)[number];

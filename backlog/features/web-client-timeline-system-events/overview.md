@@ -46,5 +46,5 @@ a `member_joined`, the protocol has no distinct event for it).
 
 - [`web-client-room-moderation`](../web-client-room-moderation/overview.md):
   produces the moderation events worth surfacing.
-- [`web-client-read-state`](../web-client-read-state/overview.md): system lines do
+- [`web-client-read-state`](../../_archives/features/web-client-read-state/overview.md): system lines do
   not count as unread.

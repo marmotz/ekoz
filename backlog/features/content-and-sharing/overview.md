@@ -99,7 +99,7 @@ client, admin console and documentation.
 - [Conversations](../../_archives/features/conversations/overview.md), for sharing content in rooms.
 - [Server administration](../../_archives/features/server-administration/overview.md), for storage
   limits and the link preview option.
-- [Web client message actions](../web-client-message-actions/overview.md), for
+- [Web client message actions](../../_archives/features/web-client-message-actions/overview.md), for
   the message edit UI that adding / removing attachments plugs into.
 
 ## Feature order

@@ -89,6 +89,7 @@ export class ProfileService implements OnModuleInit {
     }
 
     return {
+      id: user.id,
       identifier: userIdentifier(user.name, this.config.get('server.domain')),
       displayName: profile.displayName,
       bio: profile.bio,

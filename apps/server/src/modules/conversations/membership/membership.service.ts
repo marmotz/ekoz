@@ -17,6 +17,7 @@ import {
   RoomNotFoundError,
   RoomNotJoinableError,
 } from '../conversations.errors.js';
+import { GroupLifecycleService } from '../dm/group-lifecycle.service.js';
 import { EventLogService } from '../events/event-log.service.js';
 import { GroupsService } from '../groups/groups.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
@@ -121,6 +122,7 @@ export class MembershipService {
     private readonly config: ConfigService,
     private readonly effectiveMembers: EffectiveMembersQuery,
     private readonly groups: GroupsService,
+    private readonly groupLifecycle: GroupLifecycleService,
   ) {}
 
   /**
@@ -190,17 +192,24 @@ export class MembershipService {
     const room = await this.findRoomOrThrow(roomId);
     await this.requireMembership(roomId, actor.userId);
 
-    // A `dm`'s membership is fixed (technical.md §7): "leaving" hides/archives
-    // it for this user instead of removing the row, and emits no room event —
-    // the other participant's membership is untouched.
+    // A `dm`'s membership is fixed (technical.md §7): "leaving" hides it for this
+    // user instead of removing the row, and emits no room event — the other
+    // participant's membership is untouched. The history floor is raised to the
+    // next message so the conversation reappears without its past.
     if (room.type === 'dm') {
-      await this.prisma.orm.public.Membership.where({ roomId, userId: actor.userId }).update({
-        hiddenAt: new Date().toISOString(),
+      await this.prisma.transaction(async (tx) => {
+        const current = (await tx.orm.public.Room.where({ id: roomId }).first()) as {
+          lastSeq: bigint;
+        };
+        await tx.orm.public.Membership.where({ roomId, userId: actor.userId }).update({
+          hiddenAt: new Date().toISOString(),
+          historyFromSeq: current.lastSeq + 1n,
+        });
       });
       return;
     }
 
-    await this.prisma.transaction(async (tx) => {
+    const groupDeleted = await this.prisma.transaction(async (tx) => {
       await tx.orm.public.Membership.where({ roomId, userId: actor.userId }).delete();
       await this.groups.removeUserFromNodeGroups(tx, roomId, actor.userId);
       await this.eventLog.append(tx, {
@@ -209,9 +218,21 @@ export class MembershipService {
         senderId: actor.userId,
         content: { userId: actor.userId },
       });
+
+      // A group admin who leaves is no longer admin when re-added; a group left
+      // without any admin is deleted.
+      if (room.type !== 'group_dm') {
+        return false;
+      }
+      await this.groupLifecycle.clearOverrides(tx, roomId, actor.userId);
+
+      return this.groupLifecycle.deleteIfNoAdmin(tx, roomId, actor.userId);
     });
 
     await this.permissions.invalidateSubtree(roomId);
+    if (groupDeleted) {
+      this.groupLifecycle.afterDeletion(roomId);
+    }
   }
 
   async invite(

@@ -285,4 +285,22 @@ describe('RoomGate', () => {
 
     expect(await screen.findByText('Salon indisponible')).toBeInTheDocument();
   });
+
+  it.each(['dm', 'group_dm'])('redirects a %s to its conversation page', async (type) => {
+    const { router } = renderSignedIn(
+      <RoomGate roomId="r1">{() => <p data-testid="content" />}</RoomGate>,
+      {
+        route: '/rooms/r1',
+        configure: ({ stubs }) => {
+          stubs.rooms.list.mockResolvedValue({ items: [] });
+          stubs.rooms.get.mockResolvedValue({ id: 'r1', type, visibility: 'private' } as {
+            id: string;
+          });
+        },
+      },
+    );
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/dms/r1'));
+    expect(screen.queryByTestId('content')).not.toBeInTheDocument();
+  });
 });

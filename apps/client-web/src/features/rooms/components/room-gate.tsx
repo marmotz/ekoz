@@ -1,5 +1,5 @@
 import type { MyRoomInvitation, Room, RoomListItem, RoomPreview } from '@ekozhq/sdk';
-import { Link } from '@tanstack/react-router';
+import { Link, Navigate } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
 import { hasRoomErrorCode, roomErrorKey } from '@/features/rooms/api/errors';
@@ -68,6 +68,8 @@ export function RoomGate({ roomId, children }: RoomGateProps) {
       );
     case 'request':
       return <JoinRequestPanel preview={access.preview} />;
+    case 'conversation':
+      return <Navigate to="/dms/$roomId" params={{ roomId }} replace />;
     default:
       return (
         <div className="flex h-full min-h-0 flex-col">

@@ -4,6 +4,12 @@ import type { StringFilter } from './filters.js';
 
 
 export type PublicProfileViewDtoDto = {
+  /**
+   * Crockford base32 entity identifier (ULID), 26 characters
+   * 
+   * @pattern ^[0-9A-HJKMNP-TV-Z]{26}$
+   */
+  id: string;
   identifier: string;
   displayName: string;
   bio: string | null;
@@ -14,6 +20,12 @@ export type PublicProfileViewDtoDto = {
 };
 
 export type PublicProfileViewDtoDeepDto = {
+  /**
+   * Crockford base32 entity identifier (ULID), 26 characters
+   * 
+   * @pattern ^[0-9A-HJKMNP-TV-Z]{26}$
+   */
+  id: string;
   identifier: string;
   displayName: string;
   bio: string | null;
@@ -24,6 +36,12 @@ export type PublicProfileViewDtoDeepDto = {
 };
 
 export type PublicProfileViewDtoCreateDto = {
+  /**
+   * Crockford base32 entity identifier (ULID), 26 characters
+   * 
+   * @pattern ^[0-9A-HJKMNP-TV-Z]{26}$
+   */
+  id: string;
   identifier: string;
   displayName: string;
   bio: string | null;
@@ -34,6 +52,12 @@ export type PublicProfileViewDtoCreateDto = {
 };
 
 export type PublicProfileViewDtoCreateDeepDto = {
+  /**
+   * Crockford base32 entity identifier (ULID), 26 characters
+   * 
+   * @pattern ^[0-9A-HJKMNP-TV-Z]{26}$
+   */
+  id: string;
   identifier: string;
   displayName: string;
   bio: string | null;
@@ -44,6 +68,12 @@ export type PublicProfileViewDtoCreateDeepDto = {
 };
 
 export type PublicProfileViewDtoUpdateDto = Partial<{
+  /**
+   * Crockford base32 entity identifier (ULID), 26 characters
+   * 
+   * @pattern ^[0-9A-HJKMNP-TV-Z]{26}$
+   */
+  id: string;
   identifier: string;
   displayName: string;
   bio: string | null;
@@ -54,6 +84,12 @@ export type PublicProfileViewDtoUpdateDto = Partial<{
 }>;
 
 export type PublicProfileViewDtoUpdateDeepDto = Partial<{
+  /**
+   * Crockford base32 entity identifier (ULID), 26 characters
+   * 
+   * @pattern ^[0-9A-HJKMNP-TV-Z]{26}$
+   */
+  id: string;
   identifier: string;
   displayName: string;
   bio: string | null;
@@ -64,6 +100,7 @@ export type PublicProfileViewDtoUpdateDeepDto = Partial<{
 }>;
 
 export type PublicProfileViewDtoWhereDto = {
+  id?: StringFilter;
   identifier?: StringFilter;
   displayName?: StringFilter;
   bio?: StringFilter;
@@ -74,6 +111,7 @@ export type PublicProfileViewDtoWhereDto = {
 };
 
 export type PublicProfileViewDtoWhereDeepDto = {
+  id?: StringFilter;
   identifier?: StringFilter;
   displayName?: StringFilter;
   bio?: StringFilter;
@@ -84,6 +122,7 @@ export type PublicProfileViewDtoWhereDeepDto = {
 };
 
 export type PublicProfileViewDtoSelectDto = {
+  id?: boolean;
   identifier?: boolean;
   displayName?: boolean;
   bio?: boolean;
@@ -91,6 +130,7 @@ export type PublicProfileViewDtoSelectDto = {
 };
 
 export type PublicProfileViewDtoSelectDeepDto = {
+  id?: boolean;
   identifier?: boolean;
   displayName?: boolean;
   bio?: boolean;

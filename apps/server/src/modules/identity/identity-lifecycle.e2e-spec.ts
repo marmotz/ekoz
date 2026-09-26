@@ -168,6 +168,7 @@ describe('identity — lifecycle, profile, throttle (integration)', () => {
       displayName: 'Alice A.',
       bio: 'hi there',
     });
+    expect(pub.body.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
 
     await request(server())
       .patch('/me/profile')

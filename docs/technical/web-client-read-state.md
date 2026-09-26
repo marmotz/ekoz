@@ -14,7 +14,7 @@ The server, protocol and SDK side (markers for effective members, `unreadCount` 
 `GET /rooms`, the `receipts` resource and the `receipt_updated` event) is described in
 [messages and interactions](../protocol/messages-and-interactions.md#read-markers),
 [rooms and permissions](../protocol/rooms-and-permissions.md) and the
-[design of the feature](../../backlog/features/web-client-read-state/technical.md), which
+[design of the feature](../../backlog/_archives/features/web-client-read-state/technical.md), which
 holds the findings from the code and is not repeated here. This page records what shipped
 in `apps/client-web`. It builds on [web client chat](web-client-chat.md),
 [web client rooms](web-client-rooms.md) and [web client members](web-client-members.md).

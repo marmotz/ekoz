@@ -438,7 +438,7 @@ antivirus scanning (listed in section 9).
   `SignedUrlCache`. The link preview card is shown under the body, with a remove
   button for the author.
 - **Editing**: add or remove attachments and change or remove the preview in
-  the edit mode that [web client message actions](../web-client-message-actions/overview.md)
+  the edit mode that [web client message actions](../../_archives/features/web-client-message-actions/overview.md)
   provides (dependency). Until it exists, only the dedicated "remove file" action
   is available.
 - **Files panel**: a "Files" entry in the room header opens a side panel with

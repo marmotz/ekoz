@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 import { UserSummaryReader } from '../../core/users/user-summary.reader.js';
+import { ContactsController } from './contacts/contacts.controller.js';
+import { ContactsService } from './contacts/contacts.service.js';
 import { DirectoryController } from './directory/directory.controller.js';
 import { DirectoryService } from './directory/directory.service.js';
+import { ConversationListService } from './dm/conversation-list.service.js';
 import { DmController } from './dm/dm.controller.js';
 import { DmService } from './dm/dm.service.js';
+import { GroupDmController } from './dm/group-dm.controller.js';
+import { GroupDmService } from './dm/group-dm.service.js';
+import { GroupLifecycleService } from './dm/group-lifecycle.service.js';
 import { EventLogService } from './events/event-log.service.js';
 import { GroupsController } from './groups/groups.controller.js';
 import { GroupsService } from './groups/groups.service.js';
 import { EffectiveMembersQuery } from './membership/effective-members.query.js';
+import { HistoryFloorService } from './membership/history-floor.service.js';
 import {
   MembershipController,
   MyRoomInvitationsController,
@@ -76,6 +83,8 @@ import { SyncService } from './streaming/sync.service.js';
     ModerationController,
     GroupsController,
     MentionsController,
+    ContactsController,
+    GroupDmController,
   ],
   providers: [
     EventLogService,
@@ -88,6 +97,7 @@ import { SyncService } from './streaming/sync.service.js';
     MessagesService,
     ModerationService,
     DmService,
+    ConversationListService,
     ReactionsService,
     ReceiptsService,
     FeedFanoutService,
@@ -102,9 +112,13 @@ import { SyncService } from './streaming/sync.service.js';
     RetentionService,
     RetentionWorkerService,
     EffectiveMembersQuery,
+    HistoryFloorService,
     GroupsService,
     MentionResolver,
     MentionsService,
+    ContactsService,
+    GroupDmService,
+    GroupLifecycleService,
   ],
   exports: [EventLogService, PermissionsService],
 })

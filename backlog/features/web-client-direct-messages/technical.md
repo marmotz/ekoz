@@ -294,7 +294,7 @@ shows the other person's identifier. Actions:
   `room.dm_self`).
 
 The feature also exports `StartConversationButton({ userId })` (get-or-create
-then navigate). [`web-client-members`](../web-client-members/overview.md)
+then navigate). [`web-client-members`](../../_archives/features/web-client-members/overview.md)
 places it in the member profile, whichever of the two features ships second.
 
 ### 4.7 Group settings

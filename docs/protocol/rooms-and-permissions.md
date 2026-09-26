@@ -297,8 +297,15 @@ Join a `public` room. Blocked by an existing `RoomBan`. Emits `member_joined`.
 ### `POST /rooms/:id/leave`
 
 Leave a room. Emits `member_left` — **except** for a `dm`: there, leaving sets
-`Membership.hiddenAt` instead of removing the row (the membership is fixed)
-and emits nothing; the other participant is unaffected.
+`Membership.hiddenAt` instead of removing the row (the membership is fixed),
+raises the caller's history floor to `Room.lastSeq + 1` and emits nothing; the
+other participant is unaffected. The conversation reappears for the caller when
+a message is next sent in it (or when they call `POST /dms` again), showing only
+the messages written after the deletion.
+
+In a `group_dm`, leaving also removes the leaver's per-user overrides, and the
+group is deleted when no admin remains (see
+[Direct and group conversations](#direct-and-group-conversations)).
 
 - `204`.
 - Errors: `room.not_found` (`404`), `room.membership_not_found` (`404`).
@@ -555,20 +562,33 @@ never in the [public directory](#directory) (that filters to `type =
 "channel"`). Both use the same `Room` object as spaces/channels.
 
 A `dm`'s two members are always `member`; a `group_dm`'s creator additionally
-gets a per-user `room.manage_members` override (a "light `room_admin`" scoped
-to member management only, not the full `room_admin` role — see
-[permission model](../technical/permission-model.md)). All other capabilities
-resolve through the normal `member` defaults.
+gets a per-user `room.manage_members` override, which makes them a **group
+admin** (a "light `room_admin`" scoped to member management only, not the full
+`room_admin` role — see [permission model](../technical/permission-model.md)).
+All other capabilities resolve through the normal `member` defaults.
+
+### History floor
+
+A membership may carry a floor (`historyFromSeq`, not exposed): the member reads
+only messages with `seq >= floor`. It is set to `Room.lastSeq + 1` when a `dm`
+member deletes the conversation (`POST /rooms/:id/leave`) and when a member is
+added to a group with `history: "none"`. It applies to
+[message reads, pins](messages-and-interactions.md) and
+[`GET /sync`](synchronisation.md#get-sync); a message below the floor answers
+`404 message.not_found`. Only explicit memberships carry a floor.
 
 ### `POST /dms`
 
 Get or create a direct conversation with a user. `dmKey = sorted(callerId,
-userId)` dedupes: a second call from either side returns the same room.
+userId)` dedupes: a second call from either side returns the same room. When the
+room already exists, the caller's own deletion (`hiddenAt`) is cleared and their
+floor is kept.
 
 - Body: `{ userId }`.
 - `201`: `Room` (`type: "dm"`) — the existing room if one already exists for
   this pair.
-- Errors: `room.dm_self` (`422`, `userId` is the caller), validation (`422`).
+- Errors: `room.dm_self` (`422`, `userId` is the caller), `room.user_not_found`
+  (`422`, the user does not exist or is not active), validation (`422`).
 
 ### `POST /group-dms`
 
@@ -577,7 +597,64 @@ Create a group conversation. No dedup — always creates a new room.
 - Body: `{ userIds, name? }`. The caller is added automatically alongside
   `userIds`.
 - `201`: `Room` (`type: "group_dm"`).
-- Errors: validation (`422`).
+- Errors: `room.user_not_found` (`422`, a user does not exist or is not
+  active), validation (`422`).
+
+### `GET /me/conversations`
+
+The caller's `dm` and `group_dm`, newest activity first, not paginated. A
+conversation is listed when the caller has not deleted it, it is not deleted, and
+it is a `group_dm`, or has at least one message, or was created by the caller (so
+a `dm` recipient sees a new `dm` from its first message, whereas every member of
+a new group sees it from its creation and may send its first message).
+
+- `200`: `{ items: ConversationListItem[] }`. A `ConversationListItem` is a
+  [`Room`](#the-room-object) plus:
+  - `lastActivityAt`: the time of the last message the caller can read (their
+    history floor applies), else the room's creation time;
+  - `participants`: `{ user: UserSummary, isAdmin }[]`, every member except the
+    caller. `isAdmin` is `true` for a member holding the `room.manage_members`
+    override, always `false` in a `dm`;
+  - `isAdmin`: the same flag for the caller.
+
+### `GET /me/contacts`
+
+Search the people the caller can start a conversation with: active users sharing
+at least one explicit membership with the caller in a non-deleted room (any
+type), the caller excluded.
+
+- Query: `query`, trimmed, 2 to 100 characters. It matches the username prefix
+  or any part of the display name, case-insensitively.
+- `200`: `{ items: UserSummary[] }`, at most 20, ordered by display name, not
+  paginated.
+- Errors: validation (`422`, `query` too short or too long).
+
+### Group management
+
+Every endpoint below requires the group admin override (`room.manage_members`)
+and answers `404 room.not_found` for a room that is not a live `group_dm`, so the
+room type never leaks. Removing oneself is open to every member and behaves as
+`POST /rooms/:id/leave`.
+
+| Endpoint | Body | Effect | Events |
+|----------|------|--------|--------|
+| `PATCH /group-dms/:id` | `{ name: string (1-200) \| null }` | Rename or clear the name. `200`: `Room`. | `room_updated { name }` |
+| `POST /group-dms/:id/members` | `{ userIds: (1-49), history?: "full" \| "none" }` | Add users as `member`; users already members are ignored. `history: "none"` sets their floor to `Room.lastSeq + 1`. `200`: the added `Membership`s. | `member_joined` per added user |
+| `DELETE /group-dms/:id/members/:userId` | — | Remove the member and their overrides. `204`. | `member_kicked` |
+| `PUT /group-dms/:id/admins/:userId` | — | Grant the override to a member. `204`. | `permission_override_changed` (`allow`) |
+| `DELETE /group-dms/:id/admins/:userId` | — | Write `deny`. `204`. | `permission_override_changed` (`deny`) |
+
+- A group holds at most 50 members, its creator included.
+- Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
+  `room.membership_not_found` (`404`, the target is not a member),
+  `room.user_not_found` (`422`, a user to add does not exist or is not active),
+  `room.group_full` (`422`), validation (`422`).
+
+**Group deletion.** When no member holds the admin override any more (the last
+admin leaving, being removed or being demoted), the group is deleted in the same
+transaction: `room_deleted` is appended first, so it reaches every current
+member, then the room is deleted and its memberships and overrides removed. Every
+later request on it answers `404 room.not_found`.
 
 ## Directory
 

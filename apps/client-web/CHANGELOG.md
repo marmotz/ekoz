@@ -7,6 +7,17 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Add direct and group conversations: a "Direct messages" section in the sidebar listing them with an unseen dot, and a conversation page with its header, history and composer (#183).
+- Delete a one-to-one conversation from its header, after a confirmation; it comes back with the next message and none of the earlier ones (#183).
+- Redirect the link of a direct or group conversation opened as a room to its conversation page (#183).
+- Refresh the conversations list from the stream, and leave the open conversation with a toast when it is deleted or the user is removed from it (#183).
+- A new group conversation shows in every member's list as soon as it is created (#183).
+- Add a new conversation page with a debounced people search, chips, an exact `name/server` lookup, and a start button for one person or a create group button for several (#184).
+- Add a message icon to the profile card that opens the one-to-one conversation with the person (#184).
+- Export a `StartConversationButton` that opens the one-to-one conversation with a user (#184).
+- Add group settings: participants with an admin badge, rename, add members with or without the past messages, remove a member, promote or demote an admin, and leave, warning the only admin that the group will be deleted (#185).
+- Document the direct messages client in `docs/technical/web-client-direct-messages.md` (#185).
+- Regenerate the API types: conversations and contacts endpoints, group management and the profile `id` (#166, #171, #172).
 - Send the presence heartbeat with the stream, marking the user idle after 60 s hidden or 5 min without input, and add an "Appear away" / "Appear online" entry to the user menu (#133).
 - Make the user appear away as soon as they sign out (#133).
 - Show a presence dot on message authors, the members panel, the profile card and the own avatar in the user menu, fed by the stream and cleared on reconnection (#133, #135).

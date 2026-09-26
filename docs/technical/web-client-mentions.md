@@ -12,7 +12,7 @@ message.
 The server, protocol and SDK side (targets versus audience, frozen tokens, groups,
 counters, `after` / `around` history) is recorded in [Mentions](mentions.md). This page
 records what shipped in `apps/client-web`. The feature-level design is in
-[`backlog/features/web-client-mentions/technical.md`](../../backlog/features/web-client-mentions/technical.md).
+[`backlog/_archives/features/web-client-mentions/technical.md`](../../backlog/_archives/features/web-client-mentions/technical.md).
 It builds on [web client chat](web-client-chat.md),
 [web client composer editor](web-client-composer-editor.md) (TipTap 3) and
 [web client members](web-client-members.md).

@@ -892,4 +892,72 @@ describe('conversations — membership (integration)', () => {
       await request(server()).get(`/rooms/${ulid()}/join-requests`).expect(401);
     });
   });
+
+  describe('leaving a group conversation', () => {
+    it('clears the leaver overrides, and deletes the group when no admin remains', async () => {
+      const [aliceToken, bobToken, carolToken] = [
+        await login('alice'),
+        await login('bob'),
+        await login('carol'),
+      ];
+      const [alice, bob, carol] = [
+        (await accounts.findByIdentifier('alice'))!,
+        (await accounts.findByIdentifier('bob'))!,
+        (await accounts.findByIdentifier('carol'))!,
+      ];
+      const group = (
+        await request(server())
+          .post('/group-dms')
+          .set('Authorization', `Bearer ${aliceToken}`)
+          .send({ userIds: [bob.id, carol.id] })
+          .expect(201)
+      ).body;
+      const adminOverrides = async () =>
+        (await prisma.orm.public.RoomMemberPermission.where({ nodeId: group.id }).all()) as Array<{
+          userId: string;
+        }>;
+      await request(server())
+        .put(`/group-dms/${group.id}/admins/${bob.id}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(204);
+
+      // One admin leaves: their override goes, the group survives.
+      await request(server())
+        .post(`/rooms/${group.id}/leave`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(204);
+      expect((await adminOverrides()).map((o) => o.userId)).toEqual([bob.id]);
+      await request(server())
+        .get(`/rooms/${group.id}`)
+        .set('Authorization', `Bearer ${bobToken}`)
+        .expect(200);
+
+      // Re-added, the former admin is a plain member again.
+      await request(server())
+        .post(`/group-dms/${group.id}/members`)
+        .set('Authorization', `Bearer ${bobToken}`)
+        .send({ userIds: [alice.id] })
+        .expect(200);
+      await request(server())
+        .patch(`/group-dms/${group.id}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .send({ name: 'nope' })
+        .expect(403);
+
+      // The last admin leaves: the group is deleted for everyone.
+      await request(server())
+        .post(`/rooms/${group.id}/leave`)
+        .set('Authorization', `Bearer ${bobToken}`)
+        .expect(204);
+      expect(await adminOverrides()).toEqual([]);
+      await request(server())
+        .get(`/rooms/${group.id}`)
+        .set('Authorization', `Bearer ${carolToken}`)
+        .expect(404);
+      await request(server())
+        .get(`/rooms/${group.id}/messages`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(404);
+    });
+  });
 });

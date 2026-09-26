@@ -61,7 +61,7 @@ permissions, retention, deletion.
   has live children the server refuses (`room.not_empty`); the UI then lists
   the children to move or delete first. No cascade.
 - **Placement in the flow**: a "Groups" tab is added later by
-  [`web-client-mentions`](../web-client-mentions/overview.md).
+  [`web-client-mentions`](../../_archives/features/web-client-mentions/overview.md).
 
 
 ## Dependencies
@@ -70,5 +70,5 @@ permissions, retention, deletion.
   and capabilities.
 - [`web-client-room-moderation`](../web-client-room-moderation/overview.md):
   sibling feature, no ordering constraint.
-- Consumed by [`web-client-mentions`](../web-client-mentions/overview.md): adds a
+- Consumed by [`web-client-mentions`](../../_archives/features/web-client-mentions/overview.md): adds a
   "Groups" tab to the room and space settings.

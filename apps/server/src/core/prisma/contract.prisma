@@ -524,6 +524,10 @@ model Membership {
   // Per-user hide/archive for a `dm` (technical.md §7, issue #5): hiding does
   // not remove the membership, only channels/spaces/group_dm use real leave.
   hiddenAt    TimestamptzString?         @map("hidden_at")
+  // Per-member history floor: the member reads only messages with
+  // `seq >= historyFromSeq`. `null` = full history (technical design S1 of
+  // web-client-direct-messages).
+  historyFromSeq BigInt?                 @map("history_from_seq")
 
   @@id([roomId, userId])
   @@index([userId])

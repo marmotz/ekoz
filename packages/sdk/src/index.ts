@@ -11,6 +11,7 @@ export {
   SUPPORTED_PROTOCOL_MAJORS,
   WELL_KNOWN_PATH,
 } from './discovery/discovery.js';
+export type { ConversationsResource } from './resources/conversations.js';
 export type { DirectoryResource, ListDirectoryParams } from './resources/directory.js';
 export type { CreateGroupBody, GroupsResource } from './resources/groups.js';
 export type { ListMentionsParams, MentionsResource } from './resources/mentions.js';
@@ -204,6 +205,7 @@ export {
 export type {
   AcceptedResponse,
   AccountView,
+  AddConversationMembersBody,
   AddOwnerBody,
   AdminCreateUserBody,
   AdminUserDetail,
@@ -215,8 +217,14 @@ export type {
   ChangePasswordBody,
   ChangeUsernameBody,
   ConfirmPasswordResetBody,
+  ContactsResponse,
+  ConversationListItem,
+  ConversationListResponse,
+  ConversationParticipant,
   CreateChannelBody,
+  CreateDmBody,
   CreatedInvitation,
+  CreateGroupConversationBody,
   CreateInvitationBody,
   CreateSpaceBody,
   DeleteMeBody,
@@ -253,6 +261,7 @@ export type {
   PublicProfileView,
   ReadMarker,
   RegisterBody,
+  RenameGroupConversationBody,
   RenameSessionBody,
   RequestPasswordResetBody,
   ResendVerificationBody,

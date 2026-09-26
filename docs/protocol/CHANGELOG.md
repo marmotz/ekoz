@@ -135,6 +135,16 @@ All notable changes to the Ekoz protocol. Format
   the reactions of a message, grouped by emoji, on every REST response carrying a
   `Message`. Pins embed their `message` on `PUT /rooms/:id/pins/:messageId` and
   `GET /rooms/:id/pins`. `messages/policy` also returns `editWindow`.
+- `GET /me/conversations`, `GET /me/contacts` and the `ConversationListItem` object in
+  [`rooms-and-permissions.md`](rooms-and-permissions.md): the caller's direct and group
+  conversations with their participants and admin flags, and a search of the people
+  sharing a room with the caller.
+- Group management in [`rooms-and-permissions.md`](rooms-and-permissions.md):
+  `PATCH /group-dms/:id`, `POST` / `DELETE /group-dms/:id/members`, `PUT` / `DELETE
+  /group-dms/:id/admins/:userId`, the group admin semantics (per-user
+  `room.manage_members` override), the 50 member limit, group deletion when no admin
+  remains, and the `room.user_not_found` and `room.group_full` errors.
+- `id` on the public profile of `GET /users/:identifier` in [`identity.md`](identity.md).
 
 ### Changed
 
@@ -162,6 +172,18 @@ All notable changes to the Ekoz protocol. Format
   `GET /sync` (or `GET /rooms/:id/messages`) for history.
 - Room events are fanned out to the effective members of the room, ancestor
   spaces included, instead of the explicit members only.
+- **Behaviour change.** A member can have a history floor: message reads, pins and
+  `GET /sync` hide what precedes it, and a message below it answers
+  `message.not_found` (`404`). It is set when a `dm` member deletes the conversation
+  (`POST /rooms/:id/leave` now raises the floor and the `dm` reappears with the next
+  message) and when a member is added to a group without its history.
+- `POST /dms` and `POST /group-dms` answer `room.user_not_found` (`422`) for a user that
+  does not exist or is not active, and `POST /dms` reopens a conversation the caller
+  deleted.
+- Leaving a `group_dm` removes the leaver's per-user overrides, and the group is deleted
+  when no admin remains.
+- A deleted room answers `room.not_found` (`404`) to every caller, including its former
+  members.
 
 ### Fixed
 

@@ -14,6 +14,7 @@ import {
   RoomReadOnlyError,
 } from '../conversations.errors.js';
 import { EventLogService, type RoomTx } from '../events/event-log.service.js';
+import { HistoryFloorService } from '../membership/history-floor.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import {
@@ -56,6 +57,7 @@ export class MessagesService {
     private readonly eventLog: EventLogService,
     private readonly permissions: PermissionsService,
     private readonly mentionResolver: MentionResolver,
+    private readonly historyFloor: HistoryFloorService,
   ) {}
 
   async sendMessage(
@@ -117,6 +119,9 @@ export class MessagesService {
       })) as MessageRow;
 
       await this.writeTargets(tx, id, roomId, event.seq, targets);
+      if (room.type === 'dm') {
+        await this.reopenHiddenMemberships(tx, roomId);
+      }
 
       return row;
     });
@@ -142,7 +147,7 @@ export class MessagesService {
     messageId: string,
     input: EditMessage,
   ): Promise<MessageView> {
-    const message = await this.findMessageOrThrow(roomId, messageId);
+    const message = await this.findMessageOrThrow(roomId, messageId, actor.userId);
     if (message.redactedAt) {
       throw new MessageNotFoundError();
     }
@@ -233,7 +238,7 @@ export class MessagesService {
     roomId: string,
     messageId: string,
   ): Promise<{ authorId: string | null; viaCapability: 'delete_own' | 'delete_any' }> {
-    const message = await this.findMessageOrThrow(roomId, messageId);
+    const message = await this.findMessageOrThrow(roomId, messageId, actor.userId);
     if (message.redactedAt) {
       throw new MessageNotFoundError();
     }
@@ -315,14 +320,16 @@ export class MessagesService {
 
     const maxPage = this.config.get('messages.max_page');
     const limit = Math.min(query.limit ?? DEFAULT_PAGE_SIZE, maxPage);
+    const floor = await this.historyFloor.floorFor(roomId, actor.userId);
 
     const window =
       query.after !== undefined
-        ? await this.pageAfter(roomId, BigInt(query.after), limit)
+        ? await this.pageAfter(roomId, floor, BigInt(query.after), limit)
         : query.around !== undefined
-          ? await this.pageAround(roomId, BigInt(query.around), limit)
+          ? await this.pageAround(roomId, floor, BigInt(query.around), limit)
           : await this.pageBefore(
               roomId,
+              floor,
               query.before === undefined ? null : BigInt(query.before),
               limit,
             );
@@ -349,9 +356,18 @@ export class MessagesService {
     };
   }
 
-  private async pageBefore(roomId: string, before: bigint | null, limit: number): Promise<Window> {
+  private async pageBefore(
+    roomId: string,
+    floor: bigint | null,
+    before: bigint | null,
+    limit: number,
+  ): Promise<Window> {
     const rows = (await this.prisma.orm.public.Message.where((f) =>
-      before === null ? f.roomId.eq(roomId) : and(f.roomId.eq(roomId), f.seq.lt(before)),
+      and(
+        f.roomId.eq(roomId),
+        ...(floor === null ? [] : [f.seq.gte(floor)]),
+        ...(before === null ? [] : [f.seq.lt(before)]),
+      ),
     )
       .orderBy((f) => f.seq.desc())
       .limit(limit + 1)
@@ -364,9 +380,14 @@ export class MessagesService {
     };
   }
 
-  private async pageAfter(roomId: string, after: bigint, limit: number): Promise<Window> {
+  private async pageAfter(
+    roomId: string,
+    floor: bigint | null,
+    after: bigint,
+    limit: number,
+  ): Promise<Window> {
     const rows = (await this.prisma.orm.public.Message.where((f) =>
-      and(f.roomId.eq(roomId), f.seq.gt(after)),
+      and(f.roomId.eq(roomId), f.seq.gt(after), ...(floor === null ? [] : [f.seq.gte(floor)])),
     )
       .orderBy((f) => f.seq.asc())
       .limit(limit + 1)
@@ -375,23 +396,28 @@ export class MessagesService {
 
     return {
       items,
-      hasMore: await this.hasOlderThan(roomId, items[0]?.seq ?? after + 1n),
+      hasMore: await this.hasOlderThan(roomId, floor, items[0]?.seq ?? after + 1n),
       hasMoreNewer: rows.length > limit,
     };
   }
 
-  private async pageAround(roomId: string, around: bigint, limit: number): Promise<Window> {
+  private async pageAround(
+    roomId: string,
+    floor: bigint | null,
+    around: bigint,
+    limit: number,
+  ): Promise<Window> {
     const olderCount = Math.floor(limit / 2);
     const newerCount = limit - olderCount;
 
     const older = (await this.prisma.orm.public.Message.where((f) =>
-      and(f.roomId.eq(roomId), f.seq.lt(around)),
+      and(f.roomId.eq(roomId), f.seq.lt(around), ...(floor === null ? [] : [f.seq.gte(floor)])),
     )
       .orderBy((f) => f.seq.desc())
       .limit(olderCount + 1)
       .all()) as MessageRow[];
     const newer = (await this.prisma.orm.public.Message.where((f) =>
-      and(f.roomId.eq(roomId), f.seq.gte(around)),
+      and(f.roomId.eq(roomId), f.seq.gte(around), ...(floor === null ? [] : [f.seq.gte(floor)])),
     )
       .orderBy((f) => f.seq.asc())
       .limit(newerCount + 1)
@@ -404,9 +430,9 @@ export class MessagesService {
     };
   }
 
-  private async hasOlderThan(roomId: string, seq: bigint): Promise<boolean> {
+  private async hasOlderThan(roomId: string, floor: bigint | null, seq: bigint): Promise<boolean> {
     const row = (await this.prisma.orm.public.Message.where((f) =>
-      and(f.roomId.eq(roomId), f.seq.lt(seq)),
+      and(f.roomId.eq(roomId), f.seq.lt(seq), ...(floor === null ? [] : [f.seq.gte(floor)])),
     ).first()) as unknown;
 
     return row !== null;
@@ -418,7 +444,7 @@ export class MessagesService {
     messageId: string,
   ): Promise<MessageView> {
     await this.permissions.assertCan(actor, roomId, 'room.read');
-    const message = await this.findMessageOrThrow(roomId, messageId);
+    const message = await this.findMessageOrThrow(roomId, messageId, actor.userId);
     const mentions = (await this.loadTargets(messageId)).map(toMentionTarget);
     const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
     const reactions = message.redactedAt ? new Map() : await this.reactionsForMany([messageId]);
@@ -437,7 +463,7 @@ export class MessagesService {
     messageId: string,
   ): Promise<MessagePinView> {
     await this.permissions.assertCan(actor, roomId, 'room.pin');
-    const message = await this.findMessageOrThrow(roomId, messageId);
+    const message = await this.findMessageOrThrow(roomId, messageId, actor.userId);
     if (message.redactedAt) {
       throw new MessageNotFoundError();
     }
@@ -482,6 +508,7 @@ export class MessagesService {
     if (!existing) {
       throw new MessageNotPinnedError();
     }
+    await this.findMessageOrThrow(roomId, messageId, actor.userId);
 
     await this.prisma.transaction(async (tx) => {
       await tx.orm.public.MessagePin.where({ roomId, messageId }).delete();
@@ -511,8 +538,14 @@ export class MessagesService {
       (await this.toViews(actor.userId, messages)).map((view) => [view.id, view]),
     );
 
+    // A pin whose message is below the caller's floor (absent from `views`) is left out.
+    const floor = await this.historyFloor.floorFor(roomId, actor.userId);
+    const visible = new Set(
+      messages.filter((m) => floor === null || m.seq >= floor).map((m) => m.id),
+    );
+
     return rows.flatMap((row) => {
-      const message = views.get(row.messageId);
+      const message = visible.has(row.messageId) ? views.get(row.messageId) : undefined;
 
       return message ? [{ ...row, message }] : [];
     });
@@ -574,15 +607,31 @@ export class MessagesService {
     return row;
   }
 
-  private async findMessageOrThrow(roomId: string, messageId: string): Promise<MessageRow> {
+  /** The message, or `404` when unknown or below the viewer's history floor. */
+  private async findMessageOrThrow(
+    roomId: string,
+    messageId: string,
+    viewerId: string,
+  ): Promise<MessageRow> {
     const row = (await this.prisma.orm.public.Message.where((f) =>
       and(f.id.eq(messageId), f.roomId.eq(roomId)),
     ).first()) as MessageRow | null;
     if (!row) {
       throw new MessageNotFoundError();
     }
+    await this.historyFloor.assertVisible(roomId, viewerId, row.seq);
 
     return row;
+  }
+
+  /** A new message reopens a `dm` hidden by any participant; the history floors stay. */
+  private async reopenHiddenMemberships(tx: RoomTx, roomId: string): Promise<void> {
+    const hidden = (await tx.orm.public.Membership.where((f) =>
+      and(f.roomId.eq(roomId), f.hiddenAt.isNotNull()),
+    ).all()) as Array<{ userId: string }>;
+    for (const { userId } of hidden) {
+      await tx.orm.public.Membership.where({ roomId, userId }).update({ hiddenAt: null });
+    }
   }
 
   private validateBody(body: string): void {

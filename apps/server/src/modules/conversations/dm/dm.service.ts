@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { and } from '@prisma/orm-postgres/orm-client';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
-import { DmSelfError } from '../conversations.errors.js';
+import { DmSelfError, UserNotFoundError } from '../conversations.errors.js';
 import { EventLogService } from '../events/event-log.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { type RoomRow, type RoomView, toRoomView } from '../rooms/room.view.js';
@@ -32,9 +33,17 @@ export class DmService {
       throw new DmSelfError();
     }
 
+    await this.assertActiveUsers([input.userId]);
+
     const dmKey = [actor.userId, input.userId].sort().join(':');
     const existing = (await this.prisma.orm.public.Room.where({ dmKey }).first()) as RoomRow | null;
     if (existing) {
+      // Reopening a conversation the caller deleted: back in their list, floor kept.
+      await this.prisma.orm.public.Membership.where({
+        roomId: existing.id,
+        userId: actor.userId,
+      }).update({ hiddenAt: null });
+
       return toRoomView(existing);
     }
 
@@ -85,6 +94,7 @@ export class DmService {
 
   async createGroupDm(actor: PermissionPrincipal, input: CreateGroupDm): Promise<RoomView> {
     const participantIds = [...new Set([actor.userId, ...input.userIds])];
+    await this.assertActiveUsers(participantIds.filter((id) => id !== actor.userId));
 
     const room = await this.prisma.transaction(async (tx) => {
       const created = (await tx.orm.public.Room.create({
@@ -141,5 +151,16 @@ export class DmService {
     });
 
     return toRoomView(room);
+  }
+
+  /** Every id must be an existing user with `status = active`, else `422 room.user_not_found`. */
+  private async assertActiveUsers(userIds: readonly string[]): Promise<void> {
+    const ids = [...new Set(userIds)];
+    const found = (await this.prisma.orm.public.User.where((f) =>
+      and(f.id.in(ids), f.status.eq('active')),
+    ).all()) as Array<{ id: string }>;
+    if (found.length !== ids.length) {
+      throw new UserNotFoundError();
+    }
   }
 }
