@@ -249,6 +249,10 @@
       "failed": "Not sent",
       "retry": "Retry"
     },
+    "receipts": {
+      "readBy": "Read by {{names}}",
+      "everyone": "Read by everyone"
+    },
     "composer": {
       "label": "Message",
       "placeholder": "Write a message",
@@ -291,6 +295,10 @@
         "member": "members",
         "reader": "readers"
       },
+      "markers": {
+        "left": "left"
+      },
+      "deletedAccount": "@Deleted account",
       "aria": {
         "user": "Mention of {{name}}, open profile",
         "userLeft": "Mention of {{name}}, who left the room",
@@ -366,6 +374,8 @@
       "pendingInvitations_other": "{{count}} pending invitations",
       "collapse": "Collapse {{name}}",
       "expand": "Expand {{name}}",
+      "unread_one": "{{count}} unread message",
+      "unread_other": "{{count}} unread messages",
       "loading": "Loading rooms",
       "error": "The rooms could not be loaded.",
       "empty": "No rooms yet."

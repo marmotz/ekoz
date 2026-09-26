@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 import { AppFrame } from '@/app/app-frame';
 import { UserMenu } from '@/features/auth/components/user-menu';
+import { useRoomsLive } from '@/features/rooms/hooks/use-rooms-live';
 import { useUnreadMentionsLive } from '@/shared/mentions/use-unread-mentions-live';
 import { RequireAuth } from '@/shared/sdk/require-auth';
 
@@ -21,11 +22,18 @@ function UnreadMentionsLive() {
   return null;
 }
 
+/** Keeps the rooms list, unread counters and invitations live; same mounting rule as above. */
+function RoomsLive() {
+  useRoomsLive();
+  return null;
+}
+
 function AppLayout() {
   return (
     <AppFrame userMenu={<UserMenu />}>
       <RequireAuth>
         <UnreadMentionsLive />
+        <RoomsLive />
         <Outlet />
       </RequireAuth>
     </AppFrame>

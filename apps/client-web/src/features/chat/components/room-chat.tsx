@@ -1,11 +1,17 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { chatKeys } from '@/features/chat/api/query-keys';
 import { Composer } from '@/features/chat/components/composer';
 import { ConnectionBanner } from '@/features/chat/components/connection-banner';
 import { MessageList } from '@/features/chat/components/message-list';
 import { useAuthors } from '@/features/chat/hooks/use-authors';
+import { useReadMarker } from '@/features/chat/hooks/use-read-marker';
+import {
+  useReadersBySeq,
+  useReceiptAudienceSize,
+  useReceiptsSync,
+} from '@/features/chat/hooks/use-receipts';
 import { useSendMessage } from '@/features/chat/hooks/use-send-message';
 import { useLoadNewer, useLoadOlder, useTimeline } from '@/features/chat/hooks/use-timeline';
 import { useTimelineSync } from '@/features/chat/hooks/use-timeline-sync';
@@ -15,7 +21,7 @@ import {
   composerBlock,
 } from '@/features/chat/lib/composer-state';
 import { useTranslation } from '@/shared/i18n/use-translation';
-import { setActiveRoom } from '@/shared/realtime/unseen-rooms';
+import { setActiveRoom } from '@/shared/realtime/active-room';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 
@@ -42,6 +48,11 @@ export function RoomChat({ room, capabilities, membership, at, onJumpToLatest }:
   const { loadNewer, state: newerState } = useLoadNewer(room.id);
   const { send, retry } = useSendMessage(room.id);
   useTimelineSync(room.id);
+  useReceiptsSync(room.id);
+  const readers = useReadersBySeq(room.id, timeline.data?.messages);
+  const audienceSize = useReceiptAudienceSize(room.id);
+  const [atBottom, setAtBottom] = useState(false);
+  useReadMarker(room.id, timeline.data, atBottom);
 
   const authorIds = timeline.data?.messages.map((message) => message.authorId) ?? [];
   const { resolve } = useAuthors(room.id, authorIds);
@@ -51,11 +62,11 @@ export function RoomChat({ room, capabilities, membership, at, onJumpToLatest }:
     return () => setActiveRoom(null);
   }, [room.id]);
 
-  // Only the mounted chat subscribes to live events, so a cached timeline of a closed room would go stale.
+  // Only the mounted chat subscribes to live events, so a cached timeline or receipts of a closed room would go stale.
   useEffect(() => {
-    const key = chatKeys.timeline(room.id);
+    const keys = [chatKeys.timeline(room.id), chatKeys.receipts(room.id)];
     return () => {
-      queryClient.removeQueries({ queryKey: key });
+      for (const queryKey of keys) queryClient.removeQueries({ queryKey });
     };
   }, [queryClient, room.id]);
 
@@ -74,12 +85,15 @@ export function RoomChat({ room, capabilities, membership, at, onJumpToLatest }:
           roomId={room.id}
           timeline={timeline.data}
           resolveAuthor={resolve}
+          readersBySeq={readers}
+          audienceSize={audienceSize}
           onLoadOlder={() => void loadOlder()}
           olderState={olderState}
           onLoadNewer={() => void loadNewer()}
           newerState={newerState}
           targetSeq={at}
           onRetryPending={(localId) => void retry(localId)}
+          onAtBottomChange={setAtBottom}
         />
       ) : (
         <div className="flex-1 space-y-3 p-4" role="status" aria-label={t('chat.list.loading')}>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { ReadReceipts } from '@/features/chat/components/read-receipts';
 import type { Author } from '@/features/chat/hooks/use-authors';
 import type {
   PendingMessage,
@@ -81,31 +82,27 @@ function AuthorCard({
   );
 }
 
-/** 🚪 for someone who left the room, 💀 for a deleted account; nothing otherwise. */
+/** A text note for someone who left the room; a deleted account already reads as such. */
 function AuthorMarker({ kind }: { kind: Author['kind'] }) {
   const { t } = useTranslation();
-  if (kind === 'left') {
-    return (
-      <span role="img" aria-label={t('members.markers.left')} title={t('members.markers.left')}>
-        🚪
-      </span>
-    );
+  if (kind !== 'left') {
+    return null;
   }
-  if (kind === 'deleted') {
-    return (
-      <span
-        role="img"
-        aria-label={t('members.markers.deleted')}
-        title={t('members.markers.deleted')}
-      >
-        💀
-      </span>
-    );
-  }
-  return null;
+  return <span className="text-xs text-muted-foreground">({t('members.markers.left')})</span>;
 }
 
-export function MessageItem({ message, author }: { message: TimelineMessage; author: Author }) {
+export function MessageItem({
+  message,
+  author,
+  readers = [],
+  audienceSize,
+}: {
+  message: TimelineMessage;
+  author: Author;
+  /** The other members whose read marker sits on this message. */
+  readers?: readonly Author[];
+  audienceSize?: number | undefined;
+}) {
   const { t } = useTranslation();
   const label = useAuthorLabel()(author);
   const deleted = message.redactedAt !== null;
@@ -153,6 +150,7 @@ export function MessageItem({ message, author }: { message: TimelineMessage; aut
         ) : (
           <MessageBody body={message.body} roomId={message.roomId} mentions={message.mentions} />
         )}
+        <ReadReceipts readers={readers} audienceSize={audienceSize} />
       </div>
     </li>
   );

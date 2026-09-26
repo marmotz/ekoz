@@ -75,26 +75,26 @@ it('shows the raw token, muted and not clickable, while the members load', async
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
 });
 
-it('marks someone who left with a door, resolved from the user summaries', async () => {
+it('marks someone who left with a text note, resolved from the user summaries', async () => {
   const { fake } = setup(userTarget, {
     members: [],
     summaries: [{ id: 'u1', identifier: 'u1/example.test', displayName: 'Alice', avatarUrl: null }],
   });
 
   const chip = await screen.findByRole('img', { name: 'Mention of Alice, who left the room' });
-  expect(chip).toHaveTextContent('@Alice 🚪');
+  expect(chip).toHaveTextContent('@Alice (left)');
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
   expect(fake.stubs.users.summaries).toHaveBeenCalledWith(['u1']);
 });
 
-it('shows the raw token with a skull for a deleted account', async () => {
+it('shows the neutral label instead of the handle for a deleted account', async () => {
   setup(userTarget, {
     members: [],
     summaries: [{ id: 'u1', identifier: null, displayName: null, avatarUrl: null }],
   });
 
   const chip = await screen.findByRole('img', { name: 'Mention of a deleted account' });
-  expect(chip).toHaveTextContent('@u1/example.test 💀');
+  expect(chip).toHaveTextContent('@Deleted account');
   expect(screen.queryByRole('button')).not.toBeInTheDocument();
 });
 
@@ -103,7 +103,7 @@ it('treats a member with no name left as a deleted account', async () => {
 
   expect(
     await screen.findByRole('img', { name: 'Mention of a deleted account' }),
-  ).toHaveTextContent('💀');
+  ).toHaveTextContent('@Deleted account');
 });
 
 it('shows a localised label for a role', async () => {

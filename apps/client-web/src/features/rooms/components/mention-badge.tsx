@@ -22,7 +22,7 @@ export function MentionBadge({ roomId }: { roomId: string }) {
       data-mention-badge={filled ? 'direct' : 'collective'}
       aria-label={t(filled ? 'mentions.badge.direct' : 'mentions.badge.collective', { count })}
       className={cn(
-        'ml-auto shrink-0 rounded-full px-1.5 text-[0.65rem] leading-4 font-medium',
+        'shrink-0 rounded-full px-1.5 text-[0.65rem] leading-4 font-medium',
         filled ? 'bg-primary text-primary-foreground' : 'border border-primary text-primary',
       )}
     >

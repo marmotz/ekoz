@@ -93,8 +93,8 @@ rendered by `MentionChip`. The composer's edit round trip uses the same matcher.
 | Kind | Chip |
 |------|------|
 | `user`, member | `@displayName`, opens `ProfileCardPopover` |
-| `user`, left the room | `@displayName 🚪` (from `useUserSummaries`) |
-| `user`, deleted account | raw token, 💀, not clickable |
+| `user`, left the room | `@displayName (left)` (from `useUserSummaries`) |
+| `user`, deleted account | `@Deleted account` (the handle is hidden, it may be reused by a new account), not clickable |
 | `all`, `role` | localised label (`chat.mentions.*`) |
 | `group` | current name from `useRoomGroups`; a deleted group shows the raw token, muted |
 
@@ -199,11 +199,9 @@ marker and an unread marker. Opening an item goes to `/rooms/$roomId?at=<seq>`.
 
 ## Consequences
 
-- **L1. Counters never decrease for now.** The SDK has no read-marker call and the
-  client sets none, so unread counts only grow until
-  [`web-client-read-state`](../../backlog/features/web-client-read-state/overview.md)
-  ships the marker. The server side additionally needs read markers for inherited
-  members (an inherited space member has none, see [Mentions](mentions.md)).
+- **L1. Counters follow the read marker.** The client sends the marker while a room is
+  read (see [web client read state](web-client-read-state.md)), and the server-side counts
+  drop once it moves. Read markers are available to inherited members too.
 - **L2. Derived value until reload.** A live message's `mentionsMe` is derived, so it can
   differ from the server value (for example a group membership that changed between
   send and receive); the next REST load corrects it.
@@ -211,8 +209,7 @@ marker and an unread marker. Opening an item goes to `/rooms/$roomId?at=<seq>`.
   exist yet; the helper for it is in place and tested.
 - **L4.** The suggestion query cannot contain a space (the TipTap default), so people
   are found by the first word of their name or by identifier.
-- **L5.** The room tree shows no session-only "unseen" dot in the code today
-  (`useRoomHasUnseen` is exported by `shared/realtime` but not read there), so the
-  badge stands alone in the row.
+- **L5.** The rooms tree shows two badges side by side: the mention badge and the unread
+  message count (`UnreadBadge`).
 - `@tiptap/markdown` parses and serialises Markdown; the restricted-Markdown subset
   is enforced by the schema, and the server still validates the body.

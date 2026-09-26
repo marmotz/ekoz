@@ -59,7 +59,7 @@ export function createFakeStream() {
 
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `groups`, `mentions`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `receipts`, `groups`, `mentions`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -147,6 +147,10 @@ export function createFakeSdk(initial?: FakeSession) {
       get: vi.fn(async () => ({})),
       send: vi.fn(async () => ({})),
       edit: vi.fn(async () => ({})),
+    },
+    receipts: {
+      set: vi.fn(async (_roomId: string, seq: string) => ({ userId: defaultMe.id, seq })),
+      list: vi.fn(async () => [] as unknown[]),
     },
     groups: {
       list: vi.fn(async () => ({ items: [] as unknown[] })),

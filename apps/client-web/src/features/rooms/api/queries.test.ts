@@ -35,14 +35,13 @@ function nextPageParam<Page>(
 }
 
 describe('roomQueries', () => {
-  it('refreshes the list and the invitations more eagerly than the defaults', () => {
+  it('leaves the list and the invitations on the default freshness: the stream keeps them live', () => {
     const { sdk } = createFakeSdk();
 
     for (const options of [roomQueries.list(sdk), roomQueries.invitations(sdk)]) {
-      expect(options.staleTime).toBe(10_000);
-      expect(options.refetchOnWindowFocus).toBe(true);
+      expect(options.staleTime).toBeUndefined();
+      expect(options.refetchOnWindowFocus).toBeUndefined();
     }
-    expect(roomQueries.detail(sdk, 'r1').staleTime).toBeUndefined();
   });
 
   it('is disabled without a client', async () => {

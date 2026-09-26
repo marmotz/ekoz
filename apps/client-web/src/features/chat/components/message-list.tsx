@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { MessageItem, PendingItem } from '@/features/chat/components/message-item';
 import type { Author } from '@/features/chat/hooks/use-authors';
@@ -20,6 +20,10 @@ export interface MessageListProps {
   roomId: string;
   timeline: Timeline;
   resolveAuthor: (authorId: string | null) => Author;
+  /** `messageSeq -> userIds` of the members whose read marker sits on that message. */
+  readersBySeq?: ReadonlyMap<string, readonly string[]> | undefined;
+  /** Other current members: a message read by all of them shows "Read by everyone". */
+  audienceSize?: number | undefined;
   onLoadOlder: () => void;
   olderState: 'idle' | 'loading' | 'error';
   onLoadNewer: () => void;
@@ -27,6 +31,8 @@ export interface MessageListProps {
   /** `seq` of the message to scroll to and outline when the list first shows. */
   targetSeq?: string | undefined;
   onRetryPending: (localId: string) => void;
+  /** Called when the list gets pinned to, or leaves, the bottom (newest message on screen). */
+  onAtBottomChange?: ((atBottom: boolean) => void) | undefined;
 }
 
 /**
@@ -38,12 +44,15 @@ export function MessageList({
   roomId,
   timeline,
   resolveAuthor,
+  readersBySeq,
+  audienceSize,
   onLoadOlder,
   olderState,
   onLoadNewer,
   newerState,
   targetSeq,
   onRetryPending,
+  onAtBottomChange,
 }: MessageListProps) {
   const { t } = useTranslation();
   const container = useRef<HTMLDivElement>(null);
@@ -52,6 +61,17 @@ export function MessageList({
   const targetHandled = useRef(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const anchor = useRef<{ height: number; top: number } | null>(null);
+  const reportedAtBottom = useRef<boolean | undefined>(undefined);
+  const onAtBottomChangeRef = useRef(onAtBottomChange);
+  useEffect(() => {
+    onAtBottomChangeRef.current = onAtBottomChange;
+  });
+
+  const reportAtBottom = useCallback((atBottom: boolean) => {
+    if (reportedAtBottom.current === atBottom) return;
+    reportedAtBottom.current = atBottom;
+    onAtBottomChangeRef.current?.(atBottom);
+  }, []);
 
   const visible = timeline.messages.filter((message) => message.hiddenAt === null);
   const firstSeq = timeline.messages[0]?.seq;
@@ -71,7 +91,8 @@ export function MessageList({
   useLayoutEffect(() => {
     const element = container.current;
     if (element && stickToBottom.current) element.scrollTop = element.scrollHeight;
-  }, [tail]);
+    reportAtBottom(stickToBottom.current);
+  }, [tail, reportAtBottom]);
 
   // Jump target: scroll it into view once and outline it briefly; say so when it is not there.
   // The outline is a data attribute set on the element, so no render is needed for it.
@@ -80,6 +101,7 @@ export function MessageList({
     if (targetSeq === undefined || targetHandled.current) return;
     targetHandled.current = true;
     stickToBottom.current = false;
+    reportAtBottom(false);
 
     const target = visible.find((message) => message.seq === targetSeq);
     if (!target) {
@@ -94,9 +116,16 @@ export function MessageList({
       () => element.removeAttribute('data-jump-target'),
       FLASH_DURATION_MS,
     );
-  }, [targetSeq, visible, t]);
+  }, [targetSeq, visible, t, reportAtBottom]);
 
   useEffect(() => () => clearTimeout(flashTimer.current), []);
+  useEffect(
+    () => () => {
+      reportedAtBottom.current = undefined;
+      onAtBottomChangeRef.current?.(false);
+    },
+    [],
+  );
 
   const loadOlder = () => {
     const element = container.current;
@@ -110,6 +139,7 @@ export function MessageList({
     const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
     stickToBottom.current =
       distanceFromBottom <= STICK_TO_BOTTOM_THRESHOLD && !timeline.hasMoreNewer;
+    reportAtBottom(stickToBottom.current);
     if (distanceFromBottom <= LOAD_NEWER_THRESHOLD && timeline.hasMoreNewer) onLoadNewer();
     if (element.scrollTop <= LOAD_OLDER_THRESHOLD && timeline.hasMoreOlder) loadOlder();
   };
@@ -144,6 +174,8 @@ export function MessageList({
               key={message.id}
               message={message}
               author={resolveAuthor(message.authorId)}
+              readers={readersBySeq?.get(message.seq)?.map((userId) => resolveAuthor(userId))}
+              audienceSize={audienceSize}
             />
           ))}
           {timeline.pending.map((pending) => (

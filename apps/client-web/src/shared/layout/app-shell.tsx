@@ -2,6 +2,7 @@ import { Menu } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { MenuUnreadBadge } from '@/shared/layout/menu-unread-badge';
 import { Sidebar, SidebarNav, SidebarSections } from '@/shared/layout/sidebar';
 import type { ThemeChoice } from '@/shared/layout/theme-toggle';
 import { Topbar } from '@/shared/layout/topbar';
@@ -24,8 +25,14 @@ export function AppShell({ theme, onThemeChange, userMenu, children }: AppShellP
   const menuButton = (
     <Sheet open={navOpen} onOpenChange={setNavOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t('nav.open')}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t('nav.open')}
+          className="relative md:hidden"
+        >
           <Menu className="size-4" />
+          <MenuUnreadBadge />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="surface-panel bg-panel">

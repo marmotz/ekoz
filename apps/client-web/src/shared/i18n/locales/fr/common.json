@@ -249,6 +249,10 @@
       "failed": "Non envoyé",
       "retry": "Réessayer"
     },
+    "receipts": {
+      "readBy": "Lu par {{names}}",
+      "everyone": "Lu par tout le monde"
+    },
     "composer": {
       "label": "Message",
       "placeholder": "Écrire un message",
@@ -291,6 +295,10 @@
         "member": "membres",
         "reader": "lecteurs"
       },
+      "markers": {
+        "left": "a quitté"
+      },
+      "deletedAccount": "@Compte supprimé",
       "aria": {
         "user": "Mention de {{name}}, ouvrir le profil",
         "userLeft": "Mention de {{name}}, qui a quitté le salon",
@@ -366,6 +374,8 @@
       "pendingInvitations_other": "{{count}} invitations en attente",
       "collapse": "Replier {{name}}",
       "expand": "Déplier {{name}}",
+      "unread_one": "{{count}} message non lu",
+      "unread_other": "{{count}} messages non lus",
       "loading": "Chargement des salons",
       "error": "Les salons n'ont pas pu être chargés.",
       "empty": "Aucun salon pour l'instant."

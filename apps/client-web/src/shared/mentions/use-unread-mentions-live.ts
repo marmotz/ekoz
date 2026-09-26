@@ -9,7 +9,7 @@ import {
   unreadMentionsKey,
   unreadOfRoom,
 } from '@/shared/mentions/unread-mentions';
-import { getActiveRoom } from '@/shared/realtime/unseen-rooms';
+import { getActiveRoom } from '@/shared/realtime/active-room';
 import { useRoomEvents } from '@/shared/realtime/use-realtime';
 import { ME_QUERY_KEY, useMe } from '@/shared/sdk/use-me';
 

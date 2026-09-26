@@ -3,12 +3,6 @@ import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query';
 
 import { roomKeys } from '@/features/rooms/api/keys';
 
-/**
- * No live channel refreshes the rooms list and the invitations yet, so both are
- * refetched more eagerly than the global defaults (technical design 4.5).
- */
-const FRESH = { staleTime: 10_000, refetchOnWindowFocus: true } as const;
-
 function started(sdk: EkozClient | null): EkozClient {
   if (!sdk) throw new Error('SDK not started');
   return sdk;
@@ -25,7 +19,6 @@ export const roomQueries = {
       queryKey: roomKeys.list(),
       queryFn: () => started(sdk).rooms.list(),
       enabled: sdk !== null,
-      ...FRESH,
     }),
 
   /** `GET /me/room-invitations`: the caller's pending room invitations. */
@@ -34,7 +27,6 @@ export const roomQueries = {
       queryKey: roomKeys.invitations(),
       queryFn: () => started(sdk).roomInvitations.listMine(),
       enabled: sdk !== null,
-      ...FRESH,
     }),
 
   /** `GET /rooms/:id`. */
