@@ -131,9 +131,15 @@ All notable changes to the Ekoz protocol. Format
 - `RoomListItem.unreadCount` on `GET /rooms` in
   [`rooms-and-permissions.md`](rooms-and-permissions.md): unread messages since the
   read marker (or the join), capped at `100`, `null` for `context` rooms.
+- `Message.reactions` in [`messages-and-interactions.md`](messages-and-interactions.md):
+  the reactions of a message, grouped by emoji, on every REST response carrying a
+  `Message`. Pins embed their `message` on `PUT /rooms/:id/pins/:messageId` and
+  `GET /rooms/:id/pins`. `messages/policy` also returns `editWindow`.
 
 ### Changed
 
+- `PUT /rooms/:id/pins/:messageId` and `PUT /messages/:messageId/reactions/:emoji`
+  answer `message.not_found` (`404`) for a redacted message.
 - Read markers (`PUT` / `GET /rooms/:id/receipt(s)`) are available to effective
   members, including members inherited from an ancestor space, not only to explicit
   members.

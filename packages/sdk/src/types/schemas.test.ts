@@ -6,6 +6,7 @@ import {
   GroupListResponseSchema,
   LoginBodySchema,
   MembersPageSchema,
+  MessagePinSchema,
   MessageSchema,
   MessagesPageSchema,
   MessagesPolicySchema,
@@ -91,13 +92,23 @@ describe('schemas', () => {
   });
 
   it('accepts a valid MessagesPolicy payload', () => {
-    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 16000 }).success).toBe(true);
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 16000, editWindow: null }).success).toBe(
+      true,
+    );
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 16000, editWindow: 900 }).success).toBe(
+      true,
+    );
   });
 
   it('rejects a MessagesPolicy payload with a missing or non-integer limit', () => {
     expect(MessagesPolicySchema.safeParse({}).success).toBe(false);
-    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 1.5 }).success).toBe(false);
-    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: '16000' }).success).toBe(false);
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 1.5, editWindow: null }).success).toBe(
+      false,
+    );
+    expect(
+      MessagesPolicySchema.safeParse({ bodyMaxLength: '16000', editWindow: null }).success,
+    ).toBe(false);
+    expect(MessagesPolicySchema.safeParse({ bodyMaxLength: 16000 }).success).toBe(false);
   });
 
   it('validates ChangePasswordBody and rejects an empty current password', () => {
@@ -148,6 +159,7 @@ describe('schemas', () => {
       replyToId: null,
       mentions: [{ type: 'user', target: '01HZX0000000000000000000CC', token: '@bob/example.com' }],
       mentionsMe: 'direct',
+      reactions: [{ emoji: '👍', userIds: ['01HZX0000000000000000000CC'] }],
       editedAt: null,
       redactedAt: null,
       hiddenAt: null,
@@ -165,6 +177,19 @@ describe('schemas', () => {
       MessageSchema.safeParse({ ...message, mentions: ['01HZX0000000000000000000CC'] }).success,
     ).toBe(false);
     expect(MessageSchema.safeParse({ ...message, mentionsMe: null }).success).toBe(true);
+    expect(MessageSchema.safeParse({ ...message, reactions: [] }).success).toBe(true);
+    expect(MessageSchema.safeParse({ ...message, reactions: [{ emoji: '👍' }] }).success).toBe(
+      false,
+    );
+    expect(
+      MessagePinSchema.safeParse({
+        roomId: 'r1',
+        messageId: message.id,
+        pinnedById: 'u1',
+        pinnedAt: '2026-09-23T10:00:00.000Z',
+        message,
+      }).success,
+    ).toBe(true);
     expect(
       MessagesPageSchema.safeParse({
         items: [message],

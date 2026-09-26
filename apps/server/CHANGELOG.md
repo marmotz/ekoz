@@ -8,6 +8,7 @@ that does not touch this file.
 
 ### Added
 
+- Boot waits for a database that is not yet reachable (3 retries after 1s, 5s, 10s, logged) and no longer prints Nest's raw `ExceptionHandler` dump before the readable failure report.
 - `bun run db:mark-read <channel name>` marks a channel as read by all its members, for local testing of read receipts.
 - `bun run db:seed` seeds a local "Test" space with a public "test" channel joined by 100 throwaway users.
 - `GET /users?ids=` returns user summaries by id, in request order. (#123)
@@ -18,6 +19,9 @@ that does not touch this file.
 - `GET /me/mentions/unread` and `GET /me/mentions` list unread mention counters and the messages that mention the caller. (#174)
 - `GET /rooms` items carry `unreadCount`, the unread messages since the read marker or the join. (#219)
 - Public `GET /messages/policy` exposing the maximum message body length. (#190)
+- Messages carry their reactions, grouped by emoji. (#207)
+- `GET /messages/policy` also exposes the edit window. (#208)
+- Pins embed the pinned message. (#209)
 
 ### Changed
 
@@ -27,6 +31,7 @@ that does not touch this file.
 
 ### Fixed
 
+- Pinning or reacting to a deleted message now answers 404. (#207)
 - Moving a room now drops all of its outdated ancestor links, not only one.
 - Deleting a message now removes all of its reactions, not only one. (#173)
 - The SMTP transport and the storage driver use the configured `email.*` / `storage.*` values instead of the code defaults: the configuration is loaded before the providers built from it.

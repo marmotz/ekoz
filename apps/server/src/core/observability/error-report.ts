@@ -104,6 +104,14 @@ function isRedundant(link: ErrorLink, previous: readonly ErrorLink[]): boolean {
   );
 }
 
+/** True when the failure (or any cause) means the database host cannot be reached. */
+export function isDatabaseUnreachable(error: unknown): boolean {
+  return collectChain(error).some((raw) => {
+    const code = toLink(raw).code;
+    return code !== undefined && NETWORK_ERROR_CODES.has(code);
+  });
+}
+
 function inferHint(chain: readonly ErrorLink[]): string | undefined {
   if (chain.some((link) => link.code !== undefined && NETWORK_ERROR_CODES.has(link.code))) {
     return (

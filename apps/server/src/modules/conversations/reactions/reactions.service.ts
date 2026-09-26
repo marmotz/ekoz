@@ -72,8 +72,8 @@ export class ReactionsService {
   private async roomIdForMessage(messageId: string): Promise<string> {
     const message = (await this.prisma.orm.public.Message.where({
       id: messageId,
-    }).first()) as { roomId: string } | null;
-    if (!message) {
+    }).first()) as { roomId: string; redactedAt: string | null } | null;
+    if (!message || message.redactedAt) {
       throw new MessageNotFoundError();
     }
 

@@ -50,14 +50,14 @@ _done, see [technical.md](features/web-client-composer-formatting/technical.md)_
 
 ## Web client message actions ·  [overview](features/web-client-message-actions/overview.md)
 
-_designed, see [technical.md](features/web-client-message-actions/technical.md)_ — 0/11 tasks done
+_designed, see [technical.md](features/web-client-message-actions/technical.md)_ — 4/11 tasks done
 
 | Done | Issue                                              | Title                                                                         | Blocked by                         |
 |------|----------------------------------------------------|-------------------------------------------------------------------------------|------------------------------------|
-| [ ]  | [#207](https://github.com/marmotz/ekoz/issues/207) | Message actions server: reactions on Message and guards on redacted messages  | —                                  |
-| [ ]  | [#208](https://github.com/marmotz/ekoz/issues/208) | Message actions server: editWindow on the messages policy                     | —                                  |
-| [ ]  | [#209](https://github.com/marmotz/ekoz/issues/209) | Message actions server: pins embed the message                                | #207                               |
-| [ ]  | [#210](https://github.com/marmotz/ekoz/issues/210) | Message actions SDK: edit, delete, pins, reactions and typed events           | #207, #208, #209                   |
+| [x]  | [#207](https://github.com/marmotz/ekoz/issues/207) | Message actions server: reactions on Message and guards on redacted messages  | —                                  |
+| [x]  | [#208](https://github.com/marmotz/ekoz/issues/208) | Message actions server: editWindow on the messages policy                     | —                                  |
+| [x]  | [#209](https://github.com/marmotz/ekoz/issues/209) | Message actions server: pins embed the message                                | #207                               |
+| [x]  | [#210](https://github.com/marmotz/ekoz/issues/210) | Message actions SDK: edit, delete, pins, reactions and typed events           | #207, #208, #209                   |
 | [ ]  | [#211](https://github.com/marmotz/ekoz/issues/211) | Message actions client: action availability, context menu and delete          | #210, #191, #208                   |
 | [ ]  | [#212](https://github.com/marmotz/ekoz/issues/212) | Message actions client: reactions state, chips and emoji picker               | #210, #211                         |
 | [ ]  | [#213](https://github.com/marmotz/ekoz/issues/213) | Message actions client: reply banner and quote                                | #210, #211                         |

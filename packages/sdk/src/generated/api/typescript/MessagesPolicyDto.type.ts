@@ -9,6 +9,11 @@ export type MessagesPolicyDtoDto = {
    * @max 9007199254740991
    */
   bodyMaxLength: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  editWindow: number | null;
 };
 
 export type MessagesPolicyDtoDeepDto = {
@@ -17,6 +22,11 @@ export type MessagesPolicyDtoDeepDto = {
    * @max 9007199254740991
    */
   bodyMaxLength: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  editWindow: number | null;
 };
 
 export type MessagesPolicyDtoCreateDto = {
@@ -25,6 +35,11 @@ export type MessagesPolicyDtoCreateDto = {
    * @max 9007199254740991
    */
   bodyMaxLength: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  editWindow: number | null;
 };
 
 export type MessagesPolicyDtoCreateDeepDto = {
@@ -33,6 +48,11 @@ export type MessagesPolicyDtoCreateDeepDto = {
    * @max 9007199254740991
    */
   bodyMaxLength: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  editWindow: number | null;
 };
 
 export type MessagesPolicyDtoUpdateDto = Partial<{
@@ -41,6 +61,11 @@ export type MessagesPolicyDtoUpdateDto = Partial<{
    * @max 9007199254740991
    */
   bodyMaxLength: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  editWindow: number | null;
 }>;
 
 export type MessagesPolicyDtoUpdateDeepDto = Partial<{
@@ -49,10 +74,16 @@ export type MessagesPolicyDtoUpdateDeepDto = Partial<{
    * @max 9007199254740991
    */
   bodyMaxLength: number;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  editWindow: number | null;
 }>;
 
 export type MessagesPolicyDtoWhereDto = {
   bodyMaxLength?: IntFilter;
+  editWindow?: IntFilter;
   AND?: MessagesPolicyDtoWhereDto | MessagesPolicyDtoWhereDto[];
   OR?: MessagesPolicyDtoWhereDto | MessagesPolicyDtoWhereDto[];
   NOT?: MessagesPolicyDtoWhereDto | MessagesPolicyDtoWhereDto[];
@@ -60,6 +91,7 @@ export type MessagesPolicyDtoWhereDto = {
 
 export type MessagesPolicyDtoWhereDeepDto = {
   bodyMaxLength?: IntFilter;
+  editWindow?: IntFilter;
   AND?: MessagesPolicyDtoWhereDeepDto | MessagesPolicyDtoWhereDeepDto[];
   OR?: MessagesPolicyDtoWhereDeepDto | MessagesPolicyDtoWhereDeepDto[];
   NOT?: MessagesPolicyDtoWhereDeepDto | MessagesPolicyDtoWhereDeepDto[];
@@ -67,8 +99,10 @@ export type MessagesPolicyDtoWhereDeepDto = {
 
 export type MessagesPolicyDtoSelectDto = {
   bodyMaxLength?: boolean;
+  editWindow?: boolean;
 };
 
 export type MessagesPolicyDtoSelectDeepDto = {
   bodyMaxLength?: boolean;
+  editWindow?: boolean;
 };

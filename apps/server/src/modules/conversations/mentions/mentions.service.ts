@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { type MentionTargetRow, toMentionTarget } from '../messages/mention.types.js';
-import { type MessageRow, toMessageView } from '../messages/message.view.js';
+import {
+  groupReactions,
+  type MessageRow,
+  type ReactionRow,
+  toMessageView,
+} from '../messages/message.view.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import type { ListMyMentionsQuery } from './mentions.dto.js';
@@ -203,6 +208,12 @@ export class MentionsService {
       ]);
     }
 
+    const reactionsByMessage = groupReactions(
+      (await this.prisma.orm.public.Reaction.where((f) =>
+        f.messageId.in(messageIds),
+      ).all()) as ReactionRow[],
+    );
+
     const roomIds = [...new Set(rows.map((row) => row.roomId))];
     const rooms = (await this.prisma.orm.public.Room.where((f) =>
       f.id.in(roomIds),
@@ -228,6 +239,7 @@ export class MentionsService {
             message,
             (targetsByMessage.get(row.messageId) ?? []).map(toMentionTarget),
             mentionsMe,
+            reactionsByMessage.get(row.messageId) ?? [],
           ),
           room: { id: room.id, type: room.type, name: room.name, parentId: room.parentId },
           mentionsMe,

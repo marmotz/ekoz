@@ -148,6 +148,12 @@ export function createFakeSdk(initial?: FakeSession) {
       get: vi.fn(async () => ({})),
       send: vi.fn(async () => ({})),
       edit: vi.fn(async () => ({})),
+      delete: vi.fn(async () => undefined),
+      pin: vi.fn(async () => ({})),
+      unpin: vi.fn(async () => undefined),
+      pins: vi.fn(async () => [] as unknown[]),
+      react: vi.fn(async () => undefined),
+      unreact: vi.fn(async () => undefined),
     },
     receipts: {
       set: vi.fn(async (_roomId: string, seq: string) => ({ userId: defaultMe.id, seq })),

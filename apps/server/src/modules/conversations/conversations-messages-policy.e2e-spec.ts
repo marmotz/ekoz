@@ -36,7 +36,7 @@ describe('conversations — messages policy (integration)', () => {
 
   it('is public and answers with the default limit, uncached', async () => {
     const res = await request(server()).get('/messages/policy').expect(200);
-    expect(res.body).toEqual({ bodyMaxLength: 16_000 });
+    expect(res.body).toEqual({ bodyMaxLength: 16_000, editWindow: null });
     expect(res.headers['cache-control']).toBe('no-store');
   });
 
@@ -50,5 +50,17 @@ describe('conversations — messages policy (integration)', () => {
     }
     const back = await request(server()).get('/messages/policy').expect(200);
     expect(back.body.bodyMaxLength).toBe(16_000);
+  });
+
+  it('exposes the edit window in seconds, and null when unlimited', async () => {
+    await config.set('messages.edit_window', 900, null);
+    try {
+      const res = await request(server()).get('/messages/policy').expect(200);
+      expect(res.body.editWindow).toBe(900);
+    } finally {
+      await config.set('messages.edit_window', null, null);
+    }
+    const back = await request(server()).get('/messages/policy').expect(200);
+    expect(back.body.editWindow).toBeNull();
   });
 });

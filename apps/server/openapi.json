@@ -4859,7 +4859,7 @@
             }
           }
         },
-        "summary": "Limits applied to message bodies.",
+        "summary": "Limits applied to message bodies and edits.",
         "tags": [
           "Conversations — messages"
         ]
@@ -8416,6 +8416,27 @@
             ],
             "nullable": true
           },
+          "reactions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emoji": {
+                  "type": "string"
+                },
+                "userIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "emoji",
+                "userIds"
+              ]
+            }
+          },
           "editedAt": {
             "type": "string",
             "format": "date-time",
@@ -8449,6 +8470,7 @@
           "replyToId",
           "mentions",
           "mentionsMe",
+          "reactions",
           "editedAt",
           "redactedAt",
           "hiddenAt",
@@ -8521,6 +8543,27 @@
                   ],
                   "nullable": true
                 },
+                "reactions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "emoji": {
+                        "type": "string"
+                      },
+                      "userIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "emoji",
+                      "userIds"
+                    ]
+                  }
+                },
                 "editedAt": {
                   "type": "string",
                   "format": "date-time",
@@ -8554,6 +8597,7 @@
                 "replyToId",
                 "mentions",
                 "mentionsMe",
+                "reactions",
                 "editedAt",
                 "redactedAt",
                 "hiddenAt",
@@ -8594,13 +8638,136 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "message": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "roomId": {
+                "type": "string"
+              },
+              "seq": {
+                "type": "string"
+              },
+              "authorId": {
+                "type": "string",
+                "nullable": true
+              },
+              "body": {
+                "type": "string"
+              },
+              "replyToId": {
+                "type": "string",
+                "nullable": true
+              },
+              "mentions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "user",
+                        "all",
+                        "role",
+                        "group"
+                      ]
+                    },
+                    "target": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "target",
+                    "token"
+                  ]
+                }
+              },
+              "mentionsMe": {
+                "type": "string",
+                "enum": [
+                  "direct",
+                  "collective",
+                  null
+                ],
+                "nullable": true
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emoji": {
+                      "type": "string"
+                    },
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "emoji",
+                    "userIds"
+                  ]
+                }
+              },
+              "editedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "nullable": true
+              },
+              "redactedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "nullable": true
+              },
+              "hiddenAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              }
+            },
+            "required": [
+              "id",
+              "roomId",
+              "seq",
+              "authorId",
+              "body",
+              "replyToId",
+              "mentions",
+              "mentionsMe",
+              "reactions",
+              "editedAt",
+              "redactedAt",
+              "hiddenAt",
+              "createdAt"
+            ]
           }
         },
         "required": [
           "roomId",
           "messageId",
           "pinnedById",
-          "pinnedAt"
+          "pinnedAt",
+          "message"
         ]
       },
       "MessagesPolicyDto": {
@@ -8610,10 +8777,17 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "editWindow": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "nullable": true
           }
         },
         "required": [
-          "bodyMaxLength"
+          "bodyMaxLength",
+          "editWindow"
         ]
       },
       "ReadMarkerViewDto": {
@@ -9132,6 +9306,27 @@
                       ],
                       "nullable": true
                     },
+                    "reactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "emoji": {
+                            "type": "string"
+                          },
+                          "userIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "emoji",
+                          "userIds"
+                        ]
+                      }
+                    },
                     "editedAt": {
                       "type": "string",
                       "format": "date-time",
@@ -9165,6 +9360,7 @@
                     "replyToId",
                     "mentions",
                     "mentionsMe",
+                    "reactions",
                     "editedAt",
                     "redactedAt",
                     "hiddenAt",

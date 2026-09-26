@@ -13,6 +13,14 @@ function describeEvent(event: RoomEvent): string {
       return `redacted:${event.content.reason}`;
     case 'receipt_updated':
       return `receipt:${event.content.userId}:${event.content.seq}`;
+    case 'reaction_added':
+      return `reaction+:${event.content.messageId}:${event.content.emoji}:${event.senderId}`;
+    case 'reaction_removed':
+      return `reaction-:${event.content.messageId}:${event.content.emoji}`;
+    case 'pin_added':
+      return `pin+:${event.content.messageId}`;
+    case 'pin_removed':
+      return `pin-:${event.content.messageId}`;
     case 'group_changed':
       return `group:${event.content.change}:${event.content.name}:${event.content.userId ?? '-'}`;
     default:
@@ -41,6 +49,29 @@ describe('RoomEvent', () => {
     expect(
       describeEvent({ ...base, type: 'message_redacted', content: { reason: 'retention' } }),
     ).toBe('redacted:retention');
+  });
+
+  it('narrows content on the reaction and pin events', () => {
+    expect(
+      describeEvent({
+        ...base,
+        type: 'reaction_added',
+        content: { messageId: 'm', emoji: '👍' },
+      }),
+    ).toBe('reaction+:m:👍:u1');
+    expect(
+      describeEvent({
+        ...base,
+        type: 'reaction_removed',
+        content: { messageId: 'm', emoji: '👍' },
+      }),
+    ).toBe('reaction-:m:👍');
+    expect(describeEvent({ ...base, type: 'pin_added', content: { messageId: 'm' } })).toBe(
+      'pin+:m',
+    );
+    expect(describeEvent({ ...base, type: 'pin_removed', content: { messageId: 'm' } })).toBe(
+      'pin-:m',
+    );
   });
 
   it('types the mention targets of a created message', () => {

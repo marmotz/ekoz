@@ -61,11 +61,33 @@ export interface ReceiptUpdatedEvent extends RoomEventBase {
   content: { userId: string; seq: string };
 }
 
+/** A user reacted to a message. The actor is `senderId`; a redelivery may repeat a reaction already in a page. */
+export interface ReactionAddedEvent extends RoomEventBase {
+  type: 'reaction_added';
+  content: { messageId: string; emoji: string };
+}
+
+/** A user removed their reaction. Deleting a message emits none: clear reactions on `message_deleted`. */
+export interface ReactionRemovedEvent extends RoomEventBase {
+  type: 'reaction_removed';
+  content: { messageId: string; emoji: string };
+}
+
+/** A message was pinned by `senderId`. */
+export interface PinAddedEvent extends RoomEventBase {
+  type: 'pin_added';
+  content: { messageId: string };
+}
+
+/** A message was unpinned by `senderId`. Deleting a message emits none: drop its pin on `message_deleted`. */
+export interface PinRemovedEvent extends RoomEventBase {
+  type: 'pin_removed';
+  content: { messageId: string };
+}
+
 /** Every event type the server can emit besides the ones typed above. */
 export type OtherRoomEventType =
   | 'message_hidden'
-  | 'reaction_added'
-  | 'reaction_removed'
   | 'member_joined'
   | 'member_left'
   | 'member_kicked'
@@ -77,8 +99,6 @@ export type OtherRoomEventType =
   | 'room_updated'
   | 'room_moved'
   | 'room_deleted'
-  | 'pin_added'
-  | 'pin_removed'
   | 'retention_changed';
 
 /** Fallback for every other event type: the content is left untouched. */
@@ -94,6 +114,10 @@ export type RoomEvent =
   | MessageRedactedEvent
   | GroupChangedEvent
   | ReceiptUpdatedEvent
+  | ReactionAddedEvent
+  | ReactionRemovedEvent
+  | PinAddedEvent
+  | PinRemovedEvent
   | UnknownRoomEvent;
 
 /** `GET /sync` response, with `events` typed by {@link RoomEvent}. */
