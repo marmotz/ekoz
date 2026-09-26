@@ -8,7 +8,9 @@ import { roomErrorKey } from '@/features/rooms/api/errors';
 import { useLeaveRoom } from '@/features/rooms/hooks/use-room-mutations';
 import { useRooms } from '@/features/rooms/hooks/use-room-queries';
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { useDirectPresence } from '@/shared/realtime/use-direct-presence';
 import { Button } from '@/shared/ui/button';
+import { PresenceDot } from '@/shared/ui/presence-dot';
 
 const TYPE_LABEL: Record<Room['type'], ParseKeys> = {
   space: 'rooms.header.type.space',
@@ -35,6 +37,7 @@ export function RoomHeader({ room, capabilities, actions }: RoomHeaderProps) {
   const navigate = useNavigate();
   const rooms = useRooms();
   const leave = useLeaveRoom();
+  const directPresence = useDirectPresence(room.id, room.type);
 
   const items = rooms.data?.items ?? [];
   const listed = items.find((item) => item.id === room.id);
@@ -46,7 +49,10 @@ export function RoomHeader({ room, capabilities, actions }: RoomHeaderProps) {
       <div className="flex flex-wrap items-center gap-3">
         <Icon className="size-5 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-lg font-semibold">{room.name ?? t('rooms.unnamed')}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="truncate text-lg font-semibold">{room.name ?? t('rooms.unnamed')}</h2>
+            {directPresence ? <PresenceDot status={directPresence} /> : null}
+          </div>
           <p className="text-xs text-muted-foreground">{t(TYPE_LABEL[room.type])}</p>
         </div>
         {actions}

@@ -138,6 +138,9 @@ All notable changes to the Ekoz protocol. Format
 
 ### Changed
 
+- Presence: heartbeats accept an optional `clientId` and are aggregated per client instance, so an idle tab no longer hides an active one; the response also carries `manualAway`, `heartbeatInterval` and `typingTtl`; `PUT /presence/preference` persists a manual "appear away" preference. (#130, #131)
+- Presence frames are pushed when a status changes, including when it lapses to `away` or `offline`, instead of on every heartbeat, and a snapshot of the visible peers is written when the stream opens. (#130)
+- Presence and typing are delivered to each recipient, evaluated at emission: a space member receives the typing signals of its channels, the sender does not receive its own, and a membership change needs no reconnect. (#129)
 - `PUT /rooms/:id/pins/:messageId` and `PUT /messages/:messageId/reactions/:emoji`
   answer `message.not_found` (`404`) for a redacted message.
 - Read markers (`PUT` / `GET /rooms/:id/receipt(s)`) are available to effective

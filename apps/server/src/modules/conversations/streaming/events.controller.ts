@@ -7,7 +7,6 @@ import {
   STREAM_TICKET_CONSUMER,
   type StreamTicketConsumer,
 } from '../../../core/http/stream-ticket-consumer.js';
-import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { PresenceService } from '../presence/presence.service.js';
 import {
   EphemeralBroadcaster,
@@ -39,10 +38,11 @@ const PAGE_SIZE = 100;
  *   pushed live through `EphemeralBroadcaster` — never persisted, so there is
  *   no replay if a connection misses one.
  *
- * The presence/typing subscription set (co-members + `dm` partners, member
- * rooms) is computed once at connect time; a membership change made after
- * connecting only takes effect on the next reconnect — a known first-increment
- * limitation.
+ * A connection subscribes only to its own user's presence and typing
+ * channels: the emitter resolves the recipients at emission time (visible
+ * peers for presence, effective members for typing), so a membership change
+ * takes effect without a reconnect. On open, one `presence` frame per visible
+ * peer that is not `offline` is written as a snapshot.
  */
 @ApiTags('Conversations — stream')
 @Controller()
@@ -52,7 +52,6 @@ export class EventsController {
     private readonly feed: FeedReaderService,
     private readonly presence: PresenceService,
     private readonly broadcaster: EphemeralBroadcaster,
-    private readonly prisma: PrismaService,
   ) {}
 
   @Public()
@@ -129,33 +128,28 @@ export class EventsController {
     const onPresence = (signal: PresenceSignal): void => {
       res.write(`event: presence\ndata: ${JSON.stringify(signal)}\n\n`);
     };
-    const peers = await this.presence.visiblePeersOf(binding.userId);
-    for (const peerId of peers) {
-      this.broadcaster.onPresence(peerId, onPresence);
-    }
-
     const onTyping = (signal: TypingSignal): void => {
       res.write(`event: typing\ndata: ${JSON.stringify(signal)}\n\n`);
     };
-    const memberships = (await this.prisma.orm.public.Membership.where({
-      userId: binding.userId,
-    }).all()) as Array<{ roomId: string }>;
-    const roomIds = memberships.map((m) => m.roomId);
-    for (const roomId of roomIds) {
-      this.broadcaster.onTyping(roomId, onTyping);
-    }
+    // Subscribe to the user's own channels first, then write the snapshot, so a
+    // change between the two is not lost.
+    this.broadcaster.onPresence(binding.userId, onPresence);
+    this.broadcaster.onTyping(binding.userId, onTyping);
 
     res.req.on('close', () => {
       clearInterval(pollTimer);
       clearInterval(keepaliveTimer);
-      for (const peerId of peers) {
-        this.broadcaster.offPresence(peerId, onPresence);
-      }
-      for (const roomId of roomIds) {
-        this.broadcaster.offTyping(roomId, onTyping);
-      }
+      this.broadcaster.offPresence(binding.userId, onPresence);
+      this.broadcaster.offTyping(binding.userId, onTyping);
       res.end();
     });
+
+    for (const signal of await this.presence.snapshotFor(binding.userId)) {
+      if (res.writableEnded) {
+        break;
+      }
+      onPresence(signal);
+    }
   }
 }
 

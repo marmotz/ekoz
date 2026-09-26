@@ -14,6 +14,7 @@ import { createInvitationsResource, type InvitationsResource } from './resources
 import { createMeResource, type MeResource } from './resources/me.js';
 import { createMentionsResource, type MentionsResource } from './resources/mentions.js';
 import { createMessagesResource, type MessagesResource } from './resources/messages.js';
+import { createPresenceResource, type PresenceResource } from './resources/presence.js';
 import { createReceiptsResource, type ReceiptsResource } from './resources/receipts.js';
 import {
   createRoomInvitationsResource,
@@ -52,6 +53,7 @@ export interface EkozClient {
   mentions: MentionsResource;
   groups: GroupsResource;
   receipts: ReceiptsResource;
+  presence: PresenceResource;
   sync: SyncResource;
   stream: RoomStream;
   discovery: Discovery;
@@ -119,6 +121,7 @@ export function createClient(config: ClientConfig): EkozClient {
     mentions: createMentionsResource(session),
     groups: createGroupsResource(session),
     receipts: createReceiptsResource(session),
+    presence: createPresenceResource(session, emitter),
     sync: createSyncResource(session),
     stream: createRoomStream({
       session,

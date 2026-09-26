@@ -5,6 +5,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { MessageItem } from '@/features/chat/components/message-item';
 import type { Author } from '@/features/chat/hooks/use-authors';
 import type { TimelineMessage } from '@/features/chat/lib/timeline';
+import { resetPresence, setPresence } from '@/shared/realtime/presence-store';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { renderWithProviders } from '../../../../test/render';
 import { createClientMock, createFakeSdk } from '../../../../test/sdk-mock';
@@ -172,4 +173,22 @@ it('renders the mention chips of the message', async () => {
   expect(
     await screen.findByRole('img', { name: 'Mention of everyone in the room' }),
   ).toBeInTheDocument();
+});
+
+it('shows the presence dot of a member author, following the store', async () => {
+  resetPresence();
+  setPresence('u1', 'online');
+  setup(member);
+
+  // The avatar sits in a decorative (hidden) author card.
+  expect(await screen.findByRole('img', { name: 'Online', hidden: true })).toBeInTheDocument();
+});
+
+it('shows no presence dot for an author who left or whose account is deleted', async () => {
+  resetPresence();
+  setPresence('u1', 'online');
+  setup(left);
+
+  await screen.findByText('hello there');
+  expect(screen.queryByRole('img', { name: 'Online', hidden: true })).not.toBeInTheDocument();
 });

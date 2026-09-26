@@ -138,6 +138,21 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       set: vi.fn(),
       list: vi.fn(),
     },
+    presence: {
+      heartbeat: vi.fn(),
+      setManualAway: vi.fn(),
+      typing: vi.fn(),
+      reporter: {
+        start: vi.fn(),
+        stop: vi.fn(),
+        signOff: vi.fn(),
+        setIdle: vi.fn(),
+        setManualAway: vi.fn(),
+        notifyTyping: vi.fn(),
+        state: null,
+        on: vi.fn(() => () => {}),
+      },
+    },
     sync: {
       get: vi.fn(),
     },

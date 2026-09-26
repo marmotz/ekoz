@@ -300,3 +300,18 @@ it('shows a message when nothing matches', async () => {
 
   expect(await screen.findByText('No match')).toBeInTheDocument();
 });
+
+it('calls onTyping when the draft changes, not when it is empty', async () => {
+  const onTyping = vi.fn();
+  const { user } = setup({ onTyping });
+  await user.click(await editor());
+
+  await user.keyboard('{Enter}');
+  expect(onTyping).not.toHaveBeenCalled();
+
+  await user.keyboard('h');
+  expect(onTyping).toHaveBeenCalledTimes(1);
+
+  await user.keyboard('i');
+  expect(onTyping).toHaveBeenCalledTimes(2);
+});

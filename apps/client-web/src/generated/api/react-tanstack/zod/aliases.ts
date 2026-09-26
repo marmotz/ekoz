@@ -39,6 +39,7 @@ import { MyMentionsPageDtoSchema, type MyMentionsPageDtoDto } from './MyMentions
 import { MyPermissionsResponseDtoSchema, type MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.schema.js';
 import { MyRoomInvitationListViewDtoSchema, type MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.schema.js';
 import { PendingJoinRequestListViewDtoSchema, type PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.schema.js';
+import { PresencePreferenceResponseDtoSchema, type PresencePreferenceResponseDtoDto } from './PresencePreferenceResponseDto.schema.js';
 import { ProblemDetailsDtoSchema, type ProblemDetailsDtoDto } from './ProblemDetailsDto.schema.js';
 import { PublicProfileViewDtoSchema, type PublicProfileViewDtoDto } from './PublicProfileViewDto.schema.js';
 import { ReadMarkerViewDtoSchema, type ReadMarkerViewDtoDto } from './ReadMarkerViewDto.schema.js';
@@ -1004,6 +1005,15 @@ export type PresenceController_heartbeat401ResponseProblemJson = z.infer<typeof 
 
 export const PresenceController_heartbeat422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type PresenceController_heartbeat422ResponseProblemJson = z.infer<typeof PresenceController_heartbeat422ResponseProblemJsonSchema>;
+
+export const PresenceController_setPreference200ResponseJsonSchema = PresencePreferenceResponseDtoSchema;
+export type PresenceController_setPreference200ResponseJson = z.infer<typeof PresenceController_setPreference200ResponseJsonSchema>;
+
+export const PresenceController_setPreference401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PresenceController_setPreference401ResponseProblemJson = z.infer<typeof PresenceController_setPreference401ResponseProblemJsonSchema>;
+
+export const PresenceController_setPreference422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type PresenceController_setPreference422ResponseProblemJson = z.infer<typeof PresenceController_setPreference422ResponseProblemJsonSchema>;
 
 export const ReactionsController_add401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type ReactionsController_add401ResponseProblemJson = z.infer<typeof ReactionsController_add401ResponseProblemJsonSchema>;

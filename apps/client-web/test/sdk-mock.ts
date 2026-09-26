@@ -57,15 +57,44 @@ export function createFakeStream() {
   };
 }
 
+/** A controllable `PresenceReporter`: tests set `state` with `setState()`, which notifies `change`. */
+export function createFakeReporter() {
+  const listeners = new Set<() => void>();
+  const reporter = {
+    state: null as { status: 'online' | 'away' | 'offline'; manualAway: boolean } | null,
+    start: vi.fn(() => {}),
+    stop: vi.fn(() => {}),
+    signOff: vi.fn(async () => {}),
+    setIdle: vi.fn((_idle: boolean) => {}),
+    setManualAway: vi.fn(async (_away: boolean) => {}),
+    notifyTyping: vi.fn((_roomId: string) => {}),
+    on: vi.fn((_name: string, listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    }),
+  };
+
+  return {
+    reporter,
+    setState(state: typeof reporter.state) {
+      reporter.state = state;
+      for (const listener of [...listeners]) listener();
+    },
+  };
+}
+
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `receipts`, `groups`, `mentions`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `receipts`, `presence`, `groups`, `mentions`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
   let session: FakeSession | undefined = initial;
   const listeners = new Map<string, Set<Listener>>();
   const fakeStream = createFakeStream();
+  const fakeReporter = createFakeReporter();
 
   const off = (name: string, listener: Listener) => {
     listeners.get(name)?.delete(listener);
@@ -195,6 +224,12 @@ export function createFakeSdk(initial?: FakeSession) {
     directory: {
       list: vi.fn(async () => ({ items: [], nextCursor: null as string | null })),
     },
+    presence: {
+      heartbeat: vi.fn(async () => ({})),
+      setManualAway: vi.fn(async () => ({})),
+      typing: vi.fn(async () => undefined),
+      reporter: fakeReporter.reporter,
+    },
     sync: {
       get: vi.fn(async () => ({ events: [], lastSeq: '0' })),
     },
@@ -211,6 +246,8 @@ export function createFakeSdk(initial?: FakeSession) {
     emit,
     /** The fake `sdk.stream`: `emit('room_event', ...)`, `setStatus('open')`, ... */
     streamControl: fakeStream,
+    /** The fake `sdk.presence.reporter`: `setState({ status, manualAway })` notifies `change`. */
+    reporterControl: fakeReporter,
     setSession(next: FakeSession | undefined) {
       session = next;
     },

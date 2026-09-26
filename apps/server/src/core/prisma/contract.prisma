@@ -706,6 +706,21 @@ model ReadMarker {
   @@map("read_marker")
 }
 
+// ── conversations: presence preferences ──────────────────────────────────────
+// Presence itself is ephemeral (technical.md §15); only the manual "appear
+// away" choice is persisted, so it survives a new login. No FK to `User`, same
+// cross-feature rule as `Membership`.
+
+/// Per-user presence preference: `manualAway` forces the derived status to
+/// `away` while the user has a live client. No row = `manualAway: false`.
+model PresencePreference {
+  userId     String                     @id @map("user_id")
+  manualAway Boolean                    @default(false) @map("manual_away")
+  updatedAt  temporal.updatedAtString() @map("updated_at")
+
+  @@map("presence_preference")
+}
+
 // ── conversations: sync, account feed, SSE stream ────────────────────────────
 // Issue #11 (technical.md §16). `feedSeq` is a single server-wide sequence
 // (not reset per user) — simpler than a per-user cursor row and still

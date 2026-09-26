@@ -425,6 +425,12 @@
       "pinFailed": "Le message n'a pas pu être épinglé.",
       "unpinFailed": "Le message n'a pas pu être désépinglé.",
       "banner": "Dernier message épinglé"
+    },
+    "typing": {
+      "one": "{{name}} est en train d'écrire…",
+      "many": "{{names}} et {{last}} sont en train d'écrire…",
+      "several": "Plusieurs personnes sont en train d'écrire…",
+      "indicator": "Quelqu'un écrit"
     }
   },
   "members": {
@@ -699,6 +705,17 @@
       "direct": "Vous mentionne",
       "collective": "Mentionne un groupe",
       "unread": "Non lu"
+    }
+  },
+  "presence": {
+    "status": {
+      "online": "En ligne",
+      "away": "Absent",
+      "offline": "Hors ligne"
+    },
+    "menu": {
+      "appearAway": "Apparaître absent",
+      "appearOnline": "Apparaître en ligne"
     }
   }
 }

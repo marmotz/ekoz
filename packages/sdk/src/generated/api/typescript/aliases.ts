@@ -39,6 +39,7 @@ import type { MyMentionsPageDtoDto } from './MyMentionsPageDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.type.js';
 import type { PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.type.js';
+import type { PresencePreferenceResponseDtoDto } from './PresencePreferenceResponseDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
 import type { PublicProfileViewDtoDto } from './PublicProfileViewDto.type.js';
 import type { ReadMarkerViewDtoDto } from './ReadMarkerViewDto.type.js';
@@ -822,6 +823,12 @@ export type PresenceController_heartbeat200ResponseJson = HeartbeatResponseDtoDt
 export type PresenceController_heartbeat401ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type PresenceController_heartbeat422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PresenceController_setPreference200ResponseJson = PresencePreferenceResponseDtoDto;
+
+export type PresenceController_setPreference401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type PresenceController_setPreference422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type TypingController_broadcast401ResponseProblemJson = ProblemDetailsDtoDto;
 

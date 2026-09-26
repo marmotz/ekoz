@@ -68,17 +68,17 @@ _done, see [technical.md](features/web-client-message-actions/technical.md)_ —
 
 ## Web client presence and typing ·  [overview](features/web-client-presence-and-typing/overview.md)
 
-_designed, see [technical.md](features/web-client-presence-and-typing/technical.md)_ — 0/7 tasks done
+_done, see [technical.md](features/web-client-presence-and-typing/technical.md)_ — 7/7 tasks done
 
 | Done | Issue                                              | Title                                                                                   | Blocked by       |
 |------|----------------------------------------------------|-----------------------------------------------------------------------------------------|------------------|
-| [ ]  | [#129](https://github.com/marmotz/ekoz/issues/129) | Presence server: per-recipient delivery of presence and typing                          | —                |
-| [ ]  | [#130](https://github.com/marmotz/ekoz/issues/130) | Presence server: per-client state, emission on change, lapse sweep and connect snapshot | #129             |
-| [ ]  | [#131](https://github.com/marmotz/ekoz/issues/131) | Presence server: persisted manual away and heartbeat response settings                  | #130             |
-| [ ]  | [#132](https://github.com/marmotz/ekoz/issues/132) | Presence SDK: client.presence resource, heartbeat reporter and typing throttle          | #131             |
-| [ ]  | [#133](https://github.com/marmotz/ekoz/issues/133) | Presence client: own presence, presence store, avatar dot and appear-away toggle        | #132             |
-| [ ]  | [#134](https://github.com/marmotz/ekoz/issues/134) | Presence client: typing store, typing line and sidebar indicator                        | #132             |
-| [ ]  | [#135](https://github.com/marmotz/ekoz/issues/135) | Presence client: presence on members panel, profile card and direct conversations       | #133, #126, #127 |
+| [x]  | [#129](https://github.com/marmotz/ekoz/issues/129) | Presence server: per-recipient delivery of presence and typing                          | —                |
+| [x]  | [#130](https://github.com/marmotz/ekoz/issues/130) | Presence server: per-client state, emission on change, lapse sweep and connect snapshot | #129             |
+| [x]  | [#131](https://github.com/marmotz/ekoz/issues/131) | Presence server: persisted manual away and heartbeat response settings                  | #130             |
+| [x]  | [#132](https://github.com/marmotz/ekoz/issues/132) | Presence SDK: client.presence resource, heartbeat reporter and typing throttle          | #131             |
+| [x]  | [#133](https://github.com/marmotz/ekoz/issues/133) | Presence client: own presence, presence store, avatar dot and appear-away toggle        | #132             |
+| [x]  | [#134](https://github.com/marmotz/ekoz/issues/134) | Presence client: typing store, typing line and sidebar indicator                        | #132             |
+| [x]  | [#135](https://github.com/marmotz/ekoz/issues/135) | Presence client: presence on members panel, profile card and direct conversations       | #133, #126, #127 |
 
 ## Web client read state ·  [overview](features/web-client-read-state/overview.md)
 

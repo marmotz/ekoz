@@ -51,6 +51,8 @@ export interface MessageEditorProps {
   /** Escape (with no `@` popup open). */
   onCancel?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
+  /** Called on every change that leaves the editor with content (the user is typing). */
+  onTyping?: () => void;
   /** Accessible name of the editor; defaults to the composer's. */
   label?: string;
   /** Actions rendered beside the editor. */
@@ -79,6 +81,7 @@ export function MessageEditor({
   onUnchanged,
   onCancel,
   onDirtyChange,
+  onTyping,
   label: labelProp,
   children,
 }: MessageEditorProps) {
@@ -100,6 +103,10 @@ export function MessageEditor({
   const [dirty, setDirty] = useState(false);
 
   const bridge = useMemo(() => createComposerHandlers(), []);
+  const onTypingRef = useRef(onTyping);
+  useEffect(() => {
+    onTypingRef.current = onTyping;
+  });
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -115,6 +122,7 @@ export function MessageEditor({
       const markdown = current.getMarkdown().trim();
       setContentState({ empty: current.isEmpty, blank: markdown === '', length: markdown.length });
       setDirty(baseline.current === null || markdown !== baseline.current);
+      if (markdown !== '') onTypingRef.current?.();
     },
   });
 

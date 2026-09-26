@@ -1,16 +1,32 @@
 import type { ParseKeys } from 'i18next';
 import type { LucideIcon } from 'lucide-react';
+import type { ComponentType } from 'react';
 
-export interface UserMenuItem {
+interface UserMenuEntryBase {
   /** Unique key: registering the same id twice keeps the first entry. */
   id: string;
+  /** Ascending sort key; entries without one go last. */
+  order?: number;
+}
+
+/** An entry that links to a route. */
+export interface UserMenuLinkItem extends UserMenuEntryBase {
   /** Route path the entry links to. */
   to: string;
   /** Translation key of the label. */
   labelKey: ParseKeys;
   icon?: LucideIcon;
-  /** Ascending sort key; entries without one go last. */
-  order?: number;
+}
+
+/** An entry that renders itself (a dropdown menu item), for actions that are not links. */
+export interface UserMenuComponentItem extends UserMenuEntryBase {
+  Component: ComponentType;
+}
+
+export type UserMenuItem = UserMenuLinkItem | UserMenuComponentItem;
+
+export function isComponentItem(item: UserMenuItem): item is UserMenuComponentItem {
+  return 'Component' in item;
 }
 
 const items: UserMenuItem[] = [];

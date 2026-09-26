@@ -22,6 +22,13 @@ export type {
   MessagesResource,
   SendMessageBody,
 } from './resources/messages.js';
+export type {
+  HeartbeatBody,
+  PresenceReporter,
+  PresenceResource,
+  PresenceState,
+  PresenceStatus,
+} from './resources/presence.js';
 export type { ReceiptsResource } from './resources/receipts.js';
 export type { RoomInvitationsResource } from './resources/room-invitations.js';
 export type {
@@ -219,6 +226,7 @@ export type {
   Group,
   GroupDetail,
   GroupListResponse,
+  HeartbeatResponse,
   InvitationsListResponse,
   InvitationView,
   JoinRequest,
@@ -241,6 +249,7 @@ export type {
   MyRoomInvitationsListResponse,
   PendingJoinRequest,
   PendingJoinRequestsPage,
+  PresencePreferenceResponse,
   PublicProfileView,
   ReadMarker,
   RegisterBody,

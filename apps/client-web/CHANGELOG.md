@@ -7,6 +7,15 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Send the presence heartbeat with the stream, marking the user idle after 60 s hidden or 5 min without input, and add an "Appear away" / "Appear online" entry to the user menu (#133).
+- Make the user appear away as soon as they sign out (#133).
+- Show a presence dot on message authors, the members panel, the profile card and the own avatar in the user menu, fed by the stream and cleared on reconnection (#133, #135).
+- Show the presence of the partner of a direct conversation in the rooms tree and the room header (#135).
+- Show who is typing above the composer and animated dots on the rooms tree where someone types (#134).
+- Let the user menu take entries that render themselves besides links (#133).
+- Document the presence and typing design in `docs/technical/presence-and-typing.md` (#130).
+- Regenerate the API types: the heartbeat response carries the manual away flag and the timing settings, and `PUT /presence/preference` is available (#131).
+
 - Add several members to a group at once with a multiple-selection combobox: typing filters the room members and each pick becomes a chip in the field.
 - Make the sections of the members panel (roles, groups) collapsible, kept open while searching.
 - Add a "By group" view to the members panel listing each user group with its members, a member of several groups appearing in each.
@@ -88,6 +97,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Fixed
 
+- Stop the console from logging "No queryFn was passed" for every reply quote: the timeline lookup now declares itself cache-only.
 - Stop the page from scrolling when the members panel of a room with many members is open: the hover action buttons of the member rows escaped the list scroll area.
 - Scale the initials of a default avatar with its size instead of a fixed font size.
 

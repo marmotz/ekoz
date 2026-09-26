@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MembersPanel } from '@/features/members/components/members-panel';
@@ -6,6 +6,7 @@ import {
   MEMBERS_PANEL_STORAGE_KEY,
   reloadMembersPanelPrefs,
 } from '@/features/members/hooks/use-members-panel-prefs';
+import { resetPresence, setPresence } from '@/shared/realtime/presence-store';
 import { type Configure, renderSignedIn } from '../../../../test/render-signed-in';
 import { createClientMock } from '../../../../test/sdk-mock';
 
@@ -346,5 +347,30 @@ describe('MembersPanel, below lg', () => {
     expect(JSON.parse(window.localStorage.getItem(MEMBERS_PANEL_STORAGE_KEY) ?? '')).toMatchObject({
       open: false,
     });
+  });
+});
+
+describe('MembersPanel presence', () => {
+  beforeEach(() => {
+    resetPresence();
+  });
+
+  it('shows a presence dot on each member, following the store', async () => {
+    setup();
+    const panel = await screen.findByRole('complementary', { name: 'Members' });
+    await within(panel).findByText('Alice');
+    const dotOf = (name: string) =>
+      within(within(panel).getByText(name).closest('li') as HTMLElement).getByRole('img');
+
+    expect(dotOf('Alice')).toHaveAttribute('data-presence', 'offline');
+
+    act(() => {
+      setPresence('u1', 'online');
+      setPresence('u2', 'away');
+    });
+
+    expect(dotOf('Alice')).toHaveAttribute('data-presence', 'online');
+    expect(dotOf('Bob')).toHaveAttribute('data-presence', 'away');
+    expect(dotOf('Carol')).toHaveAttribute('data-presence', 'offline');
   });
 });

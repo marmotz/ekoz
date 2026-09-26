@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
@@ -62,6 +62,24 @@ it('signs out through the SDK, once, without navigating itself', async () => {
 
   expect(fake.stubs.auth.logout).toHaveBeenCalledTimes(1);
   expect(router.state.location.pathname).toBe('/somewhere');
+});
+
+it('makes the user appear away before signing out', async () => {
+  const user = userEvent.setup();
+  const fake = createFakeSdk(signedIn);
+  const order: string[] = [];
+  fake.reporterControl.reporter.signOff.mockImplementation(async () => {
+    order.push('signOff');
+  });
+  fake.stubs.auth.logout.mockImplementation(async () => {
+    order.push('logout');
+  });
+  createClientMock.mockReturnValue(fake.sdk);
+
+  renderWithProviders(menu());
+  await user.click(await screen.findByRole('menuitem', { name: 'Sign out' }));
+
+  await waitFor(() => expect(order).toEqual(['signOff', 'logout']));
 });
 
 it('renders nothing and requests nothing for an anonymous session', async () => {
@@ -185,4 +203,43 @@ it('colors the avatar like the same account elsewhere, from the account id', asy
   const expected = document.createElement('span');
   expected.style.background = avatarColors(defaultMe.id).background;
   expect(disc.style.background).toBe(expected.style.background);
+});
+
+it('renders a component entry as is, among the links', async () => {
+  registerUserMenuItem({
+    id: 'custom',
+    order: 1,
+    Component: () => (
+      <button type="button" role="menuitem">
+        Custom entry
+      </button>
+    ),
+  });
+  registerUserMenuItem({ id: 'account', to: '/account', labelKey: 'account.title', order: 2 });
+  createClientMock.mockReturnValue(createFakeSdk(signedIn).sdk);
+
+  renderWithProviders(menu());
+
+  const items = await screen.findAllByRole('menuitem');
+  expect(items.map((item) => item.textContent?.trim())).toEqual([
+    'My public profile',
+    'Custom entry',
+    'Account',
+    'Sign out',
+  ]);
+});
+
+it('shows the own presence dot on the trigger once the heartbeat has answered', async () => {
+  const fake = createFakeSdk(signedIn);
+  createClientMock.mockReturnValue(fake.sdk);
+
+  renderWithProviders(menu());
+  const trigger = await screen.findByRole('button', { name: 'Account menu' });
+  expect(within(trigger).queryByRole('img', { name: 'Online' })).not.toBeInTheDocument();
+
+  act(() => fake.reporterControl.setState({ status: 'online', manualAway: false }));
+  expect(await within(trigger).findByRole('img', { name: 'Online' })).toBeInTheDocument();
+
+  act(() => fake.reporterControl.setState({ status: 'away', manualAway: true }));
+  expect(await within(trigger).findByRole('img', { name: 'Away' })).toBeInTheDocument();
 });

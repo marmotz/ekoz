@@ -37,7 +37,7 @@ export async function fetchRoomMembers(sdk: EkozClient, roomId: string): Promise
 }
 
 /** The room members, shared by every feature that needs them (one request per room). */
-export function useRoomMembers(roomId: string) {
+export function useRoomMembers(roomId: string, enabled = true) {
   const sdk = useSdk();
 
   return useQuery<RoomMembers>({
@@ -46,6 +46,6 @@ export function useRoomMembers(roomId: string) {
       if (!sdk) throw new Error('SDK not started');
       return fetchRoomMembers(sdk, roomId);
     },
-    enabled: sdk !== null,
+    enabled: enabled && sdk !== null,
   });
 }

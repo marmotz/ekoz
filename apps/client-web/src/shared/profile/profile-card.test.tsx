@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 import { ProfileCard, ProfileCardPopover } from '@/shared/profile/profile-card';
+import { resetPresence, setPresence } from '@/shared/realtime/presence-store';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { renderWithProviders } from '../../../test/render';
 import { createClientMock, createFakeSdk } from '../../../test/sdk-mock';
@@ -160,4 +161,31 @@ it('mounts the card, and its query, only once the popover is opened', async () =
 
   expect(await screen.findByText('bob/example.test')).toBeInTheDocument();
   await waitFor(() => expect(fake.stubs.users.getProfile).toHaveBeenCalledWith('bob/example.test'));
+});
+
+it('shows the presence dot of the user the card is about', async () => {
+  setup();
+  resetPresence();
+  setPresence('u-bob', 'away');
+
+  renderWithProviders(
+    <SdkProvider>
+      <ProfileCard userId="u-bob" identifier="bob/example.test" fallback={fallback} />
+    </SdkProvider>,
+  );
+
+  expect(await screen.findByRole('img', { name: 'Away' })).toHaveAttribute('data-presence', 'away');
+});
+
+it('shows no presence dot without a user id', async () => {
+  setup();
+
+  renderWithProviders(
+    <SdkProvider>
+      <ProfileCard identifier="bob/example.test" fallback={fallback} />
+    </SdkProvider>,
+  );
+
+  await screen.findByText('Bob (fallback)');
+  expect(screen.queryByRole('img')).not.toBeInTheDocument();
 });

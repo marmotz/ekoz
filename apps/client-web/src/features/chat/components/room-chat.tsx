@@ -16,6 +16,7 @@ import { DeleteMessageDialog } from '@/features/chat/components/delete-message-d
 import { MessageList, type MessageListHandle } from '@/features/chat/components/message-list';
 import { PinnedBanner } from '@/features/chat/components/pinned-banner';
 import { ReplyBanner } from '@/features/chat/components/reply-banner';
+import { TypingLine } from '@/features/chat/components/typing-line';
 import {
   MessageActionsContext,
   type MessageActionsValue,
@@ -276,11 +277,13 @@ export function RoomChat({
             onCancel={() => setReplyTarget(null)}
           />
         ) : null}
+        <TypingLine roomId={room.id} />
         <Composer
           roomId={room.id}
           allowCollective={room.type === 'channel'}
           block={block}
           loading={!timeline.data}
+          onTyping={() => sdk?.presence.reporter.notifyTyping(room.id)}
           onSend={(message) => {
             void send(message, replyTarget?.id ?? null);
             setReplyTarget(null);

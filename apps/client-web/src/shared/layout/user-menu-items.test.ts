@@ -3,6 +3,7 @@ import { beforeEach, expect, it } from 'vitest';
 import {
   clearUserMenuItems,
   getUserMenuItems,
+  isComponentItem,
   registerUserMenuItem,
 } from '@/shared/layout/user-menu-items';
 
@@ -29,4 +30,15 @@ it('orders entries by their order key, unordered ones last', () => {
   registerUserMenuItem({ id: 'first', to: '/first', labelKey: 'account.menu', order: 1 });
 
   expect(getUserMenuItems().map((item) => item.id)).toEqual(['first', 'second', 'last']);
+});
+
+it('registers an entry that renders itself, sorted with the links', () => {
+  const Component = () => null;
+  registerUserMenuItem({ id: 'link', to: '/link', labelKey: 'account.menu', order: 2 });
+  registerUserMenuItem({ id: 'custom', order: 1, Component });
+
+  const items = getUserMenuItems();
+
+  expect(items.map((item) => item.id)).toEqual(['custom', 'link']);
+  expect(items.map(isComponentItem)).toEqual([true, false]);
 });
