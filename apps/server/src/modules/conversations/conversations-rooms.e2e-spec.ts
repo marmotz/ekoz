@@ -419,7 +419,13 @@ describe('conversations — rooms (integration)', () => {
   });
 
   describe('GET /rooms', () => {
-    type ListItem = { id: string; parentId: string | null; role: string | null; access: string };
+    type ListItem = {
+      id: string;
+      parentId: string | null;
+      role: string | null;
+      access: string;
+      unreadCount: number | null;
+    };
 
     const listRooms = async (token: string): Promise<ListItem[]> =>
       (await request(server()).get('/rooms').set('Authorization', `Bearer ${token}`).expect(200))
@@ -525,6 +531,7 @@ describe('conversations — rooms (integration)', () => {
         updatedAt: expect.any(String),
         role: 'space_admin',
         access: 'member',
+        unreadCount: 0,
       });
     });
 
@@ -536,6 +543,7 @@ describe('conversations — rooms (integration)', () => {
       expect(items.find((i) => i.id === space.id)).toMatchObject({
         role: 'space_admin',
         access: 'member',
+        unreadCount: 0,
       });
     });
 
@@ -598,6 +606,143 @@ describe('conversations — rooms (integration)', () => {
         { id: depth3.id, parentId: depth2.id, role: 'moderator', access: 'inherited' },
         { id: depth4.id, parentId: depth3.id, role: 'moderator', access: 'inherited' },
       ]);
+    });
+
+    describe('unreadCount', () => {
+      const post = async (token: string, roomId: string, body: string) =>
+        (
+          await request(server())
+            .post(`/rooms/${roomId}/messages`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ body })
+            .expect(201)
+        ).body as { id: string; seq: string };
+
+      const unreadOf = async (name: string, roomId: string): Promise<number | null> =>
+        (await listRooms(await login(name))).find((i) => i.id === roomId)?.unreadCount ?? null;
+
+      const join = async (name: string, roomId: string) =>
+        request(server())
+          .post(`/rooms/${roomId}/join`)
+          .set('Authorization', `Bearer ${await login(name)}`)
+          .expect(201);
+
+      const setup = async (label: string) => {
+        const ownerToken = await login('owner');
+        const space = await createSpace(ownerToken, `${label} space`);
+        const channel = await createChannel(ownerToken, `${label}-channel`, space.id, 'public');
+
+        return { ownerToken, space, channel };
+      };
+
+      it('counts messages since the caller joined when there is no marker', async () => {
+        const { ownerToken, channel } = await setup('unread-nomarker');
+        await post(ownerToken, channel.id, 'before the join');
+        await join('erin', channel.id);
+        expect(await unreadOf('erin', channel.id)).toBe(0);
+
+        await post(ownerToken, channel.id, 'one');
+        await post(ownerToken, channel.id, 'two');
+        expect(await unreadOf('erin', channel.id)).toBe(2);
+      });
+
+      it('counts only the messages after the marker', async () => {
+        const { ownerToken, channel } = await setup('unread-marker');
+        await join('erin', channel.id);
+        await post(ownerToken, channel.id, 'one');
+        const second = await post(ownerToken, channel.id, 'two');
+        await post(ownerToken, channel.id, 'three');
+
+        await request(server())
+          .put(`/rooms/${channel.id}/receipt`)
+          .set('Authorization', `Bearer ${await login('erin')}`)
+          .send({ seq: second.seq })
+          .expect(200);
+
+        expect(await unreadOf('erin', channel.id)).toBe(1);
+      });
+
+      it('excludes the caller own messages', async () => {
+        const { ownerToken, channel } = await setup('unread-own');
+        await join('erin', channel.id);
+        await post(await login('erin'), channel.id, 'mine');
+        await post(ownerToken, channel.id, 'theirs');
+
+        expect(await unreadOf('erin', channel.id)).toBe(1);
+      });
+
+      it('excludes a redacted message', async () => {
+        const { ownerToken, channel } = await setup('unread-redacted');
+        await join('erin', channel.id);
+        await post(ownerToken, channel.id, 'kept');
+        const removed = await post(ownerToken, channel.id, 'removed');
+        await request(server())
+          .delete(`/rooms/${channel.id}/messages/${removed.id}`)
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .expect(204);
+
+        expect(await unreadOf('erin', channel.id)).toBe(1);
+      });
+
+      it('caps the count at 100', async () => {
+        const { ownerToken, channel } = await setup('unread-cap');
+        await join('erin', channel.id);
+        for (let i = 0; i < 101; i += 1) {
+          await post(ownerToken, channel.id, `message ${i}`);
+        }
+
+        expect(await unreadOf('erin', channel.id)).toBe(100);
+      });
+
+      it('is null for a context room', async () => {
+        const { ownerToken, space, channel } = await setup('unread-context');
+        await post(ownerToken, channel.id, 'hello');
+        await join('erin', channel.id);
+
+        const items = await listRooms(await login('erin'));
+        expect(items.find((i) => i.id === space.id)).toMatchObject({
+          access: 'context',
+          unreadCount: null,
+        });
+      });
+
+      it('counts an inherited room since the space membership began', async () => {
+        const { ownerToken, space, channel } = await setup('unread-inherited');
+        await request(server())
+          .patch(`/rooms/${space.id}`)
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .send({ visibility: 'public' })
+          .expect(200);
+        await post(ownerToken, channel.id, 'before');
+        await join('carol', space.id);
+        await post(ownerToken, channel.id, 'after');
+
+        const item = (await listRooms(await login('carol'))).find((i) => i.id === channel.id);
+        expect(item).toMatchObject({ access: 'inherited', unreadCount: 1 });
+
+        await request(server())
+          .put(`/rooms/${channel.id}/receipt`)
+          .set('Authorization', `Bearer ${await login('carol')}`)
+          .send({ seq: (await post(ownerToken, channel.id, 'latest')).seq })
+          .expect(200);
+        expect(await unreadOf('carol', channel.id)).toBe(0);
+      });
+
+      it('resets the baseline when the caller rejoins', async () => {
+        const { ownerToken, channel } = await setup('unread-rejoin');
+        await join('erin', channel.id);
+        await post(ownerToken, channel.id, 'while a member');
+        expect(await unreadOf('erin', channel.id)).toBe(1);
+
+        await request(server())
+          .post(`/rooms/${channel.id}/leave`)
+          .set('Authorization', `Bearer ${await login('erin')}`)
+          .expect(204);
+        await post(ownerToken, channel.id, 'while away');
+        await join('erin', channel.id);
+
+        expect(await unreadOf('erin', channel.id)).toBe(0);
+      });
     });
   });
 });

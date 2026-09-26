@@ -55,6 +55,20 @@ export class EffectiveMembersQuery {
       .sort((a, b) => (a.userId < b.userId ? -1 : 1));
   }
 
+  /** Whether `userId` holds a membership on the room or on one of its ancestor spaces. */
+  async isMember(roomId: string, userId: string): Promise<boolean> {
+    const ancestors = (await this.prisma.orm.public.RoomClosure.where({
+      descendantId: roomId,
+    }).all()) as Array<{ ancestorId: string }>;
+    const roomIds = [roomId, ...ancestors.map((row) => row.ancestorId)];
+
+    const membership = (await this.prisma.orm.public.Membership.where((f) => f.roomId.in(roomIds))
+      .where({ userId })
+      .first()) as unknown;
+
+    return membership !== null && membership !== undefined;
+  }
+
   /** `limit + 1` rows ordered by `userId`, strictly after `afterUserId` when given. */
   async listPage(
     roomId: string,

@@ -22,6 +22,7 @@ export type {
   MessagesResource,
   SendMessageBody,
 } from './resources/messages.js';
+export type { ReceiptsResource } from './resources/receipts.js';
 export type { RoomInvitationsResource } from './resources/room-invitations.js';
 export type {
   ListJoinRequestsParams,
@@ -103,6 +104,7 @@ export type {
   MessageEditedEvent,
   MessageRedactedEvent,
   OtherRoomEventType,
+  ReceiptUpdatedEvent,
   RoomEvent,
   RoomEventBase,
   SyncResponse,
@@ -230,6 +232,7 @@ export type {
   PendingJoinRequest,
   PendingJoinRequestsPage,
   PublicProfileView,
+  ReadMarker,
   RegisterBody,
   RenameSessionBody,
   RequestPasswordResetBody,

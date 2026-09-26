@@ -124,9 +124,15 @@ All notable changes to the Ekoz protocol. Format
   `all`, role and group targets in channels, `PATCH /rooms/:id/messages/:messageId`
   takes `mentions`, `Message.mentionsMe`, `GET /me/mentions` and
   `GET /me/mentions/unread`, and the `message.mention_invalid` error.
+- `RoomListItem.unreadCount` on `GET /rooms` in
+  [`rooms-and-permissions.md`](rooms-and-permissions.md): unread messages since the
+  read marker (or the join), capped at `100`, `null` for `context` rooms.
 
 ### Changed
 
+- Read markers (`PUT` / `GET /rooms/:id/receipt(s)`) are available to effective
+  members, including members inherited from an ancestor space, not only to explicit
+  members.
 - **Breaking.** `Message.mentions` and `message_created.content.mentions` are
   now mention targets `{ type, target, token }` instead of user ids, and
   `POST /rooms/:id/messages` takes target inputs (`{ type: "user", userId }`,

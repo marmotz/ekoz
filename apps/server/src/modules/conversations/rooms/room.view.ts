@@ -136,10 +136,14 @@ export function toRoomPreview(
 export const roomAccessSchema = z.enum(['member', 'inherited', 'context']);
 export type RoomAccess = z.infer<typeof roomAccessSchema>;
 
-/** A `Room` of the caller's tree, with the caller's role on it (`null` for `context`). */
+/** Upper bound of `unreadCount`: `100` means "100 or more". */
+export const UNREAD_COUNT_CAP = 100;
+
+/** A `Room` of the caller's tree, with the caller's role on it (`null` for `context`) and their unread message count (`null` for `context`). */
 export const RoomListItemSchema = RoomViewSchema.extend({
   role: roomRoleSchema.nullable(),
   access: roomAccessSchema,
+  unreadCount: z.number().int().min(0).max(UNREAD_COUNT_CAP).nullable(),
 });
 export type RoomListItem = z.infer<typeof RoomListItemSchema>;
 
@@ -150,6 +154,7 @@ export class RoomListViewDto extends createZodDto(RoomListViewSchema) {}
 export interface RoomListItemRow extends Omit<RoomRow, 'deletedAt'> {
   role: z.infer<typeof roomRoleSchema> | null;
   access: RoomAccess;
+  unreadCount: number | null;
 }
 
 export function toRoomListItem(row: RoomListItemRow): RoomListItem {
@@ -157,5 +162,6 @@ export function toRoomListItem(row: RoomListItemRow): RoomListItem {
     ...toRoomView({ ...row, deletedAt: null }),
     role: row.role,
     access: row.access,
+    unreadCount: row.unreadCount,
   };
 }

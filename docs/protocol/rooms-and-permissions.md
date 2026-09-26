@@ -103,6 +103,11 @@ authentication. `dm` / `group_dm` rooms and deleted rooms are left out.
     [Permissions](#permissions)).
   - `context`: an ancestor space the caller does not belong to, listed only to
     place a `member` or `inherited` room in the tree; `role` is `null`.
+- `unreadCount: integer | null`: the number of `message_created` events sent by
+  someone else since the caller's [read marker](messages-and-interactions.md#read-markers),
+  or since the caller joined when there is no marker (a rejoin resets that
+  baseline). Redacted messages are not counted. Capped at `100`, meaning "100 or
+  more". `null` for `context` rooms.
 - Known limitation: overrides are not evaluated. An `inherited` room with a
   `room.read` deny override is listed, while `GET /rooms/:id` answers `403`.
 

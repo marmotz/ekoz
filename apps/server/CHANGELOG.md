@@ -14,9 +14,11 @@ that does not touch this file.
 - Messages can mention everyone, a role or a group in channels; mentions carry a frozen token and audience, and editing a message can change them. (#173)
 - Messages report `mentionsMe` for the caller. (#173)
 - `GET /me/mentions/unread` and `GET /me/mentions` list unread mention counters and the messages that mention the caller. (#174)
+- `GET /rooms` items carry `unreadCount`, the unread messages since the read marker or the join. (#219)
 
 ### Changed
 
+- Read markers can be set and listed by members inherited from an ancestor space. (#218)
 - Breaking: message `mentions` are now `{ type, target, token }` targets instead of user ids. (#173)
 - A member of the parent space can be mentioned in one of its channels. (#173)
 

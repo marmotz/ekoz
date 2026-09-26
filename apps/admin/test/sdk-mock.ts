@@ -127,6 +127,10 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       addMember: vi.fn(),
       removeMember: vi.fn(),
     },
+    receipts: {
+      set: vi.fn(),
+      list: vi.fn(),
+    },
     sync: {
       get: vi.fn(),
     },

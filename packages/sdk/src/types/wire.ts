@@ -59,6 +59,7 @@ export type {
   PendingJoinRequestListViewDtoItemsDto as PendingJoinRequest,
   PendingJoinRequestListViewDtoItemsUserDto as UserSummary,
   PublicProfileViewDtoDto as PublicProfileView,
+  ReadMarkerViewDtoDto as ReadMarker,
   RegisterDtoDto as RegisterBody,
   RenameSessionDtoDto as RenameSessionBody,
   RequestPasswordResetDtoDto as RequestPasswordResetBody,

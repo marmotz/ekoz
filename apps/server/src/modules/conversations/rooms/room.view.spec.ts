@@ -48,16 +48,44 @@ describe('toRoomListItem', () => {
   };
 
   it('serialises the room and keeps the role and access', () => {
-    const item = toRoomListItem({ ...listRow, role: 'moderator', access: 'inherited' });
+    const item = toRoomListItem({
+      ...listRow,
+      role: 'moderator',
+      access: 'inherited',
+      unreadCount: 7,
+    });
 
-    expect(item).toMatchObject({ lastSeq: '12', role: 'moderator', access: 'inherited' });
+    expect(item).toMatchObject({
+      lastSeq: '12',
+      role: 'moderator',
+      access: 'inherited',
+      unreadCount: 7,
+    });
     expect(item).not.toHaveProperty('deletedAt');
     expect(RoomListItemSchema.parse(item)).toEqual(item);
   });
 
   it('allows a null role for a context room', () => {
-    const item = toRoomListItem({ ...listRow, type: 'space', role: null, access: 'context' });
+    const item = toRoomListItem({
+      ...listRow,
+      type: 'space',
+      role: null,
+      access: 'context',
+      unreadCount: null,
+    });
 
-    expect(RoomListItemSchema.parse(item)).toMatchObject({ role: null, access: 'context' });
+    expect(RoomListItemSchema.parse(item)).toMatchObject({
+      role: null,
+      access: 'context',
+      unreadCount: null,
+    });
+  });
+
+  it('rejects an unread count above the cap or below zero', () => {
+    const item = toRoomListItem({ ...listRow, role: 'member', access: 'member', unreadCount: 0 });
+
+    expect(RoomListItemSchema.safeParse({ ...item, unreadCount: 100 }).success).toBe(true);
+    expect(RoomListItemSchema.safeParse({ ...item, unreadCount: 101 }).success).toBe(false);
+    expect(RoomListItemSchema.safeParse({ ...item, unreadCount: -1 }).success).toBe(false);
   });
 });
