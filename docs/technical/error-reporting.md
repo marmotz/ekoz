@@ -32,6 +32,11 @@ Two consumers:
   instead of the bare outer message, with the stack still attached. The HTTP response is unchanged: it stays a generic
   `internal_error` problem, details never leave the server.
 
+- **Boot retry** (`waitForDatabase`, `core/prisma/wait-for-database.ts`): before `NestFactory.create`, a probe
+  (`connect` + `SELECT 1`) is retried 3 times after 1s, 5s and 10s, each retry logged to stderr, only while the
+  failure is a network error. Other failures (credentials, stale schema) fail at once. `NestFactory.create` uses
+  `autoFlushLogs: false` so Nest's buffered `ExceptionHandler` error is never printed on a failed boot.
+
 ## Alternatives
 
 - **Patch each service** to catch its own database error: repeated in every hook, and misses errors nobody thought of.

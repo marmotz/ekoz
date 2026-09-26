@@ -180,6 +180,138 @@ describe('conversations — messages (integration)', () => {
       .expect(404);
   });
 
+  describe('reactions on messages and pins embedding the message', () => {
+    const react = (token: string, messageId: string, emoji: string) =>
+      request(server())
+        .put(`/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`)
+        .set('Authorization', `Bearer ${token}`);
+    const send = async (token: string, roomId: string, body: string) =>
+      (
+        await request(server())
+          .post(`/rooms/${roomId}/messages`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ body })
+          .expect(201)
+      ).body;
+
+    it('groups reactions by emoji in order of first reaction on list, get, send and edit', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const ownerId = (await accounts.findByIdentifier('owner'))!.id;
+      const aliceId = (await accounts.findByIdentifier('alice'))!.id;
+      const channel = await createPublicChannel(ownerToken, 'reactions-room');
+      await request(server())
+        .post(`/rooms/${channel.id}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+
+      const message = await send(ownerToken, channel.id, 'react to me');
+      const plain = await send(ownerToken, channel.id, 'no reactions');
+      expect(message.reactions).toEqual([]);
+
+      await react(ownerToken, message.id, '👍').expect(204);
+      await react(aliceToken, message.id, '🎉').expect(204);
+      await react(aliceToken, message.id, '👍').expect(204);
+
+      const list = await request(server())
+        .get(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      const listed = list.body.items.find((m: { id: string }) => m.id === message.id);
+      expect(listed.reactions.map((r: { emoji: string }) => r.emoji)).toEqual(['👍', '🎉']);
+      expect(listed.reactions[0].userIds).toEqual([ownerId, aliceId]);
+      expect(listed.reactions[1]).toEqual({ emoji: '🎉', userIds: [aliceId] });
+      expect(list.body.items.find((m: { id: string }) => m.id === plain.id).reactions).toEqual([]);
+
+      const got = await request(server())
+        .get(`/rooms/${channel.id}/messages/${message.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      expect(got.body.reactions).toEqual(listed.reactions);
+
+      const edited = await request(server())
+        .patch(`/rooms/${channel.id}/messages/${message.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ body: 'react to me, edited' })
+        .expect(200);
+      expect(edited.body.reactions).toEqual(listed.reactions);
+    });
+
+    it('returns no reactions once the message is deleted, and refuses pin and react on it', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'redacted-actions-room');
+      const message = await send(ownerToken, channel.id, 'soon gone');
+      await react(ownerToken, message.id, '👍').expect(204);
+
+      await request(server())
+        .delete(`/rooms/${channel.id}/messages/${message.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const list = await request(server())
+        .get(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      const tombstone = list.body.items.find((m: { id: string }) => m.id === message.id);
+      expect(tombstone.redactedAt).not.toBeNull();
+      expect(tombstone.reactions).toEqual([]);
+
+      const pin = await request(server())
+        .put(`/rooms/${channel.id}/pins/${message.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(404);
+      expect(pin.body.code).toBe('message.not_found');
+
+      const reaction = await react(ownerToken, message.id, '🎉').expect(404);
+      expect(reaction.body.code).toBe('message.not_found');
+    });
+
+    it('embeds the message, its reactions and mentions in every pin, newest pin first', async () => {
+      const ownerToken = await login('owner');
+      const ownerId = (await accounts.findByIdentifier('owner'))!.id;
+      const channel = await createPublicChannel(ownerToken, 'pins-embed-room');
+      const first = await send(ownerToken, channel.id, 'first');
+      const second = await send(ownerToken, channel.id, 'second');
+      const doomed = await send(ownerToken, channel.id, 'doomed');
+      await react(ownerToken, first.id, '👍').expect(204);
+
+      const pinned = await request(server())
+        .put(`/rooms/${channel.id}/pins/${first.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      expect(pinned.body.message).toMatchObject({
+        id: first.id,
+        body: 'first',
+        reactions: [{ emoji: '👍', userIds: [ownerId] }],
+      });
+
+      for (const id of [second.id, doomed.id]) {
+        await request(server())
+          .put(`/rooms/${channel.id}/pins/${id}`)
+          .set('Authorization', `Bearer ${ownerToken}`)
+          .expect(200);
+      }
+      await request(server())
+        .delete(`/rooms/${channel.id}/messages/${doomed.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(204);
+
+      const list = await request(server())
+        .get(`/rooms/${channel.id}/pins`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      expect(list.body.map((p: { messageId: string }) => p.messageId)).toEqual([
+        second.id,
+        first.id,
+      ]);
+      expect(list.body.map((p: { message: { body: string } }) => p.message.body)).toEqual([
+        'second',
+        'first',
+      ]);
+      expect(list.body[1].message.reactions).toEqual([{ emoji: '👍', userIds: [ownerId] }]);
+    });
+  });
+
   it('rejects posting in a read-only room without room.edit_any', async () => {
     const ownerToken = await login('owner');
     const aliceToken = await login('alice');

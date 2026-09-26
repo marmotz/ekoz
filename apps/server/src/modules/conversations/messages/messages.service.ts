@@ -26,7 +26,14 @@ import {
   toMentionTarget,
 } from './mention.types.js';
 import { MentionResolver, type ResolvedMention } from './mention-resolver.js';
-import { type MessageRow, type MessageView, toMessageView } from './message.view.js';
+import {
+  groupReactions,
+  type MessageReaction,
+  type MessageRow,
+  type MessageView,
+  type ReactionRow,
+  toMessageView,
+} from './message.view.js';
 import type { EditMessage, ListMessagesQuery, MessagePage, SendMessage } from './messages.dto.js';
 import type { MessagePinRow, MessagePinView } from './pin.view.js';
 import { RestrictedMarkdownError, validateRestrictedMarkdown } from './restricted-markdown.js';
@@ -201,8 +208,14 @@ export class MessagesService {
 
     const targets = await this.loadTargets(messageId);
     const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
+    const reactions = await this.reactionsForMany([messageId]);
 
-    return toMessageView(updated, targets.map(toMentionTarget), mentionsMe.get(messageId) ?? null);
+    return toMessageView(
+      updated,
+      targets.map(toMentionTarget),
+      mentionsMe.get(messageId) ?? null,
+      reactions.get(messageId) ?? [],
+    );
   }
 
   /**
@@ -282,8 +295,8 @@ export class MessagesService {
    * pages are the newest `limit` messages with `seq < before`; `after` is the
    * oldest `limit` messages with `seq > after`; `around` is `floor(limit/2)`
    * messages before `seq` plus the rest from `seq` on. `lastSeq` is read first
-   * so the page is at least as recent as it; mentions are loaded in one query
-   * for the whole page. `hasMore` means "older messages exist", `hasMoreNewer`
+   * so the page is at least as recent as it; mentions and reactions are loaded in one
+   * query each for the whole page. `hasMore` means "older messages exist", `hasMoreNewer`
    * "newer messages exist" (always `false` for the default and `before` pages).
    */
   async listMessages(
@@ -317,10 +330,18 @@ export class MessagesService {
     const ids = window.items.map((row) => row.id);
     const mentionsByMessage = await this.targetsForMany(ids);
     const mentionsMe = await this.mentionsMeFor(actor.userId, ids);
+    const reactionsByMessage = await this.reactionsForMany(
+      window.items.filter((row) => !row.redactedAt).map((row) => row.id),
+    );
 
     return {
       items: window.items.map((row) =>
-        toMessageView(row, mentionsByMessage.get(row.id) ?? [], mentionsMe.get(row.id) ?? null),
+        toMessageView(
+          row,
+          mentionsByMessage.get(row.id) ?? [],
+          mentionsMe.get(row.id) ?? null,
+          reactionsByMessage.get(row.id) ?? [],
+        ),
       ),
       lastSeq: room.lastSeq.toString(),
       hasMore: window.hasMore,
@@ -400,8 +421,14 @@ export class MessagesService {
     const message = await this.findMessageOrThrow(roomId, messageId);
     const mentions = (await this.loadTargets(messageId)).map(toMentionTarget);
     const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
+    const reactions = message.redactedAt ? new Map() : await this.reactionsForMany([messageId]);
 
-    return toMessageView(message, mentions, mentionsMe.get(messageId) ?? null);
+    return toMessageView(
+      message,
+      mentions,
+      mentionsMe.get(messageId) ?? null,
+      reactions.get(messageId) ?? [],
+    );
   }
 
   async pin(
@@ -410,7 +437,10 @@ export class MessagesService {
     messageId: string,
   ): Promise<MessagePinView> {
     await this.permissions.assertCan(actor, roomId, 'room.pin');
-    await this.findMessageOrThrow(roomId, messageId);
+    const message = await this.findMessageOrThrow(roomId, messageId);
+    if (message.redactedAt) {
+      throw new MessageNotFoundError();
+    }
 
     const existing = (await this.prisma.orm.public.MessagePin.where({
       roomId,
@@ -420,8 +450,8 @@ export class MessagesService {
       throw new MessageAlreadyPinnedError();
     }
 
-    const pin = await this.prisma.transaction(async (tx) => {
-      const row = (await tx.orm.public.MessagePin.create({
+    const row = await this.prisma.transaction(async (tx) => {
+      const created = (await tx.orm.public.MessagePin.create({
         roomId,
         messageId,
         pinnedById: actor.userId,
@@ -434,10 +464,12 @@ export class MessagesService {
         content: { messageId },
       });
 
-      return row;
+      return created;
     });
 
-    return pin;
+    const [view] = await this.toViews(actor.userId, [message]);
+
+    return { ...row, message: view as MessageView };
   }
 
   async unpin(actor: PermissionPrincipal, roomId: string, messageId: string): Promise<void> {
@@ -468,8 +500,41 @@ export class MessagesService {
     const rows = (await this.prisma.orm.public.MessagePin.where((f) => f.roomId.eq(roomId))
       .orderBy((f) => f.pinnedAt.desc())
       .all()) as MessagePinRow[];
+    if (rows.length === 0) {
+      return [];
+    }
 
-    return rows;
+    const messages = (await this.prisma.orm.public.Message.where((f) =>
+      f.id.in(rows.map((row) => row.messageId)),
+    ).all()) as MessageRow[];
+    const views = new Map(
+      (await this.toViews(actor.userId, messages)).map((view) => [view.id, view]),
+    );
+
+    return rows.flatMap((row) => {
+      const message = views.get(row.messageId);
+
+      return message ? [{ ...row, message }] : [];
+    });
+  }
+
+  /** Views of a set of messages: mentions, `mentionsMe` and reactions in one query each. */
+  private async toViews(viewerId: string, rows: MessageRow[]): Promise<MessageView[]> {
+    const ids = rows.map((row) => row.id);
+    const mentionsByMessage = await this.targetsForMany(ids);
+    const mentionsMe = await this.mentionsMeFor(viewerId, ids);
+    const reactionsByMessage = await this.reactionsForMany(
+      rows.filter((row) => !row.redactedAt).map((row) => row.id),
+    );
+
+    return rows.map((row) =>
+      toMessageView(
+        row,
+        mentionsByMessage.get(row.id) ?? [],
+        mentionsMe.get(row.id) ?? null,
+        reactionsByMessage.get(row.id) ?? [],
+      ),
+    );
   }
 
   /** Rewrite the feed rows of the original event to the same tombstone as the room event row. */
@@ -615,6 +680,22 @@ export class MessagesService {
     }
 
     return byMessage;
+  }
+
+  /**
+   * Reactions of each message, grouped by emoji in order of first appearance
+   * (`createdAt`, then `userId`). One query for the whole set.
+   */
+  private async reactionsForMany(messageIds: string[]): Promise<Map<string, MessageReaction[]>> {
+    if (messageIds.length === 0) {
+      return new Map();
+    }
+
+    const rows = (await this.prisma.orm.public.Reaction.where((f) =>
+      f.messageId.in(messageIds),
+    ).all()) as ReactionRow[];
+
+    return groupReactions(rows);
   }
 
   /**

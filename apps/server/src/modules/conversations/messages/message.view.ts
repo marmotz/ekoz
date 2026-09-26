@@ -8,6 +8,13 @@ import {
   MentionTargetSchema,
 } from './mention.types.js';
 
+/** One emoji and the users who reacted with it, in order of first reaction. */
+export const MessageReactionSchema = z.object({
+  emoji: z.string(),
+  userIds: z.array(z.string()),
+});
+export type MessageReaction = z.infer<typeof MessageReactionSchema>;
+
 /** `Message`, as the API exposes it (technical.md §11). */
 export const MessageViewSchema = z.object({
   id: z.string(),
@@ -18,6 +25,7 @@ export const MessageViewSchema = z.object({
   replyToId: nullableString(),
   mentions: z.array(MentionTargetSchema),
   mentionsMe: MentionsMeSchema.nullable(),
+  reactions: z.array(MessageReactionSchema),
   editedAt: z.iso.datetime().nullable(),
   redactedAt: z.iso.datetime().nullable(),
   hiddenAt: z.iso.datetime().nullable(),
@@ -49,6 +57,7 @@ export function toMessageView(
   row: MessageRow,
   mentions: MentionTarget[],
   mentionsMe: MentionsMe | null = null,
+  reactions: MessageReaction[] = [],
 ): MessageView {
   return {
     id: row.id,
@@ -59,9 +68,42 @@ export function toMessageView(
     replyToId: row.replyToId,
     mentions,
     mentionsMe,
+    reactions,
     editedAt: row.editedAt,
     redactedAt: row.redactedAt,
     hiddenAt: row.hiddenAt,
     createdAt: row.createdAt,
   };
+}
+
+export interface ReactionRow {
+  messageId: string;
+  userId: string;
+  emoji: string;
+  createdAt: string;
+}
+
+/**
+ * Group reaction rows by message, then by emoji in order of first appearance
+ * (`createdAt`, then `userId` as the deterministic tie-break).
+ */
+export function groupReactions(rows: ReactionRow[]): Map<string, MessageReaction[]> {
+  const byMessage = new Map<string, MessageReaction[]>();
+  const ordered = [...rows].sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() ||
+      a.userId.localeCompare(b.userId),
+  );
+  for (const row of ordered) {
+    const groups = byMessage.get(row.messageId) ?? [];
+    const group = groups.find((g) => g.emoji === row.emoji);
+    if (group) {
+      group.userIds.push(row.userId);
+    } else {
+      groups.push({ emoji: row.emoji, userIds: [row.userId] });
+    }
+    byMessage.set(row.messageId, groups);
+  }
+
+  return byMessage;
 }

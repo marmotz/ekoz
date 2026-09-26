@@ -125,4 +125,78 @@ describe('messages resource', () => {
 
     expect(fetchMock.calls[0]?.init?.body).toBe('{"body":"edited"}');
   });
+
+  it('policy() carries the edit window', async () => {
+    const fetchMock = createFetchMock(
+      jsonResponse({ body: { bodyMaxLength: 16000, editWindow: 900 } }),
+    );
+    const messages = await resource(fetchMock);
+
+    await expect(messages.policy()).resolves.toEqual({ bodyMaxLength: 16000, editWindow: 900 });
+  });
+
+  it('delete() DELETEs the message and resolves on 204', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.delete('room1', 'm1')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/rooms/room1/messages/m1');
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
+
+  it('pin() PUTs the pin and returns it with its message', async () => {
+    const pin = { roomId: 'room1', messageId: 'm1', message: { id: 'm1', reactions: [] } };
+    const fetchMock = createFetchMock(jsonResponse({ body: pin }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.pin('room1', 'm1')).resolves.toEqual(pin);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/rooms/room1/pins/m1');
+    expect(fetchMock.calls[0]?.init?.method).toBe('PUT');
+  });
+
+  it('unpin() DELETEs the pin', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.unpin('room1', 'm1')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/rooms/room1/pins/m1');
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
+
+  it('pins() GETs the pins of a room', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: [{ messageId: 'm1' }] }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.pins('room1')).resolves.toEqual([{ messageId: 'm1' }]);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/rooms/room1/pins');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+  });
+
+  it('react() PUTs the reaction with the emoji encoded, outside the room path', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.react('m1', '👍')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe(
+      'https://api.example.com/messages/m1/reactions/%F0%9F%91%8D',
+    );
+    expect(fetchMock.calls[0]?.init?.method).toBe('PUT');
+  });
+
+  it('unreact() DELETEs the reaction with the emoji encoded', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.unreact('m1', '🎉')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe(
+      'https://api.example.com/messages/m1/reactions/%F0%9F%8E%89',
+    );
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
 });

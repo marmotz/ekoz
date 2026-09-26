@@ -3,6 +3,7 @@ import {
   createFatalReporter,
   describeError,
   formatErrorReport,
+  isDatabaseUnreachable,
   isDebugRequested,
   summarizeError,
 } from './error-report.js';
@@ -146,5 +147,15 @@ describe('createFatalReporter (unit)', () => {
     expect(write.mock.calls[0]?.[0]).toContain('first');
     expect(exit).toHaveBeenCalledTimes(1);
     expect(exit).toHaveBeenCalledWith(1);
+  });
+});
+
+describe('isDatabaseUnreachable', () => {
+  it('detects a network error anywhere in the cause chain', () => {
+    expect(isDatabaseUnreachable(connectionRefused())).toBe(true);
+  });
+
+  it('is false for other failures', () => {
+    expect(isDatabaseUnreachable(new Error('boom'))).toBe(false);
   });
 });

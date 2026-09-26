@@ -28,6 +28,9 @@ fixed here first (see
     { "type": "user", "target": "01ARZ3NDEKTSV4RRFFQ69G5FAY", "token": "@bob/ekoz.example.com" }
   ],
   "mentionsMe": "direct",
+  "reactions": [
+    { "emoji": "👍", "userIds": ["01ARZ3NDEKTSV4RRFFQ69G5FAY", "01ARZ3NDEKTSV4RRFFQ69G5FAX"] }
+  ],
   "replyToId": null,
   "editedAt": null,
   "redactedAt": null,
@@ -48,6 +51,14 @@ issue #12).
 mentions them by name, `collective` when it reaches them through `@all`, a role
 or a group, `null` otherwise (and for the author of the message). It is computed
 per request, so it is present on REST responses only and never on events.
+
+`reactions` lists the [reactions](#reactions) on the message, one entry per
+emoji in order of first reaction, each with the ids of the users who reacted, in
+the order they did. A count is `userIds.length`; whether the caller reacted is
+derived by the client. A message with no reaction, a new message and a redacted
+message have `[]`. `message_created` carries no reactions; clients keep them
+current from `reaction_added` and `reaction_removed`, applied idempotently (an
+event may replay a reaction already present in a page).
 
 ## Restricted Markdown
 
@@ -76,10 +87,14 @@ Public and unauthenticated, never cached (`Cache-Control: no-store`). Tells a
 client the limits it can enforce before sending. Read live from the server
 settings, so a change made by the owner shows on the next call.
 
-- `200`: `{ bodyMaxLength }`.
+- `200`: `{ bodyMaxLength, editWindow }`.
   - `bodyMaxLength`: integer, the longest `body` the server accepts, counted in
     UTF-16 code units (`messages.body_max_length`). A longer body is rejected
     with `message.body_too_long`.
+  - `editWindow`: integer or `null`, the seconds after `createdAt` during which
+    an author may edit their own message (`messages.edit_window`); `null` means
+    unlimited. It only applies to `room.edit_own`: `room.edit_any` is not bound
+    by it. The server stays the arbiter of every edit.
 
 ## Mentions
 
@@ -243,9 +258,10 @@ added by an edit counts from the edit.
 
 Needs `room.pin`. Emits `pin_added`.
 
-- `200`: `{ roomId, messageId, pinnedById, pinnedAt }`.
-- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`),
-  `message.already_pinned` (`409`).
+- `200`: `{ roomId, messageId, pinnedById, pinnedAt, message }`, `message`
+  being the pinned [`Message`](#the-message-object).
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`,
+  unknown or redacted message), `message.already_pinned` (`409`).
 
 ### `DELETE /rooms/:id/pins/:messageId`
 
@@ -258,10 +274,13 @@ Needs `room.pin`. Emits `pin_removed`.
 
 Needs `room.read`.
 
-- `200`: `{ roomId, messageId, pinnedById, pinnedAt }[]`, most recently pinned
-  first. Fetch each `Message` separately (`GET
-  /rooms/:id/messages/:messageId`) if the body is needed — this endpoint does
-  not join it.
+- `200`: `{ roomId, messageId, pinnedById, pinnedAt, message }[]`, most
+  recently pinned first, each with its embedded [`Message`](#the-message-object)
+  (mentions and reactions included). A message with `hiddenAt` set is returned
+  as the history returns it; clients filter it. The list is not paginated: a
+  room with thousands of pins returns thousands of messages.
+- Deleting a message removes its pin without emitting `pin_removed`, so a
+  redacted message is never listed here.
 
 ## Reactions
 
@@ -276,11 +295,13 @@ with the same emoji is a conflict, not a no-op.
 
 - `204`.
 - Errors: `room.permission_denied` (`403`), `message.not_found` (`404`,
-  unknown message), `message.reaction_already_exists` (`409`).
+  unknown or redacted message), `message.reaction_already_exists` (`409`).
 
 ### `DELETE /messages/:messageId/reactions/:emoji`
 
-Removes the caller's own reaction. Emits `reaction_removed`.
+Removes the caller's own reaction. Emits `reaction_removed`. Deleting a message
+removes all its reactions without emitting `reaction_removed`; clients clear them
+on `message_deleted` / `message_redacted`.
 
 - `204`.
 - Errors: `room.permission_denied` (`403`), `message.not_found` (`404`),

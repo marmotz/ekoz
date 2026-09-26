@@ -7,6 +7,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Regenerate the API types: messages carry reactions, pins embed their message and the messages policy has the edit window (#207, #208, #209).
 - Show fenced code blocks highlighted in messages, with a language label, auto-detection without a declared language and a copy button (#192).
 - Add a formatting toolbar to the composer (bold, italic, strikethrough, code, quote, lists, link) with shortcuts in tooltips, a help panel and an "Aa" toggle on narrow screens, and make Enter send in lists and code blocks with Shift+Enter as the new line (#193).
 - Add a link popover to the composer, opened by the toolbar or Ctrl/Cmd+K, that only accepts `http`, `https` and `mailto` links and linkifies pasted and typed URLs (#194).

@@ -41,6 +41,9 @@ export type MembershipViewDtoRole = (typeof MembershipViewDtoRole)[number];
 export const MessagePageDtoItemsMentionsType = ["user", "all", "role", "group"] as const;
 export type MessagePageDtoItemsMentionsType = (typeof MessagePageDtoItemsMentionsType)[number];
 
+export const MessagePinViewDtoMessageMentionsType = ["user", "all", "role", "group"] as const;
+export type MessagePinViewDtoMessageMentionsType = (typeof MessagePinViewDtoMessageMentionsType)[number];
+
 export const MessageViewDtoMentionsType = ["user", "all", "role", "group"] as const;
 export type MessageViewDtoMentionsType = (typeof MessageViewDtoMentionsType)[number];
 

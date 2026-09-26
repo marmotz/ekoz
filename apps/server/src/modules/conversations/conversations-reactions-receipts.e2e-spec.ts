@@ -108,6 +108,37 @@ describe('conversations — reactions and receipts (integration)', () => {
       .expect(404);
   });
 
+  it('exposes reactions on the message and refuses to react to a deleted one', async () => {
+    const ownerToken = await login('owner');
+    const ownerId = (await accounts.findByIdentifier('owner'))!.id;
+    const channel = await createPublicChannel(ownerToken, 'react-view-room');
+    const message = await request(server())
+      .post(`/rooms/${channel.id}/messages`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ body: 'react to this' })
+      .expect(201);
+
+    await request(server())
+      .put(`/messages/${message.body.id}/reactions/%F0%9F%91%8D`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
+    const got = await request(server())
+      .get(`/rooms/${channel.id}/messages/${message.body.id}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+    expect(got.body.reactions).toEqual([{ emoji: '👍', userIds: [ownerId] }]);
+
+    await request(server())
+      .delete(`/rooms/${channel.id}/messages/${message.body.id}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
+    const res = await request(server())
+      .put(`/messages/${message.body.id}/reactions/%F0%9F%8E%89`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(404);
+    expect(res.body.code).toBe('message.not_found');
+  });
+
   it('sets a monotonic read marker, visible to participants only', async () => {
     const ownerToken = await login('owner');
     const aliceToken = await login('alice');

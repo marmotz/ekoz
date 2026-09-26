@@ -11,6 +11,7 @@ import {
 } from './core/observability/error-report.js';
 import { NestLoggerService } from './core/observability/nest-logger.service.js';
 import { startTracing } from './core/observability/otel.js';
+import { waitForDatabase } from './core/prisma/wait-for-database.js';
 import { buildOpenApiDocument } from './openapi/document.js';
 
 // Any failure that reaches the process boundary (boot error, stray rejection)
@@ -20,7 +21,17 @@ const reportFatal = createFatalReporter({ title: 'Ekoz server failed to start' }
 installProcessErrorHandlers(reportFatal);
 
 async function main(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true, abortOnError: false });
+  // Tolerate a database that is still starting: retry a few times before Nest boots.
+  await waitForDatabase();
+
+  // `autoFlushLogs: false` keeps Nest's own "ExceptionHandler" dump (buffered until
+  // `useLogger`) from being printed on a failed boot — `reportFatal` prints the
+  // readable report instead.
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    autoFlushLogs: false,
+    abortOnError: false,
+  });
 
   // `enableCors` must run before `app.init()` registers the routes — Express
   // middleware only sees requests that reach it, and a route already matched

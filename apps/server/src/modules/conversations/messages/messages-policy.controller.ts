@@ -5,9 +5,9 @@ import { Public } from '../../../core/http/public.decorator.js';
 import { type MessagesPolicyBody, MessagesPolicyDto } from './messages-policy.dto.js';
 
 /**
- * Public messages policy probe. The limit is hot-reloadable, so it is read from
+ * Public messages policy probe. The limits are hot-reloadable, so it is read from
  * {@link ConfigService} on every call and never cached (`no-store`). Nothing
- * secret is exposed: the limit is observable by sending a long message.
+ * secret is exposed: both limits are observable by sending or editing a message.
  */
 @ApiTags('Conversations — messages')
 @Controller('messages/policy')
@@ -17,9 +17,12 @@ export class MessagesPolicyController {
   @Get()
   @Public()
   @Header('Cache-Control', 'no-store')
-  @ApiOperation({ summary: 'Limits applied to message bodies.' })
+  @ApiOperation({ summary: 'Limits applied to message bodies and edits.' })
   @ApiOkResponse({ type: MessagesPolicyDto })
   policy(): MessagesPolicyBody {
-    return { bodyMaxLength: this.config.get('messages.body_max_length') };
+    return {
+      bodyMaxLength: this.config.get('messages.body_max_length'),
+      editWindow: this.config.get('messages.edit_window'),
+    };
   }
 }

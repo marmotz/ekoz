@@ -4,36 +4,43 @@ import { z } from 'zod';
 
 export const MessagesPolicyDtoSchema = z.object({
   bodyMaxLength: z.int().min(-9007199254740991).max(9007199254740991),
+  editWindow: z.int().min(-9007199254740991).max(9007199254740991).nullable(),
 });
 export type MessagesPolicyDtoDto = z.infer<typeof MessagesPolicyDtoSchema>;
 
 export const MessagesPolicyDtoDeepSchema = z.object({
   bodyMaxLength: z.int().min(-9007199254740991).max(9007199254740991),
+  editWindow: z.int().min(-9007199254740991).max(9007199254740991).nullable(),
 });
 export type MessagesPolicyDtoDeepDto = z.infer<typeof MessagesPolicyDtoDeepSchema>;
 
 export const MessagesPolicyDtoCreateSchema = z.object({
   bodyMaxLength: z.int().min(-9007199254740991).max(9007199254740991),
+  editWindow: z.int().min(-9007199254740991).max(9007199254740991).nullable(),
 });
 export type MessagesPolicyDtoCreateDto = z.infer<typeof MessagesPolicyDtoCreateSchema>;
 
 export const MessagesPolicyDtoCreateDeepSchema = z.object({
   bodyMaxLength: z.int().min(-9007199254740991).max(9007199254740991),
+  editWindow: z.int().min(-9007199254740991).max(9007199254740991).nullable(),
 });
 export type MessagesPolicyDtoCreateDeepDto = z.infer<typeof MessagesPolicyDtoCreateDeepSchema>;
 
 export const MessagesPolicyDtoUpdateSchema = z.object({
   bodyMaxLength: z.int().min(-9007199254740991).max(9007199254740991),
+  editWindow: z.int().min(-9007199254740991).max(9007199254740991).nullable(),
 }).partial();
 export type MessagesPolicyDtoUpdateDto = z.infer<typeof MessagesPolicyDtoUpdateSchema>;
 
 export const MessagesPolicyDtoUpdateDeepSchema = z.object({
   bodyMaxLength: z.int().min(-9007199254740991).max(9007199254740991),
+  editWindow: z.int().min(-9007199254740991).max(9007199254740991).nullable(),
 }).partial();
 export type MessagesPolicyDtoUpdateDeepDto = z.infer<typeof MessagesPolicyDtoUpdateDeepSchema>;
 
 const MessagesPolicyDtoWhereSchemaBase = z.object({
   bodyMaxLength: IntFilter.optional(),
+  editWindow: IntFilter.optional(),
 });
 export const MessagesPolicyDtoWhereSchema: z.ZodType<MessagesPolicyDtoWhereDto> = z.lazy(() => MessagesPolicyDtoWhereSchemaBase.extend({
   AND: z.union([MessagesPolicyDtoWhereSchema, z.array(MessagesPolicyDtoWhereSchema)]).optional(),
@@ -44,6 +51,7 @@ export type MessagesPolicyDtoWhereDto = z.infer<typeof MessagesPolicyDtoWhereSch
 
 const MessagesPolicyDtoWhereDeepSchemaBase = z.object({
   bodyMaxLength: IntFilter.optional(),
+  editWindow: IntFilter.optional(),
 });
 export const MessagesPolicyDtoWhereDeepSchema: z.ZodType<MessagesPolicyDtoWhereDeepDto> = z.lazy(() => MessagesPolicyDtoWhereDeepSchemaBase.extend({
   AND: z.union([MessagesPolicyDtoWhereDeepSchema, z.array(MessagesPolicyDtoWhereDeepSchema)]).optional(),
@@ -54,10 +62,12 @@ export type MessagesPolicyDtoWhereDeepDto = z.infer<typeof MessagesPolicyDtoWher
 
 export const MessagesPolicyDtoSelectSchema = z.object({
   bodyMaxLength: z.boolean().optional(),
+  editWindow: z.boolean().optional(),
 });
 export type MessagesPolicyDtoSelectDto = z.infer<typeof MessagesPolicyDtoSelectSchema>;
 
 export const MessagesPolicyDtoSelectDeepSchema = z.object({
   bodyMaxLength: z.boolean().optional(),
+  editWindow: z.boolean().optional(),
 });
 export type MessagesPolicyDtoSelectDeepDto = z.infer<typeof MessagesPolicyDtoSelectDeepSchema>;

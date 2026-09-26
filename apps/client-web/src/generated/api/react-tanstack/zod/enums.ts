@@ -57,6 +57,10 @@ export const MessagePageDtoItemsMentionsType = ["user", "all", "role", "group"] 
 export const MessagePageDtoItemsMentionsTypeSchema = z.enum(MessagePageDtoItemsMentionsType);
 export type MessagePageDtoItemsMentionsType = (typeof MessagePageDtoItemsMentionsType)[number];
 
+export const MessagePinViewDtoMessageMentionsType = ["user", "all", "role", "group"] as const;
+export const MessagePinViewDtoMessageMentionsTypeSchema = z.enum(MessagePinViewDtoMessageMentionsType);
+export type MessagePinViewDtoMessageMentionsType = (typeof MessagePinViewDtoMessageMentionsType)[number];
+
 export const MessageViewDtoMentionsType = ["user", "all", "role", "group"] as const;
 export const MessageViewDtoMentionsTypeSchema = z.enum(MessageViewDtoMentionsType);
 export type MessageViewDtoMentionsType = (typeof MessageViewDtoMentionsType)[number];
