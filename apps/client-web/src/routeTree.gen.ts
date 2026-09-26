@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppDmsRouteImport } from './routes/_app/dms'
 import { Route as AppMentionsRouteImport } from './routes/_app/mentions'
 import { Route as AppRoomsRouteImport } from './routes/_app/rooms'
 import { Route as AuthCheckEmailRouteImport } from './routes/_auth/check-email'
@@ -21,11 +22,15 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
+import { Route as AppDmsIndexRouteImport } from './routes/_app/dms/index'
+import { Route as AppDmsRoomIdRouteImport } from './routes/_app/dms/$roomId'
+import { Route as AppDmsNewRouteImport } from './routes/_app/dms/new'
 import { Route as AppRoomsIndexRouteImport } from './routes/_app/rooms/index'
 import { Route as AppRoomsRoomIdRouteImport } from './routes/_app/rooms/$roomId'
 import { Route as AppRoomsDirectoryRouteImport } from './routes/_app/rooms/directory'
 import { Route as AppRoomsInvitationsRouteImport } from './routes/_app/rooms/invitations'
 import { Route as AppRoomsNewRouteImport } from './routes/_app/rooms/new'
+import { Route as AppDmsRoomIdSettingsRouteImport } from './routes/_app/dms/$roomId/settings'
 import { Route as AppRoomsRoomIdGroupsRouteImport } from './routes/_app/rooms/$roomId/groups'
 import { Route as AppRoomsRoomIdRequestsRouteImport } from './routes/_app/rooms/$roomId/requests'
 
@@ -45,6 +50,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAccountRoute = AppAccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDmsRoute = AppDmsRouteImport.update({
+  id: '/dms',
+  path: '/dms',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMentionsRoute = AppMentionsRouteImport.update({
@@ -87,6 +97,21 @@ const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppDmsIndexRoute = AppDmsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppDmsRoute,
+} as any)
+const AppDmsRoomIdRoute = AppDmsRoomIdRouteImport.update({
+  id: '/$roomId',
+  path: '/$roomId',
+  getParentRoute: () => AppDmsRoute,
+} as any)
+const AppDmsNewRoute = AppDmsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppDmsRoute,
+} as any)
 const AppRoomsIndexRoute = AppRoomsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -112,6 +137,11 @@ const AppRoomsNewRoute = AppRoomsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AppRoomsRoute,
 } as any)
+const AppDmsRoomIdSettingsRoute = AppDmsRoomIdSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppDmsRoomIdRoute,
+} as any)
 const AppRoomsRoomIdGroupsRoute = AppRoomsRoomIdGroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
@@ -126,6 +156,7 @@ const AppRoomsRoomIdRequestsRoute = AppRoomsRoomIdRequestsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/account': typeof AppAccountRoute
+  '/dms': typeof AppDmsRouteWithChildren
   '/mentions': typeof AppMentionsRoute
   '/rooms': typeof AppRoomsRouteWithChildren
   '/check-email': typeof AuthCheckEmailRoute
@@ -134,11 +165,15 @@ export interface FileRoutesByFullPath {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/dms/$roomId': typeof AppDmsRoomIdRouteWithChildren
+  '/dms/new': typeof AppDmsNewRoute
   '/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
   '/rooms/directory': typeof AppRoomsDirectoryRoute
   '/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/rooms/new': typeof AppRoomsNewRoute
+  '/dms/': typeof AppDmsIndexRoute
   '/rooms/': typeof AppRoomsIndexRoute
+  '/dms/$roomId/settings': typeof AppDmsRoomIdSettingsRoute
   '/rooms/$roomId/groups': typeof AppRoomsRoomIdGroupsRoute
   '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
@@ -152,11 +187,15 @@ export interface FileRoutesByTo {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/dms/$roomId': typeof AppDmsRoomIdRouteWithChildren
+  '/dms/new': typeof AppDmsNewRoute
   '/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
   '/rooms/directory': typeof AppRoomsDirectoryRoute
   '/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/rooms/new': typeof AppRoomsNewRoute
+  '/dms': typeof AppDmsIndexRoute
   '/rooms': typeof AppRoomsIndexRoute
+  '/dms/$roomId/settings': typeof AppDmsRoomIdSettingsRoute
   '/rooms/$roomId/groups': typeof AppRoomsRoomIdGroupsRoute
   '/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
@@ -165,6 +204,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_app/account': typeof AppAccountRoute
+  '/_app/dms': typeof AppDmsRouteWithChildren
   '/_app/mentions': typeof AppMentionsRoute
   '/_app/rooms': typeof AppRoomsRouteWithChildren
   '/_auth/check-email': typeof AuthCheckEmailRoute
@@ -174,11 +214,15 @@ export interface FileRoutesById {
   '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/dms/$roomId': typeof AppDmsRoomIdRouteWithChildren
+  '/_app/dms/new': typeof AppDmsNewRoute
   '/_app/rooms/$roomId': typeof AppRoomsRoomIdRouteWithChildren
   '/_app/rooms/directory': typeof AppRoomsDirectoryRoute
   '/_app/rooms/invitations': typeof AppRoomsInvitationsRoute
   '/_app/rooms/new': typeof AppRoomsNewRoute
+  '/_app/dms/': typeof AppDmsIndexRoute
   '/_app/rooms/': typeof AppRoomsIndexRoute
+  '/_app/dms/$roomId/settings': typeof AppDmsRoomIdSettingsRoute
   '/_app/rooms/$roomId/groups': typeof AppRoomsRoomIdGroupsRoute
   '/_app/rooms/$roomId/requests': typeof AppRoomsRoomIdRequestsRoute
 }
@@ -187,6 +231,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/account'
+    | '/dms'
     | '/mentions'
     | '/rooms'
     | '/check-email'
@@ -195,11 +240,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/dms/$roomId'
+    | '/dms/new'
     | '/rooms/$roomId'
     | '/rooms/directory'
     | '/rooms/invitations'
     | '/rooms/new'
+    | '/dms/'
     | '/rooms/'
+    | '/dms/$roomId/settings'
     | '/rooms/$roomId/groups'
     | '/rooms/$roomId/requests'
   fileRoutesByTo: FileRoutesByTo
@@ -213,11 +262,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/dms/$roomId'
+    | '/dms/new'
     | '/rooms/$roomId'
     | '/rooms/directory'
     | '/rooms/invitations'
     | '/rooms/new'
+    | '/dms'
     | '/rooms'
+    | '/dms/$roomId/settings'
     | '/rooms/$roomId/groups'
     | '/rooms/$roomId/requests'
   id:
@@ -225,6 +278,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_auth'
     | '/_app/account'
+    | '/_app/dms'
     | '/_app/mentions'
     | '/_app/rooms'
     | '/_auth/check-email'
@@ -234,11 +288,15 @@ export interface FileRouteTypes {
     | '/_auth/reset-password'
     | '/_auth/verify-email'
     | '/_app/'
+    | '/_app/dms/$roomId'
+    | '/_app/dms/new'
     | '/_app/rooms/$roomId'
     | '/_app/rooms/directory'
     | '/_app/rooms/invitations'
     | '/_app/rooms/new'
+    | '/_app/dms/'
     | '/_app/rooms/'
+    | '/_app/dms/$roomId/settings'
     | '/_app/rooms/$roomId/groups'
     | '/_app/rooms/$roomId/requests'
   fileRoutesById: FileRoutesById
@@ -276,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dms': {
+      id: '/_app/dms'
+      path: '/dms'
+      fullPath: '/dms'
+      preLoaderRoute: typeof AppDmsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/mentions': {
@@ -334,6 +399,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthVerifyEmailRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/dms/': {
+      id: '/_app/dms/'
+      path: '/'
+      fullPath: '/dms/'
+      preLoaderRoute: typeof AppDmsIndexRouteImport
+      parentRoute: typeof AppDmsRoute
+    }
+    '/_app/dms/$roomId': {
+      id: '/_app/dms/$roomId'
+      path: '/$roomId'
+      fullPath: '/dms/$roomId'
+      preLoaderRoute: typeof AppDmsRoomIdRouteImport
+      parentRoute: typeof AppDmsRoute
+    }
+    '/_app/dms/new': {
+      id: '/_app/dms/new'
+      path: '/new'
+      fullPath: '/dms/new'
+      preLoaderRoute: typeof AppDmsNewRouteImport
+      parentRoute: typeof AppDmsRoute
+    }
     '/_app/rooms/': {
       id: '/_app/rooms/'
       path: '/'
@@ -369,6 +455,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoomsNewRouteImport
       parentRoute: typeof AppRoomsRoute
     }
+    '/_app/dms/$roomId/settings': {
+      id: '/_app/dms/$roomId/settings'
+      path: '/settings'
+      fullPath: '/dms/$roomId/settings'
+      preLoaderRoute: typeof AppDmsRoomIdSettingsRouteImport
+      parentRoute: typeof AppDmsRoomIdRoute
+    }
     '/_app/rooms/$roomId/groups': {
       id: '/_app/rooms/$roomId/groups'
       path: '/groups'
@@ -385,6 +478,33 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppDmsRoomIdRouteChildren {
+  AppDmsRoomIdSettingsRoute: typeof AppDmsRoomIdSettingsRoute
+}
+
+const AppDmsRoomIdRouteChildren: AppDmsRoomIdRouteChildren = {
+  AppDmsRoomIdSettingsRoute: AppDmsRoomIdSettingsRoute,
+}
+
+const AppDmsRoomIdRouteWithChildren = AppDmsRoomIdRoute._addFileChildren(
+  AppDmsRoomIdRouteChildren,
+)
+
+interface AppDmsRouteChildren {
+  AppDmsRoomIdRoute: typeof AppDmsRoomIdRouteWithChildren
+  AppDmsNewRoute: typeof AppDmsNewRoute
+  AppDmsIndexRoute: typeof AppDmsIndexRoute
+}
+
+const AppDmsRouteChildren: AppDmsRouteChildren = {
+  AppDmsRoomIdRoute: AppDmsRoomIdRouteWithChildren,
+  AppDmsNewRoute: AppDmsNewRoute,
+  AppDmsIndexRoute: AppDmsIndexRoute,
+}
+
+const AppDmsRouteWithChildren =
+  AppDmsRoute._addFileChildren(AppDmsRouteChildren)
 
 interface AppRoomsRoomIdRouteChildren {
   AppRoomsRoomIdGroupsRoute: typeof AppRoomsRoomIdGroupsRoute
@@ -422,6 +542,7 @@ const AppRoomsRouteWithChildren = AppRoomsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
+  AppDmsRoute: typeof AppDmsRouteWithChildren
   AppMentionsRoute: typeof AppMentionsRoute
   AppRoomsRoute: typeof AppRoomsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
@@ -429,6 +550,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
+  AppDmsRoute: AppDmsRouteWithChildren,
   AppMentionsRoute: AppMentionsRoute,
   AppRoomsRoute: AppRoomsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,

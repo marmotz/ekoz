@@ -173,6 +173,18 @@ export class DmSelfError extends DomainError {
   }
 }
 
+export class UserNotFoundError extends DomainError {
+  constructor(detail = 'One of the users does not exist or is not active.') {
+    super('room.user_not_found', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class GroupFullError extends DomainError {
+  constructor(detail = 'This group conversation has reached its maximum number of members.') {
+    super('room.group_full', detail, 422, 'Unprocessable Entity');
+  }
+}
+
 export class ReactionAlreadyExistsError extends DomainError {
   constructor(detail = 'You already reacted with this emoji.') {
     super('message.reaction_already_exists', detail, 409, 'Conflict');

@@ -5,6 +5,10 @@ export const AccountViewDtoStatus = ["active", "suspended", "deleted"] as const;
 export const AccountViewDtoStatusSchema = z.enum(AccountViewDtoStatus);
 export type AccountViewDtoStatus = (typeof AccountViewDtoStatus)[number];
 
+export const AddGroupDmMembersDtoHistory = ["full", "none"] as const;
+export const AddGroupDmMembersDtoHistorySchema = z.enum(AddGroupDmMembersDtoHistory);
+export type AddGroupDmMembersDtoHistory = (typeof AddGroupDmMembersDtoHistory)[number];
+
 export const AdminUserDetailDtoStatus = ["active", "suspended", "deleted"] as const;
 export const AdminUserDetailDtoStatusSchema = z.enum(AdminUserDetailDtoStatus);
 export type AdminUserDetailDtoStatus = (typeof AdminUserDetailDtoStatus)[number];
@@ -16,6 +20,18 @@ export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseD
 export const AuthPolicyDtoRegistrationMode = ["open", "invite", "admin"] as const;
 export const AuthPolicyDtoRegistrationModeSchema = z.enum(AuthPolicyDtoRegistrationMode);
 export type AuthPolicyDtoRegistrationMode = (typeof AuthPolicyDtoRegistrationMode)[number];
+
+export const ConversationListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
+export const ConversationListResponseDtoItemsDefaultRoleSchema = z.enum(ConversationListResponseDtoItemsDefaultRole);
+export type ConversationListResponseDtoItemsDefaultRole = (typeof ConversationListResponseDtoItemsDefaultRole)[number];
+
+export const ConversationListResponseDtoItemsType = ["space", "channel", "dm", "group_dm"] as const;
+export const ConversationListResponseDtoItemsTypeSchema = z.enum(ConversationListResponseDtoItemsType);
+export type ConversationListResponseDtoItemsType = (typeof ConversationListResponseDtoItemsType)[number];
+
+export const ConversationListResponseDtoItemsVisibility = ["public", "private", "invite"] as const;
+export const ConversationListResponseDtoItemsVisibilitySchema = z.enum(ConversationListResponseDtoItemsVisibility);
+export type ConversationListResponseDtoItemsVisibility = (typeof ConversationListResponseDtoItemsVisibility)[number];
 
 export const CreateChannelDtoVisibility = ["public", "private", "invite"] as const;
 export const CreateChannelDtoVisibilitySchema = z.enum(CreateChannelDtoVisibility);

@@ -23,6 +23,13 @@ that does not touch this file.
 - Messages carry their reactions, grouped by emoji. (#207)
 - `GET /messages/policy` also exposes the edit window. (#208)
 - Pins embed the pinned message. (#209)
+- `GET /me/conversations` lists the caller's direct and group conversations with their participants. (#171)
+- `GET /me/conversations` lists a group conversation for every member from its creation, before any message. (#171)
+- `GET /me/contacts` searches the users sharing a room with the caller. (#166)
+- `GET /users/:identifier` returns the user `id`. (#166)
+- Group conversations can be renamed, and their members and admins managed, through `/group-dms/:id`; a group without any admin is deleted. (#172)
+- Members added to a group can be limited to the messages sent after they join. (#172)
+- Deleting a one-to-one conversation hides its past messages from the caller, and it returns with the next message. (#165)
 
 ### Changed
 
@@ -32,12 +39,17 @@ that does not touch this file.
 - Read markers can be set and listed by members inherited from an ancestor space. (#218)
 - Breaking: message `mentions` are now `{ type, target, token }` targets instead of user ids. (#173)
 - A member of the parent space can be mentioned in one of its channels. (#173)
+- Creating a direct or group conversation with an unknown or inactive user answers 422 `room.user_not_found`. (#166)
+- Leaving a group conversation also removes the leaver's admin status. (#172)
+- Opening a direct conversation again brings back one the caller had deleted. (#165)
 
 ### Fixed
 
 - Presence is delivered to the peers of the user instead of the peers of their peers. (#129)
 - Typing signals reach the members of a space reading a channel by inheritance, without a reconnect, and are no longer echoed to the sender. (#129)
 - Pinning or reacting to a deleted message now answers 404. (#207)
+- Changing an existing per-user permission override no longer fails with a 500. (#172)
+- Reading a deleted room answers 404 to everyone, not 403 to former members. (#172)
 - Moving a room now drops all of its outdated ancestor links, not only one.
 - Deleting a message now removes all of its reactions, not only one. (#173)
 - The SMTP transport and the storage driver use the configured `email.*` / `storage.*` values instead of the code defaults: the configuration is loaded before the providers built from it.

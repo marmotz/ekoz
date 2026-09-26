@@ -8,6 +8,10 @@ import { type ClientConfig, normaliseConfig } from './config.js';
 import { Discovery } from './discovery/discovery.js';
 import { type AdminResource, createAdminResource } from './resources/admin.js';
 import { type AuthResource, createAuthResource } from './resources/auth.js';
+import {
+  type ConversationsResource,
+  createConversationsResource,
+} from './resources/conversations.js';
 import { createDirectoryResource, type DirectoryResource } from './resources/directory.js';
 import { createGroupsResource, type GroupsResource } from './resources/groups.js';
 import { createInvitationsResource, type InvitationsResource } from './resources/invitations.js';
@@ -47,6 +51,7 @@ export interface EkozClient {
   invitations: InvitationsResource;
   admin: AdminResource;
   rooms: RoomsResource;
+  conversations: ConversationsResource;
   roomInvitations: RoomInvitationsResource;
   directory: DirectoryResource;
   messages: MessagesResource;
@@ -115,6 +120,7 @@ export function createClient(config: ClientConfig): EkozClient {
     invitations: createInvitationsResource(session),
     admin: createAdminResource(session),
     rooms: createRoomsResource(session),
+    conversations: createConversationsResource(session),
     roomInvitations: createRoomInvitationsResource(session),
     directory: createDirectoryResource(session),
     messages: createMessagesResource(session),

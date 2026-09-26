@@ -3,6 +3,7 @@ import { and } from '@prisma/orm-postgres/orm-client';
 import { ConfigService } from '../../../core/config/config.service.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { RoomNotFoundError } from '../conversations.errors.js';
+import { HistoryFloorService } from '../membership/history-floor.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import type { RoomEventView, SyncQuery, SyncResponse } from './sync.dto.js';
@@ -24,6 +25,7 @@ export class SyncService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly permissions: PermissionsService,
+    private readonly historyFloor: HistoryFloorService,
   ) {}
 
   async sync(actor: PermissionPrincipal, query: SyncQuery): Promise<SyncResponse> {
@@ -39,7 +41,10 @@ export class SyncService {
 
     const maxPage = this.config.get('sync.max_page');
     const limit = query.limit ? Math.min(query.limit, maxPage) : maxPage;
-    const since = BigInt(query.since);
+    // A catch-up never returns events older than the member's history floor.
+    const floor = await this.historyFloor.floorFor(query.room, actor.userId);
+    const requested = BigInt(query.since);
+    const since = floor !== null && requested < floor - 1n ? floor - 1n : requested;
 
     const rows = (await this.prisma.orm.public.RoomEvent.where((f) =>
       and(f.roomId.eq(query.room), f.seq.gt(since)),

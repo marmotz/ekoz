@@ -32,6 +32,7 @@ export class MeViewDto extends createZodDto(MeViewSchema) {}
 
 /** `GET /users/:identifier` response (technical.md §13). */
 export const PublicProfileViewSchema = z.object({
+  id: entityIdSchema,
   identifier: z.string(),
   displayName: z.string(),
   bio: nullableString(),

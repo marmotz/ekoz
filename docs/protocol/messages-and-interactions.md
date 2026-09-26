@@ -186,7 +186,8 @@ messages, not over events.
 Needs `room.read`.
 
 - `200`: `Message`.
-- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`).
+- Errors: `room.permission_denied` (`403`), `message.not_found` (`404`, unknown,
+  or below the caller's history floor).
 
 ### `PATCH /rooms/:id/messages/:messageId`
 
@@ -281,6 +282,8 @@ Needs `room.read`.
   room with thousands of pins returns thousands of messages.
 - Deleting a message removes its pin without emitting `pin_removed`, so a
   redacted message is never listed here.
+- Pins of messages below the caller's
+  [history floor](rooms-and-permissions.md#history-floor) are left out.
 
 ## Reactions
 

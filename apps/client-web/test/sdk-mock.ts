@@ -87,7 +87,7 @@ export function createFakeReporter() {
 
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `receipts`, `presence`, `groups`, `mentions`, `rooms`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `receipts`, `presence`, `groups`, `mentions`, `rooms`, `conversations`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -215,6 +215,17 @@ export function createFakeSdk(initial?: FakeSession) {
       approveJoinRequest: vi.fn(async () => ({})),
       rejectJoinRequest: vi.fn(async () => {}),
       members: vi.fn(async () => ({ items: [], nextCursor: null })),
+    },
+    conversations: {
+      list: vi.fn(async () => ({ items: [] as unknown[] })),
+      createDm: vi.fn(async (userId: string) => ({ id: `dm-${userId}` })),
+      createGroup: vi.fn(async () => ({ id: 'group' })),
+      rename: vi.fn(async (id: string, name: string | null) => ({ id, name })),
+      addMembers: vi.fn(async () => [] as unknown[]),
+      removeMember: vi.fn(async () => {}),
+      grantAdmin: vi.fn(async () => {}),
+      revokeAdmin: vi.fn(async () => {}),
+      searchContacts: vi.fn(async () => ({ items: [] as unknown[] })),
     },
     roomInvitations: {
       listMine: vi.fn(async () => ({ items: [] as unknown[] })),

@@ -267,8 +267,9 @@ Self-service deletion; re-authenticates.
 
 Authenticated (the profile itself is public; the endpoint is not anonymous).
 
-- `200`: `{ identifier, displayName, bio: string | null, avatarUrl: string | null }`
-  (`avatarUrl` is versioned, see `GET /me`).
+- `200`: `{ id, identifier, displayName, bio: string | null, avatarUrl: string | null }`
+  (`id` is the user id, usable for instance to start a conversation; `avatarUrl`
+  is versioned, see `GET /me`).
 - Errors: `identity.profile_not_found` (`404`).
 
 ### `GET /users?ids=`

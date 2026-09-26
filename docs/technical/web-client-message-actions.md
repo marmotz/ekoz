@@ -10,7 +10,7 @@ scope adds them to `apps/client-web`, with the live display of reactions and pin
 The server and SDK side (reactions on the `Message` object, pins that embed their message, the
 `editWindow` of the messages policy, the guards on redacted messages, the typed events) is
 described in [messages and interactions](../protocol/messages-and-interactions.md) and in the
-[design of the feature](../../backlog/features/web-client-message-actions/technical.md), which
+[design of the feature](../../backlog/_archives/features/web-client-message-actions/technical.md), which
 holds the findings from the code and is not repeated here. This page records what shipped in
 `apps/client-web`. It builds on [web client chat](web-client-chat.md),
 [web client composer editor](web-client-composer-editor.md),

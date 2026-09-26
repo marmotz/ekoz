@@ -7,6 +7,7 @@ import {
   ReactionNotFoundError,
 } from '../conversations.errors.js';
 import { EventLogService } from '../events/event-log.service.js';
+import { HistoryFloorService } from '../membership/history-floor.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 
@@ -17,11 +18,13 @@ export class ReactionsService {
     private readonly prisma: PrismaService,
     private readonly eventLog: EventLogService,
     private readonly permissions: PermissionsService,
+    private readonly historyFloor: HistoryFloorService,
   ) {}
 
   async add(actor: PermissionPrincipal, messageId: string, emoji: string): Promise<void> {
-    const roomId = await this.roomIdForMessage(messageId);
+    const { roomId, seq } = await this.locateMessage(messageId);
     await this.permissions.assertCan(actor, roomId, 'room.react');
+    await this.historyFloor.assertVisible(roomId, actor.userId, seq);
 
     const existing = (await this.prisma.orm.public.Reaction.where({
       messageId,
@@ -44,8 +47,9 @@ export class ReactionsService {
   }
 
   async remove(actor: PermissionPrincipal, messageId: string, emoji: string): Promise<void> {
-    const roomId = await this.roomIdForMessage(messageId);
+    const { roomId, seq } = await this.locateMessage(messageId);
     await this.permissions.assertCan(actor, roomId, 'room.react');
+    await this.historyFloor.assertVisible(roomId, actor.userId, seq);
 
     const existing = (await this.prisma.orm.public.Reaction.where({
       messageId,
@@ -69,14 +73,14 @@ export class ReactionsService {
     });
   }
 
-  private async roomIdForMessage(messageId: string): Promise<string> {
+  private async locateMessage(messageId: string): Promise<{ roomId: string; seq: bigint }> {
     const message = (await this.prisma.orm.public.Message.where({
       id: messageId,
-    }).first()) as { roomId: string; redactedAt: string | null } | null;
+    }).first()) as { roomId: string; seq: bigint; redactedAt: string | null } | null;
     if (!message || message.redactedAt) {
       throw new MessageNotFoundError();
     }
 
-    return message.roomId;
+    return { roomId: message.roomId, seq: message.seq };
   }
 }

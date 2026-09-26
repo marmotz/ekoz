@@ -681,6 +681,115 @@
       }
     }
   },
+  "directMessages": {
+    "title": "Messages privés",
+    "unnamed": "Conversation",
+    "direct": "Message privé",
+    "group": "Conversation de groupe",
+    "sidebar": {
+      "label": "Messages privés",
+      "new": "Nouveau",
+      "loading": "Chargement des conversations",
+      "error": "Les conversations n'ont pas pu être chargées.",
+      "empty": "Aucune conversation. Démarrez-en une avec le lien Nouveau.",
+      "unseen": "Nouveaux messages"
+    },
+    "gate": {
+      "loading": "Chargement de la conversation",
+      "error": "La conversation n'a pas pu être chargée.",
+      "retry": "Réessayer",
+      "unavailable": {
+        "title": "Conversation indisponible",
+        "message": "Cette conversation n'existe pas ou n'est pas accessible.",
+        "new": "Démarrer une conversation"
+      }
+    },
+    "header": {
+      "delete": "Supprimer la conversation",
+      "settings": "Réglages",
+      "deleteConfirm": {
+        "title": "Supprimer cette conversation ?",
+        "message": "Elle disparaît de votre liste. L'autre personne la garde, et elle revient au prochain message, sans les précédents.",
+        "confirm": "Supprimer"
+      }
+    },
+    "confirm": {
+      "cancel": "Annuler"
+    },
+    "gone": {
+      "deleted": "Cette conversation a été supprimée.",
+      "removed": "Vous avez été retiré de cette conversation."
+    },
+    "new": {
+      "title": "Nouvelle conversation",
+      "description": "Choisissez une personne pour lui écrire, ou plusieurs pour créer un groupe.",
+      "groupName": "Nom du groupe (facultatif)",
+      "groupNamePlaceholder": "Projets du week-end",
+      "start": "Démarrer",
+      "createGroup": "Créer le groupe"
+    },
+    "start": {
+      "button": "Écrire"
+    },
+    "picker": {
+      "label": "Rechercher des personnes",
+      "placeholder": "Nom, ou nom/serveur",
+      "hint_one": "Saisissez au moins {{count}} caractère pour chercher.",
+      "hint_other": "Saisissez au moins {{count}} caractères pour chercher.",
+      "searching": "Recherche en cours",
+      "empty": "Personne ne correspond.",
+      "selected": "Personnes choisies",
+      "add": "Ajouter {{name}}",
+      "remove": "Retirer {{name}}",
+      "unknownUser": "Utilisateur inconnu"
+    },
+    "settings": {
+      "title": "Réglages du groupe",
+      "you": "(vous)",
+      "admin": "Admin",
+      "participants": "Participants",
+      "rename": {
+        "label": "Nom du groupe",
+        "placeholder": "Sans nom",
+        "save": "Enregistrer"
+      },
+      "add": {
+        "title": "Ajouter des membres",
+        "label": "Rechercher des personnes à ajouter",
+        "showPast": "Montrer les anciens messages aux nouveaux membres",
+        "submit": "Ajouter"
+      },
+      "promote": "Nommer {{name}} admin",
+      "promoteShort": "Nommer admin",
+      "demote": "Retirer {{name}} des admins",
+      "demoteShort": "Retirer admin",
+      "remove": "Retirer {{name}} du groupe",
+      "removeShort": "Retirer",
+      "giveUpAdmin": "Renoncer au rôle d'admin",
+      "leave": "Quitter le groupe",
+      "lastAdminWarning": "Vous êtes le seul admin : le groupe sera supprimé pour tout le monde.",
+      "leaveConfirm": {
+        "title": "Quitter ce groupe ?",
+        "message": "Vous ne verrez plus ses messages.",
+        "confirm": "Quitter"
+      },
+      "giveUpConfirm": {
+        "title": "Renoncer au rôle d'admin ?",
+        "message": "Vous ne pourrez plus gérer le groupe.",
+        "confirm": "Renoncer"
+      }
+    },
+    "errors": {
+      "permissionDenied": "Vous n'avez pas le droit de faire cela dans cette conversation.",
+      "notFound": "Cette conversation n'existe pas ou n'est pas accessible.",
+      "membershipNotFound": "Cette personne n'est pas membre du groupe.",
+      "userNotFound": "Une de ces personnes n'existe pas ou n'est pas active.",
+      "groupFull": "Ce groupe a atteint son nombre maximal de membres.",
+      "dmSelf": "Vous ne pouvez pas démarrer une conversation avec vous-même.",
+      "network": "Le serveur est injoignable. Vérifiez votre connexion et réessayez.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
+  },
   "mentions": {
     "title": "Mes mentions",
     "sidebar": {

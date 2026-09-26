@@ -734,4 +734,104 @@ describe('conversations — messages (integration)', () => {
       await list(ownerToken, channel.id, { limit: '0' }).expect(422);
     });
   });
+
+  describe('per-member history floor', () => {
+    it('hides messages below the floor on every read path and write on a hidden message', async () => {
+      const ownerToken = await login('owner');
+      const aliceToken = await login('alice');
+      const aliceId = (await accounts.findByIdentifier('alice'))!.id;
+      const channel = await createPublicChannel(ownerToken, 'floor-room');
+      await request(server())
+        .post(`/rooms/${channel.id}/join`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(201);
+
+      const post = async (body: string) =>
+        (
+          await request(server())
+            .post(`/rooms/${channel.id}/messages`)
+            .set('Authorization', `Bearer ${ownerToken}`)
+            .send({ body })
+            .expect(201)
+        ).body as { id: string; seq: string };
+      const old = await post('before the floor');
+      const kept = await post('after the floor');
+      await request(server())
+        .put(`/rooms/${channel.id}/pins/${old.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      await request(server())
+        .put(`/rooms/${channel.id}/pins/${kept.id}`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+
+      await prisma.orm.public.Membership.where({ roomId: channel.id, userId: aliceId }).update({
+        historyFromSeq: BigInt(kept.seq),
+      });
+
+      const listed = await request(server())
+        .get(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(200);
+      expect(listed.body.items.map((m: { id: string }) => m.id)).toEqual([kept.id]);
+      expect(listed.body.hasMore).toBe(false);
+      const ownerView = await request(server())
+        .get(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .expect(200);
+      expect(ownerView.body.items).toHaveLength(2);
+      expect(listed.body.lastSeq).toBe(ownerView.body.lastSeq);
+
+      const around = await request(server())
+        .get(`/rooms/${channel.id}/messages`)
+        .query({ around: old.seq })
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(200);
+      expect(around.body.items.map((m: { id: string }) => m.id)).toEqual([kept.id]);
+
+      const after = await request(server())
+        .get(`/rooms/${channel.id}/messages`)
+        .query({ after: '0' })
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(200);
+      expect(after.body.items.map((m: { id: string }) => m.id)).toEqual([kept.id]);
+      expect(after.body.hasMore).toBe(false);
+
+      const hidden = await request(server())
+        .get(`/rooms/${channel.id}/messages/${old.id}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(404);
+      expect(hidden.body.code).toBe('message.not_found');
+      await request(server())
+        .get(`/rooms/${channel.id}/messages/${kept.id}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(200);
+
+      const pins = await request(server())
+        .get(`/rooms/${channel.id}/pins`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(200);
+      expect(pins.body.map((p: { messageId: string }) => p.messageId)).toEqual([kept.id]);
+
+      const sync = await request(server())
+        .get('/sync')
+        .query({ room: channel.id, since: '0' })
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(200);
+      expect(
+        sync.body.events.every((e: { seq: string }) => BigInt(e.seq) >= BigInt(kept.seq)),
+      ).toBe(true);
+      expect(sync.body.events.length).toBeGreaterThan(0);
+
+      const react = await request(server())
+        .put(`/messages/${old.id}/reactions/${encodeURIComponent('👍')}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(404);
+      expect(react.body.code).toBe('message.not_found');
+      await request(server())
+        .put(`/messages/${kept.id}/reactions/${encodeURIComponent('👍')}`)
+        .set('Authorization', `Bearer ${aliceToken}`)
+        .expect(204);
+    });
+  });
 });

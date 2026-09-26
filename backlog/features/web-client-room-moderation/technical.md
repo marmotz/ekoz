@@ -180,7 +180,7 @@ Types regenerated through the existing pipeline (`openapi:emit` → `bun run gen
 ### C1. Ownership
 
 All moderator-side code lives in `features/members`, created by
-[`web-client-members`](../web-client-members/technical.md) (panel, `member-row`). The
+[`web-client-members`](../../_archives/features/web-client-members/technical.md) (panel, `member-row`). The
 members query (`roomMembersKey`, `useRoomMembers`) and its live refresh
 (`useMembersLive`) live in `shared/members`; the lookup card and `usePublicProfile`
 in `shared/profile` (web-client-members 6.1, 6.2, 6.4). The target side (removal,

@@ -681,6 +681,115 @@
       }
     }
   },
+  "directMessages": {
+    "title": "Direct messages",
+    "unnamed": "Conversation",
+    "direct": "Direct message",
+    "group": "Group conversation",
+    "sidebar": {
+      "label": "Direct messages",
+      "new": "New",
+      "loading": "Loading conversations",
+      "error": "The conversations could not be loaded.",
+      "empty": "No conversation yet. Start one with the New link.",
+      "unseen": "New messages"
+    },
+    "gate": {
+      "loading": "Loading the conversation",
+      "error": "The conversation could not be loaded.",
+      "retry": "Retry",
+      "unavailable": {
+        "title": "Conversation unavailable",
+        "message": "This conversation does not exist or is not accessible.",
+        "new": "Start a conversation"
+      }
+    },
+    "header": {
+      "delete": "Delete the conversation",
+      "settings": "Settings",
+      "deleteConfirm": {
+        "title": "Delete this conversation?",
+        "message": "It disappears from your list. The other person keeps it, and it comes back with the next message, without the earlier ones.",
+        "confirm": "Delete"
+      }
+    },
+    "confirm": {
+      "cancel": "Cancel"
+    },
+    "gone": {
+      "deleted": "This conversation was deleted.",
+      "removed": "You were removed from this conversation."
+    },
+    "new": {
+      "title": "New conversation",
+      "description": "Pick one person to write to them, or several to create a group.",
+      "groupName": "Group name (optional)",
+      "groupNamePlaceholder": "Weekend plans",
+      "start": "Start",
+      "createGroup": "Create group"
+    },
+    "start": {
+      "button": "Message"
+    },
+    "picker": {
+      "label": "Search people",
+      "placeholder": "Name, or name/server",
+      "hint_one": "Type at least {{count}} character to search.",
+      "hint_other": "Type at least {{count}} characters to search.",
+      "searching": "Searching",
+      "empty": "Nobody matches.",
+      "selected": "Selected people",
+      "add": "Add {{name}}",
+      "remove": "Remove {{name}}",
+      "unknownUser": "Unknown user"
+    },
+    "settings": {
+      "title": "Group settings",
+      "you": "(you)",
+      "admin": "Admin",
+      "participants": "Participants",
+      "rename": {
+        "label": "Group name",
+        "placeholder": "No name",
+        "save": "Save"
+      },
+      "add": {
+        "title": "Add members",
+        "label": "Search people to add",
+        "showPast": "Show past messages to the new members",
+        "submit": "Add"
+      },
+      "promote": "Make {{name}} an admin",
+      "promoteShort": "Make admin",
+      "demote": "Remove {{name}} as admin",
+      "demoteShort": "Remove admin",
+      "remove": "Remove {{name}} from the group",
+      "removeShort": "Remove",
+      "giveUpAdmin": "Give up admin role",
+      "leave": "Leave the group",
+      "lastAdminWarning": "You are the only admin: the group will be deleted for everyone.",
+      "leaveConfirm": {
+        "title": "Leave this group?",
+        "message": "You will no longer see its messages.",
+        "confirm": "Leave"
+      },
+      "giveUpConfirm": {
+        "title": "Give up the admin role?",
+        "message": "You will no longer be able to manage the group.",
+        "confirm": "Give up"
+      }
+    },
+    "errors": {
+      "permissionDenied": "You are not allowed to do this in this conversation.",
+      "notFound": "This conversation does not exist or is not accessible.",
+      "membershipNotFound": "This person is not a member of the group.",
+      "userNotFound": "One of these people does not exist or is not active.",
+      "groupFull": "This group has reached its maximum number of members.",
+      "dmSelf": "You cannot start a conversation with yourself.",
+      "network": "The server could not be reached. Check your connection and try again.",
+      "generic": "Something went wrong. Try again."
+    }
+  },
   "mentions": {
     "title": "My mentions",
     "sidebar": {

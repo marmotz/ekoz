@@ -8,9 +8,9 @@ TipTap 3 editor whose schema is limited to the
 subset. This page records how it lets a user format a message without knowing
 Markdown, how code blocks are written and rendered, and how the client learns the
 body length limit. Product decisions are in the
-[feature overview](../../backlog/features/web-client-composer-formatting/overview.md),
+[feature overview](../../backlog/_archives/features/web-client-composer-formatting/overview.md),
 the code-level design in its
-[technical design](../../backlog/features/web-client-composer-formatting/technical.md).
+[technical design](../../backlog/_archives/features/web-client-composer-formatting/technical.md).
 
 Three facts frame the choices:
 

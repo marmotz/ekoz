@@ -65,7 +65,7 @@ kick or ban a member, ban a non-member, lift a ban.
 
 ## Dependencies
 
-- [`web-client-members`](../web-client-members/overview.md): the members panel
+- [`web-client-members`](../../_archives/features/web-client-members/overview.md): the members panel
   hosts every action of this feature; it must ship first.
 - [`web-client-rooms`](../../_archives/features/web-client-rooms/overview.md): capabilities, room gate,
   join request screen.

@@ -61,6 +61,7 @@ per-resource constructors:
 | `client.invitations`       | Owner-only registration invitations                              |
 | `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset), owner and username-request administration |
 | `client.rooms`             | The caller's tree (`list`), detail, preview, children, own permissions, create space / channel, join / leave, join requests (request, list, approve, reject), members page |
+| `client.conversations`     | The caller's direct and group conversations (`list`), create a one-to-one (`createDm`) or a group (`createGroup`), rename, add / remove members, grant / revoke admin, search contacts |
 | `client.roomInvitations`   | The caller's pending room invitations (`listMine`, `accept`, `decline`) |
 | `client.directory`         | Public room directory, search and paging (`list`)                |
 | `client.messages`          | Room messages (`policy`, `list` with `before` / `after` / `around`, `get`, `send`, `edit`, `delete`, `pin`, `unpin`, `pins`, `react`, `unreact`), with mention targets and reactions |

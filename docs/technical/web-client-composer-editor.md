@@ -6,12 +6,12 @@ The web client composer is a plain `<textarea>`
 ([composer.tsx](../../apps/client-web/src/features/chat/components/composer.tsx)).
 Two features need more than plain text:
 
-- [mentions](../../backlog/features/web-client-mentions/overview.md): the
+- [mentions](../../backlog/_archives/features/web-client-mentions/overview.md): the
   composer shows a mention as the target's display name, coloured, while the
   stored body carries the canonical identifier (`@alice/chat.example`). A
   mention must behave as one atomic unit (deleted in one keystroke, never
   half-edited).
-- [composer formatting](../../backlog/features/web-client-composer-formatting/overview.md):
+- [composer formatting](../../backlog/_archives/features/web-client-composer-formatting/overview.md):
   bold, italic, strikethrough, code, quote, lists and links without typing
   Markdown.
 
@@ -57,7 +57,7 @@ No Tiptap Cloud or Pro extension.
   (only the nodes and marks listed above are enabled), `@tiptap/markdown`,
   `@tiptap/extension-mention`, `@tiptap/suggestion`.
 - The composer is rebuilt once by
-  [web-client-mentions](../../backlog/features/web-client-mentions/technical.md).
+  [web-client-mentions](../../backlog/_archives/features/web-client-mentions/technical.md).
   Composer formatting then only adds a toolbar and marks to it.
 - Emoji, image and file-drop support later reuse official extensions. Adding
   image nodes also needs a protocol change (images are outside the subset

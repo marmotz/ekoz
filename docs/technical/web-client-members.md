@@ -23,7 +23,7 @@ Checking the product scoping against the code showed that:
   memberships are deleted on leave.
 
 The feature-level design is in
-[`backlog/features/web-client-members/technical.md`](../../backlog/features/web-client-members/technical.md);
+[`backlog/_archives/features/web-client-members/technical.md`](../../backlog/_archives/features/web-client-members/technical.md);
 this page records what shipped and why. It builds on [web client chat](web-client-chat.md)
 (authors, `shared/realtime`), [web client rooms](web-client-rooms.md) (`RoomGate`,
 `RoomHeader`) and [web client account](web-client-account.md) (user menu, avatars).

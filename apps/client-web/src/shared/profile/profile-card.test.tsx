@@ -3,7 +3,9 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
+import { StartConversationIconButton } from '@/features/direct-messages/components/start-conversation-button';
 import { ProfileCard, ProfileCardPopover } from '@/shared/profile/profile-card';
+import { registerProfileCardAction } from '@/shared/profile/profile-card-action-registry';
 import { resetPresence, setPresence } from '@/shared/realtime/presence-store';
 import { SdkProvider } from '@/shared/sdk/provider';
 import { renderWithProviders } from '../../../test/render';
@@ -24,6 +26,9 @@ function setup(configure?: (fake: ReturnType<typeof createFakeSdk>) => void) {
   createClientMock.mockReturnValue(fake.sdk);
   return fake;
 }
+
+// The direct messages route registers this action in the app.
+registerProfileCardAction({ id: 'start-conversation', component: StartConversationIconButton });
 
 beforeEach(() => {
   createClientMock.mockReset();
@@ -188,4 +193,33 @@ it('shows no presence dot without a user id', async () => {
 
   await screen.findByText('Bob (fallback)');
   expect(screen.queryByRole('img')).not.toBeInTheDocument();
+});
+
+it('offers to message the user the card is about', async () => {
+  const fake = setup();
+  const user = userEvent.setup();
+
+  renderWithProviders(
+    <SdkProvider>
+      <ProfileCard userId="u-bob" identifier="bob/example.test" fallback={fallback} />
+    </SdkProvider>,
+  );
+
+  await user.click(await screen.findByRole('button', { name: 'Message' }));
+
+  await waitFor(() => expect(fake.stubs.conversations.createDm).toHaveBeenCalledWith('u-bob'));
+});
+
+it('offers no message button without a user id or for someone who left', async () => {
+  setup();
+
+  renderWithProviders(
+    <SdkProvider>
+      <ProfileCard identifier="bob/example.test" fallback={fallback} />
+      <ProfileCard userId="u-bob" identifier="bob/example.test" fallback={fallback} left />
+    </SdkProvider>,
+  );
+
+  await screen.findAllByText('Bob (fallback)');
+  expect(screen.queryByRole('button', { name: 'Message' })).not.toBeInTheDocument();
 });

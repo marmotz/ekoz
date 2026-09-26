@@ -45,5 +45,5 @@ channels later.
 ## Feature order
 
 - [Extensibility](../extensibility/overview.md) allows adding delivery adapters.
-- [`web-client-mentions`](../web-client-mentions/overview.md) defines mentions
+- [`web-client-mentions`](../../_archives/features/web-client-mentions/overview.md) defines mentions
   (direct, `@all`, role, group, added on edit) that this feature notifies.

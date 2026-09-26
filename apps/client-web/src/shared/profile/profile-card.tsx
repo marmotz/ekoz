@@ -2,8 +2,10 @@ import type { Member } from '@ekozhq/sdk';
 import type { ReactNode } from 'react';
 
 import { useTranslation } from '@/shared/i18n/use-translation';
+import { getProfileCardActions } from '@/shared/profile/profile-card-action-registry';
 import { usePublicProfile } from '@/shared/profile/use-public-profile';
 import { useUserPresence } from '@/shared/realtime/own-presence';
+import { useMe } from '@/shared/sdk/use-me';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { UserAvatar } from '@/shared/ui/user-avatar';
@@ -36,6 +38,8 @@ export function ProfileCard({ userId, identifier, fallback, role, left }: Profil
   const { t } = useTranslation();
   const profile = usePublicProfile(identifier);
   const presence = useUserPresence(userId);
+  const myId = useMe().data?.id;
+  const canMessage = userId !== undefined && userId !== myId && !left;
   const displayName = profile.data?.displayName ?? fallback.displayName;
   const avatarUrl = profile.data?.avatarUrl ?? fallback.avatarUrl;
 
@@ -53,10 +57,15 @@ export function ProfileCard({ userId, identifier, fallback, role, left }: Profil
           className="size-12"
           presence={userId ? presence : undefined}
         />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate font-medium">{displayName ?? identifier}</p>
           <p className="truncate text-sm text-muted-foreground">{identifier}</p>
         </div>
+        {canMessage
+          ? getProfileCardActions().map(({ id, component: Action }) => (
+              <Action key={id} userId={userId} />
+            ))
+          : null}
       </div>
       {profile.isPending ? (
         <div className="space-y-2" role="status" aria-label={t('members.card.loading')}>

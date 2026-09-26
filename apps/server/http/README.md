@@ -166,6 +166,16 @@ http/
     list.hurl                          GET    /me/mentions             200 · needs access_token
     list-invalid.hurl                  GET    /me/mentions             422 · limit below 1
     list-unauthenticated.hurl          GET    /me/mentions             401 auth.unauthenticated
+  dm/
+    list-conversations.hurl            GET    /me/conversations                       200 · needs access_token
+    list-conversations-unauthenticated.hurl GET /me/conversations                     401 auth.unauthenticated
+    contacts.hurl                      GET    /me/contacts?query=                     200 · needs access_token
+    delete-dm.hurl                     POST   /rooms/:id/leave (dm)                   204 · needs conversation_id
+    group-manage.hurl                  PATCH  /group-dms/:id                          200 · group admin + conversation_id
+    group-add-members.hurl             POST   /group-dms/:id/members                  200 · group admin + target_user_id
+    group-remove-member.hurl           DELETE /group-dms/:id/members/:userId          204 · group admin + target_user_id
+    group-grant-admin.hurl             PUT    /group-dms/:id/admins/:userId           204 · group admin + target_user_id
+    group-revoke-admin.hurl            DELETE /group-dms/:id/admins/:userId           204 · group admin + target_user_id
   groups/
     list.hurl                          GET    /rooms/:id/groups                        200 · needs access_token + room_id
     get.hurl                           GET    /rooms/:id/groups/:groupId               200 · needs room_id + group_id

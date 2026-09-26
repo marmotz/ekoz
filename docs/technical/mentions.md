@@ -8,7 +8,7 @@ nor express a mention of a whole room, a role or a named group, and it only
 accepted users with an **explicit** membership on the room, so a member of the
 parent space could not be mentioned in a channel they read through inheritance.
 
-The [web client mentions](../../backlog/features/web-client-mentions/technical.md)
+The [web client mentions](../../backlog/_archives/features/web-client-mentions/technical.md)
 design needs all of that, plus unread counters and a "My mentions" list. The wire
 contract is in [messages and interactions](../protocol/messages-and-interactions.md#mentions)
 and [rooms and permissions](../protocol/rooms-and-permissions.md#room-groups).

@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 import { AppFrame } from '@/app/app-frame';
 import { UserMenu } from '@/features/auth/components/user-menu';
+import { ConversationsLive } from '@/features/direct-messages/components/conversations-live';
 import { useRoomsLive } from '@/features/rooms/hooks/use-rooms-live';
 import { useUnreadMentionsLive } from '@/shared/mentions/use-unread-mentions-live';
 import { RequireAuth } from '@/shared/sdk/require-auth';
@@ -34,6 +35,7 @@ function AppLayout() {
       <RequireAuth>
         <UnreadMentionsLive />
         <RoomsLive />
+        <ConversationsLive />
         <Outlet />
       </RequireAuth>
     </AppFrame>

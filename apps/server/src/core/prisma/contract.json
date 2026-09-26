@@ -898,6 +898,13 @@
                   "kind": "scalar"
                 }
               },
+              "historyFromSeq": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
               "invitedById": {
                 "nullable": true,
                 "type": {
@@ -945,6 +952,9 @@
               "fields": {
                 "hiddenAt": {
                   "column": "hidden_at"
+                },
+                "historyFromSeq": {
+                  "column": "history_from_seq"
                 },
                 "invitedById": {
                   "column": "invited_by_id"
@@ -3643,6 +3653,11 @@
                   "nativeType": "timestamptz",
                   "nullable": true
                 },
+                "history_from_seq": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": true
+                },
                 "invited_by_id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -5615,7 +5630,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "2304c06f408a2b4098270a2a5aa822173011bddc543e6b9974e35de62631afa5"
+    "storageHash": "70724003d57754908cdda405cd0a68c41db1a523e3c12b3bef071c48881e10aa"
   },
   "execution": {
     "executionHash": "47cc06385b7410ec6ef8201a5f857cb1634859bb74f3f1fedadad629339cda35",

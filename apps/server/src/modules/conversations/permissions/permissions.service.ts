@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { and } from '@prisma/orm-postgres/orm-client';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { RoomNotFoundError, RoomPermissionDeniedError } from '../conversations.errors.js';
-import { EventLogService } from '../events/event-log.service.js';
+import { EventLogService, type RoomTx } from '../events/event-log.service.js';
 import { CAPABILITIES, type Capability } from './capabilities.js';
 import type { RoomRole } from './role-default-capabilities.js';
 
@@ -112,20 +112,45 @@ export class PermissionsService {
   ): Promise<void> {
     await this.assertCan(actor, nodeId, 'room.manage_permissions');
 
-    await this.prisma.transaction(async (tx) => {
-      await tx.orm.public.RoomMemberPermission.where({ nodeId, userId, capability }).upsert({
-        create: { nodeId, userId, capability, effect },
-        update: { effect },
-      });
-      await this.eventLog.append(tx, {
-        roomId: nodeId,
-        type: 'permission_override_changed',
-        senderId: actor.userId,
-        content: { scope: 'user', userId, capability, effect },
-      });
-    });
+    await this.prisma.transaction((tx) =>
+      this.writeMemberOverride(tx, actor.userId, nodeId, userId, capability, effect),
+    );
 
     await this.invalidateSubtree(nodeId);
+  }
+
+  /**
+   * Upsert a per-user override and append `permission_override_changed`, inside
+   * the caller's transaction, without any capability check: the caller has
+   * already authorised the write through its own rule (a group admin
+   * promoting a member, for instance). The caller invalidates the cache.
+   */
+  async writeMemberOverride(
+    tx: RoomTx,
+    actorId: string,
+    nodeId: string,
+    userId: string,
+    capability: Capability,
+    effect: 'allow' | 'deny',
+  ): Promise<void> {
+    // Find then write: the ORM `upsert` only targets primary keys, and this
+    // override is unique on `(nodeId, userId, capability)`, not keyed by it.
+    const existing = (await tx.orm.public.RoomMemberPermission.where({
+      nodeId,
+      userId,
+      capability,
+    }).first()) as { id: string } | null;
+    if (existing) {
+      await tx.orm.public.RoomMemberPermission.where({ id: existing.id }).update({ effect });
+    } else {
+      await tx.orm.public.RoomMemberPermission.create({ nodeId, userId, capability, effect });
+    }
+    await this.eventLog.append(tx, {
+      roomId: nodeId,
+      type: 'permission_override_changed',
+      senderId: actorId,
+      content: { scope: 'user', userId, capability, effect },
+    });
   }
 
   async assertCan(
@@ -161,8 +186,10 @@ export class PermissionsService {
       id: string;
       visibility: string;
       defaultRole: RoomRole;
+      deletedAt: string | null;
     } | null;
-    if (!room) {
+    // A deleted room is unknown to everyone, members and strangers alike.
+    if (!room || room.deletedAt) {
       throw new RoomNotFoundError();
     }
 
@@ -229,8 +256,10 @@ export class PermissionsService {
       id: string;
       visibility: string;
       defaultRole: RoomRole;
+      deletedAt: string | null;
     } | null;
-    if (!room) {
+    // A deleted room is unknown to everyone, members and strangers alike.
+    if (!room || room.deletedAt) {
       throw new RoomNotFoundError();
     }
 

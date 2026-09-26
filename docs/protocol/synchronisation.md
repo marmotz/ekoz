@@ -30,6 +30,8 @@ room's current `seq` so the caller knows how far behind it still is.
   `lastSeq` is the room's `Room.lastSeq` at response time (may be ahead of the
   last returned event when the page was capped — call again with the last
   event's `seq` as the new `since`).
+- A member with a [history floor](rooms-and-permissions.md#history-floor) never
+  receives events older than it: `since` is raised to `floor - 1` when lower.
 - Errors: `room.not_found` (`404`), `room.permission_denied` (`403`),
   validation (`422`, e.g. a non-numeric `since`).
 

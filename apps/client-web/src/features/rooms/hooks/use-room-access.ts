@@ -28,6 +28,8 @@ export type RoomAccessState =
       invitation: MyRoomInvitation | null;
     }
   | { status: 'request'; preview: RoomPreview }
+  /** A `dm` / `group_dm`: it has its own page, `/dms/$roomId`. */
+  | { status: 'conversation' }
   | { status: 'unavailable' };
 
 function httpStatus(error: unknown): number | undefined {
@@ -74,6 +76,11 @@ export function useRoomAccess(roomId: string): RoomAccessState {
     };
   }
   if (!listsReady) return { status: 'loading' };
+
+  // Keyed on the room type only: conversations live in their own feature.
+  if (detail.data && (detail.data.type === 'dm' || detail.data.type === 'group_dm')) {
+    return { status: 'conversation' };
+  }
 
   if (readable) {
     if (permissions.isPending) return { status: 'loading' };
