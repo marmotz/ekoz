@@ -1,0 +1,27 @@
+name: Setup workspace
+description: Install Bun, Node and the workspace dependencies (with the Bun cache), then build the SDK.
+
+inputs:
+  build-sdk:
+    description: Build @ekozhq/sdk after the install (what other workspaces consume).
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: package.json
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: bun-${{ runner.os }}-
+    - run: bun install --frozen-lockfile
+      shell: bash
+    - if: inputs.build-sdk == 'true'
+      run: bun run build
+      shell: bash
