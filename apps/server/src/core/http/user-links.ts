@@ -18,3 +18,8 @@ export function avatarUrl(apiUrl: string, name: string, blobId: string): string 
 export function userIdentifier(name: string, serverDomain: string): string {
   return `${name}/${serverDomain}`;
 }
+
+/** URL of a signed file download (technical.md §S6). */
+export function fileUrl(apiUrl: string, token: string): string {
+  return `${apiUrl}/files/${encodeURIComponent(token)}`;
+}

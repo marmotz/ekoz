@@ -34,6 +34,8 @@ export * from './ServerSigningKey.schema.js';
 export * from './Session.schema.js';
 export * from './Setting.schema.js';
 export * from './SetupToken.schema.js';
+export * from './StorageQuotaOverride.schema.js';
+export * from './Upload.schema.js';
 export * from './User.schema.js';
 export * from './UserProfile.schema.js';
 export * from './UsernameChangeRequest.schema.js';

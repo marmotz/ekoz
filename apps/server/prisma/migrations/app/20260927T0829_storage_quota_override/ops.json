@@ -1,0 +1,41 @@
+[
+  {
+    "id": "table.storage_quota_override",
+    "label": "Create table \"storage_quota_override\"",
+    "summary": "Creates table \"storage_quota_override\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "storage_quota_override"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"storage_quota_override\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"storage_quota_override\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"storage_quota_override\"",
+        "sql": "CREATE TABLE \"public\".\"storage_quota_override\" (\n  \"quota_bytes\" int8,\n  \"updated_at\" timestamptz NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"storage_quota_override\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"storage_quota_override\""
+        ]
+      }
+    ]
+  }
+]

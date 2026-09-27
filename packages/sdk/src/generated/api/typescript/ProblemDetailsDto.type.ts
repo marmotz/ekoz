@@ -36,6 +36,10 @@ export type ProblemDetailsDtoDto = {
    * Correlation id, echoed from / generated for the request.
    */
   requestId?: string;
+  /**
+   * Extra machine-readable context specific to this error code.
+   */
+  details?: Record<string, string>;
 };
 
 export type ProblemDetailsDtoDeepDto = {
@@ -70,6 +74,10 @@ export type ProblemDetailsDtoDeepDto = {
    * Correlation id, echoed from / generated for the request.
    */
   requestId?: string;
+  /**
+   * Extra machine-readable context specific to this error code.
+   */
+  details?: Record<string, string>;
 };
 
 export type ProblemDetailsDtoCreateDto = {
@@ -104,6 +112,10 @@ export type ProblemDetailsDtoCreateDto = {
    * Correlation id, echoed from / generated for the request.
    */
   requestId?: string;
+  /**
+   * Extra machine-readable context specific to this error code.
+   */
+  details?: Record<string, string>;
 };
 
 export type ProblemDetailsDtoCreateDeepDto = {
@@ -138,6 +150,10 @@ export type ProblemDetailsDtoCreateDeepDto = {
    * Correlation id, echoed from / generated for the request.
    */
   requestId?: string;
+  /**
+   * Extra machine-readable context specific to this error code.
+   */
+  details?: Record<string, string>;
 };
 
 export type ProblemDetailsDtoUpdateDto = Partial<{
@@ -172,6 +188,10 @@ export type ProblemDetailsDtoUpdateDto = Partial<{
    * Correlation id, echoed from / generated for the request.
    */
   requestId: string;
+  /**
+   * Extra machine-readable context specific to this error code.
+   */
+  details: Record<string, string>;
 }>;
 
 export type ProblemDetailsDtoUpdateDeepDto = Partial<{
@@ -206,6 +226,10 @@ export type ProblemDetailsDtoUpdateDeepDto = Partial<{
    * Correlation id, echoed from / generated for the request.
    */
   requestId: string;
+  /**
+   * Extra machine-readable context specific to this error code.
+   */
+  details: Record<string, string>;
 }>;
 
 export type ProblemDetailsDtoWhereDto = {
@@ -240,6 +264,7 @@ export type ProblemDetailsDtoSelectDto = {
   code?: boolean;
   errors?: boolean;
   requestId?: boolean;
+  details?: boolean;
 };
 
 export type ProblemDetailsDtoSelectDeepDto = {
@@ -250,4 +275,5 @@ export type ProblemDetailsDtoSelectDeepDto = {
   code?: boolean;
   errors?: boolean;
   requestId?: boolean;
+  details?: boolean;
 };

@@ -21,6 +21,8 @@ export class DomainError extends Error {
     readonly title?: string,
     /** Extra response headers to set alongside the problem body (e.g. `Retry-After`). */
     readonly headers?: Readonly<Record<string, string>>,
+    /** Extra machine-readable context specific to this error code. */
+    readonly details?: Readonly<Record<string, unknown>>,
   ) {
     super(detail);
 

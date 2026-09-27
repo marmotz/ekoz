@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { afterEach, describe, expect, it } from 'vitest';
 import { LocalStorageDriver } from './local-storage.driver.js';
+import { describeStorageDriverContract } from './storage-driver.contract.js';
 import { blobStorageKey } from './storage-driver.js';
 
 const roots: string[] = [];
@@ -14,6 +15,13 @@ function freshRoot(): string {
   return root;
 }
 
+afterEach(async () => {
+  const { rm } = await import('node:fs/promises');
+  await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
+});
+
+describeStorageDriverContract('local', () => new LocalStorageDriver(freshRoot()));
+
 async function readAll(stream: NodeJS.ReadableStream): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of stream) chunks.push(chunk as Buffer);
@@ -22,11 +30,6 @@ async function readAll(stream: NodeJS.ReadableStream): Promise<string> {
 }
 
 describe('LocalStorageDriver (unit)', () => {
-  afterEach(async () => {
-    const { rm } = await import('node:fs/promises');
-    await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
-  });
-
   it('round-trips a blob at its content-addressed key', async () => {
     const driver = new LocalStorageDriver(freshRoot());
     const key = blobStorageKey('a'.repeat(64));

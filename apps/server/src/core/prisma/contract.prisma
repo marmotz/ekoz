@@ -103,16 +103,60 @@ model SetupToken {
 /// plain `int4` (2 GiB ceiling) — enough for the avatar consumer this increment
 /// ships; message attachments revisit it with per-user quotas.
 model Blob {
-  id          String                     @id @default(ulid())
-  hash        String                     @unique
-  sizeBytes   Int                        @map("size_bytes")
-  contentType String                     @map("content_type")
-  storageKey  String                     @map("storage_key")
-  refCount    Int                        @default(0) @map("ref_count")
-  createdAt   temporal.createdAtString() @map("created_at")
+  id              String                     @id @default(ulid())
+  hash            String                     @unique
+  sizeBytes       BigInt                     @map("size_bytes")
+  contentType     String                     @map("content_type")
+  storageKey      String                     @map("storage_key")
+  refCount        Int                        @default(0) @map("ref_count")
+  uploaderId      String?                    @map("uploader_id")
+  touchedAt       TimestamptzString          @map("touched_at")
+  width           Int?
+  height          Int?
+  durationMs      Int?                       @map("duration_ms")
+  thumbnailBlobId String?                    @map("thumbnail_blob_id")
+  createdAt       temporal.createdAtString() @map("created_at")
 
   @@index([refCount])
+  @@index([uploaderId])
   @@map("blob")
+}
+
+/// Owner-set storage quota override for one user (technical.md §S8). No row =
+/// `uploads.default_quota_bytes`. `quotaBytes = null` means unlimited.
+model StorageQuotaOverride {
+  userId     String            @id @map("user_id")
+  quotaBytes BigInt?           @map("quota_bytes")
+  updatedAt  temporal.updatedAtString() @map("updated_at")
+
+  @@map("storage_quota_override")
+}
+
+enum UploadState {
+  @@type("pg/text@1")
+  receiving = "receiving"
+  ready     = "ready"
+  failed    = "failed"
+}
+
+/// A resumable upload (technical.md §S4, tus 1.0). `blobId` is set once the
+/// upload completes and is ingested; `failure` carries the error code when
+/// `state = failed`. No cross-module FK on `userId` (same rule as `Blob.uploaderId`).
+model Upload {
+  id        String            @id @default(ulid())
+  userId    String            @map("user_id")
+  filename  String
+  length    BigInt
+  offset    BigInt            @default(0)
+  state     UploadState       @default(receiving)
+  blobId    String?           @map("blob_id")
+  failure   String?
+  expiresAt TimestamptzString @map("expires_at")
+  createdAt temporal.createdAtString() @map("created_at")
+
+  @@index([userId, state])
+  @@index([expiresAt])
+  @@map("upload")
 }
 
 /// Outbound email record (technical.md §7). Written before the send attempt;

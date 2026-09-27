@@ -4,6 +4,8 @@ export * from './filters.js';
 export * from './aliases.js';
 export * from './ProblemDetailsDtoErrors.schema.js';
 export * from './ProblemDetailsDto.schema.js';
+export * from './MyStorageViewDto.schema.js';
+export * from './IssueFileUrlsResponseDto.schema.js';
 export * from './DiscoveryDocumentDto.schema.js';
 export * from './LoginDto.schema.js';
 export * from './LoginResponseDtoSession.schema.js';

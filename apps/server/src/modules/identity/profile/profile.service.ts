@@ -8,6 +8,8 @@ import { avatarUrl, userIdentifier } from '../../../core/http/user-links.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { type Blob, BlobService } from '../../../core/storage/blob.service.js';
 import { BlobAccessRegistry } from '../../../core/storage/blob-access.registry.js';
+import { sniffContentType } from '../../../core/storage/sniff-content-type.js';
+import { StorageQuotaService } from '../../../core/storage/storage-quota.service.js';
 import { AccountService } from '../accounts/account.service.js';
 import { toAccountView } from '../accounts/account.view.js';
 import {
@@ -16,7 +18,7 @@ import {
   ProfileInvalidError,
   ProfileNotFoundError,
 } from '../identity.errors.js';
-import { sniffImageMime, type UploadedAvatar } from './avatar.js';
+import type { UploadedAvatar } from './avatar.js';
 import type { MeViewSchema, PublicProfileViewSchema } from './profile.dto.js';
 
 /**
@@ -41,6 +43,7 @@ export class ProfileService implements OnModuleInit {
     private readonly accounts: AccountService,
     private readonly blobs: BlobService,
     private readonly blobAccess: BlobAccessRegistry,
+    private readonly quotas: StorageQuotaService,
     private readonly audit: AuditService,
   ) {}
 
@@ -136,8 +139,8 @@ export class ProfileService implements OnModuleInit {
       throw new AvatarTooLargeError(`The avatar must be at most ${maxBytes} bytes.`);
     }
 
-    const mime = await sniffImageMime(file.buffer);
-    if (!mime || !this.config.get('avatar.allowed_mime').includes(mime)) {
+    const mime = await sniffContentType(file.buffer);
+    if (!this.config.get('avatar.allowed_mime').includes(mime)) {
       throw new AvatarRejectedError();
     }
 
@@ -146,7 +149,12 @@ export class ProfileService implements OnModuleInit {
       throw new ProfileNotFoundError();
     }
 
-    const blob = await this.blobs.ingest(Readable.from(file.buffer), { declaredType: mime });
+    await this.quotas.assertCanStore(userId, BigInt(file.size));
+
+    const blob = await this.blobs.ingest(Readable.from(file.buffer), {
+      contentType: mime,
+      uploaderId: userId,
+    });
     const previous = profile.avatarBlobId;
 
     await this.prisma.transaction(async (tx) => {
