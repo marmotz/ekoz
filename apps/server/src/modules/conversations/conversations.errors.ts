@@ -167,6 +167,24 @@ export class MessageNotPinnedError extends DomainError {
   }
 }
 
+export class MessageEmptyError extends DomainError {
+  constructor(detail = 'A message needs a body or at least one attachment.') {
+    super('message.empty', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class AttachmentLimitExceededError extends DomainError {
+  constructor(detail = 'This message exceeds the maximum number of attachments.') {
+    super('message.attachment_limit_exceeded', detail, 422, 'Unprocessable Entity');
+  }
+}
+
+export class AttachmentNotFoundError extends DomainError {
+  constructor(detail = 'No such attachment.') {
+    super('message.attachment_not_found', detail, 404, 'Not Found');
+  }
+}
+
 export class DmSelfError extends DomainError {
   constructor(detail = 'Cannot start a direct conversation with yourself.') {
     super('room.dm_self', detail, 422, 'Unprocessable Entity');

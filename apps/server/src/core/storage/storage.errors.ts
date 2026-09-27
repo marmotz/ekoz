@@ -54,6 +54,12 @@ export class UploadExpiredError extends DomainError {
   }
 }
 
+export class UploadNotReadyError extends DomainError {
+  constructor(detail = 'This upload has not finished yet.') {
+    super('upload.not_ready', detail, 409, 'Conflict');
+  }
+}
+
 export class UploadRequestInvalidError extends DomainError {
   constructor(detail: string) {
     super('upload.request_invalid', detail, 400, 'Bad Request');

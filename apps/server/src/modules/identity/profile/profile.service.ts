@@ -8,6 +8,7 @@ import { avatarUrl, userIdentifier } from '../../../core/http/user-links.js';
 import { PrismaService } from '../../../core/prisma/prisma.service.js';
 import { type Blob, BlobService } from '../../../core/storage/blob.service.js';
 import { BlobAccessRegistry } from '../../../core/storage/blob-access.registry.js';
+import { BlobReferenceRemoverRegistry } from '../../../core/storage/blob-reference-remover.registry.js';
 import { sniffContentType } from '../../../core/storage/sniff-content-type.js';
 import { StorageQuotaService } from '../../../core/storage/storage-quota.service.js';
 import { AccountService } from '../accounts/account.service.js';
@@ -45,6 +46,7 @@ export class ProfileService implements OnModuleInit {
     private readonly blobAccess: BlobAccessRegistry,
     private readonly quotas: StorageQuotaService,
     private readonly audit: AuditService,
+    private readonly blobReferenceRemovers: BlobReferenceRemoverRegistry,
   ) {}
 
   onModuleInit(): void {
@@ -60,6 +62,23 @@ export class ProfileService implements OnModuleInit {
       }).first()) as { userId: string } | null;
 
       return holder !== null;
+    });
+
+    // Force-removal everywhere (technical.md §S11, issue #146): every profile
+    // using `blobId` as its avatar is cleared and the reference released.
+    this.blobReferenceRemovers.register(async (blobId) => {
+      const holders = (await this.prisma.orm.public.UserProfile.where({
+        avatarBlobId: blobId,
+      }).all()) as Array<{ userId: string }>;
+
+      for (const holder of holders) {
+        await this.prisma.transaction(async (tx) => {
+          await tx.orm.public.UserProfile.where({ userId: holder.userId }).update({
+            avatarBlobId: null,
+          });
+          await this.blobs.release(blobId, tx.orm);
+        });
+      }
     });
   }
 

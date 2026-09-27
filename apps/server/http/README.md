@@ -52,8 +52,11 @@ http/
   blobs/
     not-found.hurl                    GET /blobs/:id                  (404 until a feature adds a policy)
   files/
-    urls-not-found.hurl                POST /files/urls                201 · every ref denies until #143/#144 register a policy
+    urls-not-found.hurl                POST /files/urls                201 · unresolvable refs
     download-not-found.hurl            GET  /files/:token              404 files.not_found · public route
+  link-previews/
+    fetch.hurl                         POST /link-previews             200 · needs link_previews.enabled = true
+    disabled.hurl                      POST /link-previews             404 link_preview.disabled · any state
   setup/
     state.hurl                        GET /setup                      200 · public, any state
     create-owner.hurl                 POST /setup/owner               201 · fresh DB + real setup_token
@@ -143,6 +146,18 @@ http/
     username-requests-list.hurl       GET    /admin/username-requests 200 · owner, approval mode
     username-requests-approve.hurl    POST   /admin/username-requests/:id/approve 201 · owner + request_id
     username-requests-reject.hurl     POST   /admin/username-requests/:id/reject  204 · owner + request_id
+    settings-list.hurl                 GET    /admin/settings                     200 · owner access_token
+    settings-list-forbidden.hurl       GET    /admin/settings                     403 auth.forbidden (non-owner)
+    settings-set.hurl                  PUT    /admin/settings/:key                200 · owner access_token
+    settings-set-not-runtime.hurl      PUT    /admin/settings/:key                409 config.not_runtime
+    settings-set-invalid.hurl          PUT    /admin/settings/:key                422 config.invalid_value
+    settings-reset.hurl                DELETE /admin/settings/:key                204 · owner, run after settings-set.hurl
+    user-storage.hurl                  GET    /admin/users/:id/storage            200 · owner + target_user_id
+    user-storage-quota-set.hurl        PUT    /admin/users/:id/storage-quota      204 · owner + target_user_id
+    user-storage-quota-reset.hurl      DELETE /admin/users/:id/storage-quota      204 · owner, run after user-storage-quota-set.hurl
+    storage-dashboard.hurl             GET    /admin/storage                      200 · owner access_token
+    attachments-search.hurl            GET    /admin/attachments                  200 · owner access_token
+    blob-remove.hurl                   DELETE /admin/blobs/:id                    204 · owner + blob_id, destructive
   sessions/
     list.hurl                         GET    /sessions                200 · needs access_token
     list-unauthenticated.hurl         GET    /sessions                401 auth.unauthenticated
@@ -173,7 +188,13 @@ http/
     list-conflicting-params.hurl       GET    /rooms/:id/messages      422 · before and after together
     send-mentions.hurl                 POST   /rooms/:id/messages      201 · needs room.post + target_user_id
     send-mention-invalid.hurl          POST   /rooms/:id/messages      422 message.mention_invalid (dm)
+    send-attachments.hurl              POST   /rooms/:id/messages      201 · needs room.attach + upload_id
+    send-link-preview.hurl             POST   /rooms/:id/messages      201 · needs link_previews.enabled = true
+    send-empty.hurl                    POST   /rooms/:id/messages      422 message.empty
     edit-mentions.hurl                 PATCH  /rooms/:id/messages/:id  200 · needs edit right + message_id
+    edit-attachments.hurl              PATCH  /rooms/:id/messages/:id  200 · author + upload_id, add attachment
+    remove-attachment.hurl             DELETE /rooms/:id/messages/:id/attachments/:id  204 · needs attachment_id
+    files.hurl                         GET    /rooms/:id/files         200 · needs room.read + room_id
   mentions/
     unread.hurl                        GET    /me/mentions/unread      200 · needs access_token
     unread-unauthenticated.hurl        GET    /me/mentions/unread      401 auth.unauthenticated

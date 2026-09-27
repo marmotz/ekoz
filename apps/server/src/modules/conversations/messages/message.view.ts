@@ -2,6 +2,11 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { nullableString } from '../../../core/http/nullable.js';
 import {
+  type LinkPreviewView,
+  LinkPreviewViewSchema,
+} from '../../../core/link-previews/link-preview.view.js';
+import { type AttachmentView, AttachmentViewSchema } from './attachment.view.js';
+import {
   type MentionsMe,
   MentionsMeSchema,
   type MentionTarget,
@@ -26,6 +31,8 @@ export const MessageViewSchema = z.object({
   mentions: z.array(MentionTargetSchema),
   mentionsMe: MentionsMeSchema.nullable(),
   reactions: z.array(MessageReactionSchema),
+  attachments: z.array(AttachmentViewSchema),
+  linkPreview: LinkPreviewViewSchema.nullable(),
   editedAt: z.iso.datetime().nullable(),
   redactedAt: z.iso.datetime().nullable(),
   hiddenAt: z.iso.datetime().nullable(),
@@ -58,6 +65,8 @@ export function toMessageView(
   mentions: MentionTarget[],
   mentionsMe: MentionsMe | null = null,
   reactions: MessageReaction[] = [],
+  attachments: AttachmentView[] = [],
+  linkPreview: LinkPreviewView | null = null,
 ): MessageView {
   return {
     id: row.id,
@@ -69,6 +78,8 @@ export function toMessageView(
     mentions,
     mentionsMe,
     reactions,
+    attachments,
+    linkPreview,
     editedAt: row.editedAt,
     redactedAt: row.redactedAt,
     hiddenAt: row.hiddenAt,

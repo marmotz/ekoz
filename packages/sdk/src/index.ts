@@ -13,7 +13,16 @@ export {
 } from './discovery/discovery.js';
 export type { ConversationsResource } from './resources/conversations.js';
 export type { DirectoryResource, ListDirectoryParams } from './resources/directory.js';
+export {
+  type FileRef,
+  type FilesResource,
+  type FileUrlResult,
+  type IssueFileUrlsResponse,
+  type ListRoomFilesParams,
+  SignedUrlCache,
+} from './resources/files.js';
 export type { CreateGroupBody, GroupsResource } from './resources/groups.js';
+export type { LinkPreviewsResource } from './resources/link-previews.js';
 export type { ListMentionsParams, MentionsResource } from './resources/mentions.js';
 export type {
   EditMessageBody,
@@ -51,6 +60,13 @@ export type {
   TypingStreamEvent,
 } from './resources/stream.js';
 export type { SyncParams, SyncResource } from './resources/sync.js';
+export type {
+  UploadHandle,
+  UploadOptions,
+  UploadResult,
+  UploadStatus,
+  UploadsResource,
+} from './resources/uploads.js';
 export type {
   SessionEventMap,
   SessionEventName,
@@ -130,6 +146,7 @@ export {
   AdminUserDetailSchema,
   AdminUserListItemSchema,
   AdminUserListResponseSchema,
+  AttachmentViewSchema,
   AuthPolicySchema,
   AvatarUploadedSchema,
   ChangeEmailBodySchema,
@@ -144,12 +161,14 @@ export {
   DirectoryListResponseSchema,
   EmailAcceptedResponseSchema,
   EmailVerifiedResponseSchema,
+  FilesPageSchema,
   GroupDetailSchema,
   GroupListResponseSchema,
   GroupSchema,
   InvitationsListResponseSchema,
   InvitationViewSchema,
   JoinRequestSchema,
+  LinkPreviewViewSchema,
   LoginBodySchema,
   LoginResponseSchema,
   MemberSchema,
@@ -167,6 +186,7 @@ export {
   MyPermissionsResponseSchema,
   MyRoomInvitationSchema,
   MyRoomInvitationsListResponseSchema,
+  MyStorageViewSchema,
   PendingJoinRequestSchema,
   PendingJoinRequestsPageSchema,
   PublicProfileViewSchema,
@@ -175,6 +195,7 @@ export {
   RequestPasswordResetBodySchema,
   ResendVerificationBodySchema,
   RevokeAllSessionsResponseSchema,
+  RoomFileItemSchema,
   RoomListItemSchema,
   RoomListResponseSchema,
   RoomPreviewSchema,
@@ -211,6 +232,7 @@ export type {
   AdminUserDetail,
   AdminUserListItem,
   AdminUserListResponse,
+  AttachmentView,
   AuthPolicy,
   AvatarUploaded,
   ChangeEmailBody,
@@ -231,6 +253,7 @@ export type {
   DirectoryListResponse,
   EmailAcceptedResponse,
   EmailVerifiedResponse,
+  FilesPage,
   Group,
   GroupDetail,
   GroupListResponse,
@@ -238,6 +261,7 @@ export type {
   InvitationsListResponse,
   InvitationView,
   JoinRequest,
+  LinkPreviewView,
   LoginBody,
   LoginResponse,
   Member,
@@ -255,6 +279,7 @@ export type {
   MyPermissionsResponse,
   MyRoomInvitation,
   MyRoomInvitationsListResponse,
+  MyStorageView,
   PendingJoinRequest,
   PendingJoinRequestsPage,
   PresencePreferenceResponse,
@@ -267,6 +292,7 @@ export type {
   ResendVerificationBody,
   RevokeAllSessionsResponse,
   Room,
+  RoomFileItem,
   RoomListItem,
   RoomListResponse,
   RoomPreview,

@@ -93,6 +93,46 @@ describe('messages resource', () => {
     );
   });
 
+  it('send() carries attachments and a link preview url, with no body', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 201, body: { id: 'm1' } }));
+    const messages = await resource(fetchMock);
+
+    await messages.send('room1', {
+      attachments: ['u1', 'u2'],
+      linkPreviewUrl: 'https://example.com/article',
+    });
+
+    expect(fetchMock.calls[0]?.init?.body).toBe(
+      '{"attachments":["u1","u2"],"linkPreviewUrl":"https://example.com/article"}',
+    );
+  });
+
+  it('edit() carries attachments add/remove and a null link preview', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { id: 'm1' } }));
+    const messages = await resource(fetchMock);
+
+    await messages.edit('room1', 'm1', {
+      attachments: { add: ['u3'], remove: ['a1'] },
+      linkPreviewUrl: null,
+    });
+
+    expect(fetchMock.calls[0]?.init?.body).toBe(
+      '{"attachments":{"add":["u3"],"remove":["a1"]},"linkPreviewUrl":null}',
+    );
+  });
+
+  it('removeAttachment() DELETEs /rooms/:id/messages/:messageId/attachments/:attachmentId', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const messages = await resource(fetchMock);
+
+    await expect(messages.removeAttachment('room1', 'm1', 'a1')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe(
+      'https://api.example.com/rooms/room1/messages/m1/attachments/a1',
+    );
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
+
   it('list() forwards after and around', async () => {
     const fetchMock = createFetchMock(jsonResponse({ body: {} }), jsonResponse({ body: {} }));
     const messages = await resource(fetchMock);

@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { AuditModule } from './core/audit/audit.module.js';
 import { BootstrapModule } from './core/bootstrap/bootstrap.module.js';
 import { ConfigModule } from './core/config/config.module.js';
+import { SettingsModule } from './core/config/settings.module.js';
 import { CryptoModule } from './core/crypto/crypto.module.js';
 import { DiscoveryModule } from './core/discovery/discovery.module.js';
 import { HealthModule } from './core/health/health.module.js';
 import { AuthGuardModule } from './core/http/auth-guard.module.js';
 import { HttpModule } from './core/http/http.module.js';
+import { LinkPreviewsModule } from './core/link-previews/link-previews.module.js';
 import { MailModule } from './core/mail/mail.module.js';
 import { MetricsModule } from './core/observability/metrics.module.js';
 import { ObservabilityModule } from './core/observability/observability.module.js';
@@ -31,10 +33,12 @@ import { IdentityModule } from './modules/identity/identity.module.js';
     AuthGuardModule,
     PrismaModule,
     ConfigModule,
+    SettingsModule,
     CryptoModule,
     MetricsModule,
     AuditModule,
     StorageModule,
+    LinkPreviewsModule,
     MailModule,
     BootstrapModule,
     DiscoveryModule,

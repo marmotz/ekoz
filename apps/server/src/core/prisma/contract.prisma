@@ -482,6 +482,7 @@ enum RoomEventType {
   room_deleted              = "room_deleted"
   pin_added                 = "pin_added"
   pin_removed               = "pin_removed"
+  attachment_removed        = "attachment_removed"
   retention_changed         = "retention_changed"
   receipt_updated           = "receipt_updated"
   group_changed             = "group_changed"
@@ -680,6 +681,65 @@ model Message {
   @@index([roomId, createdAt])
   @@index([replyToId])
   @@map("message")
+}
+
+/// A file attached to a {@link Message} (technical.md §S9, issue #143). `blobId`
+/// is the moved-over reference from the `Upload` consumed at send time — no net
+/// `retain`/`release`. `roomId` is denormalised for the room's Files view.
+/// `uploaderId` is who attached it (may differ from `Blob.uploaderId`).
+model MessageAttachment {
+  id          String                     @id @default(ulid())
+  messageId   String                     @map("message_id")
+  roomId      String                     @map("room_id")
+  blobId      String                     @map("blob_id")
+  filename    String
+  contentType String                     @map("content_type")
+  sizeBytes   BigInt                     @map("size_bytes")
+  position    Int
+  uploaderId  String                     @map("uploader_id")
+  createdAt   temporal.createdAtString() @map("created_at")
+
+  @@index([messageId])
+  @@index([roomId, createdAt])
+  @@map("message_attachment")
+}
+
+enum LinkPreviewStatus {
+  @@type("pg/text@1")
+  ready  = "ready"
+  failed = "failed"
+}
+
+/// Cached metadata for one normalised URL (technical.md §S10, issue #144).
+/// `status = failed` is cached too (a shorter TTL than a `ready` entry), so a
+/// site is not hammered. `imageBlobId` is a core blob with no uploader.
+model LinkPreview {
+  id          String            @id @default(ulid())
+  url         String            @unique
+  title       String?
+  description String?
+  siteName    String?           @map("site_name")
+  imageBlobId String?           @map("image_blob_id")
+  status      LinkPreviewStatus
+  fetchedAt   TimestamptzString @map("fetched_at")
+
+  @@index([status, fetchedAt])
+  @@map("link_preview")
+}
+
+/// A snapshot of the cached {@link LinkPreview} chosen for a message
+/// (technical.md §S10): copied at send/edit time so a later cache refresh
+/// never changes an already-sent message. `imageBlobId`'s ref is retained
+/// independently of the cache row's own reference.
+model MessageLinkPreview {
+  messageId   String  @id @map("message_id")
+  url         String
+  title       String?
+  description String?
+  siteName    String? @map("site_name")
+  imageBlobId String? @map("image_blob_id")
+
+  @@map("message_link_preview")
 }
 
 /// What the author of a {@link Message} mentioned (web-client-mentions technical.md

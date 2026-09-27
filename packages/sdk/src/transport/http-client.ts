@@ -12,15 +12,21 @@
 import { decodeProblem, toNetworkError } from './problem.js';
 import { newRequestId, REQUEST_ID_HEADER } from './request-context.js';
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
 
 export type QueryValue = string | number | boolean | null | undefined;
 
 export interface RequestOptions {
-  /** JSON request body. Ignored when `formData` is set. */
+  /** JSON request body. Ignored when `formData` or `rawBody` is set. */
   body?: unknown;
   /** Multipart body; sent as-is so the platform sets the boundary. */
   formData?: FormData;
+  /**
+   * Pre-serialised request body (e.g. one chunk of bytes for a tus `PATCH`),
+   * sent as-is with no `Content-Type` inferred — the caller sets it via
+   * `headers`. Takes precedence over `body`, ignored when `formData` is set.
+   */
+  rawBody?: NonNullable<RequestInit['body']>;
   /** Query-string parameters; `null` / `undefined` values are skipped. */
   query?: Record<string, QueryValue>;
   /** Abort signal, forwarded to `fetch`. */
@@ -30,11 +36,13 @@ export interface RequestOptions {
   /** Explicit `X-Request-Id`; generated when omitted. */
   requestId?: string;
   /**
-   * How a 2xx body is decoded. `json` (default) parses JSON and sends
+   * How the response is decoded. `json` (default) parses JSON and sends
    * `Accept: application/json`; `blob` sends `Accept: image/*` and returns the
-   * raw body as a `Blob`. Non-2xx responses are problem+json in both modes.
+   * raw body as a `Blob`; `raw` returns the `Response` itself, unread — for a
+   * caller that needs response headers (tus `Location` / `Upload-Offset` /
+   * `Ekoz-Upload`). Non-2xx responses are problem+json in every mode.
    */
-  responseType?: 'json' | 'blob';
+  responseType?: 'json' | 'blob' | 'raw';
 }
 
 export interface HttpClientOptions {
@@ -98,6 +106,8 @@ export class HttpClient {
 
     if (options.formData !== undefined) {
       init.body = options.formData;
+    } else if (options.rawBody !== undefined) {
+      init.body = options.rawBody;
     } else if (options.body !== undefined) {
       headers.set('Content-Type', 'application/json');
       init.body = JSON.stringify(options.body);
@@ -115,6 +125,7 @@ export class HttpClient {
       throw await decodeProblem(response, requestId);
     }
 
+    if (options.responseType === 'raw') return response as unknown as T;
     if (blobMode) return (await response.blob()) as T;
     if (response.status === 204) return undefined as T;
     const text = await response.text();

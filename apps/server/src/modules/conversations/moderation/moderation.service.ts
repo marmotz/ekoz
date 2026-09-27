@@ -95,6 +95,33 @@ export class ModerationService {
     }
   }
 
+  /**
+   * Delegates to `MessagesService.removeAttachment`. Only a removal made under
+   * `room.delete_any` is a moderation action — the author removing their own
+   * attachment via `room.delete_own` is not audited here.
+   */
+  async removeAttachment(
+    actor: PermissionPrincipal,
+    roomId: string,
+    messageId: string,
+    attachmentId: string,
+  ): Promise<void> {
+    const { authorId, viaCapability } = await this.messages.removeAttachment(
+      actor,
+      roomId,
+      messageId,
+      attachmentId,
+    );
+    if (viaCapability === 'delete_any') {
+      await this.audit.record({
+        action: 'moderation.remove_attachment',
+        targetType: 'room',
+        targetId: roomId,
+        metadata: { messageId, attachmentId, authorId },
+      });
+    }
+  }
+
   /** Room-scoped view over the audit log, for a caller with a moderation capability. */
   async getModerationLog(
     actor: PermissionPrincipal,

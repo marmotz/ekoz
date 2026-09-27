@@ -63,7 +63,7 @@ _in discussion, technical design in [technical.md](./technical.md)_ — 0/4 task
 
 ## Content and sharing ·  [overview](features/content-and-sharing/overview.md)
 
-_todo, see [technical.md](./technical.md)_ — 6/21 tasks done
+_todo, see [technical.md](./technical.md)_ — 13/21 tasks done
 
 | Done | Issue                                              | Title                                                                                          | Blocked by                   |
 |------|----------------------------------------------------|------------------------------------------------------------------------------------------------|------------------------------|
@@ -73,13 +73,13 @@ _todo, see [technical.md](./technical.md)_ — 6/21 tasks done
 | [x]  | [#139](https://github.com/marmotz/ekoz/issues/139) | Storage core: resumable uploads (tus 1.0) under /uploads                                       | #136, #138                   |
 | [x]  | [#140](https://github.com/marmotz/ekoz/issues/140) | Storage core: optional ffmpeg thumbnails and media metadata                                    | #139                         |
 | [x]  | [#141](https://github.com/marmotz/ekoz/issues/141) | Storage core: signed file URLs with per-request access check                                   | #136, #137                   |
-| [ ]  | [#143](https://github.com/marmotz/ekoz/issues/143) | Conversations: room.attach and message attachments (send, edit, remove, redact, files listing) | #139, #141                   |
-| [ ]  | [#144](https://github.com/marmotz/ekoz/issues/144) | Link previews: SSRF-safe fetcher, cache, POST /link-previews and message snapshot              | #140, #143                   |
-| [ ]  | [#145](https://github.com/marmotz/ekoz/issues/145) | Admin settings API: GET/PUT/DELETE /admin/settings                                             | —                            |
-| [ ]  | [#146](https://github.com/marmotz/ekoz/issues/146) | Admin storage endpoints: per-user quota, dashboard, file moderation                            | #138, #140, #144             |
-| [ ]  | [#147](https://github.com/marmotz/ekoz/issues/147) | SDK: resumable upload client (client.uploads) and me.storage()                                 | #138, #139                   |
-| [ ]  | [#148](https://github.com/marmotz/ekoz/issues/148) | SDK: message attachments, file URLs, room files and link previews                              | #143, #144                   |
-| [ ]  | [#149](https://github.com/marmotz/ekoz/issues/149) | SDK: admin settings and storage bindings                                                       | #145, #146                   |
+| [x]  | [#143](https://github.com/marmotz/ekoz/issues/143) | Conversations: room.attach and message attachments (send, edit, remove, redact, files listing) | #139, #141                   |
+| [x]  | [#144](https://github.com/marmotz/ekoz/issues/144) | Link previews: SSRF-safe fetcher, cache, POST /link-previews and message snapshot              | #140, #143                   |
+| [x]  | [#145](https://github.com/marmotz/ekoz/issues/145) | Admin settings API: GET/PUT/DELETE /admin/settings                                             | —                            |
+| [x]  | [#146](https://github.com/marmotz/ekoz/issues/146) | Admin storage endpoints: per-user quota, dashboard, file moderation                            | #138, #140, #144             |
+| [x]  | [#147](https://github.com/marmotz/ekoz/issues/147) | SDK: resumable upload client (client.uploads) and me.storage()                                 | #138, #139                   |
+| [x]  | [#148](https://github.com/marmotz/ekoz/issues/148) | SDK: message attachments, file URLs, room files and link previews                              | #143, #144                   |
+| [x]  | [#149](https://github.com/marmotz/ekoz/issues/149) | SDK: admin settings and storage bindings                                                       | #145, #146                   |
 | [ ]  | [#150](https://github.com/marmotz/ekoz/issues/150) | Web client: render attachments in messages (signed URLs, grid, players, file card)             | #148                         |
 | [ ]  | [#152](https://github.com/marmotz/ekoz/issues/152) | Web client: composer attachments (picker, drop, paste, tray, progress, optimistic send)        | #147, #150                   |
 | [ ]  | [#153](https://github.com/marmotz/ekoz/issues/153) | Web client: link preview card in the composer and in messages                                  | #152                         |

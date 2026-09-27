@@ -7,4 +7,5 @@ HTTP 200
 jsonpath "$.registrationMode" matches /^(open|invite|admin)$/
 jsonpath "$.emailVerificationRequired" isBoolean
 jsonpath "$.passwordMinLength" isInteger
+jsonpath "$.linkPreviews" isBoolean
 header "Cache-Control" == "no-store"

@@ -30,6 +30,8 @@ function wireMessage(seq: number, overrides: Partial<Message> = {}): Message {
     mentions: [],
     mentionsMe: null,
     reactions: [],
+    attachments: [],
+    linkPreview: null,
     editedAt: null,
     redactedAt: null,
     hiddenAt: null,

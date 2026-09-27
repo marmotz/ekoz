@@ -11,3 +11,6 @@ import { z } from 'zod';
  * `entityIdSchema`, ...) convert correctly on their own and do not need this.
  */
 export const nullableString = () => z.string().nullable().meta({ type: 'string', nullable: true });
+
+/** Same workaround as {@link nullableString}, for a nullable number field. */
+export const nullableNumber = () => z.number().nullable().meta({ type: 'number', nullable: true });

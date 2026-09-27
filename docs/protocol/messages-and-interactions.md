@@ -31,6 +31,26 @@ fixed here first (see
   "reactions": [
     { "emoji": "👍", "userIds": ["01ARZ3NDEKTSV4RRFFQ69G5FAY", "01ARZ3NDEKTSV4RRFFQ69G5FAX"] }
   ],
+  "attachments": [
+    {
+      "id": "01ARZ3NDEKTSV4RRFFQ69G5FAZ",
+      "filename": "photo.jpg",
+      "contentType": "image/jpeg",
+      "sizeBytes": "204800",
+      "width": 1920,
+      "height": 1080,
+      "durationMs": null,
+      "hasThumbnail": true
+    }
+  ],
+  "linkPreview": {
+    "id": "01ARZ3NDEKTSV4RRFFQ69G5FB0",
+    "url": "https://example.com/article",
+    "title": "Article title",
+    "description": "A short description",
+    "siteName": "Example",
+    "hasImage": true
+  },
   "replyToId": null,
   "editedAt": null,
   "redactedAt": null,
@@ -59,6 +79,10 @@ derived by the client. A message with no reaction, a new message and a redacted
 message have `[]`. `message_created` carries no reactions; clients keep them
 current from `reaction_added` and `reaction_removed`, applied idempotently (an
 event may replay a reaction already present in a page).
+
+`attachments` lists the message's files, ordered by `position`; `[]` for a
+message with none. `linkPreview` is the message's snapshotted link preview, or
+`null`. See [Attachments](#attachments) and [Link previews](#link-previews).
 
 ## Restricted Markdown
 
@@ -132,21 +156,89 @@ A target has a `type`:
   `message_edited` event, so it counts as new for a reader whose read marker is
   already past the message.
 
+## Attachments
+
+Needs `room.post` **and** `room.attach` to add files; `room.attach` alone does
+not let a caller post without `room.post`.
+
+- `POST /rooms/:id/messages` accepts `attachments?: uploadId[]` (max
+  `attachments.max_per_message`, default `10`): ids of the caller's own,
+  `ready`, not-yet-expired uploads (see
+  [Storage](../technical/file-storage-and-quotas.md) for `POST /uploads`). A
+  message needs a `body` or at least one attachment (`message.empty`, `422`).
+  Consuming an upload moves its blob reference to the attachment; the `Upload`
+  row is deleted, no net effect on the blob's reference count.
+- `PATCH /rooms/:id/messages/:messageId` accepts
+  `attachments?: { add?: uploadId[], remove?: attachmentId[] }`. Adding is
+  **author-only**, needs `room.attach`, and only within `messages.edit_window`
+  if set — `room.edit_any` does not extend to attaching new files on someone
+  else's message. Removing follows the edit rule (`room.edit_own` /
+  `room.edit_any`). The message must still have a body or an attachment
+  afterward (`message.empty`, `422`).
+- `DELETE /rooms/:id/messages/:messageId/attachments/:attachmentId` removes one
+  attachment: `room.delete_own` (the author) or `room.delete_any` (audited as a
+  moderation action). Emits `attachment_removed { messageId, attachmentId }`;
+  clients handle it like `message_edited` (refetch the message).
+- `GET /rooms/:id/files?kind=media|documents&before=&limit=` (`room.read`)
+  lists the room's attachments, newest first: `{ items, nextCursor }`. `media`
+  is `image/*`, `video/*`, `audio/*`; `documents` is everything else. Hidden and
+  redacted messages are excluded. Items add `messageId`, `uploaderId` and
+  `createdAt` to the `attachments` item shape above.
+- Errors: `message.attachment_limit_exceeded` (`422`),
+  `message.attachment_not_found` (`404`), `upload.not_found` (`404`),
+  `upload.not_ready` (`409`), `upload.expired` (`410`).
+- Files are downloaded through signed URLs (`POST /files/urls` with
+  `{ kind: "attachment", id, variant }`), not this endpoint — see
+  [Storage](../technical/file-storage-and-quotas.md).
+
+## Link previews
+
+Off by default (`link_previews.enabled`); `GET /messages/policy`'s sibling
+`GET /auth/policy` exposes it as `linkPreviews`.
+
+- `POST /link-previews { url }` (throttled per user, `link_previews.throttle`)
+  fetches (or returns the cached) metadata for a page: `og:*` / `twitter:*` /
+  `<title>` / `<meta name=description>`, and a preview image when present.
+  `200`: `{ id, url, title, description, siteName, hasImage }`; `204` when the
+  page has nothing to preview; `404 link_preview.disabled` when the feature is
+  off. The fetcher is SSRF-safe: `http(s)` only, every resolved address must be
+  public, redirects are re-checked, response size and time are capped.
+- `POST /rooms/:id/messages` accepts `linkPreviewUrl?: string`, one of the
+  `http(s)` links in `body` (`link_preview.url_not_in_body`, `422`). The cached
+  preview (fetched synchronously once if missing or expired) is copied into the
+  message as a snapshot, so a later cache refresh never changes an
+  already-sent message.
+- `PATCH /rooms/:id/messages/:messageId` accepts
+  `linkPreviewUrl?: string | null`: a URL replaces the snapshot (validated the
+  same way), `null` removes it, omitting it leaves it unchanged.
+- `DELETE` and redaction (user delete, retention delete mode) remove the
+  snapshot and release its image.
+- The preview image is downloaded through signed URLs, kind `message_preview`
+  keyed by the message id (same access rule as attachments); the cache's own
+  image (before it is ever used in a message) is kind `preview`, open to any
+  authenticated user.
+
 ## Sending, editing, deleting
 
 ### `POST /rooms/:id/messages`
 
 Needs `room.post` and the room not read-only (or `room.edit_any`).
 
-- Body: `{ body, replyToId?, mentions? }`. `replyToId` must reference a message
-  in the same room (a redacted parent still anchors the reply). `mentions` is a
-  list of [mention target inputs](#mentions).
+- Body: `{ body?, replyToId?, mentions?, attachments?, linkPreviewUrl? }`. `body`
+  is optional, but a body or at least one attachment is required
+  (`message.empty`). `replyToId` must reference a message in the same room (a
+  redacted parent still anchors the reply). `mentions` is a list of
+  [mention target inputs](#mentions); `attachments` and `linkPreviewUrl` are
+  covered in [Attachments](#attachments) and [Link previews](#link-previews).
 - `201`: `Message`.
 - Errors: `room.permission_denied` (`403`), `room.not_found` (`404`),
-  `room.read_only` (`422`), `message.body_too_long` (`422`),
+  `room.read_only` (`422`), `message.empty` (`422`),
+  `message.body_too_long` (`422`),
   `message.body_invalid` (`422`, fails the restricted-Markdown parse),
   `message.reply_not_in_room` (`422`), `message.mention_not_member` (`422`),
-  `message.mention_invalid` (`422`), validation (`422`).
+  `message.mention_invalid` (`422`), plus the
+  [attachment](#attachments) and [link preview](#link-previews) errors,
+  validation (`422`).
 
 ### `GET /rooms/:id/messages`
 
@@ -195,17 +287,26 @@ Needs `room.edit_own` (author, within `messages.edit_window` if set) or
 `room.edit_any`. Sets `editedAt`; the previous body is not retained. Emits
 `message_edited` with `{ messageId, editedAt }` only — never the previous body.
 
-- Body: `{ body, mentions? }` — validated the same way as `POST`.
+- Body: `{ body?, mentions?, attachments?, linkPreviewUrl? }` — validated the
+  same way as `POST`; the message must still have a body or an attachment
+  afterward (`message.empty`).
   - `mentions` absent: the targets are unchanged.
   - `mentions` present: the full new list. A target kept (same `type` and
     `target`) keeps its token and audience, with no re-evaluation. A removed
     target loses its audience. An added target is resolved now, with its
     audience at the `seq` of the `message_edited` event.
+  - `attachments`: `{ add?: uploadId[], remove?: attachmentId[] }` — see
+    [Attachments](#attachments).
+  - `linkPreviewUrl`: a URL replaces the preview, `null` removes it, omitting
+    it leaves it unchanged — see [Link previews](#link-previews).
 - `200`: `Message`.
 - Errors: `room.permission_denied` (`403`), `message.not_found` (`404`, also
-  returned for an already-redacted message), `message.body_too_long` (`422`),
+  returned for an already-redacted message), `message.empty` (`422`),
+  `message.body_too_long` (`422`),
   `message.body_invalid` (`422`), `message.mention_not_member` (`422`),
-  `message.mention_invalid` (`422`), validation (`422`).
+  `message.mention_invalid` (`422`), plus the
+  [attachment](#attachments) and [link preview](#link-previews) errors,
+  validation (`422`).
 
 ### `DELETE /rooms/:id/messages/:messageId`
 
@@ -348,8 +449,8 @@ deleter, reactor, pinner); `content` only ever carries the delta.
 
 | type | payload |
 |---|---|
-| `message_created` | `{ messageId, body, replyToId, mentions }` — `mentions` are the [mention targets](#mentions); `mentionsMe` is never part of an event |
-| `message_edited` | `{ messageId, editedAt }` — never the previous body |
+| `message_created` | `{ messageId, body, replyToId, mentions, attachments, linkPreview }` — `mentions` are the [mention targets](#mentions); `attachments` is the raw attachment list (`{ id, filename, contentType, sizeBytes, position }`, not the resolved media metadata); `linkPreview` is the snapshot or `null`; `mentionsMe` is never part of an event |
+| `message_edited` | `{ messageId, editedAt }` — never the previous body; clients refetch the message for attachment or link-preview changes too |
 | `message_redacted` | `{ reason: "user" \| "retention" }` — this REWRITES the original `message_created` row (same `seq`); it is not a new event |
 | `message_deleted` | `{ messageId, messageSeq, reason: "user" \| "retention" }` — the live notification of a deletion, appended with its own `seq`; `messageSeq` is the `seq` of the original (now tombstoned) row |
 | `message_hidden` | reserved for the retention worker (issue #12); no payload shape fixed yet |
@@ -357,4 +458,5 @@ deleter, reactor, pinner); `content` only ever carries the delta.
 | `reaction_removed` | `{ messageId, emoji }` |
 | `pin_added` | `{ messageId }` |
 | `pin_removed` | `{ messageId }` |
+| `attachment_removed` | `{ messageId, attachmentId }` — clients refetch the message |
 | `receipt_updated` | `{ userId, seq }` |

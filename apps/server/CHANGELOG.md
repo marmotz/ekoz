@@ -32,6 +32,10 @@ that does not touch this file.
 - Deleting a one-to-one conversation hides its past messages from the caller, and it returns with the next message. (#165)
 - `GET /me/storage` reports the caller's storage usage against their quota. (#138)
 - Resumable uploads under `/uploads` (tus 1.0: creation, termination, expiration). (#139)
+- Messages can carry file attachments: send and edit accept uploads, attachments can be removed by their author or a moderator, and `GET /rooms/:id/files` lists a room's media and documents. (#143)
+- Messages can carry a link preview: `POST /link-previews` fetches and caches page metadata with an SSRF-safe fetcher, and send/edit can attach one from a link in the body. Off by default (`link_previews.enabled`). (#144)
+- `GET/PUT/DELETE /admin/settings(/:key)` let the owner read every configuration parameter's resolved value and provenance, and set or reset a runtime override, audited. (#145)
+- Admin storage: `GET/PUT/DELETE /admin/users/:id/storage(-quota)` for a per-user quota override, `GET /admin/storage` for the server-wide dashboard, `GET /admin/attachments` to search attachments across every room, and `DELETE /admin/blobs/:id` to force-remove a blob from every attachment, link preview and avatar referencing it, audited. (#146)
 - Uploaded images and videos get a generated thumbnail and reported dimensions/duration when ffmpeg is available. (#140)
 - `POST /files/urls` issues short-lived signed download URLs, checked again on every `GET /files/:token` request. (#141)
 

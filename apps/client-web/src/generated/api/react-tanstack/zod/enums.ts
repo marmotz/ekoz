@@ -9,6 +9,10 @@ export const AddGroupDmMembersDtoHistory = ["full", "none"] as const;
 export const AddGroupDmMembersDtoHistorySchema = z.enum(AddGroupDmMembersDtoHistory);
 export type AddGroupDmMembersDtoHistory = (typeof AddGroupDmMembersDtoHistory)[number];
 
+export const AdminStorageDashboardDtoDriver = ["local", "s3"] as const;
+export const AdminStorageDashboardDtoDriverSchema = z.enum(AdminStorageDashboardDtoDriver);
+export type AdminStorageDashboardDtoDriver = (typeof AdminStorageDashboardDtoDriver)[number];
+
 export const AdminUserDetailDtoStatus = ["active", "suspended", "deleted"] as const;
 export const AdminUserDetailDtoStatusSchema = z.enum(AdminUserDetailDtoStatus);
 export type AdminUserDetailDtoStatus = (typeof AdminUserDetailDtoStatus)[number];
@@ -20,6 +24,14 @@ export type AdminUserListResponseDtoItemsStatus = (typeof AdminUserListResponseD
 export const AuthPolicyDtoRegistrationMode = ["open", "invite", "admin"] as const;
 export const AuthPolicyDtoRegistrationModeSchema = z.enum(AuthPolicyDtoRegistrationMode);
 export type AuthPolicyDtoRegistrationMode = (typeof AuthPolicyDtoRegistrationMode)[number];
+
+export const ConfigParameterViewDtoKind = ["infra", "runtime"] as const;
+export const ConfigParameterViewDtoKindSchema = z.enum(ConfigParameterViewDtoKind);
+export type ConfigParameterViewDtoKind = (typeof ConfigParameterViewDtoKind)[number];
+
+export const ConfigParameterViewDtoSource = ["default", "file", "settings", "env"] as const;
+export const ConfigParameterViewDtoSourceSchema = z.enum(ConfigParameterViewDtoSource);
+export type ConfigParameterViewDtoSource = (typeof ConfigParameterViewDtoSource)[number];
 
 export const ConversationListResponseDtoItemsDefaultRole = ["space_admin", "room_admin", "moderator", "member", "reader"] as const;
 export const ConversationListResponseDtoItemsDefaultRoleSchema = z.enum(ConversationListResponseDtoItemsDefaultRole);
@@ -97,7 +109,7 @@ export const MyMentionsPageDtoItemsRoomType = ["space", "channel", "dm", "group_
 export const MyMentionsPageDtoItemsRoomTypeSchema = z.enum(MyMentionsPageDtoItemsRoomType);
 export type MyMentionsPageDtoItemsRoomType = (typeof MyMentionsPageDtoItemsRoomType)[number];
 
-export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "room.manage_groups", "space.create_child", "space.manage", "directory.publish"] as const;
+export const MyPermissionsResponseDtoCapabilities = ["room.read", "room.post", "room.edit_own", "room.delete_own", "room.edit_any", "room.delete_any", "room.react", "room.pin", "room.attach", "room.invite", "room.kick", "room.ban", "room.manage_members", "room.manage_roles", "room.manage_permissions", "room.manage_retention", "room.manage_groups", "space.create_child", "space.manage", "directory.publish"] as const;
 export const MyPermissionsResponseDtoCapabilitiesSchema = z.enum(MyPermissionsResponseDtoCapabilities);
 export type MyPermissionsResponseDtoCapabilities = (typeof MyPermissionsResponseDtoCapabilities)[number];
 
