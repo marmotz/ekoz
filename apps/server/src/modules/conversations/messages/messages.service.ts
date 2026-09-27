@@ -170,6 +170,19 @@ export class MessagesService implements OnModuleInit {
         return null;
       }
 
+      if (ref.variant === 'thumbnail') {
+        const thumbnail = blob.thumbnailBlobId
+          ? await this.blobs.findById(blob.thumbnailBlobId)
+          : null;
+        if (thumbnail) {
+          return {
+            blob: thumbnail,
+            filename: attachment.filename,
+            contentType: thumbnail.contentType,
+          };
+        }
+      }
+
       return { blob, filename: attachment.filename, contentType: attachment.contentType };
     });
 
@@ -611,6 +624,21 @@ export class MessagesService implements OnModuleInit {
     const viaCapability = canDeleteOwn ? 'delete_own' : 'delete_any';
     if (!canDeleteOwn) {
       await this.permissions.assertCan(actor, roomId, 'room.delete_any');
+    }
+
+    const { count: otherAttachmentsCount } = await this.prisma.orm.public.MessageAttachment.where(
+      (f) => and(f.messageId.eq(messageId), f.id.neq(attachmentId)),
+    ).aggregate((a) => ({ count: a.count() }));
+    const linkPreview = (await this.prisma.orm.public.MessageLinkPreview.where({
+      messageId,
+    }).first()) as MessageLinkPreviewRow | null;
+
+    if (otherAttachmentsCount === 0 && message.body === '' && !linkPreview) {
+      // Removing the last attachment leaves nothing to show — redact the
+      // message so it renders as "deleted" instead of an empty bubble.
+      await this.redactMessage(roomId, message, actor.userId, 'user');
+
+      return { authorId: message.authorId, viaCapability };
     }
 
     await this.prisma.transaction(async (tx) => {

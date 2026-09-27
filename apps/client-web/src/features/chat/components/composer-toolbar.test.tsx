@@ -150,7 +150,11 @@ it('shows the language selector only inside a code block and changes what is sen
   await waitFor(async () => expect(await input()).toHaveFocus());
   await user.keyboard('{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: '```typescript\nconst a = 1;\n```', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({
+    body: '```typescript\nconst a = 1;\n```',
+    mentions: [],
+    attachments: [],
+  });
 });
 
 it('sends a bare fence for auto-detect', async () => {
@@ -159,7 +163,7 @@ it('sends a bare fence for auto-detect', async () => {
   await user.click(button('Code block'));
   await user.keyboard('{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: '```\nx\n```', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: '```\nx\n```', mentions: [], attachments: [] });
 });
 
 it('sends ```text for plain text', async () => {
@@ -173,7 +177,7 @@ it('sends ```text for plain text', async () => {
   await waitFor(async () => expect(await input()).toHaveFocus());
   await user.keyboard('{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: '```text\ny\n```', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: '```text\ny\n```', mentions: [], attachments: [] });
 });
 
 it('sends on Enter inside a list and a code block, and breaks the line with Shift+Enter', async () => {
@@ -184,7 +188,7 @@ it('sends on Enter inside a list and a code block, and breaks the line with Shif
 
   await user.keyboard('{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: '- one\n- two', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: '- one\n- two', mentions: [], attachments: [] });
 });
 
 it('cannot exceed the Markdown the server accepts: a heading typed stays text', async () => {

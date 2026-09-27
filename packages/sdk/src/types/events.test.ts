@@ -36,7 +36,14 @@ describe('RoomEvent', () => {
       describeEvent({
         ...base,
         type: 'message_created',
-        content: { messageId: 'm', body: 'hi', replyToId: null, mentions: [] },
+        content: {
+          messageId: 'm',
+          body: 'hi',
+          replyToId: null,
+          mentions: [],
+          attachments: [],
+          linkPreview: null,
+        },
       }),
     ).toBe('created:hi');
     expect(
@@ -86,6 +93,8 @@ describe('RoomEvent', () => {
           { type: 'all', target: null, token: '@all' },
           { type: 'user', target: 'u2', token: '@bob/example.com' },
         ],
+        attachments: [],
+        linkPreview: null,
       },
     };
 

@@ -29,6 +29,8 @@ function wireMessage(seq: number, overrides: Record<string, unknown> = {}) {
     redactedAt: null,
     hiddenAt: null,
     createdAt: '2026-01-01T10:00:00.000Z',
+    attachments: [],
+    linkPreview: null,
     ...overrides,
   };
 }
@@ -39,7 +41,11 @@ const member = (id: string, displayName: string | null) => ({
   user: { id, identifier: displayName ? `${id}/example.test` : null, displayName, avatarUrl: null },
 });
 
-function created(seq: number, overrides: Record<string, unknown> = {}) {
+function created(
+  seq: number,
+  overrides: Record<string, unknown> & { content?: Record<string, unknown> } = {},
+) {
+  const { content, ...eventOverrides } = overrides;
   return {
     roomId: 'r1',
     feedSeq: String(seq),
@@ -49,8 +55,16 @@ function created(seq: number, overrides: Record<string, unknown> = {}) {
       seq: String(seq),
       senderId: 'u2',
       createdAt: '2026-01-01T11:00:00.000Z',
-      content: { messageId: `m${seq}`, body: `live ${seq}`, replyToId: null, mentions: [] },
-      ...overrides,
+      content: {
+        messageId: `m${seq}`,
+        body: `live ${seq}`,
+        replyToId: null,
+        mentions: [],
+        attachments: [],
+        linkPreview: null,
+        ...content,
+      },
+      ...eventOverrides,
     },
   };
 }
@@ -734,6 +748,47 @@ it('sends a message optimistically and reconciles it with the confirmed one', as
   expect(screen.getAllByText('hello there')).toHaveLength(1);
 });
 
+it('sends an attachment with an empty body and revokes its local preview once confirmed', async () => {
+  URL.createObjectURL = vi.fn(() => 'blob:preview-1');
+  URL.revokeObjectURL = vi.fn();
+  let confirm: (message: unknown) => void = () => {};
+  const { fake, container } = setup({
+    capabilities: [...CAN_POST, 'room.attach'],
+    configure: (f) => {
+      f.stubs.uploads.upload.mockResolvedValue({
+        id: 'up-1',
+        promise: Promise.resolve({ id: 'up-1', state: 'ready' }),
+      } as never);
+      f.stubs.messages.send.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            confirm = resolve;
+          }) as never,
+      );
+    },
+  });
+  await screen.findByText('message 2');
+
+  const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+  fireEvent.change(input, {
+    target: { files: [new File(['x'], 'photo.png', { type: 'image/png' })] },
+  });
+  await screen.findByText('photo.png');
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Send' })).toBeEnabled());
+  fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+
+  await waitFor(() =>
+    expect(fake.stubs.messages.send).toHaveBeenCalledWith('r1', {
+      attachments: ['up-1'],
+    }),
+  );
+
+  await act(async () => confirm(wireMessage(3, { body: '', authorId: 'u1' })));
+
+  await waitFor(() => expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:preview-1'));
+  vi.restoreAllMocks();
+});
+
 it('does not duplicate the message when the stream delivers it before the response', async () => {
   let confirm: (message: unknown) => void = () => {};
   const { fake, user } = setup({
@@ -753,7 +808,16 @@ it('does not duplicate the message when the stream delivers it before the respon
   await emit(
     fake,
     'room_event',
-    created(3, { content: { messageId: 'm3', body: 'echo', replyToId: null, mentions: [] } }),
+    created(3, {
+      content: {
+        messageId: 'm3',
+        body: 'echo',
+        replyToId: null,
+        mentions: [],
+        attachments: [],
+        linkPreview: null,
+      },
+    }),
   );
   await act(async () => confirm(wireMessage(3, { body: 'echo' })));
 

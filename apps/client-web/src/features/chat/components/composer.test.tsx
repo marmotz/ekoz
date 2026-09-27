@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
@@ -42,12 +42,16 @@ function setup(props: Partial<ComposerProps> = {}) {
   createClientMock.mockReturnValue(fake.sdk);
 
   const onSend = vi.fn();
-  const { queryClient } = renderWithProviders(
+  const { queryClient, container } = renderWithProviders(
     <SdkProvider>
       <Composer roomId="r1" allowCollective block={null} onSend={onSend} {...props} />
     </SdkProvider>,
   );
-  return { fake, onSend, queryClient, user: userEvent.setup() };
+  return { fake, onSend, queryClient, container, user: userEvent.setup() };
+}
+
+function pdfFile(name = 'report.pdf') {
+  return new File(['x'], name, { type: 'application/pdf' });
 }
 
 const editor = () => screen.findByRole('textbox', { name: 'Message' });
@@ -81,7 +85,7 @@ it('sends the Markdown body with Enter and clears the editor', async () => {
 
   await user.type(await editor(), 'hello **world**{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: 'hello **world**', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: 'hello **world**', mentions: [], attachments: [] });
   await waitFor(() =>
     expect(screen.getByRole('textbox', { name: 'Message' }).textContent).toBe(''),
   );
@@ -111,7 +115,7 @@ it('sends with the button once there is text', async () => {
 
   await user.click(screen.getByRole('button', { name: 'Send' }));
 
-  expect(onSend).toHaveBeenCalledWith({ body: 'hi', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: 'hi', mentions: [], attachments: [] });
 });
 
 it('does not accept input while blocked or loading', async () => {
@@ -182,6 +186,7 @@ it('picks a suggestion with Enter, turns it into a chip and sends its token and 
   expect(onSend).toHaveBeenCalledWith({
     body: 'hi @bob/example.test ok',
     mentions: [{ type: 'user', target: 'u2', token: '@bob/example.test' }],
+    attachments: [],
   });
 });
 
@@ -199,6 +204,7 @@ it('navigates with the arrow keys and picks with Tab', async () => {
   expect(onSend).toHaveBeenCalledWith({
     body: '@alina/example.test x',
     mentions: [{ type: 'user', target: 'u3', token: '@alina/example.test' }],
+    attachments: [],
   });
 });
 
@@ -223,6 +229,7 @@ it('picks with the mouse', async () => {
   expect(onSend).toHaveBeenCalledWith({
     body: '@bob/example.test',
     mentions: [{ type: 'user', target: 'u2', token: '@bob/example.test' }],
+    attachments: [],
   });
 });
 
@@ -235,7 +242,7 @@ it('closes the suggestions on Escape and keeps the typed text', async () => {
 
   await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
   await user.keyboard('{Enter}');
-  expect(onSend).toHaveBeenCalledWith({ body: '@bo', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: '@bo', mentions: [], attachments: [] });
 });
 
 it('serialises group, role and @all mentions to their tokens and sends the targets once each', async () => {
@@ -260,6 +267,7 @@ it('serialises group, role and @all mentions to their tokens and sends the targe
       { type: 'role', target: 'moderator', token: '@moderator' },
       { type: 'all', target: null, token: '@all' },
     ],
+    attachments: [],
   });
 });
 
@@ -314,4 +322,221 @@ it('calls onTyping when the draft changes, not when it is empty', async () => {
 
   await user.keyboard('i');
   expect(onTyping).toHaveBeenCalledTimes(2);
+});
+
+it('hides the attach button without room.attach', async () => {
+  setup({ canAttach: false });
+  await editor();
+
+  expect(screen.queryByRole('button', { name: 'Attach a file' })).not.toBeInTheDocument();
+});
+
+it('adds a file through the picker to the tray and sends it with an empty body', async () => {
+  const { fake, onSend, container } = setup({ canAttach: true });
+  fake.stubs.uploads.upload.mockResolvedValue({
+    id: 'up-1',
+    promise: Promise.resolve({ id: 'up-1', state: 'ready' }),
+  } as never);
+  await editor();
+
+  const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+  fireEvent.change(input, { target: { files: [pdfFile()] } });
+
+  expect(await screen.findByText('report.pdf')).toBeInTheDocument();
+  const send = await screen.findByRole('button', { name: 'Send' });
+  await waitFor(() => expect(send).toBeEnabled());
+
+  fireEvent.click(send);
+
+  await waitFor(() =>
+    expect(onSend).toHaveBeenCalledWith({
+      body: '',
+      mentions: [],
+      attachments: [
+        {
+          uploadId: 'up-1',
+          filename: 'report.pdf',
+          contentType: 'application/pdf',
+          previewUrl: null,
+        },
+      ],
+    }),
+  );
+});
+
+it('adds a dropped file to the tray', async () => {
+  const { container } = setup({ canAttach: true });
+  await editor();
+
+  const dropZone = container.querySelector('.border-t') as HTMLElement;
+  fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile('dropped.pdf')] } });
+
+  expect(await screen.findByText('dropped.pdf')).toBeInTheDocument();
+});
+
+it('adds a pasted file to the tray', async () => {
+  const { container } = setup({ canAttach: true });
+  await editor();
+
+  const dropZone = container.querySelector('.border-t') as HTMLElement;
+  fireEvent.paste(dropZone, { clipboardData: { files: [pdfFile('pasted.pdf')] } });
+
+  expect(await screen.findByText('pasted.pdf')).toBeInTheDocument();
+});
+
+it('does not add a dropped file without room.attach', async () => {
+  const { container } = setup({ canAttach: false });
+  await editor();
+
+  const dropZone = container.querySelector('.border-t') as HTMLElement;
+  fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile('dropped.pdf')] } });
+
+  expect(screen.queryByText('dropped.pdf')).not.toBeInTheDocument();
+});
+
+it('disables send while an upload is in progress, even with text', async () => {
+  const { fake, container, user } = setup({ canAttach: true });
+  let resolveUpload!: (result: { id: string; state: 'ready' }) => void;
+  fake.stubs.uploads.upload.mockResolvedValue({
+    id: 'up-1',
+    promise: new Promise((resolve) => {
+      resolveUpload = resolve;
+    }),
+  } as never);
+  await editor();
+
+  const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+  fireEvent.change(input, { target: { files: [pdfFile()] } });
+  await screen.findByText('report.pdf');
+  await user.type(await editor(), 'hello');
+
+  expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled();
+
+  resolveUpload({ id: 'up-1', state: 'ready' });
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Send' })).toBeEnabled());
+});
+
+it('removes a failed upload from the tray', async () => {
+  const { fake, container, user } = setup({ canAttach: true });
+  fake.stubs.uploads.upload.mockRejectedValue(new Error('boom'));
+  await editor();
+
+  const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+  fireEvent.change(input, { target: { files: [pdfFile()] } });
+
+  await screen.findByText('This file could not be uploaded.');
+  await user.click(screen.getByRole('button', { name: 'Remove report.pdf' }));
+
+  expect(screen.queryByText('report.pdf')).not.toBeInTheDocument();
+});
+
+const linkPreview = {
+  id: 'p1',
+  url: 'https://example.test',
+  title: 'Example site',
+  description: 'A description',
+  siteName: 'example.test',
+  hasImage: false,
+};
+
+it('does not fetch a link preview when the option is off', async () => {
+  const { fake, user } = setup();
+
+  await user.type(await editor(), 'see https://example.test');
+
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  expect(fake.stubs.linkPreviews.fetch).not.toHaveBeenCalled();
+});
+
+it('shows the preview of the first link once the option is on', async () => {
+  const { fake, user } = setup();
+  fake.stubs.auth.policy.mockResolvedValue({
+    registrationMode: 'open',
+    emailVerificationRequired: true,
+    passwordMinLength: 12,
+    linkPreviews: true,
+  } as never);
+  fake.stubs.linkPreviews.fetch.mockResolvedValue(linkPreview as never);
+
+  await user.type(await editor(), 'see https://example.test');
+
+  await waitFor(
+    () => expect(fake.stubs.linkPreviews.fetch).toHaveBeenCalledWith('https://example.test'),
+    {
+      timeout: 2000,
+    },
+  );
+  expect(await screen.findByText('Example site')).toBeInTheDocument();
+});
+
+it('cycles to the next link found in the body', async () => {
+  const { fake, user } = setup();
+  fake.stubs.auth.policy.mockResolvedValue({
+    registrationMode: 'open',
+    emailVerificationRequired: true,
+    passwordMinLength: 12,
+    linkPreviews: true,
+  } as never);
+  fake.stubs.linkPreviews.fetch.mockImplementation(
+    async (url: string) => ({ ...linkPreview, url, title: url }) as never,
+  );
+
+  await user.type(await editor(), 'https://a.test then https://b.test');
+
+  await waitFor(
+    () => expect(fake.stubs.linkPreviews.fetch).toHaveBeenCalledWith('https://a.test'),
+    { timeout: 6000 },
+  );
+
+  await user.click(await screen.findByRole('button', { name: 'Preview the next link' }));
+
+  await waitFor(
+    () => expect(fake.stubs.linkPreviews.fetch).toHaveBeenCalledWith('https://b.test'),
+    { timeout: 6000 },
+  );
+}, 15_000);
+
+it('sends the chosen link as linkPreviewUrl', async () => {
+  const { fake, onSend, user } = setup();
+  fake.stubs.auth.policy.mockResolvedValue({
+    registrationMode: 'open',
+    emailVerificationRequired: true,
+    passwordMinLength: 12,
+    linkPreviews: true,
+  } as never);
+  fake.stubs.linkPreviews.fetch.mockResolvedValue(linkPreview as never);
+
+  await user.type(await editor(), 'see https://example.test');
+  await screen.findByText('Example site');
+
+  await user.click(await editor());
+  await user.keyboard('{Enter}');
+
+  expect(onSend).toHaveBeenCalledWith(
+    expect.objectContaining({ linkPreviewUrl: 'https://example.test' }),
+  );
+});
+
+it('sends nothing for linkPreviewUrl once the preview is dismissed', async () => {
+  const { fake, onSend, user } = setup();
+  fake.stubs.auth.policy.mockResolvedValue({
+    registrationMode: 'open',
+    emailVerificationRequired: true,
+    passwordMinLength: 12,
+    linkPreviews: true,
+  } as never);
+  fake.stubs.linkPreviews.fetch.mockResolvedValue(linkPreview as never);
+
+  await user.type(await editor(), 'see https://example.test');
+  await screen.findByText('Example site');
+
+  await user.click(screen.getByRole('button', { name: 'Remove the link preview' }));
+  await waitFor(() => expect(screen.queryByText('Example site')).not.toBeInTheDocument());
+
+  await user.click(await editor());
+  await user.keyboard('{Enter}');
+
+  expect(onSend).toHaveBeenCalledWith(
+    expect.not.objectContaining({ linkPreviewUrl: expect.anything() }),
+  );
 });

@@ -9,6 +9,12 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 - Regenerate the API types: `GET /me/storage` and `POST /files/urls` response shapes, and the problem-details `details` field (#136, #137, #138, #139, #140, #141).
 - Regenerate the API types: message attachments and link previews, admin settings, and admin storage and attachment moderation response shapes (#143, #144, #145, #146).
+- Render message attachments: an image/video grid sized to avoid layout shift with a lightbox, native `<audio controls>` rows, and a file card with a signed download link for everything else; a "Remove file" action for the author or a moderator (#150).
+- Add composer attachments: a file picker, drag-and-drop and paste, an attachment tray with per-file progress, cancel and retry, and an optimistic send that carries the local previews until the message is confirmed. The attach control is hidden without `room.attach` (#152).
+- Add link previews: the composer debounces and previews the first `http(s)` link of the draft, with a button to cycle through the others and a dismiss; sent messages show the same card, removable by their author. Off entirely when the `linkPreviews` auth policy is off (#153).
+- Add a "Files" control in the room header opening a side panel with Media and Documents tabs over the room's attachments, paginated with a "Load more" button; clicking an entry jumps to its message (#154).
+- Add a "Storage" section to the account page with a usage bar against the quota, or "unlimited" when there is none (#154).
+- Edit attachments and the link preview from a message's edit mode: existing attachments toggle out for removal, new ones need `room.attach` and the author, and the link preview follows the edited body or can be removed (#155).
 - Add direct and group conversations: a "Direct messages" section in the sidebar listing them with an unseen dot, and a conversation page with its header, history and composer (#183).
 - Delete a one-to-one conversation from its header, after a confirmation; it comes back with the next message and none of the earlier ones (#183).
 - Redirect the link of a direct or group conversation opened as a room to its conversation page (#183).
@@ -110,6 +116,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Fixed
 
+- Sending a message with only an attachment and no text no longer fails: an empty body is omitted from the request instead of being sent as an invalid empty string.
 - Stop the console from logging "No queryFn was passed" for every reply quote: the timeline lookup now declares itself cache-only.
 - Stop the page from scrolling when the members panel of a room with many members is open: the hover action buttons of the member rows escaped the list scroll area.
 - Scale the initials of a default avatar with its size instead of a fixed font size.

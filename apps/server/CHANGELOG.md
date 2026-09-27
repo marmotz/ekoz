@@ -57,6 +57,10 @@ that does not touch this file.
 
 ### Fixed
 
+- Video attachment thumbnails are served instead of the raw video file, which browsers cannot render as an image. (#143)
+- PDF attachments now download instead of opening inline in the browser tab.
+- Removing a message's last attachment now redacts it (shows as deleted) instead of leaving an empty bubble. (#143)
+- CORS now allows and exposes the tus upload headers, so attachment uploads no longer fail with a network error from a browser client.
 - Presence is delivered to the peers of the user instead of the peers of their peers. (#129)
 - Typing signals reach the members of a space reading a channel by inheritance, without a reconnect, and are no longer echoed to the sender. (#129)
 - Pinning or reacting to a deleted message now answers 404. (#207)

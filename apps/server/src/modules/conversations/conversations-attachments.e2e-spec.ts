@@ -1,6 +1,7 @@
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { Readable } from 'node:stream';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -10,6 +11,7 @@ import { AppModule } from '../../app.module.js';
 import { applyTestInfraConfig } from '../../core/config/testing/test-infra-config.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { startTestDatabase, type TestDatabase } from '../../core/prisma/testing/test-database.js';
+import { BlobService } from '../../core/storage/blob.service.js';
 import { AccountService } from '../identity/accounts/account.service.js';
 import { PermissionsService } from './permissions/permissions.service.js';
 
@@ -21,6 +23,7 @@ describe('conversations — attachments (integration)', () => {
   let accounts: AccountService;
   let prisma: PrismaService;
   let permissions: PermissionsService;
+  let blobs: BlobService;
 
   const password = 'a-perfectly-fine-passphrase';
   const server = () => app.getHttpServer();
@@ -137,6 +140,7 @@ describe('conversations — attachments (integration)', () => {
     accounts = app.get(AccountService);
     prisma = app.get(PrismaService);
     permissions = app.get(PermissionsService);
+    blobs = app.get(BlobService);
     await accounts.createAccount({
       name: 'owner',
       email: 'owner@ekoz.example.com',
@@ -407,6 +411,55 @@ describe('conversations — attachments (integration)', () => {
     ).toBe(0);
   });
 
+  it('redacts a files-only message when its last attachment is removed', async () => {
+    const ownerToken = await login('owner');
+    const channel = await createPublicChannel(ownerToken, 'attach-remove-last-room');
+
+    const uploadId = await createUpload(ownerToken, Buffer.from('only file'), 'only.txt');
+    const message = await request(server())
+      .post(`/rooms/${channel.id}/messages`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ attachments: [uploadId] })
+      .expect(201);
+    const attachmentId = message.body.attachments[0].id as string;
+
+    await request(server())
+      .delete(`/rooms/${channel.id}/messages/${message.body.id}/attachments/${attachmentId}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
+
+    const redacted = await prisma.orm.public.Message.where({ id: message.body.id }).first();
+    expect((redacted as { redactedAt: string | null }).redactedAt).not.toBeNull();
+  });
+
+  it('does not redact when other attachments or a body remain', async () => {
+    const ownerToken = await login('owner');
+    const channel = await createPublicChannel(ownerToken, 'attach-remove-keep-room');
+
+    const upload1 = await createUpload(ownerToken, Buffer.from('first'), 'first.txt');
+    const upload2 = await createUpload(ownerToken, Buffer.from('second'), 'second.txt');
+    const message = await request(server())
+      .post(`/rooms/${channel.id}/messages`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ attachments: [upload1, upload2] })
+      .expect(201);
+    const [firstAttachmentId, secondAttachmentId] = message.body.attachments.map(
+      (attachment: { id: string }) => attachment.id,
+    );
+
+    await request(server())
+      .delete(`/rooms/${channel.id}/messages/${message.body.id}/attachments/${firstAttachmentId}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(204);
+
+    const afterFirstRemoval = await prisma.orm.public.Message.where({
+      id: message.body.id,
+    }).first();
+    expect((afterFirstRemoval as { redactedAt: string | null }).redactedAt).toBeNull();
+
+    void secondAttachmentId;
+  });
+
   describe('GET /rooms/:id/files', () => {
     it('filters by kind and paginates with a cursor, excluding hidden/redacted messages', async () => {
       const ownerToken = await login('owner');
@@ -482,17 +535,71 @@ describe('conversations — attachments (integration)', () => {
   });
 
   describe('attachment file access', () => {
-    const issueUrl = async (token: string, attachmentId: string): Promise<string> => {
+    const issueUrl = async (
+      token: string,
+      attachmentId: string,
+      variant: 'original' | 'thumbnail' = 'original',
+    ): Promise<string> => {
       const urls = await request(server())
         .post('/files/urls')
         .set('Authorization', `Bearer ${token}`)
-        .send({ items: [{ kind: 'attachment', id: attachmentId, variant: 'original' }] })
+        .send({ items: [{ kind: 'attachment', id: attachmentId, variant }] })
         .expect(201);
 
       return new URL(urls.body.items[0].url, 'https://ekoz.example.com').pathname
         .split('/')
         .pop() as string;
     };
+
+    it('serves the thumbnail blob for the thumbnail variant, not the original', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'attach-thumbnail-room');
+
+      const uploadId = await createUpload(ownerToken, Buffer.from('fake video bytes'), 'clip.mp4');
+      const message = await request(server())
+        .post(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ attachments: [uploadId] })
+        .expect(201);
+      const attachmentId = message.body.attachments[0].id as string;
+      const attachment = (await prisma.orm.public.MessageAttachment.where({
+        id: attachmentId,
+      }).first()) as { blobId: string };
+
+      const thumbnail = await blobs.ingest(Readable.from([Buffer.from('thumb bytes')]), {
+        contentType: 'image/jpeg',
+        uploaderId: null,
+      });
+      await prisma.orm.public.Blob.where({ id: attachment.blobId }).update({
+        thumbnailBlobId: thumbnail.id,
+      });
+
+      const originalToken = await issueUrl(ownerToken, attachmentId, 'original');
+      const original = await request(server()).get(`/files/${originalToken}`).expect(200);
+      expect(original.text).toBe('fake video bytes');
+
+      const thumbnailToken = await issueUrl(ownerToken, attachmentId, 'thumbnail');
+      const thumbnailRes = await request(server()).get(`/files/${thumbnailToken}`).expect(200);
+      expect(thumbnailRes.headers['content-type']).toContain('image/jpeg');
+      expect(Buffer.from(thumbnailRes.body as Buffer).toString()).toBe('thumb bytes');
+    });
+
+    it('falls back to the original when no thumbnail was generated', async () => {
+      const ownerToken = await login('owner');
+      const channel = await createPublicChannel(ownerToken, 'attach-thumbnail-fallback-room');
+
+      const uploadId = await createUpload(ownerToken, Buffer.from('plain file'), 'note.txt');
+      const message = await request(server())
+        .post(`/rooms/${channel.id}/messages`)
+        .set('Authorization', `Bearer ${ownerToken}`)
+        .send({ attachments: [uploadId] })
+        .expect(201);
+      const attachmentId = message.body.attachments[0].id as string;
+
+      const thumbnailToken = await issueUrl(ownerToken, attachmentId, 'thumbnail');
+      const res = await request(server()).get(`/files/${thumbnailToken}`).expect(200);
+      expect(res.text).toBe('plain file');
+    });
 
     it('denies access once the caller has left the room', async () => {
       const ownerToken = await login('owner');

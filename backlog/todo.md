@@ -63,7 +63,7 @@ _in discussion, technical design in [technical.md](./technical.md)_ — 0/4 task
 
 ## Content and sharing ·  [overview](features/content-and-sharing/overview.md)
 
-_todo, see [technical.md](./technical.md)_ — 13/21 tasks done
+_todo, see [technical.md](./technical.md)_ — 18/21 tasks done
 
 | Done | Issue                                              | Title                                                                                          | Blocked by                   |
 |------|----------------------------------------------------|------------------------------------------------------------------------------------------------|------------------------------|
@@ -80,11 +80,11 @@ _todo, see [technical.md](./technical.md)_ — 13/21 tasks done
 | [x]  | [#147](https://github.com/marmotz/ekoz/issues/147) | SDK: resumable upload client (client.uploads) and me.storage()                                 | #138, #139                   |
 | [x]  | [#148](https://github.com/marmotz/ekoz/issues/148) | SDK: message attachments, file URLs, room files and link previews                              | #143, #144                   |
 | [x]  | [#149](https://github.com/marmotz/ekoz/issues/149) | SDK: admin settings and storage bindings                                                       | #145, #146                   |
-| [ ]  | [#150](https://github.com/marmotz/ekoz/issues/150) | Web client: render attachments in messages (signed URLs, grid, players, file card)             | #148                         |
-| [ ]  | [#152](https://github.com/marmotz/ekoz/issues/152) | Web client: composer attachments (picker, drop, paste, tray, progress, optimistic send)        | #147, #150                   |
-| [ ]  | [#153](https://github.com/marmotz/ekoz/issues/153) | Web client: link preview card in the composer and in messages                                  | #152                         |
-| [ ]  | [#154](https://github.com/marmotz/ekoz/issues/154) | Web client: room Files panel and account storage section                                       | #147, #150                   |
-| [ ]  | [#155](https://github.com/marmotz/ekoz/issues/155) | Web client: edit attachments and link preview in message edit mode                             | #152, #153                   |
+| [x]  | [#150](https://github.com/marmotz/ekoz/issues/150) | Web client: render attachments in messages (signed URLs, grid, players, file card)             | #148                         |
+| [x]  | [#152](https://github.com/marmotz/ekoz/issues/152) | Web client: composer attachments (picker, drop, paste, tray, progress, optimistic send)        | #147, #150                   |
+| [x]  | [#153](https://github.com/marmotz/ekoz/issues/153) | Web client: link preview card in the composer and in messages                                  | #152                         |
+| [x]  | [#154](https://github.com/marmotz/ekoz/issues/154) | Web client: room Files panel and account storage section                                       | #147, #150                   |
+| [x]  | [#155](https://github.com/marmotz/ekoz/issues/155) | Web client: edit attachments and link preview in message edit mode                             | #152, #153                   |
 | [ ]  | [#156](https://github.com/marmotz/ekoz/issues/156) | Admin console: sharing settings screen                                                         | #149                         |
 | [ ]  | [#157](https://github.com/marmotz/ekoz/issues/157) | Admin console: storage dashboard, file moderation and user storage card                        | #149                         |
 | [ ]  | [#158](https://github.com/marmotz/ekoz/issues/158) | Content and sharing docs: protocol and technical pages                                         | #137, #145, #146, #147, #148 |

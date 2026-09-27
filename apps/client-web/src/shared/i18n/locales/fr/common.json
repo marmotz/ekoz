@@ -196,6 +196,14 @@
       "revokedOthers_one": "{{count}} session déconnectée.",
       "revokedOthers_other": "{{count}} sessions déconnectées."
     },
+    "storage": {
+      "title": "Stockage",
+      "description": "Espace utilisé par vos fichiers envoyés.",
+      "loading": "Chargement de l'utilisation du stockage",
+      "error": "L'utilisation du stockage n'a pas pu être chargée.",
+      "usage": "{{used}} sur {{quota}} utilisés",
+      "unlimited": "{{used}} utilisés - stockage illimité"
+    },
     "danger": {
       "title": "Zone de danger",
       "description": "La suppression de votre compte est irréversible.",
@@ -249,6 +257,44 @@
       "failed": "Non envoyé",
       "retry": "Réessayer",
       "editedAt": "Modifié le {{date}}"
+    },
+    "attachments": {
+      "download": "Télécharger {{filename}}",
+      "playVideo": "Lire {{filename}}",
+      "remove": {
+        "action": "Supprimer le fichier",
+        "title": "Supprimer ce fichier ?",
+        "description": "« {{filename}} » sera supprimé du message pour tout le monde. Cette action est irréversible.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer",
+        "errors": {
+          "permissionDenied": "Vous n'avez pas la permission de supprimer ce fichier.",
+          "notFound": "Ce fichier n'existe plus.",
+          "network": "Le serveur n'a pas pu être contacté.",
+          "generic": "Le fichier n'a pas pu être supprimé."
+        }
+      },
+      "upload": {
+        "attach": "Joindre un fichier",
+        "tray": "Pièces jointes",
+        "remove": "Retirer {{filename}}",
+        "retry": "Réessayer",
+        "progress": "{{percent}} %",
+        "errors": {
+          "quotaExceeded": "Votre quota de stockage est atteint.",
+          "tooLarge": "Ce fichier est trop volumineux.",
+          "typeRejected": "Ce type de fichier n'est pas autorisé.",
+          "capacityExceeded": "Le serveur n'a plus d'espace de stockage disponible.",
+          "expired": "Cet envoi a expiré.",
+          "network": "Le serveur n'a pas pu être contacté.",
+          "generic": "Ce fichier n'a pas pu être envoyé."
+        }
+      }
+    },
+    "linkPreview": {
+      "next": "Prévisualiser le lien suivant",
+      "dismiss": "Retirer l'aperçu du lien",
+      "remove": "Retirer l'aperçu du lien"
     },
     "receipts": {
       "readBy": "Lu par {{names}}",
@@ -403,6 +449,10 @@
       "hint": "Entrée pour enregistrer, Échap pour annuler.",
       "discard": "Abandonner vos modifications du message en cours de modification ?",
       "deleted": "Le message que vous modifiiez a été supprimé.",
+      "attachments": {
+        "remove": "Retirer {{filename}}",
+        "keep": "Conserver {{filename}}"
+      },
       "errors": {
         "permissionDenied": "Vous ne pouvez plus modifier ce message.",
         "bodyTooLong": "Ce message est trop long.",
@@ -501,6 +551,17 @@
       "empty": "Aucun salon pour l'instant."
     },
     "unnamed": "Salon sans nom",
+    "files": {
+      "toggle": "Fichiers",
+      "title": "Fichiers",
+      "description": "Les médias et documents partagés dans le salon.",
+      "mediaTab": "Médias",
+      "documentsTab": "Documents",
+      "loading": "Chargement des fichiers",
+      "emptyMedia": "Aucun média partagé pour le moment.",
+      "emptyDocuments": "Aucun document partagé pour le moment.",
+      "loadMore": "Charger plus"
+    },
     "welcome": {
       "title": "Bienvenue",
       "empty": "Vous n'êtes encore dans aucun salon. Parcourez l'annuaire pour trouver un salon public à rejoindre.",

@@ -1,7 +1,9 @@
 import { Pin } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
+import { MessageAttachments } from '@/features/chat/components/message-attachments';
 import { MessageEditForm } from '@/features/chat/components/message-edit-form';
+import { MessageLinkPreview } from '@/features/chat/components/message-link-preview';
 import { MessageMenu, type MessageMenuHandlers } from '@/features/chat/components/message-menu';
 import { ReactionBar } from '@/features/chat/components/reaction-bar';
 import { ReactionPicker } from '@/features/chat/components/reaction-picker';
@@ -207,15 +209,35 @@ export function MessageItem({
               <MessageEditForm
                 message={message}
                 allowCollective={actions.allowCollective}
+                canAttach={
+                  actions.myId === message.authorId && actions.capabilities.includes('room.attach')
+                }
                 onFinished={actions.onEditFinished}
                 onDirtyChange={actions.onEditDirtyChange}
               />
             ) : (
-              <MessageBody
-                body={message.body}
-                roomId={message.roomId}
-                mentions={message.mentions}
-              />
+              <>
+                <MessageBody
+                  body={message.body}
+                  roomId={message.roomId}
+                  mentions={message.mentions}
+                />
+                <MessageAttachments
+                  roomId={message.roomId}
+                  messageId={message.id}
+                  authorId={message.authorId}
+                  attachments={message.attachments}
+                />
+                {message.linkPreview ? (
+                  <MessageLinkPreview
+                    roomId={message.roomId}
+                    messageId={message.id}
+                    authorId={message.authorId}
+                    linkPreview={message.linkPreview}
+                    myId={actions?.myId ?? null}
+                  />
+                ) : null}
+              </>
             )}
             {!deleted && actions ? (
               <ReactionBar
@@ -263,6 +285,23 @@ export function PendingItem({
           <ReplyQuote roomId={roomId} replyToId={pending.replyToId} />
         ) : null}
         <MessageBody body={pending.body} roomId={roomId} mentions={pending.mentions} />
+        {pending.attachments.length > 0 ? (
+          <ul className="mt-1 flex flex-wrap gap-1">
+            {pending.attachments.map((attachment) => (
+              <li key={attachment.uploadId} className="rounded-md border bg-muted/50 p-1">
+                {attachment.previewUrl ? (
+                  <img
+                    src={attachment.previewUrl}
+                    alt={attachment.filename}
+                    className="size-12 rounded object-cover"
+                  />
+                ) : (
+                  <span className="px-1 text-xs text-muted-foreground">{attachment.filename}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {failed ? (
           <p
             role="alert"

@@ -14,8 +14,28 @@ export function buildCorsOptions(allowedOrigins: readonly string[]): CorsOptions
   return {
     origin: [...allowedOrigins],
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['authorization', 'content-type', 'x-request-id', 'x-ekoz-protocol'],
-    exposedHeaders: ['x-request-id'],
+    allowedHeaders: [
+      'authorization',
+      'content-type',
+      'x-request-id',
+      'x-ekoz-protocol',
+      'upload-length',
+      'upload-metadata',
+      'upload-offset',
+      'tus-resumable',
+    ],
+    exposedHeaders: [
+      'x-request-id',
+      'location',
+      'upload-offset',
+      'upload-length',
+      'upload-expires',
+      'ekoz-upload',
+      'tus-resumable',
+      'tus-version',
+      'tus-extension',
+      'tus-max-size',
+    ],
     maxAge: 600,
   };
 }

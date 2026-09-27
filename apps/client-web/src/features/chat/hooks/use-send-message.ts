@@ -8,12 +8,20 @@ import {
   addPending,
   markPendingFailed,
   markPendingSending,
+  type PendingAttachment,
   reconcilePending,
   type SendFailureReason,
   type Timeline,
   toTimelineMessage,
 } from '@/features/chat/lib/timeline';
 import { useSdk } from '@/shared/sdk/use-sdk';
+
+/** Revokes the local preview urls of a pending message's attachments, once it is settled. */
+function revokePreviews(attachments: readonly PendingAttachment[]): void {
+  for (const attachment of attachments) {
+    if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
+  }
+}
 
 const REASON_BY_CODE: Record<string, SendFailureReason> = {
   'room.read_only': 'read_only',
@@ -53,15 +61,27 @@ export function useSendMessage(roomId: string) {
   );
 
   const deliver = useCallback(
-    async (localId: string, body: string, mentions: MentionTarget[], replyToId: string | null) => {
+    async (
+      localId: string,
+      body: string,
+      mentions: MentionTarget[],
+      replyToId: string | null,
+      attachments: PendingAttachment[],
+      linkPreviewUrl: string | null,
+    ) => {
       if (!sdk) return;
       try {
         const message = await sdk.messages.send(roomId, {
-          body,
+          ...(body !== '' ? { body } : {}),
           ...(replyToId !== null ? { replyToId } : {}),
           ...(mentions.length > 0 ? { mentions: toMentionInputs(mentions) } : {}),
+          ...(attachments.length > 0
+            ? { attachments: attachments.map((attachment) => attachment.uploadId) }
+            : {}),
+          ...(linkPreviewUrl !== null ? { linkPreviewUrl } : {}),
         });
         update((timeline) => reconcilePending(timeline, localId, toTimelineMessage(message)));
+        revokePreviews(attachments);
       } catch (error) {
         const reason = toFailureReason(error);
         // The limit was lowered on the server: pick the new one up.
@@ -76,15 +96,33 @@ export function useSendMessage(roomId: string) {
 
   const send = useCallback(
     (
-      { body, mentions }: { body: string; mentions: MentionTarget[] },
+      {
+        body,
+        mentions,
+        attachments = [],
+        linkPreviewUrl = null,
+      }: {
+        body: string;
+        mentions: MentionTarget[];
+        attachments?: PendingAttachment[];
+        linkPreviewUrl?: string | null;
+      },
       replyToId: string | null = null,
     ) => {
       localCounter += 1;
       const localId = `local-${Date.now()}-${localCounter}`;
       update((timeline) =>
-        addPending(timeline, { localId, body, mentions, replyToId, state: 'sending' }),
+        addPending(timeline, {
+          localId,
+          body,
+          mentions,
+          replyToId,
+          attachments,
+          linkPreviewUrl,
+          state: 'sending',
+        }),
       );
-      return deliver(localId, body, mentions, replyToId);
+      return deliver(localId, body, mentions, replyToId, attachments, linkPreviewUrl);
     },
     [update, deliver],
   );
@@ -95,7 +133,14 @@ export function useSendMessage(roomId: string) {
       const entry = timeline?.pending.find((pending) => pending.localId === localId);
       if (entry?.state !== 'failed') return Promise.resolve();
       update((current) => markPendingSending(current, localId));
-      return deliver(localId, entry.body, entry.mentions, entry.replyToId);
+      return deliver(
+        localId,
+        entry.body,
+        entry.mentions,
+        entry.replyToId,
+        entry.attachments,
+        entry.linkPreviewUrl,
+      );
     },
     [queryClient, key, update, deliver],
   );

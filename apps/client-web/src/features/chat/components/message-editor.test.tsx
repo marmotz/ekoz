@@ -75,7 +75,7 @@ it('still sends at exactly the limit', async () => {
   expect(screen.getByRole('button', { name: 'Send' })).toBeEnabled();
   await user.keyboard('{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: 'abcdefghij', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: 'abcdefghij', mentions: [], attachments: [] });
 });
 
 it('turns to the error tone and blocks the button and Enter over the limit', async () => {
@@ -104,7 +104,7 @@ it('sends again once the text is short enough', async () => {
   await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('10 / 10'));
   await user.keyboard('{Enter}');
 
-  expect(onSend).toHaveBeenCalledWith({ body: 'abcdefghij', mentions: [] });
+  expect(onSend).toHaveBeenCalledWith({ body: 'abcdefghij', mentions: [], attachments: [] });
 });
 
 it('counts the Markdown that is sent, not the visible text', async () => {
@@ -150,7 +150,7 @@ it('refetches the limit after a send is refused as too long', async () => {
       </QueryClientProvider>
     ),
   });
-  await result.current.send({ body: 'hello', mentions: [] });
+  await result.current.send({ body: 'hello', mentions: [], attachments: [] });
 
   await waitFor(() => expect(fake.stubs.messages.policy).toHaveBeenCalledTimes(2));
   expect(await screen.findByRole('status')).toHaveTextContent('5 / 5');

@@ -122,6 +122,7 @@ export {
   resolveRequestId,
 } from './transport/request-context.js';
 export type {
+  AttachmentRemovedEvent,
   GroupChangedEvent,
   MessageCreatedEvent,
   MessageDeletedEvent,
@@ -130,6 +131,7 @@ export type {
   OtherRoomEventType,
   PinAddedEvent,
   PinRemovedEvent,
+  RawAttachmentTarget,
   ReactionAddedEvent,
   ReactionRemovedEvent,
   ReceiptUpdatedEvent,

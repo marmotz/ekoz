@@ -29,6 +29,8 @@ const message: TimelineMessage = {
   hiddenAt: null,
   createdAt: '2026-01-01T10:00:00.000Z',
   reactions: [],
+  attachments: [],
+  linkPreview: null,
 };
 
 const member: Author = {
@@ -191,4 +193,81 @@ it('shows no presence dot for an author who left or whose account is deleted', a
 
   await screen.findByText('hello there');
   expect(screen.queryByRole('img', { name: 'Online', hidden: true })).not.toBeInTheDocument();
+});
+
+it('renders the message attachments', async () => {
+  setup(member, {
+    ...message,
+    body: '',
+    attachments: [
+      {
+        id: 'a1',
+        filename: 'report.pdf',
+        contentType: 'application/pdf',
+        sizeBytes: '10240',
+        width: null,
+        height: null,
+        durationMs: null,
+        hasThumbnail: false,
+      },
+    ],
+  });
+
+  expect(await screen.findByText('report.pdf')).toBeInTheDocument();
+});
+
+it('does not render attachments of a deleted message', async () => {
+  setup(member, {
+    ...message,
+    redactedAt: '2026-01-01T11:00:00.000Z',
+    attachments: [
+      {
+        id: 'a1',
+        filename: 'report.pdf',
+        contentType: 'application/pdf',
+        sizeBytes: '10240',
+        width: null,
+        height: null,
+        durationMs: null,
+        hasThumbnail: false,
+      },
+    ],
+  });
+
+  await screen.findByText('Message deleted');
+  expect(screen.queryByText('report.pdf')).not.toBeInTheDocument();
+});
+
+it('renders the message link preview', async () => {
+  setup(member, {
+    ...message,
+    linkPreview: {
+      id: 'p1',
+      url: 'https://example.test',
+      title: 'Example site',
+      description: 'A description',
+      siteName: 'example.test',
+      hasImage: false,
+    },
+  });
+
+  expect(await screen.findByText('Example site')).toBeInTheDocument();
+});
+
+it('does not render the link preview of a deleted message', async () => {
+  setup(member, {
+    ...message,
+    redactedAt: '2026-01-01T11:00:00.000Z',
+    linkPreview: {
+      id: 'p1',
+      url: 'https://example.test',
+      title: 'Example site',
+      description: 'A description',
+      siteName: 'example.test',
+      hasImage: false,
+    },
+  });
+
+  await screen.findByText('Message deleted');
+  expect(screen.queryByText('Example site')).not.toBeInTheDocument();
 });

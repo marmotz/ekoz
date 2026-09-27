@@ -46,6 +46,8 @@ export interface MessageEditorProps {
   onSubmit: (message: ComposerMessage) => void;
   /** Called instead of `onSubmit` when the body is what `initial` was loaded as. */
   onUnchanged?: () => void;
+  /** An empty body still submits (at least one ready attachment covers it). */
+  allowEmptyBody?: boolean;
   /** Loads a message for editing: its body parsed back, mention chips included. */
   initial?: InitialMessage;
   /** Escape (with no `@` popup open). */
@@ -53,6 +55,8 @@ export interface MessageEditorProps {
   onDirtyChange?: (dirty: boolean) => void;
   /** Called on every change that leaves the editor with content (the user is typing). */
   onTyping?: () => void;
+  /** Called with the current Markdown body on every change (the link preview watches it). */
+  onBodyChange?: (body: string) => void;
   /** Accessible name of the editor; defaults to the composer's. */
   label?: string;
   /** Actions rendered beside the editor. */
@@ -79,9 +83,11 @@ export function MessageEditor({
   onSubmit,
   initial,
   onUnchanged,
+  allowEmptyBody = false,
   onCancel,
   onDirtyChange,
   onTyping,
+  onBodyChange,
   label: labelProp,
   children,
 }: MessageEditorProps) {
@@ -104,8 +110,10 @@ export function MessageEditor({
 
   const bridge = useMemo(() => createComposerHandlers(), []);
   const onTypingRef = useRef(onTyping);
+  const onBodyChangeRef = useRef(onBodyChange);
   useEffect(() => {
     onTypingRef.current = onTyping;
+    onBodyChangeRef.current = onBodyChange;
   });
 
   const editor = useEditor({
@@ -123,6 +131,7 @@ export function MessageEditor({
       setContentState({ empty: current.isEmpty, blank: markdown === '', length: markdown.length });
       setDirty(baseline.current === null || markdown !== baseline.current);
       if (markdown !== '') onTypingRef.current?.();
+      onBodyChangeRef.current?.(markdown);
     },
   });
 
@@ -186,7 +195,7 @@ export function MessageEditor({
   const submit = () => {
     if (!editor || disabled || overLimit) return;
     const body = editor.getMarkdown().trim();
-    if (body === '') return;
+    if (body === '' && !allowEmptyBody) return;
     if (initial && !dirty) {
       onUnchanged?.();
       return;
@@ -269,7 +278,7 @@ export function MessageEditor({
           </p>
         ) : null}
       </div>
-      {children?.({ canSubmit: !disabled && !blank && !overLimit, submit })}
+      {children?.({ canSubmit: !disabled && (!blank || allowEmptyBody) && !overLimit, submit })}
       {suggestions.popup}
     </div>
   );
