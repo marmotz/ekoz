@@ -51,6 +51,9 @@ http/
     scrape.hurl                       GET /metrics                    (404 unless metrics_enabled)
   blobs/
     not-found.hurl                    GET /blobs/:id                  (404 until a feature adds a policy)
+  files/
+    urls-not-found.hurl                POST /files/urls                201 · every ref denies until #143/#144 register a policy
+    download-not-found.hurl            GET  /files/:token              404 files.not_found · public route
   setup/
     state.hurl                        GET /setup                      200 · public, any state
     create-owner.hurl                 POST /setup/owner               201 · fresh DB + real setup_token
@@ -95,6 +98,17 @@ http/
     username-cancel.hurl              DELETE /me/username/request     204 · needs a pending request
     username-cancel-none.hurl         DELETE /me/username/request     404 identity.username_request_not_found
     delete.hurl                       DELETE /me                      204 · re-auth, throwaway account
+    storage.hurl                      GET    /me/storage              200 · needs access_token
+  uploads/
+    options.hurl                      OPTIONS /uploads                204 · public, tus capability discovery
+    create.hurl                       POST   /uploads                 201 · needs access_token, captures upload_id
+    create-too-large.hurl             POST   /uploads                 413 upload.too_large
+    head.hurl                         HEAD   /uploads/:id             200 · needs upload_id
+    patch-complete.hurl               PATCH  /uploads/:id             200 · whole file in one chunk, finalizes
+    patch-offset-mismatch.hurl        PATCH  /uploads/:id             409 upload.offset_mismatch
+    get.hurl                          GET    /uploads/:id             200 · non-tus recovery view
+    get-not-found.hurl                GET    /uploads/:id             404 upload.not_found
+    cancel.hurl                       DELETE /uploads/:id             204 · needs upload_id
   users/
     profile.hurl                      GET    /users/:identifier       200 · needs access_token
     summaries.hurl                    GET    /users?ids=              200 · needs access_token + target_user_id

@@ -1,10 +1,10 @@
-<!-- backlog-sync 2026-09-26T20:28Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
+<!-- backlog-sync 2026-09-27T08:48Z — GENERATED, do not hand-edit. Regenerate: skill backlog-sync -->
 
 # Backlog
 
 ## Web client room moderation ·  [overview](features/web-client-room-moderation/overview.md)
 
-_designed, see [technical.md](features/web-client-room-moderation/technical.md)_ — 0/10 tasks done
+_designed, see [technical.md](./technical.md)_ — 0/10 tasks done
 
 | Done | Issue                                              | Title                                                                                              | Blocked by             |
 |------|----------------------------------------------------|----------------------------------------------------------------------------------------------------|------------------------|
@@ -21,7 +21,7 @@ _designed, see [technical.md](features/web-client-room-moderation/technical.md)_
 
 ## Web client room settings ·  [overview](features/web-client-room-settings/overview.md)
 
-_designed, see [technical.md](features/web-client-room-settings/technical.md)_ — 0/9 tasks done
+_designed, see [technical.md](./technical.md)_ — 0/9 tasks done
 
 | Done | Issue                                              | Title                                                                                          | Blocked by       |
 |------|----------------------------------------------------|------------------------------------------------------------------------------------------------|------------------|
@@ -37,7 +37,7 @@ _designed, see [technical.md](features/web-client-room-settings/technical.md)_ �
 
 ## Web client direct messages ·  [overview](features/web-client-direct-messages/overview.md)
 
-_done, see [technical.md](features/web-client-direct-messages/technical.md)_ — 8/8 tasks done
+_done, see [technical.md](./technical.md)_ — 8/8 tasks done
 
 | Done | Issue                                              | Title                                                                                       | Blocked by       |
 |------|----------------------------------------------------|---------------------------------------------------------------------------------------------|------------------|
@@ -52,7 +52,7 @@ _done, see [technical.md](features/web-client-direct-messages/technical.md)_ —
 
 ## Web client timeline system events ·  [overview](features/web-client-timeline-system-events/overview.md)
 
-_in discussion, technical design in [technical.md](features/web-client-timeline-system-events/technical.md)_ — 0/4 tasks done
+_in discussion, technical design in [technical.md](./technical.md)_ — 0/4 tasks done
 
 | Done | Issue                                              | Title                                                            | Blocked by |
 |------|----------------------------------------------------|------------------------------------------------------------------|------------|
@@ -63,16 +63,16 @@ _in discussion, technical design in [technical.md](features/web-client-timeline-
 
 ## Content and sharing ·  [overview](features/content-and-sharing/overview.md)
 
-_todo, see [technical.md](features/content-and-sharing/technical.md)_ — 0/21 tasks done
+_todo, see [technical.md](./technical.md)_ — 6/21 tasks done
 
 | Done | Issue                                              | Title                                                                                          | Blocked by                   |
 |------|----------------------------------------------------|------------------------------------------------------------------------------------------------|------------------------------|
-| [ ]  | [#136](https://github.com/marmotz/ekoz/issues/136) | Storage core: blob uploader, GC fix, content type sniffing and filtering                       | —                            |
-| [ ]  | [#137](https://github.com/marmotz/ekoz/issues/137) | Storage core: S3-compatible storage driver                                                     | —                            |
-| [ ]  | [#138](https://github.com/marmotz/ekoz/issues/138) | Storage core: per-user quota, global capacity and GET /me/storage                              | #136                         |
-| [ ]  | [#139](https://github.com/marmotz/ekoz/issues/139) | Storage core: resumable uploads (tus 1.0) under /uploads                                       | #136, #138                   |
-| [ ]  | [#140](https://github.com/marmotz/ekoz/issues/140) | Storage core: optional ffmpeg thumbnails and media metadata                                    | #139                         |
-| [ ]  | [#141](https://github.com/marmotz/ekoz/issues/141) | Storage core: signed file URLs with per-request access check                                   | #136, #137                   |
+| [x]  | [#137](https://github.com/marmotz/ekoz/issues/137) | Storage core: S3-compatible storage driver                                                     | —                            |
+| [x]  | [#136](https://github.com/marmotz/ekoz/issues/136) | Storage core: blob uploader, GC fix, content type sniffing and filtering                       | —                            |
+| [x]  | [#138](https://github.com/marmotz/ekoz/issues/138) | Storage core: per-user quota, global capacity and GET /me/storage                              | #136                         |
+| [x]  | [#139](https://github.com/marmotz/ekoz/issues/139) | Storage core: resumable uploads (tus 1.0) under /uploads                                       | #136, #138                   |
+| [x]  | [#140](https://github.com/marmotz/ekoz/issues/140) | Storage core: optional ffmpeg thumbnails and media metadata                                    | #139                         |
+| [x]  | [#141](https://github.com/marmotz/ekoz/issues/141) | Storage core: signed file URLs with per-request access check                                   | #136, #137                   |
 | [ ]  | [#143](https://github.com/marmotz/ekoz/issues/143) | Conversations: room.attach and message attachments (send, edit, remove, redact, files listing) | #139, #141                   |
 | [ ]  | [#144](https://github.com/marmotz/ekoz/issues/144) | Link previews: SSRF-safe fetcher, cache, POST /link-previews and message snapshot              | #140, #143                   |
 | [ ]  | [#145](https://github.com/marmotz/ekoz/issues/145) | Admin settings API: GET/PUT/DELETE /admin/settings                                             | —                            |
@@ -88,3 +88,16 @@ _todo, see [technical.md](features/content-and-sharing/technical.md)_ — 0/21 t
 | [ ]  | [#156](https://github.com/marmotz/ekoz/issues/156) | Admin console: sharing settings screen                                                         | #149                         |
 | [ ]  | [#157](https://github.com/marmotz/ekoz/issues/157) | Admin console: storage dashboard, file moderation and user storage card                        | #149                         |
 | [ ]  | [#158](https://github.com/marmotz/ekoz/issues/158) | Content and sharing docs: protocol and technical pages                                         | #137, #145, #146, #147, #148 |
+
+## Documentation site ·  [overview](features/documentation-site/overview.md)
+
+_technical design — see [technical.md](technical.md)_ — 0/6 tasks done
+
+| Done | Issue                                              | Title                                                                                 | Blocked by |
+|------|----------------------------------------------------|---------------------------------------------------------------------------------------|------------|
+| [ ]  | [#236](https://github.com/marmotz/ekoz/issues/236) | docs: scaffold apps/docs workspace with 3 Docusaurus docs instances                   | —          |
+| [ ]  | [#237](https://github.com/marmotz/ekoz/issues/237) | docs: write the Guides instance (quickstart, installation, server ops, security, FAQ) | #236       |
+| [ ]  | [#238](https://github.com/marmotz/ekoz/issues/238) | docs: write the Protocol instance from docs/protocol/*                                | #236       |
+| [ ]  | [#239](https://github.com/marmotz/ekoz/issues/239) | docs: write the SDK guide and wire TypeDoc API reference                              | #236       |
+| [ ]  | [#240](https://github.com/marmotz/ekoz/issues/240) | ci: dedicated docs.yml workflow deploying apps/docs to GitHub Pages                   | #236       |
+| [ ]  | [#241](https://github.com/marmotz/ekoz/issues/241) | ci: add apps/docs to the check-changelog.sh app loop                                  | #236       |

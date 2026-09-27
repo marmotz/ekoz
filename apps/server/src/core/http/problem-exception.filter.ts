@@ -66,6 +66,7 @@ export class ProblemExceptionFilter implements ExceptionFilter {
         status: exception.status,
         detail: exception.detail,
         code: exception.code,
+        details: exception.details,
       };
     }
 

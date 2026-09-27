@@ -5,10 +5,16 @@ import { BlobAccessRegistry } from './blob-access.registry.js';
 const blob = {
   id: 'blb_1',
   hash: 'h',
-  sizeBytes: 1,
+  sizeBytes: 1n,
   contentType: 'image/png',
   storageKey: 'k',
   refCount: 1,
+  uploaderId: null,
+  touchedAt: '',
+  width: null,
+  height: null,
+  durationMs: null,
+  thumbnailBlobId: null,
   createdAt: '',
 } satisfies Blob;
 

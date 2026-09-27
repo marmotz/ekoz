@@ -30,6 +30,10 @@ that does not touch this file.
 - Group conversations can be renamed, and their members and admins managed, through `/group-dms/:id`; a group without any admin is deleted. (#172)
 - Members added to a group can be limited to the messages sent after they join. (#172)
 - Deleting a one-to-one conversation hides its past messages from the caller, and it returns with the next message. (#165)
+- `GET /me/storage` reports the caller's storage usage against their quota. (#138)
+- Resumable uploads under `/uploads` (tus 1.0: creation, termination, expiration). (#139)
+- Uploaded images and videos get a generated thumbnail and reported dimensions/duration when ffmpeg is available. (#140)
+- `POST /files/urls` issues short-lived signed download URLs, checked again on every `GET /files/:token` request. (#141)
 
 ### Changed
 
@@ -42,6 +46,10 @@ that does not touch this file.
 - Creating a direct or group conversation with an unknown or inactive user answers 422 `room.user_not_found`. (#166)
 - Leaving a group conversation also removes the leaver's admin status. (#172)
 - Opening a direct conversation again brings back one the caller had deleted. (#165)
+- Blobs record their uploader and support widths, heights, durations and thumbnails, and their size can now exceed 2 GiB. (#136)
+- Uploaded content type is sniffed from the bytes instead of trusted from the caller, with a configurable allow/block list. (#136)
+- Object storage can run against an S3-compatible bucket instead of the local disk. (#137)
+- Avatar uploads are now checked against the caller's storage quota and the server's global capacity. (#138)
 
 ### Fixed
 
@@ -51,6 +59,7 @@ that does not touch this file.
 - Changing an existing per-user permission override no longer fails with a 500. (#172)
 - Reading a deleted room answers 404 to everyone, not 403 to former members. (#172)
 - Moving a room now drops all of its outdated ancestor links, not only one.
+- Blob GC no longer races a concurrent ingest: a blob touched again after becoming unreferenced survives the sweep. (#136)
 - Deleting a message now removes all of its reactions, not only one. (#173)
 - The SMTP transport and the storage driver use the configured `email.*` / `storage.*` values instead of the code defaults: the configuration is loaded before the providers built from it.
 - Requesting to join a room again after a rejection, and inviting a user again after a decline, no longer fail with a 500. (#64)

@@ -1,0 +1,445 @@
+[
+  {
+    "id": "column.public.blob.duration_ms",
+    "label": "Add column \"duration_ms\" to \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "duration_ms",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"duration_ms\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "duration_ms"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"duration_ms\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD COLUMN \"duration_ms\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"duration_ms\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "duration_ms"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.blob.height",
+    "label": "Add column \"height\" to \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "height",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"height\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "height"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"height\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD COLUMN \"height\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"height\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "height"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.blob.thumbnail_blob_id",
+    "label": "Add column \"thumbnail_blob_id\" to \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "thumbnail_blob_id",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"thumbnail_blob_id\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "thumbnail_blob_id"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"thumbnail_blob_id\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD COLUMN \"thumbnail_blob_id\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"thumbnail_blob_id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "thumbnail_blob_id"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.blob.uploader_id",
+    "label": "Add column \"uploader_id\" to \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "uploader_id",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"uploader_id\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "uploader_id"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"uploader_id\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD COLUMN \"uploader_id\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"uploader_id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "uploader_id"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.blob.width",
+    "label": "Add column \"width\" to \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "width",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"width\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "width"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"width\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD COLUMN \"width\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"width\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "width"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.blob.touched_at",
+    "label": "Add column \"touched_at\" to \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "touched_at",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"touched_at\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "touched_at"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"touched_at\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ADD COLUMN \"touched_at\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"touched_at\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "touched_at"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-blob-touched_at",
+    "label": "Data transform: backfill-blob-touched_at",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-blob-touched_at has work to do",
+        "sql": "SELECT EXISTS (SELECT id FROM blob WHERE touched_at IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-blob-touched_at",
+        "sql": "UPDATE blob SET touched_at = created_at WHERE touched_at IS NULL",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-blob-touched_at resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT id FROM blob WHERE touched_at IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-blob-uploader_id",
+    "label": "Data transform: backfill-blob-uploader_id",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-blob-uploader_id has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT blob.id FROM blob\n            JOIN user_profile ON user_profile.avatar_blob_id = blob.id\n            WHERE blob.uploader_id IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-blob-uploader_id",
+        "sql": "\n            UPDATE blob SET uploader_id = user_profile.user_id\n            FROM user_profile\n            WHERE user_profile.avatar_blob_id = blob.id AND blob.uploader_id IS NULL\n          ",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-blob-uploader_id resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT blob.id FROM blob\n            JOIN user_profile ON user_profile.avatar_blob_id = blob.id\n            WHERE blob.uploader_id IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.blob.touched_at",
+    "label": "Set NOT NULL on \"blob\".\"touched_at\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "touched_at",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"touched_at\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "touched_at"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"touched_at\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"blob\" WHERE \"touched_at\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"touched_at\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ALTER COLUMN \"touched_at\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"touched_at\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "touched_at",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterType.blob.size_bytes",
+    "label": "Alter type of \"blob\".\"size_bytes\" to int8",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "size_bytes",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"size_bytes\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "size_bytes"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"size_bytes\"",
+        "sql": "ALTER TABLE \"public\".\"blob\" ALTER COLUMN \"size_bytes\" TYPE int8 USING \"size_bytes\"::int8"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"size_bytes\" has type \"bigint\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "blob",
+          "size_bytes",
+          "bigint"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "index.blob.blob_uploader_id_idx_7e6af2c2",
+    "label": "Create index \"blob_uploader_id_idx_7e6af2c2\" on \"blob\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "blob_uploader_id_idx_7e6af2c2",
+        "table": "blob"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"blob_uploader_id_idx_7e6af2c2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"blob_uploader_id_idx_7e6af2c2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"blob_uploader_id_idx_7e6af2c2\"",
+        "sql": "CREATE INDEX \"blob_uploader_id_idx_7e6af2c2\" ON \"public\".\"blob\" (\"uploader_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"blob_uploader_id_idx_7e6af2c2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"blob_uploader_id_idx_7e6af2c2\""
+        ]
+      }
+    ]
+  }
+]

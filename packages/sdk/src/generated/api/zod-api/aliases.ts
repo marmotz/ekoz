@@ -29,6 +29,7 @@ import { GroupDetailDtoSchema, type GroupDetailDtoDto } from './GroupDetailDto.s
 import { GroupListViewDtoSchema, type GroupListViewDtoDto } from './GroupListViewDto.schema.js';
 import { HeartbeatResponseDtoSchema, type HeartbeatResponseDtoDto } from './HeartbeatResponseDto.schema.js';
 import { InvitationViewDtoSchema, type InvitationViewDtoDto } from './InvitationViewDto.schema.js';
+import { IssueFileUrlsResponseDtoSchema, type IssueFileUrlsResponseDtoDto } from './IssueFileUrlsResponseDto.schema.js';
 import { JoinRequestViewDtoSchema, type JoinRequestViewDtoDto } from './JoinRequestViewDto.schema.js';
 import { LoginDtoSchema, type LoginDtoDto } from './LoginDto.schema.js';
 import { LoginResponseDtoSchema, type LoginResponseDtoDto } from './LoginResponseDto.schema.js';
@@ -43,6 +44,7 @@ import { ModerationLogEntryDtoSchema, type ModerationLogEntryDtoDto } from './Mo
 import { MyMentionsPageDtoSchema, type MyMentionsPageDtoDto } from './MyMentionsPageDto.schema.js';
 import { MyPermissionsResponseDtoSchema, type MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.schema.js';
 import { MyRoomInvitationListViewDtoSchema, type MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.schema.js';
+import { MyStorageViewDtoSchema, type MyStorageViewDtoDto } from './MyStorageViewDto.schema.js';
 import { PendingJoinRequestListViewDtoSchema, type PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.schema.js';
 import { PresencePreferenceResponseDtoSchema, type PresencePreferenceResponseDtoDto } from './PresencePreferenceResponseDto.schema.js';
 import { ProblemDetailsDtoSchema, type ProblemDetailsDtoDto } from './ProblemDetailsDto.schema.js';
@@ -420,6 +422,15 @@ export type EmailVerificationController_verifyRequest = z.infer<typeof EmailVeri
 
 export const EventsController_streamQueryTicketSchema = z.string();
 export type EventsController_streamQueryTicket = z.infer<typeof EventsController_streamQueryTicketSchema>;
+
+export const FilesController_issueUrls200ResponseJsonSchema = IssueFileUrlsResponseDtoSchema;
+export type FilesController_issueUrls200ResponseJson = z.infer<typeof FilesController_issueUrls200ResponseJsonSchema>;
+
+export const FilesController_issueUrls401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type FilesController_issueUrls401ResponseProblemJson = z.infer<typeof FilesController_issueUrls401ResponseProblemJsonSchema>;
+
+export const FilesController_issueUrls422ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type FilesController_issueUrls422ResponseProblemJson = z.infer<typeof FilesController_issueUrls422ResponseProblemJsonSchema>;
 
 export const GroupDmController_addMembers200ResponseJsonSchema = z.array(MembershipViewDtoSchema);
 export type GroupDmController_addMembers200ResponseJson = z.infer<typeof GroupDmController_addMembers200ResponseJsonSchema>;
@@ -1032,6 +1043,12 @@ export type MyRoomInvitationsController_list200ResponseJson = z.infer<typeof MyR
 
 export const MyRoomInvitationsController_list401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type MyRoomInvitationsController_list401ResponseProblemJson = z.infer<typeof MyRoomInvitationsController_list401ResponseProblemJsonSchema>;
+
+export const MyStorageController_storage200ResponseJsonSchema = MyStorageViewDtoSchema;
+export type MyStorageController_storage200ResponseJson = z.infer<typeof MyStorageController_storage200ResponseJsonSchema>;
+
+export const MyStorageController_storage401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
+export type MyStorageController_storage401ResponseProblemJson = z.infer<typeof MyStorageController_storage401ResponseProblemJsonSchema>;
 
 export const PasswordResetController_confirm401ResponseProblemJsonSchema = ProblemDetailsDtoSchema;
 export type PasswordResetController_confirm401ResponseProblemJson = z.infer<typeof PasswordResetController_confirm401ResponseProblemJsonSchema>;

@@ -12,16 +12,24 @@ import { blobStorageKey, STORAGE_DRIVER, type StorageDriver } from './storage-dr
 export interface Blob {
   id: string;
   hash: string;
-  sizeBytes: number;
+  sizeBytes: bigint;
   contentType: string;
   storageKey: string;
   refCount: number;
+  uploaderId: string | null;
+  touchedAt: string;
+  width: number | null;
+  height: number | null;
+  durationMs: number | null;
+  thumbnailBlobId: string | null;
   createdAt: string;
 }
 
 export interface IngestOptions {
-  /** Caller-declared MIME type. Magic-byte validation is a content-and-sharing concern. */
-  declaredType: string;
+  /** Sniffed MIME type (technical.md §S5), not the caller-declared one. */
+  contentType: string;
+  /** The uploader charged for this content on a new hash. `null` for content no quota should carry (thumbnails, link previews). */
+  uploaderId: string | null;
 }
 
 /** ORM handle: the ambient client, or a transaction's `tx.orm` for {@link BlobService.retain}. */
@@ -48,29 +56,34 @@ export class BlobService {
     const dir = await mkdtemp(join(tmpdir(), 'ekoz-blob-'));
     const tmp = join(dir, 'payload');
     const hasher = createHash('sha256');
-    let sizeBytes = 0;
+    let sizeBytes = 0n;
 
     try {
       stream.on('data', (chunk: Buffer) => {
-        sizeBytes += chunk.length;
+        sizeBytes += BigInt(chunk.length);
         hasher.update(chunk);
       });
       await pipeline(stream, createWriteStream(tmp));
       const hash = hasher.digest('hex');
 
+      const now = new Date().toISOString();
       const existing = (await this.prisma.orm.public.Blob.where({ hash }).first()) as Blob | null;
       if (existing) {
-        return existing;
+        await this.prisma.orm.public.Blob.where({ id: existing.id }).update({ touchedAt: now });
+
+        return { ...existing, touchedAt: now };
       }
 
       const storageKey = blobStorageKey(hash);
-      await this.driver.put(storageKey, createReadStream(tmp), options.declaredType);
+      await this.driver.put(storageKey, createReadStream(tmp), options.contentType);
       const row = (await this.prisma.orm.public.Blob.create({
         hash,
         sizeBytes,
-        contentType: options.declaredType,
+        contentType: options.contentType,
         storageKey,
         refCount: 0,
+        uploaderId: options.uploaderId,
+        touchedAt: now,
       })) as Blob;
       this.logger.log(`Ingested blob ${row.id} (${sizeBytes} bytes, ${hash.slice(0, 12)}…)`);
 
@@ -110,6 +123,14 @@ export class BlobService {
     }
 
     const next = Math.max(0, row.refCount + delta);
+    if (next === 0 && row.refCount !== 0) {
+      await orm.public.Blob.where({ id: blobId }).update({
+        refCount: next,
+        touchedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
     await orm.public.Blob.where({ id: blobId }).update({ refCount: next });
   }
 }

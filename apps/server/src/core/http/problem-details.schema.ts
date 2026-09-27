@@ -32,6 +32,10 @@ export const ProblemDetailsSchema = z
       .string()
       .optional()
       .describe('Correlation id, echoed from / generated for the request.'),
+    details: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('Extra machine-readable context specific to this error code.'),
   })
   .describe(
     'RFC 9457 `application/problem+json` body — the single error shape for the REST surface.',

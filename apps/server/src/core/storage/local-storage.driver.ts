@@ -48,6 +48,13 @@ export class LocalStorageDriver implements StorageDriver {
     return createReadStream(target);
   }
 
+  async getRange(key: string, start: number, end: number): Promise<NodeJS.ReadableStream> {
+    const target = this.pathFor(key);
+    await stat(target);
+
+    return createReadStream(target, { start, end });
+  }
+
   async delete(key: string): Promise<void> {
     try {
       await unlink(this.pathFor(key));

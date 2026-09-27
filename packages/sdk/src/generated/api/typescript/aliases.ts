@@ -29,6 +29,7 @@ import type { GroupDetailDtoDto } from './GroupDetailDto.type.js';
 import type { GroupListViewDtoDto } from './GroupListViewDto.type.js';
 import type { HeartbeatResponseDtoDto } from './HeartbeatResponseDto.type.js';
 import type { InvitationViewDtoDto } from './InvitationViewDto.type.js';
+import type { IssueFileUrlsResponseDtoDto } from './IssueFileUrlsResponseDto.type.js';
 import type { JoinRequestViewDtoDto } from './JoinRequestViewDto.type.js';
 import type { LoginDtoDto } from './LoginDto.type.js';
 import type { LoginResponseDtoDto } from './LoginResponseDto.type.js';
@@ -43,6 +44,7 @@ import type { ModerationLogEntryDtoDto } from './ModerationLogEntryDto.type.js';
 import type { MyMentionsPageDtoDto } from './MyMentionsPageDto.type.js';
 import type { MyPermissionsResponseDtoDto } from './MyPermissionsResponseDto.type.js';
 import type { MyRoomInvitationListViewDtoDto } from './MyRoomInvitationListViewDto.type.js';
+import type { MyStorageViewDtoDto } from './MyStorageViewDto.type.js';
 import type { PendingJoinRequestListViewDtoDto } from './PendingJoinRequestListViewDto.type.js';
 import type { PresencePreferenceResponseDtoDto } from './PresencePreferenceResponseDto.type.js';
 import type { ProblemDetailsDtoDto } from './ProblemDetailsDto.type.js';
@@ -85,6 +87,16 @@ export type BlobController_download401ResponseProblemJson = ProblemDetailsDtoDto
 export type BlobController_download404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type BlobController_downloadPathId = string;
+
+export type MyStorageController_storage200ResponseJson = MyStorageViewDtoDto;
+
+export type MyStorageController_storage401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type FilesController_issueUrls200ResponseJson = IssueFileUrlsResponseDtoDto;
+
+export type FilesController_issueUrls401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type FilesController_issueUrls422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type DiscoveryController_getDiscoveryDocument200ResponseJson = DiscoveryDocumentDtoDto;
 

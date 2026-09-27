@@ -59,6 +59,91 @@
         ]
       }
     },
+    "/me/storage": {
+      "get": {
+        "operationId": "MyStorageController_storage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyStorageViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The calling account's storage usage and quota.",
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
+    "/files/urls": {
+      "post": {
+        "operationId": "FilesController_issueUrls",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueFileUrlsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Issue short-lived signed download URLs for up to 100 file refs.",
+        "tags": [
+          "Files",
+          "Files"
+        ]
+      }
+    },
     "/.well-known/ekoz": {
       "get": {
         "operationId": "DiscoveryController_getDiscoveryDocument",
@@ -6579,6 +6664,11 @@
           "requestId": {
             "description": "Correlation id, echoed from / generated for the request.",
             "type": "string"
+          },
+          "details": {
+            "description": "Extra machine-readable context specific to this error code.",
+            "type": "object",
+            "additionalProperties": {}
           }
         },
         "required": [
@@ -6589,6 +6679,209 @@
           "code"
         ],
         "description": "RFC 9457 `application/problem+json` body — the single error shape for the REST surface."
+      },
+      "MyStorageViewDto": {
+        "type": "object",
+        "properties": {
+          "usedBytes": {
+            "type": "string"
+          },
+          "pendingBytes": {
+            "type": "string"
+          },
+          "quotaBytes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "usedBytes",
+          "pendingBytes",
+          "quotaBytes"
+        ]
+      },
+      "IssueFileUrlsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "attachment"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "variant": {
+                              "type": "string",
+                              "enum": [
+                                "original",
+                                "thumbnail"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "id",
+                            "variant"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "message_preview"
+                              ]
+                            },
+                            "messageId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "messageId"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "preview"
+                              ]
+                            },
+                            "previewId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "previewId"
+                          ]
+                        }
+                      ]
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ref",
+                    "url",
+                    "expiresAt"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "attachment"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "variant": {
+                              "type": "string",
+                              "enum": [
+                                "original",
+                                "thumbnail"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "id",
+                            "variant"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "message_preview"
+                              ]
+                            },
+                            "messageId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "messageId"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "preview"
+                              ]
+                            },
+                            "previewId": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "previewId"
+                          ]
+                        }
+                      ]
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ref",
+                    "error"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       },
       "DiscoveryDocumentDto": {
         "type": "object",

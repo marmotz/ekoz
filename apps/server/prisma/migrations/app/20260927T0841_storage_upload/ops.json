@@ -1,0 +1,119 @@
+[
+  {
+    "id": "table.upload",
+    "label": "Create table \"upload\"",
+    "summary": "Creates table \"upload\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "upload"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"upload\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"upload\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"upload\"",
+        "sql": "CREATE TABLE \"public\".\"upload\" (\n  \"blob_id\" text,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"expires_at\" timestamptz NOT NULL,\n  \"failure\" text,\n  \"filename\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"length\" int8 NOT NULL,\n  \"offset\" int8 DEFAULT '0'::int8 NOT NULL,\n  \"state\" text DEFAULT 'receiving' NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"upload_state_check_e196e825\" CHECK (\"state\" IN ('receiving', 'ready', 'failed'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"upload\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"upload\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.upload.upload_expires_at_idx_35365ada",
+    "label": "Create index \"upload_expires_at_idx_35365ada\" on \"upload\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "upload_expires_at_idx_35365ada",
+        "table": "upload"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"upload_expires_at_idx_35365ada\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"upload_expires_at_idx_35365ada\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"upload_expires_at_idx_35365ada\"",
+        "sql": "CREATE INDEX \"upload_expires_at_idx_35365ada\" ON \"public\".\"upload\" (\"expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"upload_expires_at_idx_35365ada\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"upload_expires_at_idx_35365ada\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.upload.upload_user_id_state_idx_241eaac3",
+    "label": "Create index \"upload_user_id_state_idx_241eaac3\" on \"upload\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "upload_user_id_state_idx_241eaac3",
+        "table": "upload"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"upload_user_id_state_idx_241eaac3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"upload_user_id_state_idx_241eaac3\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"upload_user_id_state_idx_241eaac3\"",
+        "sql": "CREATE INDEX \"upload_user_id_state_idx_241eaac3\" ON \"public\".\"upload\" (\"user_id\", \"state\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"upload_user_id_state_idx_241eaac3\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"upload_user_id_state_idx_241eaac3\""
+        ]
+      }
+    ]
+  }
+]

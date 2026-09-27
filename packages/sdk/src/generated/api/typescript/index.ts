@@ -4,6 +4,8 @@ export type * from './aliases.js';
 export type * from './filters.js';
 export type * from './ProblemDetailsDtoErrors.type.js';
 export type * from './ProblemDetailsDto.type.js';
+export type * from './MyStorageViewDto.type.js';
+export type * from './IssueFileUrlsResponseDto.type.js';
 export type * from './DiscoveryDocumentDto.type.js';
 export type * from './LoginDto.type.js';
 export type * from './LoginResponseDtoSession.type.js';

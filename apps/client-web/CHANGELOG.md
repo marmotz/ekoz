@@ -7,6 +7,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 
 ### Added
 
+- Regenerate the API types: `GET /me/storage` and `POST /files/urls` response shapes, and the problem-details `details` field (#136, #137, #138, #139, #140, #141).
 - Add direct and group conversations: a "Direct messages" section in the sidebar listing them with an unseen dot, and a conversation page with its header, history and composer (#183).
 - Delete a one-to-one conversation from its header, after a confirmation; it comes back with the next message and none of the earlier ones (#183).
 - Redirect the link of a direct or group conversation opened as a room to its conversation page (#183).

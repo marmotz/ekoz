@@ -25,9 +25,10 @@ describe('GET /blobs/:id (integration)', () => {
     app.enableShutdownHooks();
     await app.init();
 
-    const blob = await app
-      .get(BlobService)
-      .ingest(Readable.from([Buffer.from('PNGDATA')]), { declaredType: 'image/png' });
+    const blob = await app.get(BlobService).ingest(Readable.from([Buffer.from('PNGDATA')]), {
+      contentType: 'image/png',
+      uploaderId: null,
+    });
     blobId = blob.id;
     blobHash = blob.hash;
   }, 180_000);

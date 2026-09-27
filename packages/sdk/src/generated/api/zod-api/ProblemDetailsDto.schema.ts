@@ -11,6 +11,7 @@ export const ProblemDetailsDtoSchema: z.ZodType<ProblemDetailsDtoDto> = z.object
   code: z.string(),
   errors: z.array(ProblemDetailsDtoErrorsSchema).optional(),
   requestId: z.string().optional(),
+  details: z.record(z.string(), z.string()).optional(),
 });
 export type ProblemDetailsDtoDto = {
   type: string;
@@ -20,6 +21,7 @@ export type ProblemDetailsDtoDto = {
   code: string;
   errors?: ProblemDetailsDtoErrorsDto[];
   requestId?: string;
+  details?: Record<string, string>;
 };
 
 export const ProblemDetailsDtoDeepSchema: z.ZodType<ProblemDetailsDtoDeepDto> = z.object({
@@ -30,6 +32,7 @@ export const ProblemDetailsDtoDeepSchema: z.ZodType<ProblemDetailsDtoDeepDto> = 
   code: z.string(),
   errors: z.array(ProblemDetailsDtoErrorsSchema).optional(),
   requestId: z.string().optional(),
+  details: z.record(z.string(), z.string()).optional(),
 });
 export type ProblemDetailsDtoDeepDto = {
   type: string;
@@ -39,6 +42,7 @@ export type ProblemDetailsDtoDeepDto = {
   code: string;
   errors?: ProblemDetailsDtoErrorsDto[];
   requestId?: string;
+  details?: Record<string, string>;
 };
 
 export const ProblemDetailsDtoCreateSchema: z.ZodType<ProblemDetailsDtoCreateDto> = z.object({
@@ -49,6 +53,7 @@ export const ProblemDetailsDtoCreateSchema: z.ZodType<ProblemDetailsDtoCreateDto
   code: z.string(),
   errors: z.array(ProblemDetailsDtoErrorsSchema).optional(),
   requestId: z.string().optional(),
+  details: z.record(z.string(), z.string()).optional(),
 });
 export type ProblemDetailsDtoCreateDto = {
   type: string;
@@ -58,6 +63,7 @@ export type ProblemDetailsDtoCreateDto = {
   code: string;
   errors?: ProblemDetailsDtoErrorsDto[];
   requestId?: string;
+  details?: Record<string, string>;
 };
 
 export const ProblemDetailsDtoCreateDeepSchema: z.ZodType<ProblemDetailsDtoCreateDeepDto> = z.object({
@@ -68,6 +74,7 @@ export const ProblemDetailsDtoCreateDeepSchema: z.ZodType<ProblemDetailsDtoCreat
   code: z.string(),
   errors: z.array(ProblemDetailsDtoErrorsSchema).optional(),
   requestId: z.string().optional(),
+  details: z.record(z.string(), z.string()).optional(),
 });
 export type ProblemDetailsDtoCreateDeepDto = {
   type: string;
@@ -77,6 +84,7 @@ export type ProblemDetailsDtoCreateDeepDto = {
   code: string;
   errors?: ProblemDetailsDtoErrorsDto[];
   requestId?: string;
+  details?: Record<string, string>;
 };
 
 export const ProblemDetailsDtoUpdateSchema: z.ZodType<ProblemDetailsDtoUpdateDto> = z.object({
@@ -87,6 +95,7 @@ export const ProblemDetailsDtoUpdateSchema: z.ZodType<ProblemDetailsDtoUpdateDto
   code: z.string(),
   errors: z.array(ProblemDetailsDtoErrorsSchema),
   requestId: z.string(),
+  details: z.record(z.string(), z.string()),
 }).partial();
 export type ProblemDetailsDtoUpdateDto = {
   type?: string;
@@ -96,6 +105,7 @@ export type ProblemDetailsDtoUpdateDto = {
   code?: string;
   errors?: ProblemDetailsDtoErrorsDto[];
   requestId?: string;
+  details?: Record<string, string>;
 };
 
 export const ProblemDetailsDtoUpdateDeepSchema: z.ZodType<ProblemDetailsDtoUpdateDeepDto> = z.object({
@@ -106,6 +116,7 @@ export const ProblemDetailsDtoUpdateDeepSchema: z.ZodType<ProblemDetailsDtoUpdat
   code: z.string(),
   errors: z.array(ProblemDetailsDtoErrorsSchema),
   requestId: z.string(),
+  details: z.record(z.string(), z.string()),
 }).partial();
 export type ProblemDetailsDtoUpdateDeepDto = {
   type?: string;
@@ -115,6 +126,7 @@ export type ProblemDetailsDtoUpdateDeepDto = {
   code?: string;
   errors?: ProblemDetailsDtoErrorsDto[];
   requestId?: string;
+  details?: Record<string, string>;
 };
 
 const ProblemDetailsDtoWhereSchemaBase = z.object({
@@ -155,6 +167,7 @@ export const ProblemDetailsDtoSelectSchema = z.object({
   code: z.boolean().optional(),
   errors: z.boolean().optional(),
   requestId: z.boolean().optional(),
+  details: z.boolean().optional(),
 });
 export type ProblemDetailsDtoSelectDto = z.infer<typeof ProblemDetailsDtoSelectSchema>;
 
@@ -166,5 +179,6 @@ export const ProblemDetailsDtoSelectDeepSchema = z.object({
   code: z.boolean().optional(),
   errors: z.boolean().optional(),
   requestId: z.boolean().optional(),
+  details: z.boolean().optional(),
 });
 export type ProblemDetailsDtoSelectDeepDto = z.infer<typeof ProblemDetailsDtoSelectDeepSchema>;

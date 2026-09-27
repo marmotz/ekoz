@@ -136,6 +136,14 @@
       "model": "SetupToken",
       "namespace": "public"
     },
+    "storage_quota_override": {
+      "model": "StorageQuotaOverride",
+      "namespace": "public"
+    },
+    "upload": {
+      "model": "Upload",
+      "namespace": "public"
+    },
     "user": {
       "model": "User",
       "namespace": "public"
@@ -323,6 +331,23 @@
               {
                 "name": "invite",
                 "value": "invite"
+              }
+            ]
+          },
+          "UploadState": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "receiving",
+                "value": "receiving"
+              },
+              {
+                "name": "ready",
+                "value": "ready"
+              },
+              {
+                "name": "failed",
+                "value": "failed"
               }
             ]
           },
@@ -554,10 +579,24 @@
                   "kind": "scalar"
                 }
               },
+              "durationMs": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "hash": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "height": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
@@ -578,7 +617,7 @@
               "sizeBytes": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/int8@1",
                   "kind": "scalar"
                 }
               },
@@ -586,6 +625,34 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "thumbnailBlobId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "touchedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "uploaderId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "width": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               }
@@ -599,8 +666,14 @@
                 "createdAt": {
                   "column": "created_at"
                 },
+                "durationMs": {
+                  "column": "duration_ms"
+                },
                 "hash": {
                   "column": "hash"
+                },
+                "height": {
+                  "column": "height"
                 },
                 "id": {
                   "column": "id"
@@ -613,6 +686,18 @@
                 },
                 "storageKey": {
                   "column": "storage_key"
+                },
+                "thumbnailBlobId": {
+                  "column": "thumbnail_blob_id"
+                },
+                "touchedAt": {
+                  "column": "touched_at"
+                },
+                "uploaderId": {
+                  "column": "uploader_id"
+                },
+                "width": {
+                  "column": "width"
                 }
               },
               "namespaceId": "public",
@@ -2908,6 +2993,164 @@
               "table": "setup_token"
             }
           },
+          "StorageQuotaOverride": {
+            "fields": {
+              "quotaBytes": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "quotaBytes": {
+                  "column": "quota_bytes"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "storage_quota_override"
+            }
+          },
+          "Upload": {
+            "fields": {
+              "blobId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "expiresAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "failure": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "filename": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "length": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "offset": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "state": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "UploadState",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "blobId": {
+                  "column": "blob_id"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "expiresAt": {
+                  "column": "expires_at"
+                },
+                "failure": {
+                  "column": "failure"
+                },
+                "filename": {
+                  "column": "filename"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "length": {
+                  "column": "length"
+                },
+                "offset": {
+                  "column": "offset"
+                },
+                "state": {
+                  "column": "state"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "upload"
+            }
+          },
           "User": {
             "fields": {
               "createdAt": {
@@ -3374,10 +3617,20 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "duration_ms": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "hash": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "height": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 },
                 "id": {
                   "codecId": "pg/text@1",
@@ -3394,14 +3647,34 @@
                   "nullable": false
                 },
                 "size_bytes": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
                   "nullable": false
                 },
                 "storage_key": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "thumbnail_blob_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "touched_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "uploader_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "width": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
                 }
               },
               "foreignKeys": [],
@@ -3412,6 +3685,14 @@
                   ],
                   "name": "blob_ref_count_idx_73a05b87",
                   "prefix": "blob_ref_count_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "uploader_id"
+                  ],
+                  "name": "blob_uploader_id_idx_7e6af2c2",
+                  "prefix": "blob_uploader_id_idx",
                   "unique": false
                 }
               ],
@@ -5303,6 +5584,138 @@
               },
               "uniques": []
             },
+            "storage_quota_override": {
+              "columns": {
+                "quota_bytes": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": true
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "user_id"
+                ]
+              },
+              "uniques": []
+            },
+            "upload": {
+              "checks": [
+                {
+                  "expression": "\"state\" IN ('receiving', 'ready', 'failed')",
+                  "name": "upload_state_check_e196e825",
+                  "prefix": "upload_state_check"
+                }
+              ],
+              "columns": {
+                "blob_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "expires_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "failure": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "filename": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "length": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "offset": {
+                  "codecId": "pg/int8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "0"
+                  },
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "state": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "receiving"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "UploadState",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "expires_at"
+                  ],
+                  "name": "upload_expires_at_idx_35365ada",
+                  "prefix": "upload_expires_at_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "user_id",
+                    "state"
+                  ],
+                  "name": "upload_user_id_state_idx_241eaac3",
+                  "prefix": "upload_user_id_state_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
             "user": {
               "checks": [
                 {
@@ -5607,6 +6020,14 @@
                 "invite"
               ]
             },
+            "UploadState": {
+              "kind": "valueSet",
+              "values": [
+                "receiving",
+                "ready",
+                "failed"
+              ]
+            },
             "UserStatus": {
               "kind": "valueSet",
               "values": [
@@ -5630,10 +6051,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "70724003d57754908cdda405cd0a68c41db1a523e3c12b3bef071c48881e10aa"
+    "storageHash": "7bac4d33d0d5b538fec0c703d35c4685450f94e6d32c32a4ae0751ef82fc38a9"
   },
   "execution": {
-    "executionHash": "47cc06385b7410ec6ef8201a5f857cb1634859bb74f3f1fedadad629339cda35",
+    "executionHash": "fa040e2fffd64f7f07787776e6a0392881010e7249c1a13ab4f302cd7b4e8a59",
     "mutations": {
       "defaults": [
         {
@@ -5870,6 +6291,32 @@
             "column": "id",
             "namespace": "public",
             "table": "setup_token"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "updated_at",
+            "namespace": "public",
+            "table": "storage_quota_override"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "upload"
           }
         },
         {
