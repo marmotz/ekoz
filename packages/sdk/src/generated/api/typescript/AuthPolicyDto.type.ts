@@ -12,6 +12,7 @@ export type AuthPolicyDtoDto = {
    * @max 9007199254740991
    */
   passwordMinLength: number;
+  linkPreviews: boolean;
 };
 
 export type AuthPolicyDtoDeepDto = {
@@ -22,6 +23,7 @@ export type AuthPolicyDtoDeepDto = {
    * @max 9007199254740991
    */
   passwordMinLength: number;
+  linkPreviews: boolean;
 };
 
 export type AuthPolicyDtoCreateDto = {
@@ -32,6 +34,7 @@ export type AuthPolicyDtoCreateDto = {
    * @max 9007199254740991
    */
   passwordMinLength: number;
+  linkPreviews: boolean;
 };
 
 export type AuthPolicyDtoCreateDeepDto = {
@@ -42,6 +45,7 @@ export type AuthPolicyDtoCreateDeepDto = {
    * @max 9007199254740991
    */
   passwordMinLength: number;
+  linkPreviews: boolean;
 };
 
 export type AuthPolicyDtoUpdateDto = Partial<{
@@ -52,6 +56,7 @@ export type AuthPolicyDtoUpdateDto = Partial<{
    * @max 9007199254740991
    */
   passwordMinLength: number;
+  linkPreviews: boolean;
 }>;
 
 export type AuthPolicyDtoUpdateDeepDto = Partial<{
@@ -62,12 +67,14 @@ export type AuthPolicyDtoUpdateDeepDto = Partial<{
    * @max 9007199254740991
    */
   passwordMinLength: number;
+  linkPreviews: boolean;
 }>;
 
 export type AuthPolicyDtoWhereDto = {
   registrationMode?: EnumAuthPolicyDtoRegistrationModeFilter;
   emailVerificationRequired?: BoolFilter;
   passwordMinLength?: IntFilter;
+  linkPreviews?: BoolFilter;
   AND?: AuthPolicyDtoWhereDto | AuthPolicyDtoWhereDto[];
   OR?: AuthPolicyDtoWhereDto | AuthPolicyDtoWhereDto[];
   NOT?: AuthPolicyDtoWhereDto | AuthPolicyDtoWhereDto[];
@@ -77,6 +84,7 @@ export type AuthPolicyDtoWhereDeepDto = {
   registrationMode?: EnumAuthPolicyDtoRegistrationModeFilter;
   emailVerificationRequired?: BoolFilter;
   passwordMinLength?: IntFilter;
+  linkPreviews?: BoolFilter;
   AND?: AuthPolicyDtoWhereDeepDto | AuthPolicyDtoWhereDeepDto[];
   OR?: AuthPolicyDtoWhereDeepDto | AuthPolicyDtoWhereDeepDto[];
   NOT?: AuthPolicyDtoWhereDeepDto | AuthPolicyDtoWhereDeepDto[];
@@ -86,10 +94,12 @@ export type AuthPolicyDtoSelectDto = {
   registrationMode?: boolean;
   emailVerificationRequired?: boolean;
   passwordMinLength?: boolean;
+  linkPreviews?: boolean;
 };
 
 export type AuthPolicyDtoSelectDeepDto = {
   registrationMode?: boolean;
   emailVerificationRequired?: boolean;
   passwordMinLength?: boolean;
+  linkPreviews?: boolean;
 };

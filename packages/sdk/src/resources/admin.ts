@@ -6,13 +6,29 @@ import type { SessionManager } from '../session/session-manager.js';
 import type {
   AccountView,
   AddOwnerBody,
+  AdminAttachmentsPage,
   AdminCreateUserBody,
+  AdminStorageDashboard,
   AdminUserDetail,
   AdminUserListResponse,
+  AdminUserStorageView,
+  ConfigParameterView,
   SuspendUserBody,
   UsernameApproved,
   UsernameRequestsListResponse,
 } from '../types/wire.js';
+
+/** `GET /admin/attachments` query params (technical.md §S11, issue #146). */
+export interface AdminAttachmentsQueryParams {
+  /** Substring match on the attachment's filename. */
+  q?: string;
+  uploaderId?: string;
+  roomId?: string;
+  type?: 'media' | 'documents';
+  /** Opaque keyset cursor from a previous page's `nextCursor`. */
+  before?: string;
+  limit?: number;
+}
 
 /** `GET /admin/users` query params (technical.md §2.1). */
 export interface AdminUserListParams {
@@ -35,6 +51,12 @@ export interface AdminResource {
     unsuspend(id: string): Promise<void>;
     delete(id: string): Promise<void>;
     triggerPasswordReset(id: string): Promise<{ accepted: true }>;
+    /** `GET /admin/users/:id/storage`: usage, pending uploads and effective quota. */
+    storage(id: string): Promise<AdminUserStorageView>;
+    /** `PUT /admin/users/:id/storage-quota`: override the quota (`null` = unlimited), audited. */
+    setStorageQuota(id: string, quotaBytes: string | null): Promise<void>;
+    /** `DELETE /admin/users/:id/storage-quota`: revert to the server default, audited. */
+    resetStorageQuota(id: string): Promise<void>;
   };
   owners: {
     add(body: AddOwnerBody): Promise<void>;
@@ -44,6 +66,24 @@ export interface AdminResource {
     list(status?: 'pending' | 'approved' | 'rejected'): Promise<UsernameRequestsListResponse>;
     approve(id: string): Promise<UsernameApproved>;
     reject(id: string): Promise<void>;
+  };
+  settings: {
+    /** `GET /admin/settings`: every parameter's resolved value and provenance. */
+    list(): Promise<ConfigParameterView[]>;
+    /** `PUT /admin/settings/:key`: set a runtime override (audited). */
+    set(key: string, value: unknown): Promise<ConfigParameterView>;
+    /** `DELETE /admin/settings/:key`: revert to the file / default value (audited). */
+    reset(key: string): Promise<void>;
+  };
+  /** `GET /admin/storage`: global usage, capacity, top consumers and media tooling. */
+  storage(): Promise<AdminStorageDashboard>;
+  attachments: {
+    /** `GET /admin/attachments`: cross-room attachment search, newest first. */
+    search(params?: AdminAttachmentsQueryParams): Promise<AdminAttachmentsPage>;
+  };
+  blobs: {
+    /** `DELETE /admin/blobs/:id`: force-remove from every attachment, preview and avatar (audited). */
+    remove(id: string): Promise<void>;
   };
 }
 
@@ -84,6 +124,25 @@ export function createAdminResource(session: SessionManager): AdminResource {
           `/admin/users/${encodeURIComponent(id)}/password-reset`,
         );
       },
+      storage(id) {
+        return session.request<AdminUserStorageView>(
+          'GET',
+          `/admin/users/${encodeURIComponent(id)}/storage`,
+        );
+      },
+      setStorageQuota(id, quotaBytes) {
+        return session.request<void>(
+          'PUT',
+          `/admin/users/${encodeURIComponent(id)}/storage-quota`,
+          { body: { quotaBytes } },
+        );
+      },
+      resetStorageQuota(id) {
+        return session.request<void>(
+          'DELETE',
+          `/admin/users/${encodeURIComponent(id)}/storage-quota`,
+        );
+      },
     },
     owners: {
       add(body) {
@@ -110,6 +169,43 @@ export function createAdminResource(session: SessionManager): AdminResource {
           'POST',
           `/admin/username-requests/${encodeURIComponent(id)}/reject`,
         );
+      },
+    },
+    settings: {
+      list() {
+        return session.request<ConfigParameterView[]>('GET', '/admin/settings');
+      },
+      set(key, value) {
+        return session.request<ConfigParameterView>(
+          'PUT',
+          `/admin/settings/${encodeURIComponent(key)}`,
+          { body: { value } },
+        );
+      },
+      reset(key) {
+        return session.request<void>('DELETE', `/admin/settings/${encodeURIComponent(key)}`);
+      },
+    },
+    storage() {
+      return session.request<AdminStorageDashboard>('GET', '/admin/storage');
+    },
+    attachments: {
+      search(params = {}) {
+        return session.request<AdminAttachmentsPage>('GET', '/admin/attachments', {
+          query: {
+            q: params.q,
+            uploaderId: params.uploaderId,
+            roomId: params.roomId,
+            type: params.type,
+            before: params.before,
+            limit: params.limit,
+          },
+        });
+      },
+    },
+    blobs: {
+      remove(id) {
+        return session.request<void>('DELETE', `/admin/blobs/${encodeURIComponent(id)}`);
       },
     },
   };

@@ -43,6 +43,7 @@ export const ROLE_DEFAULT_CAPABILITIES: ReadonlyArray<{ role: RoomRole; capabili
         'room.ban',
         'room.invite',
         'room.pin',
+        'room.attach',
         'room.manage_members',
         'room.manage_roles',
         'room.manage_permissions',
@@ -68,6 +69,7 @@ export const ROLE_DEFAULT_CAPABILITIES: ReadonlyArray<{ role: RoomRole; capabili
         'room.ban',
         'room.invite',
         'room.pin',
+        'room.attach',
         'room.manage_members',
         'room.manage_roles',
         'room.manage_permissions',
@@ -90,14 +92,22 @@ export const ROLE_DEFAULT_CAPABILITIES: ReadonlyArray<{ role: RoomRole; capabili
         'room.ban',
         'room.invite',
         'room.pin',
+        'room.attach',
         'room.manage_members',
       ] as const
     ).map((capability) => ({ role: 'moderator' as const, capability })),
 
     // member: participate, no moderation.
-    ...(['room.read', 'room.post', 'room.edit_own', 'room.delete_own', 'room.react'] as const).map(
-      (capability) => ({ role: 'member' as const, capability }),
-    ),
+    ...(
+      [
+        'room.read',
+        'room.post',
+        'room.edit_own',
+        'room.delete_own',
+        'room.react',
+        'room.attach',
+      ] as const
+    ).map((capability) => ({ role: 'member' as const, capability })),
 
     // reader: read-only.
     { role: 'reader' as const, capability: 'room.read' as const },

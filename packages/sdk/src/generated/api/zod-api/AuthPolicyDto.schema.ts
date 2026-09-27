@@ -7,6 +7,7 @@ export const AuthPolicyDtoSchema = z.object({
   registrationMode: AuthPolicyDtoRegistrationModeSchema,
   emailVerificationRequired: z.boolean(),
   passwordMinLength: z.int().min(-9007199254740991).max(9007199254740991),
+  linkPreviews: z.boolean(),
 });
 export type AuthPolicyDtoDto = z.infer<typeof AuthPolicyDtoSchema>;
 
@@ -14,6 +15,7 @@ export const AuthPolicyDtoDeepSchema = z.object({
   registrationMode: AuthPolicyDtoRegistrationModeSchema,
   emailVerificationRequired: z.boolean(),
   passwordMinLength: z.int().min(-9007199254740991).max(9007199254740991),
+  linkPreviews: z.boolean(),
 });
 export type AuthPolicyDtoDeepDto = z.infer<typeof AuthPolicyDtoDeepSchema>;
 
@@ -21,6 +23,7 @@ export const AuthPolicyDtoCreateSchema = z.object({
   registrationMode: AuthPolicyDtoRegistrationModeSchema,
   emailVerificationRequired: z.boolean(),
   passwordMinLength: z.int().min(-9007199254740991).max(9007199254740991),
+  linkPreviews: z.boolean(),
 });
 export type AuthPolicyDtoCreateDto = z.infer<typeof AuthPolicyDtoCreateSchema>;
 
@@ -28,6 +31,7 @@ export const AuthPolicyDtoCreateDeepSchema = z.object({
   registrationMode: AuthPolicyDtoRegistrationModeSchema,
   emailVerificationRequired: z.boolean(),
   passwordMinLength: z.int().min(-9007199254740991).max(9007199254740991),
+  linkPreviews: z.boolean(),
 });
 export type AuthPolicyDtoCreateDeepDto = z.infer<typeof AuthPolicyDtoCreateDeepSchema>;
 
@@ -35,6 +39,7 @@ export const AuthPolicyDtoUpdateSchema = z.object({
   registrationMode: AuthPolicyDtoRegistrationModeSchema,
   emailVerificationRequired: z.boolean(),
   passwordMinLength: z.int().min(-9007199254740991).max(9007199254740991),
+  linkPreviews: z.boolean(),
 }).partial();
 export type AuthPolicyDtoUpdateDto = z.infer<typeof AuthPolicyDtoUpdateSchema>;
 
@@ -42,6 +47,7 @@ export const AuthPolicyDtoUpdateDeepSchema = z.object({
   registrationMode: AuthPolicyDtoRegistrationModeSchema,
   emailVerificationRequired: z.boolean(),
   passwordMinLength: z.int().min(-9007199254740991).max(9007199254740991),
+  linkPreviews: z.boolean(),
 }).partial();
 export type AuthPolicyDtoUpdateDeepDto = z.infer<typeof AuthPolicyDtoUpdateDeepSchema>;
 
@@ -49,6 +55,7 @@ const AuthPolicyDtoWhereSchemaBase = z.object({
   registrationMode: EnumAuthPolicyDtoRegistrationModeFilter.optional(),
   emailVerificationRequired: BoolFilter.optional(),
   passwordMinLength: IntFilter.optional(),
+  linkPreviews: BoolFilter.optional(),
 });
 export const AuthPolicyDtoWhereSchema: z.ZodType<AuthPolicyDtoWhereDto> = z.lazy(() => AuthPolicyDtoWhereSchemaBase.extend({
   AND: z.union([AuthPolicyDtoWhereSchema, z.array(AuthPolicyDtoWhereSchema)]).optional(),
@@ -61,6 +68,7 @@ const AuthPolicyDtoWhereDeepSchemaBase = z.object({
   registrationMode: EnumAuthPolicyDtoRegistrationModeFilter.optional(),
   emailVerificationRequired: BoolFilter.optional(),
   passwordMinLength: IntFilter.optional(),
+  linkPreviews: BoolFilter.optional(),
 });
 export const AuthPolicyDtoWhereDeepSchema: z.ZodType<AuthPolicyDtoWhereDeepDto> = z.lazy(() => AuthPolicyDtoWhereDeepSchemaBase.extend({
   AND: z.union([AuthPolicyDtoWhereDeepSchema, z.array(AuthPolicyDtoWhereDeepSchema)]).optional(),
@@ -73,6 +81,7 @@ export const AuthPolicyDtoSelectSchema = z.object({
   registrationMode: z.boolean().optional(),
   emailVerificationRequired: z.boolean().optional(),
   passwordMinLength: z.boolean().optional(),
+  linkPreviews: z.boolean().optional(),
 });
 export type AuthPolicyDtoSelectDto = z.infer<typeof AuthPolicyDtoSelectSchema>;
 
@@ -80,5 +89,6 @@ export const AuthPolicyDtoSelectDeepSchema = z.object({
   registrationMode: z.boolean().optional(),
   emailVerificationRequired: z.boolean().optional(),
   passwordMinLength: z.boolean().optional(),
+  linkPreviews: z.boolean().optional(),
 });
 export type AuthPolicyDtoSelectDeepDto = z.infer<typeof AuthPolicyDtoSelectDeepSchema>;

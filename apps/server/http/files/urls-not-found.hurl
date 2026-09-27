@@ -1,6 +1,6 @@
-# Issue a signed URL for a ref (technical.md §S6). No feature registers an
-# `attachment` / `message_preview` / `preview` access policy yet (that lands
-# with #143/#144), so every ref currently denies. Set `access_token`.
+# Issue a signed URL for a ref (technical.md §S6) that does not resolve: an
+# unknown attachment id, or a `message_preview` / `preview` ref (#144 has not
+# registered those policies yet). Set `access_token`.
 POST {{base_url}}/files/urls
 Authorization: Bearer {{access_token}}
 {

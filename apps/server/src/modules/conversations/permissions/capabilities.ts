@@ -11,6 +11,7 @@ export const CAPABILITIES = [
   'room.delete_any',
   'room.react',
   'room.pin',
+  'room.attach',
   'room.invite',
   'room.kick',
   'room.ban',

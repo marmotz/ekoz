@@ -1,0 +1,203 @@
+[
+  {
+    "id": "dropCheckConstraint.room_event.room_event_type_check_02d9b1d8",
+    "label": "Drop check constraint \"room_event_type_check_02d9b1d8\" on \"room_event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "room_event_type_check_02d9b1d8",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_event_type_check_02d9b1d8\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_02d9b1d8",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"room_event_type_check_02d9b1d8\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" DROP CONSTRAINT \"room_event_type_check_02d9b1d8\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_event_type_check_02d9b1d8\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_02d9b1d8",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.message_attachment",
+    "label": "Create table \"message_attachment\"",
+    "summary": "Creates table \"message_attachment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_attachment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_attachment\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_attachment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message_attachment\"",
+        "sql": "CREATE TABLE \"public\".\"message_attachment\" (\n  \"blob_id\" text NOT NULL,\n  \"content_type\" text NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"filename\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"message_id\" text NOT NULL,\n  \"position\" int4 NOT NULL,\n  \"room_id\" text NOT NULL,\n  \"size_bytes\" int8 NOT NULL,\n  \"uploader_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_attachment\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_attachment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.room_event.room_event_type_check_3c77a9c9",
+    "label": "Add check constraint \"room_event_type_check_3c77a9c9\" on \"room_event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "room_event_type_check_3c77a9c9",
+        "table": "room_event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"room_event_type_check_3c77a9c9\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_3c77a9c9",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"room_event_type_check_3c77a9c9\"",
+        "sql": "ALTER TABLE \"public\".\"room_event\" ADD CONSTRAINT \"room_event_type_check_3c77a9c9\" CHECK (\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'attachment_removed', 'retention_changed', 'receipt_updated', 'group_changed'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"room_event_type_check_3c77a9c9\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "room_event_type_check_3c77a9c9",
+          "public",
+          "\"public\".\"room_event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message_attachment.message_attachment_message_id_idx_8a7ff1ba",
+    "label": "Create index \"message_attachment_message_id_idx_8a7ff1ba\" on \"message_attachment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_attachment_message_id_idx_8a7ff1ba",
+        "table": "message_attachment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_attachment_message_id_idx_8a7ff1ba\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_attachment_message_id_idx_8a7ff1ba\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_attachment_message_id_idx_8a7ff1ba\"",
+        "sql": "CREATE INDEX \"message_attachment_message_id_idx_8a7ff1ba\" ON \"public\".\"message_attachment\" (\"message_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_attachment_message_id_idx_8a7ff1ba\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_attachment_message_id_idx_8a7ff1ba\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message_attachment.message_attachment_room_id_created_at_idx_3f0ddf95",
+    "label": "Create index \"message_attachment_room_id_created_at_idx_3f0ddf95\" on \"message_attachment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_attachment_room_id_created_at_idx_3f0ddf95",
+        "table": "message_attachment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_attachment_room_id_created_at_idx_3f0ddf95\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_attachment_room_id_created_at_idx_3f0ddf95\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_attachment_room_id_created_at_idx_3f0ddf95\"",
+        "sql": "CREATE INDEX \"message_attachment_room_id_created_at_idx_3f0ddf95\" ON \"public\".\"message_attachment\" (\"room_id\", \"created_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_attachment_room_id_created_at_idx_3f0ddf95\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_attachment_room_id_created_at_idx_3f0ddf95\""
+        ]
+      }
+    ]
+  }
+]

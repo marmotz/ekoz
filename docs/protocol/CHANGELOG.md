@@ -145,6 +145,20 @@ All notable changes to the Ekoz protocol. Format
   `room.manage_members` override), the 50 member limit, group deletion when no admin
   remains, and the `room.user_not_found` and `room.group_full` errors.
 - `id` on the public profile of `GET /users/:identifier` in [`identity.md`](identity.md).
+- Message attachments in [`messages-and-interactions.md`](messages-and-interactions.md):
+  `Message.attachments`, `POST` / `PATCH /rooms/:id/messages(/:messageId)` accept
+  `attachments`, `DELETE /rooms/:id/messages/:messageId/attachments/:attachmentId`,
+  `GET /rooms/:id/files`, the `attachment_removed` room event, and the `room.attach`
+  capability. (#143)
+- Link previews in [`messages-and-interactions.md`](messages-and-interactions.md):
+  `Message.linkPreview`, `POST /link-previews`, `POST` / `PATCH
+  /rooms/:id/messages(/:messageId)` accept `linkPreviewUrl`, and `linkPreviews` on
+  `GET /auth/policy`. (#144)
+- Admin settings in [`identity.md`](identity.md): `GET` / `PUT` / `DELETE
+  /admin/settings(/:key)` and the `ConfigParameterView` object. (#145)
+- Admin storage in [`identity.md`](identity.md): `GET` / `PUT` / `DELETE
+  /admin/users/:id/storage(-quota)`, `GET /admin/storage`, `GET
+  /admin/attachments`, and `DELETE /admin/blobs/:id`. (#146)
 
 ### Changed
 

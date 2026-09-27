@@ -13,8 +13,13 @@ import {
   createConversationsResource,
 } from './resources/conversations.js';
 import { createDirectoryResource, type DirectoryResource } from './resources/directory.js';
+import { createFilesResource, type FilesResource } from './resources/files.js';
 import { createGroupsResource, type GroupsResource } from './resources/groups.js';
 import { createInvitationsResource, type InvitationsResource } from './resources/invitations.js';
+import {
+  createLinkPreviewsResource,
+  type LinkPreviewsResource,
+} from './resources/link-previews.js';
 import { createMeResource, type MeResource } from './resources/me.js';
 import { createMentionsResource, type MentionsResource } from './resources/mentions.js';
 import { createMessagesResource, type MessagesResource } from './resources/messages.js';
@@ -29,6 +34,7 @@ import { createSessionsResource, type SessionsResource } from './resources/sessi
 import { createSetupResource, type SetupResource } from './resources/setup.js';
 import { createRoomStream, type RoomStream } from './resources/stream.js';
 import { createSyncResource, type SyncResource } from './resources/sync.js';
+import { createUploadsResource, type UploadsResource } from './resources/uploads.js';
 import { createUsersResource, type UsersResource } from './resources/users.js';
 import type { SessionEventMap, SessionEventName } from './session/events.js';
 import { SessionEventEmitter } from './session/events.js';
@@ -55,11 +61,14 @@ export interface EkozClient {
   roomInvitations: RoomInvitationsResource;
   directory: DirectoryResource;
   messages: MessagesResource;
+  files: FilesResource;
+  linkPreviews: LinkPreviewsResource;
   mentions: MentionsResource;
   groups: GroupsResource;
   receipts: ReceiptsResource;
   presence: PresenceResource;
   sync: SyncResource;
+  uploads: UploadsResource;
   stream: RoomStream;
   discovery: Discovery;
   session: SessionController;
@@ -124,11 +133,14 @@ export function createClient(config: ClientConfig): EkozClient {
     roomInvitations: createRoomInvitationsResource(session),
     directory: createDirectoryResource(session),
     messages: createMessagesResource(session),
+    files: createFilesResource(session),
+    linkPreviews: createLinkPreviewsResource(session),
     mentions: createMentionsResource(session),
     groups: createGroupsResource(session),
     receipts: createReceiptsResource(session),
     presence: createPresenceResource(session, emitter),
     sync: createSyncResource(session),
+    uploads: createUploadsResource(session),
     stream: createRoomStream({
       session,
       discovery,

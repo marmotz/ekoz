@@ -56,3 +56,20 @@ export function validateRestrictedMarkdown(source: string): void {
     }
   });
 }
+
+/** Every `http(s)` link in `source`'s Markdown, in document order (technical.md §S10). */
+export function extractHttpLinks(source: string): string[] {
+  const tree = processor.parse(source);
+  const urls: string[] = [];
+
+  visit(tree, (node) => {
+    if (node.type === 'link') {
+      const url = (node as { url: string }).url;
+      if (/^https?:/i.test(url)) {
+        urls.push(url);
+      }
+    }
+  });
+
+  return urls;
+}

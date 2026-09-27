@@ -1,0 +1,161 @@
+[
+  {
+    "id": "table.link_preview",
+    "label": "Create table \"link_preview\"",
+    "summary": "Creates table \"link_preview\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "link_preview"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"link_preview\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"link_preview\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"link_preview\"",
+        "sql": "CREATE TABLE \"public\".\"link_preview\" (\n  \"description\" text,\n  \"fetched_at\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"image_blob_id\" text,\n  \"site_name\" text,\n  \"status\" text NOT NULL,\n  \"title\" text,\n  \"url\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"link_preview_status_check_27d2066a\" CHECK (\"status\" IN ('ready', 'failed'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"link_preview\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"link_preview\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.message_link_preview",
+    "label": "Create table \"message_link_preview\"",
+    "summary": "Creates table \"message_link_preview\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message_link_preview"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message_link_preview\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_link_preview\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message_link_preview\"",
+        "sql": "CREATE TABLE \"public\".\"message_link_preview\" (\n  \"description\" text,\n  \"image_blob_id\" text,\n  \"message_id\" text NOT NULL,\n  \"site_name\" text,\n  \"title\" text,\n  \"url\" text NOT NULL,\n  PRIMARY KEY (\"message_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message_link_preview\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_link_preview\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.link_preview.link_preview_url_key",
+    "label": "Add unique constraint on \"link_preview\" (url)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "link_preview_url_key",
+        "table": "link_preview"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"link_preview_url_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "link_preview_url_key",
+          "public",
+          "\"public\".\"link_preview\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"link_preview_url_key\"",
+        "sql": "ALTER TABLE \"public\".\"link_preview\" ADD CONSTRAINT \"link_preview_url_key\" UNIQUE (\"url\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"link_preview_url_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "link_preview_url_key",
+          "public",
+          "\"public\".\"link_preview\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.link_preview.link_preview_status_fetched_at_idx_30a983cc",
+    "label": "Create index \"link_preview_status_fetched_at_idx_30a983cc\" on \"link_preview\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "link_preview_status_fetched_at_idx_30a983cc",
+        "table": "link_preview"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"link_preview_status_fetched_at_idx_30a983cc\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"link_preview_status_fetched_at_idx_30a983cc\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"link_preview_status_fetched_at_idx_30a983cc\"",
+        "sql": "CREATE INDEX \"link_preview_status_fetched_at_idx_30a983cc\" ON \"public\".\"link_preview\" (\"status\", \"fetched_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"link_preview_status_fetched_at_idx_30a983cc\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"link_preview_status_fetched_at_idx_30a983cc\""
+        ]
+      }
+    ]
+  }
+]

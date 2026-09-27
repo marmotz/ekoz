@@ -3,14 +3,18 @@ import type { AcceptedResponseDtoDto } from './AcceptedResponseDto.type.js';
 import type { AccountViewDtoDto } from './AccountViewDto.type.js';
 import type { AddGroupDmMembersDtoDto } from './AddGroupDmMembersDto.type.js';
 import type { AddOwnerDtoDto } from './AddOwnerDto.type.js';
+import type { AdminAttachmentsPageDtoDto } from './AdminAttachmentsPageDto.type.js';
 import type { AdminCreateUserDtoDto } from './AdminCreateUserDto.type.js';
+import type { AdminStorageDashboardDtoDto } from './AdminStorageDashboardDto.type.js';
 import type { AdminUserDetailDtoDto } from './AdminUserDetailDto.type.js';
 import type { AdminUserListResponseDtoDto } from './AdminUserListResponseDto.type.js';
+import type { AdminUserStorageViewDtoDto } from './AdminUserStorageViewDto.type.js';
 import type { AuthPolicyDtoDto } from './AuthPolicyDto.type.js';
 import type { AvatarUploadedDtoDto } from './AvatarUploadedDto.type.js';
 import type { ChangeEmailDtoDto } from './ChangeEmailDto.type.js';
 import type { ChangePasswordDtoDto } from './ChangePasswordDto.type.js';
 import type { ChangeUsernameDtoDto } from './ChangeUsernameDto.type.js';
+import type { ConfigParameterViewDtoDto } from './ConfigParameterViewDto.type.js';
 import type { ConfirmPasswordResetDtoDto } from './ConfirmPasswordResetDto.type.js';
 import type { ContactsResponseDtoDto } from './ContactsResponseDto.type.js';
 import type { ConversationListResponseDtoDto } from './ConversationListResponseDto.type.js';
@@ -25,12 +29,14 @@ import type { DirectoryListResponseDtoDto } from './DirectoryListResponseDto.typ
 import type { DiscoveryDocumentDtoDto } from './DiscoveryDocumentDto.type.js';
 import type { EmailAcceptedResponseDtoDto } from './EmailAcceptedResponseDto.type.js';
 import type { EmailVerifiedResponseDtoDto } from './EmailVerifiedResponseDto.type.js';
+import type { FilesPageDtoDto } from './FilesPageDto.type.js';
 import type { GroupDetailDtoDto } from './GroupDetailDto.type.js';
 import type { GroupListViewDtoDto } from './GroupListViewDto.type.js';
 import type { HeartbeatResponseDtoDto } from './HeartbeatResponseDto.type.js';
 import type { InvitationViewDtoDto } from './InvitationViewDto.type.js';
 import type { IssueFileUrlsResponseDtoDto } from './IssueFileUrlsResponseDto.type.js';
 import type { JoinRequestViewDtoDto } from './JoinRequestViewDto.type.js';
+import type { LinkPreviewViewDtoDto } from './LinkPreviewViewDto.type.js';
 import type { LoginDtoDto } from './LoginDto.type.js';
 import type { LoginResponseDtoDto } from './LoginResponseDto.type.js';
 import type { MemberListViewDtoDto } from './MemberListViewDto.type.js';
@@ -80,6 +86,30 @@ import type { UsernameChangeStateDtoDto } from './UsernameChangeStateDto.type.js
 import type { UserSummaryListViewDtoDto } from './UserSummaryListViewDto.type.js';
 import type { VerifyEmailDtoDto } from './VerifyEmailDto.type.js';
 
+export type SettingsController_list200ResponseJson = ConfigParameterViewDtoDto[];
+
+export type SettingsController_list401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_list403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_set200ResponseJson = ConfigParameterViewDtoDto;
+
+export type SettingsController_set401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_set403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_set409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_set422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_reset401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_reset403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_reset409ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type SettingsController_reset422ResponseProblemJson = ProblemDetailsDtoDto;
+
 export type BlobController_download200ResponseOctetStream = Uint8Array;
 
 export type BlobController_download401ResponseProblemJson = ProblemDetailsDtoDto;
@@ -97,6 +127,58 @@ export type FilesController_issueUrls200ResponseJson = IssueFileUrlsResponseDtoD
 export type FilesController_issueUrls401ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type FilesController_issueUrls422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_get200ResponseJson = AdminUserStorageViewDtoDto;
+
+export type AdminUserStorageController_get401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_get403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_get404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_set401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_set403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_set404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_set422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_reset401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_reset403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminUserStorageController_reset404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminStorageDashboardController_dashboard200ResponseJson = AdminStorageDashboardDtoDto;
+
+export type AdminStorageDashboardController_dashboard401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminStorageDashboardController_dashboard403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminAttachmentsController_search200ResponseJson = AdminAttachmentsPageDtoDto;
+
+export type AdminAttachmentsController_search401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminAttachmentsController_search403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminAttachmentsController_search422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminBlobsController_remove401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminBlobsController_remove403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type AdminBlobsController_remove404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type LinkPreviewController_fetch200ResponseJson = LinkPreviewViewDtoDto;
+
+export type LinkPreviewController_fetch401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type LinkPreviewController_fetch404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type LinkPreviewController_fetch422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type LinkPreviewController_fetch429ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type DiscoveryController_getDiscoveryDocument200ResponseJson = DiscoveryDocumentDtoDto;
 
@@ -753,6 +835,22 @@ export type MessagesController_editMessage403ResponseProblemJson = ProblemDetail
 export type MessagesController_editMessage404ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MessagesController_editMessage422ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_removeAttachment401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_removeAttachment403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_removeAttachment404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listFiles200ResponseJson = FilesPageDtoDto;
+
+export type MessagesController_listFiles401ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listFiles403ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listFiles404ResponseProblemJson = ProblemDetailsDtoDto;
+
+export type MessagesController_listFiles422ResponseProblemJson = ProblemDetailsDtoDto;
 
 export type MessagesController_pin200ResponseJson = MessagePinViewDtoDto;
 

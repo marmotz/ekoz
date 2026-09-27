@@ -47,6 +47,7 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       cancelUsernameRequest: vi.fn(),
       changePassword: vi.fn(),
       deleteAccount: vi.fn(),
+      storage: vi.fn(),
     },
     users: {
       getProfile: vi.fn(),
@@ -73,6 +74,9 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
         unsuspend: vi.fn(),
         delete: vi.fn(),
         triggerPasswordReset: vi.fn(),
+        storage: vi.fn(),
+        setStorageQuota: vi.fn(),
+        resetStorageQuota: vi.fn(),
       },
       owners: {
         add: vi.fn(),
@@ -82,6 +86,18 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
         list: vi.fn(),
         approve: vi.fn(),
         reject: vi.fn(),
+      },
+      settings: {
+        list: vi.fn(),
+        set: vi.fn(),
+        reset: vi.fn(),
+      },
+      storage: vi.fn(),
+      attachments: {
+        search: vi.fn(),
+      },
+      blobs: {
+        remove: vi.fn(),
       },
     },
     rooms: {
@@ -119,6 +135,19 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
     directory: {
       list: vi.fn(),
     },
+    files: {
+      urls: vi.fn(),
+      roomFiles: vi.fn(),
+    },
+    linkPreviews: {
+      fetch: vi.fn(),
+    },
+    uploads: {
+      upload: vi.fn(),
+      resume: vi.fn(),
+      cancel: vi.fn(),
+      get: vi.fn(),
+    },
     messages: {
       policy: vi.fn(),
       list: vi.fn(),
@@ -131,6 +160,7 @@ export function createMockSdk(overrides: Partial<EkozClient> = {}): MockSdk {
       pins: vi.fn(),
       react: vi.fn(),
       unreact: vi.fn(),
+      removeAttachment: vi.fn(),
     },
     mentions: {
       list: vi.fn(),

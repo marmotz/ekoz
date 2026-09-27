@@ -148,4 +148,126 @@ describe('admin resource', () => {
       'https://api.example.com/admin/username-requests/req2/reject',
     ]);
   });
+
+  it('users.storage() GETs /admin/users/:id/storage', async () => {
+    const view = { usedBytes: '100', pendingBytes: '0', quotaBytes: null, overridden: false };
+    const fetchMock = createFetchMock(jsonResponse({ body: view }));
+    const admin = await resource(fetchMock);
+
+    await expect(admin.users.storage('u2')).resolves.toEqual(view);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/users/u2/storage');
+    expect(fetchMock.calls[0]?.init?.method).toBe('GET');
+  });
+
+  it('users.setStorageQuota() PUTs the quota, null included', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }), jsonResponse({ status: 204 }));
+    const admin = await resource(fetchMock);
+
+    await admin.users.setStorageQuota('u2', '1000000');
+    await admin.users.setStorageQuota('u2', null);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/users/u2/storage-quota');
+    expect(fetchMock.calls[0]?.init?.method).toBe('PUT');
+    expect(fetchMock.calls[0]?.init?.body).toBe('{"quotaBytes":"1000000"}');
+    expect(fetchMock.calls[1]?.init?.body).toBe('{"quotaBytes":null}');
+  });
+
+  it('users.resetStorageQuota() DELETEs /admin/users/:id/storage-quota', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const admin = await resource(fetchMock);
+
+    await expect(admin.users.resetStorageQuota('u2')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/users/u2/storage-quota');
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
+
+  it('settings.list() / set() / reset() hit the expected endpoints', async () => {
+    const parameter = {
+      key: 'attachments.max_per_message',
+      kind: 'runtime',
+      value: 10,
+      source: 'default',
+      locked: false,
+      hotReloadable: true,
+      secret: false,
+      schemaHint: null,
+    };
+    const fetchMock = createFetchMock(
+      jsonResponse({ body: [parameter] }),
+      jsonResponse({ body: { ...parameter, value: 5 } }),
+      jsonResponse({ status: 204 }),
+    );
+    const admin = await resource(fetchMock);
+
+    await expect(admin.settings.list()).resolves.toEqual([parameter]);
+    await expect(admin.settings.set('attachments.max_per_message', 5)).resolves.toEqual({
+      ...parameter,
+      value: 5,
+    });
+    await expect(admin.settings.reset('attachments.max_per_message')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls.map((c) => [c.init?.method, c.url])).toEqual([
+      ['GET', 'https://api.example.com/admin/settings'],
+      ['PUT', 'https://api.example.com/admin/settings/attachments.max_per_message'],
+      ['DELETE', 'https://api.example.com/admin/settings/attachments.max_per_message'],
+    ]);
+    expect(fetchMock.calls[1]?.init?.body).toBe('{"value":5}');
+  });
+
+  it('storage() GETs /admin/storage', async () => {
+    const dashboard = {
+      usedBytes: '100',
+      capacityBytes: null,
+      blobCount: 1,
+      pendingUploads: 0,
+      topConsumers: [],
+      driver: 'local',
+      mediaTools: { available: true, ffmpegVersion: null },
+    };
+    const fetchMock = createFetchMock(jsonResponse({ body: dashboard }));
+    const admin = await resource(fetchMock);
+
+    await expect(admin.storage()).resolves.toEqual(dashboard);
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/storage');
+  });
+
+  it('attachments.search() forwards every query param', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { items: [], nextCursor: null } }));
+    const admin = await resource(fetchMock);
+
+    await admin.attachments.search({
+      q: 'report',
+      uploaderId: 'u1',
+      roomId: 'r1',
+      type: 'documents',
+      before: 'a1',
+      limit: 20,
+    });
+
+    expect(fetchMock.calls[0]?.url).toBe(
+      'https://api.example.com/admin/attachments?q=report&uploaderId=u1&roomId=r1&type=documents&before=a1&limit=20',
+    );
+  });
+
+  it('attachments.search() with no params omits the query string', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ body: { items: [], nextCursor: null } }));
+    const admin = await resource(fetchMock);
+
+    await admin.attachments.search();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/attachments');
+  });
+
+  it('blobs.remove() DELETEs /admin/blobs/:id', async () => {
+    const fetchMock = createFetchMock(jsonResponse({ status: 204 }));
+    const admin = await resource(fetchMock);
+
+    await expect(admin.blobs.remove('b1')).resolves.toBeUndefined();
+
+    expect(fetchMock.calls[0]?.url).toBe('https://api.example.com/admin/blobs/b1');
+    expect(fetchMock.calls[0]?.init?.method).toBe('DELETE');
+  });
 });

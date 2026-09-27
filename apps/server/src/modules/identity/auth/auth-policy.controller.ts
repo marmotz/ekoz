@@ -26,6 +26,7 @@ export class AuthPolicyController {
       registrationMode: this.config.get('registration.mode'),
       emailVerificationRequired: this.config.get('email.verification_required'),
       passwordMinLength: MIN_PASSWORD_LENGTH,
+      linkPreviews: this.config.get('link_previews.enabled'),
     };
   }
 }

@@ -495,6 +495,37 @@ export const PARAMETER_REGISTRY = {
     hotReloadable: true,
     secret: false,
   },
+  'attachments.max_per_message': {
+    kind: 'runtime',
+    schema: int.pipe(z.number().min(1)),
+    default: 10,
+    hotReloadable: true,
+    secret: false,
+  },
+  'link_previews.enabled': {
+    kind: 'runtime',
+    schema: z.boolean(),
+    default: false,
+    hotReloadable: true,
+    secret: false,
+  },
+  'link_previews.cache_ttl': {
+    kind: 'runtime',
+    schema: durationSeconds,
+    default: '24h',
+    hotReloadable: true,
+    secret: false,
+  },
+  'link_previews.throttle': {
+    kind: 'runtime',
+    // Same shape as `auth.sensitive_throttle`: the resolved object, or a JSON string from an env override.
+    schema: z
+      .union([z.string().transform((s) => JSON.parse(s) as unknown), z.object({}).passthrough()])
+      .pipe(z.object({ window: durationSeconds, max: int.pipe(z.number().min(1)) })),
+    default: { window: '1m', max: 10 },
+    hotReloadable: true,
+    secret: false,
+  },
   'retention.default': {
     kind: 'runtime',
     // Accepts the resolved object, or a JSON string from an env override —

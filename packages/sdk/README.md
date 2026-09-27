@@ -55,21 +55,24 @@ per-resource constructors:
 | -------------------------- | --------------------------------------------------------------- |
 | `client.setup`             | Setup-state probe, first-owner setup (`state`, `createOwner`)    |
 | `client.auth`              | Policy, register, login, logout, email verification, password reset |
-| `client.me`                | Own profile, avatar, email, password, username (state, cancel), account deletion |
+| `client.me`                | Own profile, avatar, email, password, username (state, cancel), account deletion, storage usage (`storage`) |
 | `client.users`             | Public profile lookup by identifier, user summaries by id, avatar blob |
 | `client.sessions`          | List / rename / revoke the caller's own sessions                 |
 | `client.invitations`       | Owner-only registration invitations                              |
-| `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset), owner and username-request administration |
+| `client.admin`             | Owner-only user (list/get/create/lifecycle/password-reset/storage), owner, username-request, settings, storage dashboard, attachment search and blob removal administration |
 | `client.rooms`             | The caller's tree (`list`), detail, preview, children, own permissions, create space / channel, join / leave, join requests (request, list, approve, reject), members page |
 | `client.conversations`     | The caller's direct and group conversations (`list`), create a one-to-one (`createDm`) or a group (`createGroup`), rename, add / remove members, grant / revoke admin, search contacts |
 | `client.roomInvitations`   | The caller's pending room invitations (`listMine`, `accept`, `decline`) |
 | `client.directory`         | Public room directory, search and paging (`list`)                |
-| `client.messages`          | Room messages (`policy`, `list` with `before` / `after` / `around`, `get`, `send`, `edit`, `delete`, `pin`, `unpin`, `pins`, `react`, `unreact`), with mention targets and reactions |
+| `client.messages`          | Room messages (`policy`, `list` with `before` / `after` / `around`, `get`, `send`, `edit`, `delete`, `pin`, `unpin`, `pins`, `react`, `unreact`, `removeAttachment`), with mention targets, reactions, attachments and link previews |
+| `client.files`             | Short-lived signed download URLs (`urls`, `SignedUrlCache`), a room's attachments (`roomFiles`) |
+| `client.linkPreviews`      | Preview metadata for a URL (`fetch`)                              |
 | `client.mentions`          | The caller's mentions: `list` ("My mentions") and per-room `unread` counters |
 | `client.groups`            | Room groups: `list`, `get`, `create`, `rename`, `remove`, `addMember`, `removeMember` |
 | `client.receipts`          | Read markers: `set` (monotonic) and `list` for a room            |
 | `client.presence`          | Heartbeat, manual away (`setManualAway`), typing signal, and `reporter`: the heartbeat loop with idle state and throttled typing, `signOff()` before a sign-out |
 | `client.sync`              | Per-room catch-up (`get`), events typed as `RoomEvent`           |
+| `client.uploads`           | Resumable file uploads over tus (`upload`, `resume`, `cancel`, `get`) |
 | `client.stream`            | Account SSE stream (`connect` / `disconnect` / `status` / `on`) with fresh-ticket reconnection |
 | `client.discovery`         | The resolved discovery document (`get` / `refresh`)              |
 | `client.session`           | Local session state (`getState`, `resume`, `clear`)              |

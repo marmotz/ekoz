@@ -28,8 +28,13 @@ import { type MessageView, MessageViewDto } from './message.view.js';
 import {
   type EditMessage,
   EditMessageDto,
+  type FilesPage,
+  FilesPageDto,
+  type ListFilesQuery,
+  ListFilesQueryDto,
   type ListMessagesQuery,
   ListMessagesQueryDto,
+  MessageAttachmentIdParamSchema,
   MessageIdParamSchema,
   type MessagePage,
   MessagePageDto,
@@ -109,6 +114,37 @@ export class MessagesController {
     @CurrentPrincipal() principal: AuthPrincipal,
   ): Promise<void> {
     await this.moderation.deleteMessage(principal, params.id, params.messageId);
+  }
+
+  @Delete('rooms/:id/messages/:messageId/attachments/:attachmentId')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Remove a message attachment (needs room.delete_own or room.delete_any).',
+  })
+  @ApiProblemResponses({ statuses: [403, 404] })
+  async removeAttachment(
+    @Param(new ZodValidationPipe(MessageAttachmentIdParamSchema))
+    params: { id: string; messageId: string; attachmentId: string },
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<void> {
+    await this.moderation.removeAttachment(
+      principal,
+      params.id,
+      params.messageId,
+      params.attachmentId,
+    );
+  }
+
+  @Get('rooms/:id/files')
+  @ApiOperation({ summary: "List the room's attachments, newest first (needs room.read)." })
+  @ApiOkResponse({ type: FilesPageDto })
+  @ApiProblemResponses({ validation: true, statuses: [403, 404] })
+  listFiles(
+    @Param(new ZodValidationPipe(RoomIdParamSchema)) params: { id: string },
+    @Query(new ZodValidationPipe(ListFilesQueryDto)) query: ListFilesQuery,
+    @CurrentPrincipal() principal: AuthPrincipal,
+  ): Promise<FilesPage> {
+    return this.messages.listFiles(principal, params.id, query);
   }
 
   @Put('rooms/:id/pins/:messageId')

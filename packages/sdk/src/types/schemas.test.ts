@@ -70,6 +70,7 @@ describe('schemas', () => {
       registrationMode: 'invite',
       emailVerificationRequired: true,
       passwordMinLength: 10,
+      linkPreviews: false,
     });
 
     expect(result.success).toBe(true);
@@ -80,6 +81,7 @@ describe('schemas', () => {
       registrationMode: 'anyone',
       emailVerificationRequired: true,
       passwordMinLength: 10,
+      linkPreviews: false,
     });
 
     expect(result.success).toBe(false);
@@ -164,6 +166,8 @@ describe('schemas', () => {
       redactedAt: null,
       hiddenAt: null,
       createdAt: '2026-09-23T10:00:00.000Z',
+      attachments: [],
+      linkPreview: null,
     };
     expect(MessageSchema.safeParse(message).success).toBe(true);
     expect(MessageSchema.safeParse({ ...message, seq: 3 }).success).toBe(false);

@@ -25,6 +25,7 @@ export type RoomEventType =
   | 'room_deleted'
   | 'pin_added'
   | 'pin_removed'
+  | 'attachment_removed'
   | 'retention_changed'
   | 'receipt_updated'
   | 'group_changed';
@@ -34,6 +35,25 @@ const roomVisibilitySchema = z.enum(['public', 'private', 'invite']);
 const roomRoleSchema = z.enum(['space_admin', 'room_admin', 'moderator', 'member', 'reader']);
 const capabilitySchema = z.enum(CAPABILITIES);
 const overrideEffectSchema = z.enum(['allow', 'deny']);
+/** Raw link preview snapshot embedded in `message_created` content (technical.md §S10). */
+const linkPreviewTargetSchema = z
+  .object({
+    id: z.string(),
+    url: z.string(),
+    title: z.string().nullable(),
+    description: z.string().nullable(),
+    siteName: z.string().nullable(),
+    hasImage: z.boolean(),
+  })
+  .nullable();
+/** Raw attachment target embedded in `message_created` content (technical.md §S9). */
+const attachmentTargetSchema = z.object({
+  id: z.string(),
+  filename: z.string(),
+  contentType: z.string(),
+  sizeBytes: z.string(),
+  position: z.number(),
+});
 
 /**
  * Typed content payload per {@link RoomEventType} (technical.md §10, item 4),
@@ -91,16 +111,24 @@ export const ROOM_EVENT_PAYLOAD_SCHEMAS = {
   member_unbanned: z.object({ userId: z.string() }),
   role_changed: z.object({ userId: z.string(), role: roomRoleSchema }),
 
-  // Fixed shape (technical.md §11, issue #7).
+  // Fixed shape (technical.md §11, issue #7; attachments added by technical.md
+  // §S9, issue #143). `attachments` is the raw target list, like `mentions` —
+  // filename/contentType/sizeBytes/position, not the resolved `AttachmentView`
+  // (media metadata is read from the `Blob` join at request time).
   message_created: z.object({
     messageId: z.string(),
     body: z.string(),
     replyToId: z.string().nullable(),
     mentions: z.array(MentionTargetSchema),
+    attachments: z.array(attachmentTargetSchema),
+    linkPreview: linkPreviewTargetSchema,
   }),
   // Fixed shape (technical.md §11, issue #7). `senderId` carries the pinner.
   pin_added: z.object({ messageId: z.string() }),
   pin_removed: z.object({ messageId: z.string() }),
+  // Fixed shape (technical.md §S9, issue #143). `senderId` carries whoever
+  // removed the attachment (author or moderator).
+  attachment_removed: z.object({ messageId: z.string(), attachmentId: z.string() }),
 
   // Fixed shape (technical.md §12, retention-and-tombstones.md, issue #8).
   // `message_redacted` REWRITES the original `message_created` row in place

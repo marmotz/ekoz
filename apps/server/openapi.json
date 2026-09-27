@@ -1,6 +1,178 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/admin/settings": {
+      "get": {
+        "operationId": "SettingsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigParameterViewDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Every parameter's resolved value, source and provenance.",
+        "tags": [
+          "Admin settings"
+        ]
+      }
+    },
+    "/admin/settings/{key}": {
+      "put": {
+        "operationId": "SettingsController_set",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigParameterViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current resource state.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set a runtime override (audited).",
+        "tags": [
+          "Admin settings"
+        ]
+      },
+      "delete": {
+        "operationId": "SettingsController_reset",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current resource state.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revert a key to its file / default value (audited).",
+        "tags": [
+          "Admin settings"
+        ]
+      }
+    },
     "/blobs/{id}": {
       "get": {
         "operationId": "BlobController_download",
@@ -141,6 +313,383 @@
         "tags": [
           "Files",
           "Files"
+        ]
+      }
+    },
+    "/admin/users/{id}/storage": {
+      "get": {
+        "operationId": "AdminUserStorageController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserStorageViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A user's storage usage, pending uploads and effective quota.",
+        "tags": [
+          "Admin storage"
+        ]
+      }
+    },
+    "/admin/users/{id}/storage-quota": {
+      "put": {
+        "operationId": "AdminUserStorageController_set",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Override a user's storage quota (null = unlimited), audited.",
+        "tags": [
+          "Admin storage"
+        ]
+      },
+      "delete": {
+        "operationId": "AdminUserStorageController_reset",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revert a user's quota to the server default, audited.",
+        "tags": [
+          "Admin storage"
+        ]
+      }
+    },
+    "/admin/storage": {
+      "get": {
+        "operationId": "AdminStorageDashboardController_dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStorageDashboardDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Global storage usage, capacity, top consumers and media tooling.",
+        "tags": [
+          "Admin storage"
+        ]
+      }
+    },
+    "/admin/attachments": {
+      "get": {
+        "operationId": "AdminAttachmentsController_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAttachmentsPageDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search attachments across every room, newest first.",
+        "tags": [
+          "Admin storage"
+        ]
+      }
+    },
+    "/admin/blobs/{id}": {
+      "delete": {
+        "operationId": "AdminBlobsController_remove",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a blob from every attachment, link preview and avatar referencing it, audited.",
+        "tags": [
+          "Admin storage"
+        ]
+      }
+    },
+    "/link-previews": {
+      "post": {
+        "operationId": "LinkPreviewController_fetch",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkPreviewViewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fetch (or return cached) preview metadata for a URL (needs link_previews.enabled).",
+        "tags": [
+          "Link previews"
         ]
       }
     },
@@ -4756,6 +5305,120 @@
         ]
       }
     },
+    "/rooms/{id}/messages/{messageId}/attachments/{attachmentId}": {
+      "delete": {
+        "operationId": "MessagesController_removeAttachment",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a message attachment (needs room.delete_own or room.delete_any).",
+        "tags": [
+          "Conversations — messages"
+        ]
+      }
+    },
+    "/rooms/{id}/files": {
+      "get": {
+        "operationId": "MessagesController_listFiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilesPageDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authenticated but not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code = \"validation_failed\"`, with an `errors` array).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the room's attachments, newest first (needs room.read).",
+        "tags": [
+          "Conversations — messages"
+        ]
+      }
+    },
     "/rooms/{id}/pins/{messageId}": {
       "put": {
         "operationId": "MessagesController_pin",
@@ -6680,6 +7343,53 @@
         ],
         "description": "RFC 9457 `application/problem+json` body — the single error shape for the REST surface."
       },
+      "ConfigParameterViewDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "infra",
+              "runtime"
+            ]
+          },
+          "value": {},
+          "source": {
+            "type": "string",
+            "enum": [
+              "default",
+              "file",
+              "settings",
+              "env"
+            ]
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "hotReloadable": {
+            "type": "boolean"
+          },
+          "secret": {
+            "type": "boolean"
+          },
+          "schemaHint": {
+            "nullable": true
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "value",
+          "source",
+          "locked",
+          "hotReloadable",
+          "secret",
+          "schemaHint"
+        ]
+      },
       "MyStorageViewDto": {
         "type": "object",
         "properties": {
@@ -6883,6 +7593,264 @@
           "items"
         ]
       },
+      "AdminUserStorageViewDto": {
+        "type": "object",
+        "properties": {
+          "usedBytes": {
+            "type": "string"
+          },
+          "pendingBytes": {
+            "type": "string"
+          },
+          "quotaBytes": {
+            "type": "string",
+            "nullable": true
+          },
+          "overridden": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "usedBytes",
+          "pendingBytes",
+          "quotaBytes",
+          "overridden"
+        ]
+      },
+      "AdminStorageDashboardDto": {
+        "type": "object",
+        "properties": {
+          "usedBytes": {
+            "type": "string"
+          },
+          "capacityBytes": {
+            "type": "string",
+            "nullable": true
+          },
+          "blobCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pendingUploads": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "topConsumers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Crockford base32 entity identifier (ULID), 26 characters"
+                    },
+                    "identifier": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "displayName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "identifier",
+                    "displayName",
+                    "avatarUrl"
+                  ]
+                },
+                "usedBytes": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "user",
+                "usedBytes"
+              ]
+            }
+          },
+          "driver": {
+            "type": "string",
+            "enum": [
+              "local",
+              "s3"
+            ]
+          },
+          "mediaTools": {
+            "type": "object",
+            "properties": {
+              "available": {
+                "type": "boolean"
+              },
+              "ffmpegVersion": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "available",
+              "ffmpegVersion"
+            ]
+          }
+        },
+        "required": [
+          "usedBytes",
+          "capacityBytes",
+          "blobCount",
+          "pendingUploads",
+          "topConsumers",
+          "driver",
+          "mediaTools"
+        ]
+      },
+      "AdminAttachmentsPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "filename": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "string"
+                },
+                "sizeBytes": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "room": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                },
+                "uploader": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                      "description": "Crockford base32 entity identifier (ULID), 26 characters"
+                    },
+                    "identifier": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "displayName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "avatarUrl": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "identifier",
+                    "displayName",
+                    "avatarUrl"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "filename",
+                "contentType",
+                "sizeBytes",
+                "createdAt",
+                "room",
+                "message",
+                "uploader"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "LinkPreviewViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "siteName": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasImage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "title",
+          "description",
+          "siteName",
+          "hasImage"
+        ]
+      },
       "DiscoveryDocumentDto": {
         "type": "object",
         "properties": {
@@ -7082,12 +8050,16 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "linkPreviews": {
+            "type": "boolean"
           }
         },
         "required": [
           "registrationMode",
           "emailVerificationRequired",
-          "passwordMinLength"
+          "passwordMinLength",
+          "linkPreviews"
         ]
       },
       "SessionViewDto": {
@@ -8582,6 +9554,7 @@
                 "room.delete_any",
                 "room.react",
                 "room.pin",
+                "room.attach",
                 "room.invite",
                 "room.kick",
                 "room.ban",
@@ -9183,6 +10156,86 @@
               ]
             }
           },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "filename": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "string"
+                },
+                "sizeBytes": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "height": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "durationMs": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "hasThumbnail": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "filename",
+                "contentType",
+                "sizeBytes",
+                "width",
+                "height",
+                "durationMs",
+                "hasThumbnail"
+              ]
+            }
+          },
+          "linkPreview": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string",
+                "nullable": true
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "siteName": {
+                "type": "string",
+                "nullable": true
+              },
+              "hasImage": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "url",
+              "title",
+              "description",
+              "siteName",
+              "hasImage"
+            ],
+            "nullable": true
+          },
           "editedAt": {
             "type": "string",
             "format": "date-time",
@@ -9217,6 +10270,8 @@
           "mentions",
           "mentionsMe",
           "reactions",
+          "attachments",
+          "linkPreview",
           "editedAt",
           "redactedAt",
           "hiddenAt",
@@ -9310,6 +10365,86 @@
                     ]
                   }
                 },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "filename": {
+                        "type": "string"
+                      },
+                      "contentType": {
+                        "type": "string"
+                      },
+                      "sizeBytes": {
+                        "type": "string"
+                      },
+                      "width": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "height": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "durationMs": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "hasThumbnail": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "filename",
+                      "contentType",
+                      "sizeBytes",
+                      "width",
+                      "height",
+                      "durationMs",
+                      "hasThumbnail"
+                    ]
+                  }
+                },
+                "linkPreview": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "siteName": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "hasImage": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "url",
+                    "title",
+                    "description",
+                    "siteName",
+                    "hasImage"
+                  ],
+                  "nullable": true
+                },
                 "editedAt": {
                   "type": "string",
                   "format": "date-time",
@@ -9344,6 +10479,8 @@
                 "mentions",
                 "mentionsMe",
                 "reactions",
+                "attachments",
+                "linkPreview",
                 "editedAt",
                 "redactedAt",
                 "hiddenAt",
@@ -9366,6 +10503,78 @@
           "lastSeq",
           "hasMore",
           "hasMoreNewer"
+        ]
+      },
+      "FilesPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "filename": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "string"
+                },
+                "sizeBytes": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "height": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "durationMs": {
+                  "type": "number",
+                  "nullable": true
+                },
+                "hasThumbnail": {
+                  "type": "boolean"
+                },
+                "messageId": {
+                  "type": "string"
+                },
+                "uploaderId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "filename",
+                "contentType",
+                "sizeBytes",
+                "width",
+                "height",
+                "durationMs",
+                "hasThumbnail",
+                "messageId",
+                "uploaderId",
+                "createdAt"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
         ]
       },
       "MessagePinViewDto": {
@@ -9467,6 +10676,86 @@
                   ]
                 }
               },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "filename": {
+                      "type": "string"
+                    },
+                    "contentType": {
+                      "type": "string"
+                    },
+                    "sizeBytes": {
+                      "type": "string"
+                    },
+                    "width": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "height": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "durationMs": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "hasThumbnail": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "filename",
+                    "contentType",
+                    "sizeBytes",
+                    "width",
+                    "height",
+                    "durationMs",
+                    "hasThumbnail"
+                  ]
+                }
+              },
+              "linkPreview": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "siteName": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "hasImage": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "url",
+                  "title",
+                  "description",
+                  "siteName",
+                  "hasImage"
+                ],
+                "nullable": true
+              },
               "editedAt": {
                 "type": "string",
                 "format": "date-time",
@@ -9501,6 +10790,8 @@
               "mentions",
               "mentionsMe",
               "reactions",
+              "attachments",
+              "linkPreview",
               "editedAt",
               "redactedAt",
               "hiddenAt",
@@ -10300,6 +11591,86 @@
                         ]
                       }
                     },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "filename": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "sizeBytes": {
+                            "type": "string"
+                          },
+                          "width": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "height": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "durationMs": {
+                            "type": "number",
+                            "nullable": true
+                          },
+                          "hasThumbnail": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "filename",
+                          "contentType",
+                          "sizeBytes",
+                          "width",
+                          "height",
+                          "durationMs",
+                          "hasThumbnail"
+                        ]
+                      }
+                    },
+                    "linkPreview": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "siteName": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "hasImage": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "url",
+                        "title",
+                        "description",
+                        "siteName",
+                        "hasImage"
+                      ],
+                      "nullable": true
+                    },
                     "editedAt": {
                       "type": "string",
                       "format": "date-time",
@@ -10334,6 +11705,8 @@
                     "mentions",
                     "mentionsMe",
                     "reactions",
+                    "attachments",
+                    "linkPreview",
                     "editedAt",
                     "redactedAt",
                     "hiddenAt",

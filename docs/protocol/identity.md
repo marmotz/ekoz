@@ -46,13 +46,16 @@ client how to present the sign-up and sign-in flows before anyone types
 anything. Read live from the server settings, so a change made by the owner
 shows on the next call.
 
-- `200`: `{ registrationMode, emailVerificationRequired, passwordMinLength }`.
+- `200`: `{ registrationMode, emailVerificationRequired, passwordMinLength, linkPreviews }`.
   - `registrationMode`: `open` | `invite` | `admin` (the current
     `registration.mode`).
   - `emailVerificationRequired`: boolean. When `false`, a registered account is
     created already verified and no verification mail is sent.
   - `passwordMinLength`: integer, the minimum length the server accepts for a
     password.
+  - `linkPreviews`: boolean, the current `link_previews.enabled` — whether the
+    composer may request a preview (see
+    [Link previews](messages-and-interactions.md#link-previews)).
 
 ### `POST /auth/register`
 
@@ -365,6 +368,87 @@ Body: `{ userId }`. `204`. Errors: `identity.user_not_found` (`404`).
 | `createdAt`        | string (ISO)                         |
 | `resolvedAt`       | string \| null (ISO)                 |
 | `resolvedByUserId` | string \| null (ULID)                |
+
+### `GET /admin/settings`
+
+Every configuration parameter's resolved value and provenance (technical.md
+§2, issue #145). `200`: `ConfigParameterView[]`.
+
+### `PUT /admin/settings/:key`
+
+Sets a runtime override, audited (`config.setting_changed`, old and new value,
+secrets masked). Body: `{ value }`.
+
+- `200`: the updated `ConfigParameterView`.
+- Errors: `config.unknown_key` (`422`), `config.invalid_value` (`422`, fails
+  the parameter's own schema), `config.not_runtime` (`409`, an infra
+  parameter), `config.locked` (`409`, an environment override pins it).
+
+### `DELETE /admin/settings/:key`
+
+Reverts a key to its file / default value, audited the same way as `PUT`.
+`204`. Errors: `config.unknown_key` (`422`), `config.not_runtime` (`409`),
+`config.locked` (`409`).
+
+### `ConfigParameterView`
+
+| Field           | Type                                          |
+| --------------- | ---------------------------------------------- |
+| `key`            | string (e.g. `messages.max_page`)             |
+| `kind`           | `infra` \| `runtime`                          |
+| `value`          | the parameter's own type, or `"[secret]"` when `secret` |
+| `source`         | `default` \| `file` \| `settings` \| `env`    |
+| `locked`         | boolean — an env override pins the value      |
+| `hotReloadable`  | boolean — a `runtime` change applies without a restart |
+| `secret`         | boolean — `value` is masked                   |
+| `schemaHint`     | JSON Schema for the value, or `null`          |
+
+### `GET /admin/users/:id/storage`
+
+A user's storage usage and effective quota (technical.md §S11, issue #146).
+`200`: `{ usedBytes, pendingBytes, quotaBytes, overridden }` — `quotaBytes` is
+`null` when unlimited; `overridden` is `true` when a `StorageQuotaOverride`
+row exists (a `null` override, i.e. an explicit "unlimited", still counts).
+Errors: `storage.user_not_found` (`404`).
+
+### `PUT /admin/users/:id/storage-quota`
+
+Overrides a user's quota, audited (`storage.user_quota_changed`, old and new
+value). Body: `{ quotaBytes: string | null }` (`null` = unlimited). `204`.
+Errors: `storage.user_not_found` (`404`).
+
+### `DELETE /admin/users/:id/storage-quota`
+
+Reverts to the server default (`uploads.default_quota_bytes`), audited the
+same way. `204`. Errors: `storage.user_not_found` (`404`).
+
+### `GET /admin/storage`
+
+Server-wide dashboard (technical.md §S11, issue #146). `200`:
+`{ usedBytes, capacityBytes, blobCount, pendingUploads, topConsumers, driver, mediaTools }`.
+
+- `capacityBytes`: `storage.capacity_bytes`, `null` when unbounded.
+- `topConsumers`: the 10 heaviest uploaders, `{ user: UserSummary, usedBytes }[]`, by referenced blob bytes.
+- `driver`: `local` \| `s3` (`storage.driver`).
+- `mediaTools`: `{ available, ffmpegVersion }` — whether ffmpeg/ffprobe were found at boot.
+
+### `GET /admin/attachments`
+
+Cross-room attachment search, newest first (technical.md §S11, issue #146).
+
+- Query: `?q=&uploaderId=&roomId=&type=media|documents&before=&limit=`. `q`
+  matches the filename; `before` is an attachment id (keyset cursor).
+- `200`: `{ items, nextCursor }`. Each item is the attachment fields plus
+  `room: { id, name }`, `message: { id }` and `uploader: UserSummary`.
+
+### `DELETE /admin/blobs/:id`
+
+Force-removes a blob from every message attachment, link-preview image and
+avatar referencing it (technical.md §S11, issue #146): each reference is
+deleted (a room whose attachment is removed gets `attachment_removed`, like a
+moderator removal) and the blob reference released. Audited as
+`storage.content_removed` with the content hash. `204`. Errors:
+`storage.blob_not_found` (`404`).
 
 ## Error codes reference
 

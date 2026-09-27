@@ -1,22 +1,47 @@
-import { Injectable } from '@nestjs/common';
-import { and } from '@prisma/orm-postgres/orm-client';
+import { Injectable, type OnModuleInit } from '@nestjs/common';
+import { and, not, or } from '@prisma/orm-postgres/orm-client';
 import { ulid } from 'ulid';
 import { ConfigService } from '../../../core/config/config.service.js';
-import { PrismaService } from '../../../core/prisma/prisma.service.js';
+import { LinkPreviewUrlNotInBodyError } from '../../../core/link-previews/link-preview.errors.js';
+import { LinkPreviewService } from '../../../core/link-previews/link-preview.service.js';
 import {
+  isEmptyPreview,
+  type LinkPreviewView,
+  type MessageLinkPreviewRow,
+  toMessageLinkPreviewView,
+} from '../../../core/link-previews/link-preview.view.js';
+import { PrismaService } from '../../../core/prisma/prisma.service.js';
+import type { Blob } from '../../../core/storage/blob.service.js';
+import { BlobService } from '../../../core/storage/blob.service.js';
+import { BlobReferenceRemoverRegistry } from '../../../core/storage/blob-reference-remover.registry.js';
+import { FileAccessRegistry } from '../../../core/storage/file-access.registry.js';
+import { UploadNotFoundError, UploadNotReadyError } from '../../../core/storage/storage.errors.js';
+import type { UploadRecord } from '../../../core/storage/upload.service.js';
+import { UploadService } from '../../../core/storage/upload.service.js';
+import {
+  AttachmentLimitExceededError,
+  AttachmentNotFoundError,
   MessageAlreadyPinnedError,
   MessageBodyInvalidError,
   MessageBodyTooLongError,
+  MessageEmptyError,
   MessageNotFoundError,
   MessageNotPinnedError,
   MessageReplyNotInRoomError,
   RoomNotFoundError,
+  RoomPermissionDeniedError,
   RoomReadOnlyError,
 } from '../conversations.errors.js';
 import { EventLogService, type RoomTx } from '../events/event-log.service.js';
 import { HistoryFloorService } from '../membership/history-floor.service.js';
 import type { PermissionPrincipal } from '../permissions/permissions.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
+import {
+  type AttachmentRow,
+  type AttachmentView,
+  toAttachmentView,
+  toRoomFileItem,
+} from './attachment.view.js';
 import {
   dedupeMentions,
   inputTarget,
@@ -35,12 +60,25 @@ import {
   type ReactionRow,
   toMessageView,
 } from './message.view.js';
-import type { EditMessage, ListMessagesQuery, MessagePage, SendMessage } from './messages.dto.js';
+import type {
+  EditMessage,
+  FilesPage,
+  ListFilesQuery,
+  ListMessagesQuery,
+  MessagePage,
+  SendMessage,
+} from './messages.dto.js';
 import type { MessagePinRow, MessagePinView } from './pin.view.js';
-import { RestrictedMarkdownError, validateRestrictedMarkdown } from './restricted-markdown.js';
+import {
+  extractHttpLinks,
+  RestrictedMarkdownError,
+  validateRestrictedMarkdown,
+} from './restricted-markdown.js';
 
 /** Default `limit` of `GET /rooms/:id/messages`, capped by `messages.max_page`. */
 const DEFAULT_PAGE_SIZE = 50;
+/** Default `limit` of `GET /rooms/:id/files`, capped the same way. */
+const DEFAULT_FILES_PAGE_SIZE = 50;
 
 interface Window {
   items: MessageRow[];
@@ -48,9 +86,36 @@ interface Window {
   hasMoreNewer: boolean;
 }
 
-/** Messages: send, restricted Markdown, mentions, replies, pins (technical.md §11, issue #7). */
+/** The fields written to `MessageLinkPreview` for a message (technical.md §S10). */
+interface LinkPreviewSnapshot {
+  url: string;
+  title: string | null;
+  description: string | null;
+  siteName: string | null;
+  imageBlobId: string | null;
+}
+
+function snapshotToView(snapshot: LinkPreviewSnapshot | null): LinkPreviewView | null {
+  if (!snapshot) {
+    return null;
+  }
+
+  return {
+    id: snapshot.url,
+    url: snapshot.url,
+    title: snapshot.title,
+    description: snapshot.description,
+    siteName: snapshot.siteName,
+    hasImage: snapshot.imageBlobId !== null,
+  };
+}
+
+/**
+ * Messages: send, restricted Markdown, mentions, replies, pins (technical.md
+ * §11, issue #7), attachments (technical.md §S9, issue #143).
+ */
 @Injectable()
-export class MessagesService {
+export class MessagesService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
@@ -58,7 +123,130 @@ export class MessagesService {
     private readonly permissions: PermissionsService,
     private readonly mentionResolver: MentionResolver,
     private readonly historyFloor: HistoryFloorService,
+    private readonly uploads: UploadService,
+    private readonly blobs: BlobService,
+    private readonly fileAccess: FileAccessRegistry,
+    private readonly linkPreviews: LinkPreviewService,
+    private readonly blobReferenceRemovers: BlobReferenceRemoverRegistry,
   ) {}
+
+  /**
+   * Attachment access policy (technical.md §S6, §S9): `room.read` on the
+   * attachment's room, the message not redacted, and — for a message hidden
+   * by retention — `room.delete_any` too (same audience as moderation).
+   */
+  onModuleInit(): void {
+    this.fileAccess.register('attachment', async (ref, userId) => {
+      const attachment = (await this.prisma.orm.public.MessageAttachment.where({
+        id: ref.id,
+      }).first()) as AttachmentRow | null;
+      if (!attachment) {
+        return null;
+      }
+
+      const message = (await this.prisma.orm.public.Message.where({
+        id: attachment.messageId,
+      }).first()) as MessageRow | null;
+      if (!message || message.redactedAt) {
+        return null;
+      }
+
+      const user = (await this.prisma.orm.public.User.where({ id: userId }).first()) as {
+        isOwner: boolean;
+      } | null;
+      const principal: PermissionPrincipal = { userId, isOwner: user?.isOwner ?? false };
+      if (!(await this.permissions.can(principal, attachment.roomId, 'room.read'))) {
+        return null;
+      }
+      if (
+        message.hiddenAt &&
+        !(await this.permissions.can(principal, attachment.roomId, 'room.delete_any'))
+      ) {
+        return null;
+      }
+
+      const blob = await this.blobs.findById(attachment.blobId);
+      if (!blob) {
+        return null;
+      }
+
+      return { blob, filename: attachment.filename, contentType: attachment.contentType };
+    });
+
+    // `message_preview` access policy (technical.md §S6, §S10): same rule as `attachment`.
+    this.fileAccess.register('message_preview', async (ref, userId) => {
+      const preview = (await this.prisma.orm.public.MessageLinkPreview.where({
+        messageId: ref.id,
+      }).first()) as MessageLinkPreviewRow | null;
+      if (!preview?.imageBlobId) {
+        return null;
+      }
+
+      const message = (await this.prisma.orm.public.Message.where({
+        id: preview.messageId,
+      }).first()) as MessageRow | null;
+      if (!message || message.redactedAt) {
+        return null;
+      }
+
+      const user = (await this.prisma.orm.public.User.where({ id: userId }).first()) as {
+        isOwner: boolean;
+      } | null;
+      const principal: PermissionPrincipal = { userId, isOwner: user?.isOwner ?? false };
+      if (!(await this.permissions.can(principal, message.roomId, 'room.read'))) {
+        return null;
+      }
+      if (
+        message.hiddenAt &&
+        !(await this.permissions.can(principal, message.roomId, 'room.delete_any'))
+      ) {
+        return null;
+      }
+
+      const blob = await this.blobs.findById(preview.imageBlobId);
+
+      return blob ? { blob } : null;
+    });
+
+    // Force-removal everywhere (technical.md §S11, issue #146): every
+    // attachment referencing `blobId` is deleted, its room notified, and the
+    // reference released.
+    this.blobReferenceRemovers.register(async (blobId) => {
+      const attachments = (await this.prisma.orm.public.MessageAttachment.where({
+        blobId,
+      }).all()) as AttachmentRow[];
+
+      for (const attachment of attachments) {
+        await this.prisma.transaction(async (tx) => {
+          await tx.orm.public.MessageAttachment.where({ id: attachment.id }).delete();
+          await this.blobs.release(blobId, tx.orm);
+          await this.eventLog.append(tx, {
+            roomId: attachment.roomId,
+            type: 'attachment_removed',
+            senderId: null,
+            content: { messageId: attachment.messageId, attachmentId: attachment.id },
+          });
+        });
+      }
+    });
+
+    // Force-removal everywhere: every message's link-preview snapshot
+    // referencing `blobId` as its image loses that image.
+    this.blobReferenceRemovers.register(async (blobId) => {
+      const previews = (await this.prisma.orm.public.MessageLinkPreview.where({
+        imageBlobId: blobId,
+      }).all()) as MessageLinkPreviewRow[];
+
+      for (const preview of previews) {
+        await this.prisma.transaction(async (tx) => {
+          await tx.orm.public.MessageLinkPreview.where({
+            messageId: preview.messageId,
+          }).update({ imageBlobId: null });
+          await this.blobs.release(blobId, tx.orm);
+        });
+      }
+    });
+  }
 
   async sendMessage(
     actor: PermissionPrincipal,
@@ -71,7 +259,26 @@ export class MessagesService {
       throw new RoomReadOnlyError();
     }
 
-    this.validateBody(input.body);
+    if (input.body === undefined && (input.attachments?.length ?? 0) === 0) {
+      throw new MessageEmptyError();
+    }
+    if (input.body !== undefined) {
+      this.validateBody(input.body);
+    }
+    if (input.attachments && input.attachments.length > 0) {
+      await this.permissions.assertCan(actor, roomId, 'room.attach');
+    }
+    const maxAttachments = this.config.get('attachments.max_per_message');
+    if ((input.attachments?.length ?? 0) > maxAttachments) {
+      throw new AttachmentLimitExceededError();
+    }
+    const resolvedUploads = await this.resolveAttachmentUploads(
+      actor.userId,
+      input.attachments ?? [],
+    );
+    const linkPreviewSnapshot = input.linkPreviewUrl
+      ? await this.resolveLinkPreviewSnapshot(input.linkPreviewUrl, input.body ?? '')
+      : null;
 
     if (input.replyToId) {
       const parent = (await this.prisma.orm.public.Message.where({
@@ -90,6 +297,14 @@ export class MessagesService {
       mentions: input.mentions ?? [],
     });
     const targets = resolved.map((mention, position) => ({ ...mention, position }));
+    const attachmentIds = resolvedUploads.map(() => ulid());
+    const attachmentTargets = resolvedUploads.map(({ upload, blob }, position) => ({
+      id: attachmentIds[position] as string,
+      filename: upload.filename,
+      contentType: blob.contentType,
+      sizeBytes: blob.sizeBytes.toString(),
+      position,
+    }));
 
     const id = ulid();
     const message = await this.prisma.transaction(async (tx) => {
@@ -99,9 +314,11 @@ export class MessagesService {
         senderId: actor.userId,
         content: {
           messageId: id,
-          body: input.body,
+          body: input.body ?? '',
           replyToId: input.replyToId ?? null,
           mentions: targets.map(toMentionTarget),
+          attachments: attachmentTargets,
+          linkPreview: snapshotToView(linkPreviewSnapshot),
         },
       });
 
@@ -110,7 +327,7 @@ export class MessagesService {
         roomId,
         seq: event.seq,
         authorId: actor.userId,
-        body: input.body,
+        body: input.body ?? '',
         replyToId: input.replyToId ?? null,
         editedAt: null,
         redactedAt: null,
@@ -119,6 +336,13 @@ export class MessagesService {
       })) as MessageRow;
 
       await this.writeTargets(tx, id, roomId, event.seq, targets);
+      await this.createAttachments(tx, id, roomId, actor.userId, resolvedUploads, attachmentIds);
+      if (linkPreviewSnapshot) {
+        await tx.orm.public.MessageLinkPreview.create({ messageId: id, ...linkPreviewSnapshot });
+        if (linkPreviewSnapshot.imageBlobId) {
+          await this.blobs.retain(linkPreviewSnapshot.imageBlobId, tx.orm);
+        }
+      }
       if (room.type === 'dm') {
         await this.reopenHiddenMemberships(tx, roomId);
       }
@@ -126,7 +350,32 @@ export class MessagesService {
       return row;
     });
 
-    return toMessageView(message, targets.map(toMentionTarget));
+    const attachmentViews = resolvedUploads.map(({ blob }, position) =>
+      toAttachmentView(
+        {
+          id: attachmentIds[position] as string,
+          messageId: id,
+          roomId,
+          blobId: blob.id,
+          filename: attachmentTargets[position]?.filename as string,
+          contentType: blob.contentType,
+          sizeBytes: blob.sizeBytes,
+          position,
+          uploaderId: actor.userId,
+          createdAt: message.createdAt,
+        },
+        blob,
+      ),
+    );
+
+    return toMessageView(
+      message,
+      targets.map(toMentionTarget),
+      null,
+      [],
+      attachmentViews,
+      snapshotToView(linkPreviewSnapshot),
+    );
   }
 
   /**
@@ -152,7 +401,49 @@ export class MessagesService {
       throw new MessageNotFoundError();
     }
     await this.assertCanEditOrThrow(actor, roomId, message);
-    this.validateBody(input.body);
+    if (input.body !== undefined) {
+      this.validateBody(input.body);
+    }
+
+    const existingAttachments = (await this.prisma.orm.public.MessageAttachment.where({
+      messageId,
+    }).all()) as AttachmentRow[];
+    const addIds = input.attachments?.add ?? [];
+    const removeIds = input.attachments?.remove ?? [];
+    if (removeIds.length > 0) {
+      const existingIds = new Set(existingAttachments.map((row) => row.id));
+      if (!removeIds.every((id) => existingIds.has(id))) {
+        throw new AttachmentNotFoundError();
+      }
+    }
+    if (addIds.length > 0) {
+      await this.assertCanAttachOrThrow(actor, roomId, message);
+    }
+    const finalAttachmentCount = existingAttachments.length - removeIds.length + addIds.length;
+    const maxAttachments = this.config.get('attachments.max_per_message');
+    if (finalAttachmentCount > maxAttachments) {
+      throw new AttachmentLimitExceededError();
+    }
+    const finalBody = input.body ?? message.body;
+    if (finalBody === '' && finalAttachmentCount === 0) {
+      throw new MessageEmptyError();
+    }
+
+    const existingPreview = (await this.prisma.orm.public.MessageLinkPreview.where({
+      messageId,
+    }).first()) as MessageLinkPreviewRow | null;
+    // `undefined`: input omitted `linkPreviewUrl`, keep `existingPreview` as is.
+    let linkPreviewChange: LinkPreviewSnapshot | null | undefined;
+    if (input.linkPreviewUrl === null) {
+      linkPreviewChange = null;
+    } else if (input.linkPreviewUrl !== undefined) {
+      linkPreviewChange = await this.resolveLinkPreviewSnapshot(input.linkPreviewUrl, finalBody);
+    }
+
+    const resolvedUploads = await this.resolveAttachmentUploads(actor.userId, addIds);
+    const newAttachmentIds = resolvedUploads.map(() => ulid());
+    const firstAttachmentPosition =
+      Math.max(-1, ...existingAttachments.map((row) => row.position)) + 1;
 
     const existing = await this.loadTargets(messageId);
     let removed: MentionTargetRow[] = [];
@@ -183,7 +474,7 @@ export class MessagesService {
     const now = new Date().toISOString();
     const updated = await this.prisma.transaction(async (tx) => {
       const row = (await tx.orm.public.Message.where({ id: messageId }).update({
-        body: input.body,
+        body: finalBody,
         editedAt: now,
       })) as MessageRow;
 
@@ -208,18 +499,55 @@ export class MessagesService {
       }
       await this.writeTargets(tx, messageId, roomId, event.seq, added);
 
+      for (const attachmentId of removeIds) {
+        const attachment = existingAttachments.find((row) => row.id === attachmentId);
+        await tx.orm.public.MessageAttachment.where({ id: attachmentId }).delete();
+        if (attachment) {
+          await this.blobs.release(attachment.blobId, tx.orm);
+        }
+      }
+      await this.createAttachments(
+        tx,
+        messageId,
+        roomId,
+        actor.userId,
+        resolvedUploads,
+        newAttachmentIds,
+        firstAttachmentPosition,
+      );
+
+      if (linkPreviewChange !== undefined) {
+        if (existingPreview) {
+          await tx.orm.public.MessageLinkPreview.where({ messageId }).delete();
+          if (existingPreview.imageBlobId) {
+            await this.blobs.release(existingPreview.imageBlobId, tx.orm);
+          }
+        }
+        if (linkPreviewChange) {
+          await tx.orm.public.MessageLinkPreview.create({ messageId, ...linkPreviewChange });
+          if (linkPreviewChange.imageBlobId) {
+            await this.blobs.retain(linkPreviewChange.imageBlobId, tx.orm);
+          }
+        }
+      }
+
       return row;
     });
 
     const targets = await this.loadTargets(messageId);
     const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
     const reactions = await this.reactionsForMany([messageId]);
+    const attachments = await this.attachmentsForMany([messageId]);
+    const finalPreview: LinkPreviewSnapshot | null =
+      linkPreviewChange !== undefined ? linkPreviewChange : existingPreview;
 
     return toMessageView(
       updated,
       targets.map(toMentionTarget),
       mentionsMe.get(messageId) ?? null,
       reactions.get(messageId) ?? [],
+      attachments.get(messageId) ?? [],
+      snapshotToView(finalPreview),
     );
   }
 
@@ -255,6 +583,130 @@ export class MessagesService {
   }
 
   /**
+   * Remove one attachment (technical.md §S9, issue #143). `room.delete_own`
+   * (the author) or `room.delete_any` — same rule and same
+   * `{ authorId, viaCapability }` return shape as {@link deleteMessage}, so
+   * the moderation façade knows whether to audit it.
+   */
+  async removeAttachment(
+    actor: PermissionPrincipal,
+    roomId: string,
+    messageId: string,
+    attachmentId: string,
+  ): Promise<{ authorId: string | null; viaCapability: 'delete_own' | 'delete_any' }> {
+    const message = await this.findMessageOrThrow(roomId, messageId, actor.userId);
+    if (message.redactedAt) {
+      throw new MessageNotFoundError();
+    }
+    const attachment = (await this.prisma.orm.public.MessageAttachment.where({
+      id: attachmentId,
+      messageId,
+    }).first()) as AttachmentRow | null;
+    if (!attachment) {
+      throw new AttachmentNotFoundError();
+    }
+
+    const isAuthor = message.authorId === actor.userId;
+    const canDeleteOwn = isAuthor && (await this.permissions.can(actor, roomId, 'room.delete_own'));
+    const viaCapability = canDeleteOwn ? 'delete_own' : 'delete_any';
+    if (!canDeleteOwn) {
+      await this.permissions.assertCan(actor, roomId, 'room.delete_any');
+    }
+
+    await this.prisma.transaction(async (tx) => {
+      await tx.orm.public.MessageAttachment.where({ id: attachmentId }).delete();
+      await this.blobs.release(attachment.blobId, tx.orm);
+      await this.eventLog.append(tx, {
+        roomId,
+        type: 'attachment_removed',
+        senderId: actor.userId,
+        content: { messageId, attachmentId },
+      });
+    });
+
+    return { authorId: message.authorId, viaCapability };
+  }
+
+  /**
+   * The room's attachments, newest first (technical.md §S9, issue #143).
+   * `media` is `image/*`, `video/*`, `audio/*`; `documents` is everything
+   * else. Hidden and redacted messages are excluded.
+   */
+  async listFiles(
+    actor: PermissionPrincipal,
+    roomId: string,
+    query: ListFilesQuery,
+  ): Promise<FilesPage> {
+    await this.permissions.assertCan(actor, roomId, 'room.read');
+    await this.findRoomOrThrow(roomId);
+
+    const maxPage = this.config.get('messages.max_page');
+    const limit = Math.min(query.limit ?? DEFAULT_FILES_PAGE_SIZE, maxPage);
+
+    let beforeCreatedAt: string | null = null;
+    if (query.before !== undefined) {
+      const cursor = (await this.prisma.orm.public.MessageAttachment.where({
+        id: query.before,
+        roomId,
+      }).first()) as AttachmentRow | null;
+      if (!cursor) {
+        return { items: [], nextCursor: null };
+      }
+      beforeCreatedAt = cursor.createdAt;
+    }
+
+    const visibleMessageIds = (
+      (await this.prisma.orm.public.Message.where((f) =>
+        and(f.roomId.eq(roomId), f.hiddenAt.isNull(), f.redactedAt.isNull()),
+      ).all()) as MessageRow[]
+    ).map((row) => row.id);
+    if (visibleMessageIds.length === 0) {
+      return { items: [], nextCursor: null };
+    }
+
+    const rows = (await this.prisma.orm.public.MessageAttachment.where((f) =>
+      and(
+        f.roomId.eq(roomId),
+        f.messageId.in(visibleMessageIds),
+        ...(beforeCreatedAt === null ? [] : [f.createdAt.lt(beforeCreatedAt)]),
+        ...(query.kind === undefined
+          ? []
+          : [
+              query.kind === 'media'
+                ? or(
+                    f.contentType.like('image/%'),
+                    f.contentType.like('video/%'),
+                    f.contentType.like('audio/%'),
+                  )
+                : not(
+                    or(
+                      f.contentType.like('image/%'),
+                      f.contentType.like('video/%'),
+                      f.contentType.like('audio/%'),
+                    ),
+                  ),
+            ]),
+      ),
+    )
+      .orderBy((f) => f.createdAt.desc())
+      .limit(limit + 1)
+      .all()) as AttachmentRow[];
+
+    const items = rows.slice(0, limit);
+    const hasMore = rows.length > limit;
+    const blobIds = [...new Set(items.map((row) => row.blobId))];
+    const blobRows = (await this.prisma.orm.public.Blob.where((f) =>
+      f.id.in(blobIds),
+    ).all()) as Blob[];
+    const blobsById = new Map(blobRows.map((blob) => [blob.id, blob] as const));
+
+    return {
+      items: items.map((row) => toRoomFileItem(row, blobsById.get(row.blobId) ?? null)),
+      nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+    };
+  }
+
+  /**
    * Shared redact core (technical.md §12-§13): also the retention worker's delete-mode helper.
    * Besides rewriting the original event in place, it appends `message_deleted` (so
    * connected clients and `/sync` see the deletion) and scrubs the account feed rows
@@ -281,6 +733,22 @@ export class MessagesService {
       ).deleteAndCount();
       await tx.orm.public.MessagePin.where({ roomId, messageId: message.id }).delete();
       await tx.orm.public.Reaction.where((f) => f.messageId.eq(message.id)).deleteAndCount();
+      const attachments = (await tx.orm.public.MessageAttachment.where({
+        messageId: message.id,
+      }).all()) as AttachmentRow[];
+      for (const attachment of attachments) {
+        await tx.orm.public.MessageAttachment.where({ id: attachment.id }).delete();
+        await this.blobs.release(attachment.blobId, tx.orm);
+      }
+      const preview = (await tx.orm.public.MessageLinkPreview.where({
+        messageId: message.id,
+      }).first()) as MessageLinkPreviewRow | null;
+      if (preview) {
+        await tx.orm.public.MessageLinkPreview.where({ messageId: message.id }).delete();
+        if (preview.imageBlobId) {
+          await this.blobs.release(preview.imageBlobId, tx.orm);
+        }
+      }
       await tx.orm.public.RoomEvent.where({ roomId, seq: message.seq }).update({
         type: 'message_redacted',
         content: { reason },
@@ -340,6 +808,8 @@ export class MessagesService {
     const reactionsByMessage = await this.reactionsForMany(
       window.items.filter((row) => !row.redactedAt).map((row) => row.id),
     );
+    const attachmentsByMessage = await this.attachmentsForMany(ids);
+    const linkPreviewsByMessage = await this.linkPreviewsForMany(ids);
 
     return {
       items: window.items.map((row) =>
@@ -348,6 +818,8 @@ export class MessagesService {
           mentionsByMessage.get(row.id) ?? [],
           mentionsMe.get(row.id) ?? null,
           reactionsByMessage.get(row.id) ?? [],
+          attachmentsByMessage.get(row.id) ?? [],
+          linkPreviewsByMessage.get(row.id) ?? null,
         ),
       ),
       lastSeq: room.lastSeq.toString(),
@@ -448,12 +920,18 @@ export class MessagesService {
     const mentions = (await this.loadTargets(messageId)).map(toMentionTarget);
     const mentionsMe = await this.mentionsMeFor(actor.userId, [messageId]);
     const reactions = message.redactedAt ? new Map() : await this.reactionsForMany([messageId]);
+    const attachments = message.redactedAt ? new Map() : await this.attachmentsForMany([messageId]);
+    const linkPreviews = message.redactedAt
+      ? new Map()
+      : await this.linkPreviewsForMany([messageId]);
 
     return toMessageView(
       message,
       mentions,
       mentionsMe.get(messageId) ?? null,
       reactions.get(messageId) ?? [],
+      attachments.get(messageId) ?? [],
+      linkPreviews.get(messageId) ?? null,
     );
   }
 
@@ -559,6 +1037,12 @@ export class MessagesService {
     const reactionsByMessage = await this.reactionsForMany(
       rows.filter((row) => !row.redactedAt).map((row) => row.id),
     );
+    const attachmentsByMessage = await this.attachmentsForMany(
+      rows.filter((row) => !row.redactedAt).map((row) => row.id),
+    );
+    const linkPreviewsByMessage = await this.linkPreviewsForMany(
+      rows.filter((row) => !row.redactedAt).map((row) => row.id),
+    );
 
     return rows.map((row) =>
       toMessageView(
@@ -566,6 +1050,8 @@ export class MessagesService {
         mentionsByMessage.get(row.id) ?? [],
         mentionsMe.get(row.id) ?? null,
         reactionsByMessage.get(row.id) ?? [],
+        attachmentsByMessage.get(row.id) ?? [],
+        linkPreviewsByMessage.get(row.id) ?? null,
       ),
     );
   }
@@ -669,6 +1155,28 @@ export class MessagesService {
     await this.permissions.assertCan(actor, roomId, 'room.edit_any');
   }
 
+  /**
+   * Adding attachments on edit is author-only, within `messages.edit_window`
+   * (technical.md §S9): quota and files belong to the author, so `room.edit_any`
+   * does not extend to attaching new files on someone else's message.
+   */
+  private async assertCanAttachOrThrow(
+    actor: PermissionPrincipal,
+    roomId: string,
+    message: MessageRow,
+  ): Promise<void> {
+    const editWindow = this.config.get('messages.edit_window');
+    const withinWindow =
+      editWindow === null ||
+      Date.now() <= new Date(message.createdAt).getTime() + editWindow * 1000;
+    if (message.authorId !== actor.userId || !withinWindow) {
+      throw new RoomPermissionDeniedError(
+        'Only the author can add attachments, within the edit window.',
+      );
+    }
+    await this.permissions.assertCan(actor, roomId, 'room.attach');
+  }
+
   /** Insert targets and their recipients (at `seq`) inside the caller's transaction. */
   private async writeTargets(
     tx: RoomTx,
@@ -697,6 +1205,91 @@ export class MessagesService {
           })),
         );
       }
+    }
+  }
+
+  /**
+   * Resolve `uploadIds` to their upload + blob, in the given order (technical.md
+   * §S9): each must belong to `userId`, be `ready` and not expired.
+   */
+  private async resolveAttachmentUploads(
+    userId: string,
+    uploadIds: readonly string[],
+  ): Promise<Array<{ upload: UploadRecord; blob: Blob }>> {
+    const resolved: Array<{ upload: UploadRecord; blob: Blob }> = [];
+    for (const uploadId of uploadIds) {
+      const upload = await this.uploads.findOwned(uploadId, userId);
+      if (!upload) {
+        throw new UploadNotFoundError();
+      }
+      this.uploads.assertNotExpired(upload);
+      if (upload.state !== 'ready' || !upload.blobId) {
+        throw new UploadNotReadyError();
+      }
+      const blob = await this.blobs.findById(upload.blobId);
+      if (!blob) {
+        throw new UploadNotReadyError();
+      }
+      resolved.push({ upload, blob });
+    }
+
+    return resolved;
+  }
+
+  /**
+   * Resolve `linkPreviewUrl` to a snapshot to write into `MessageLinkPreview`
+   * (technical.md §S10): the URL must be one of the `http(s)` links in the
+   * body; disabled or nothing-to-preview both resolve to `null` (ignored),
+   * not an error.
+   */
+  private async resolveLinkPreviewSnapshot(
+    url: string,
+    body: string,
+  ): Promise<LinkPreviewSnapshot | null> {
+    if (!this.config.get('link_previews.enabled')) {
+      return null;
+    }
+    if (!extractHttpLinks(body).includes(url)) {
+      throw new LinkPreviewUrlNotInBodyError();
+    }
+
+    const row = await this.linkPreviews.resolve(url);
+    if (isEmptyPreview(row)) {
+      return null;
+    }
+
+    return {
+      url: row.url,
+      title: row.title,
+      description: row.description,
+      siteName: row.siteName,
+      imageBlobId: row.imageBlobId,
+    };
+  }
+
+  /** Create the `MessageAttachment` rows and consume the uploads (no net retain/release: the blob reference moves). */
+  private async createAttachments(
+    tx: RoomTx,
+    messageId: string,
+    roomId: string,
+    uploaderId: string,
+    resolvedUploads: ReadonlyArray<{ upload: UploadRecord; blob: Blob }>,
+    attachmentIds: readonly string[],
+    startPosition = 0,
+  ): Promise<void> {
+    for (const [i, { upload, blob }] of resolvedUploads.entries()) {
+      await tx.orm.public.MessageAttachment.create({
+        id: attachmentIds[i] as string,
+        messageId,
+        roomId,
+        blobId: blob.id,
+        filename: upload.filename,
+        contentType: blob.contentType,
+        sizeBytes: blob.sizeBytes,
+        position: startPosition + i,
+        uploaderId,
+      });
+      await tx.orm.public.Upload.where({ id: upload.id }).delete();
     }
   }
 
@@ -745,6 +1338,53 @@ export class MessagesService {
     ).all()) as ReactionRow[];
 
     return groupReactions(rows);
+  }
+
+  /** Attachments of each message, ordered by `position`, blob metadata joined in one extra query. */
+  private async attachmentsForMany(messageIds: string[]): Promise<Map<string, AttachmentView[]>> {
+    const byMessage = new Map<string, AttachmentView[]>();
+    if (messageIds.length === 0) {
+      return byMessage;
+    }
+
+    const rows = (await this.prisma.orm.public.MessageAttachment.where((f) =>
+      f.messageId.in(messageIds),
+    )
+      .orderBy((f) => f.position.asc())
+      .all()) as AttachmentRow[];
+    if (rows.length === 0) {
+      return byMessage;
+    }
+
+    const blobIds = [...new Set(rows.map((row) => row.blobId))];
+    const blobRows = (await this.prisma.orm.public.Blob.where((f) =>
+      f.id.in(blobIds),
+    ).all()) as Blob[];
+    const blobsById = new Map(blobRows.map((blob) => [blob.id, blob] as const));
+
+    for (const row of rows) {
+      const view = toAttachmentView(row, blobsById.get(row.blobId) ?? null);
+      byMessage.set(row.messageId, [...(byMessage.get(row.messageId) ?? []), view]);
+    }
+
+    return byMessage;
+  }
+
+  /** Each message's `linkPreview`, one query for the whole set (technical.md §S10). */
+  private async linkPreviewsForMany(messageIds: string[]): Promise<Map<string, LinkPreviewView>> {
+    const byMessage = new Map<string, LinkPreviewView>();
+    if (messageIds.length === 0) {
+      return byMessage;
+    }
+
+    const rows = (await this.prisma.orm.public.MessageLinkPreview.where((f) =>
+      f.messageId.in(messageIds),
+    ).all()) as MessageLinkPreviewRow[];
+    for (const row of rows) {
+      byMessage.set(row.messageId, toMessageLinkPreviewView(row));
+    }
+
+    return byMessage;
   }
 
   /**

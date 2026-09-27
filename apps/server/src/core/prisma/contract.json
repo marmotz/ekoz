@@ -28,12 +28,24 @@
       "model": "Invitation",
       "namespace": "public"
     },
+    "link_preview": {
+      "model": "LinkPreview",
+      "namespace": "public"
+    },
     "membership": {
       "model": "Membership",
       "namespace": "public"
     },
     "message": {
       "model": "Message",
+      "namespace": "public"
+    },
+    "message_attachment": {
+      "model": "MessageAttachment",
+      "namespace": "public"
+    },
+    "message_link_preview": {
+      "model": "MessageLinkPreview",
       "namespace": "public"
     },
     "message_mention_recipient": {
@@ -161,6 +173,19 @@
     "namespaces": {
       "public": {
         "enum": {
+          "LinkPreviewStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "ready",
+                "value": "ready"
+              },
+              {
+                "name": "failed",
+                "value": "failed"
+              }
+            ]
+          },
           "OverrideEffect": {
             "codecId": "pg/text@1",
             "members": [
@@ -256,6 +281,10 @@
               {
                 "name": "pin_removed",
                 "value": "pin_removed"
+              },
+              {
+                "name": "attachment_removed",
+                "value": "attachment_removed"
               },
               {
                 "name": "retention_changed",
@@ -974,6 +1003,103 @@
               "table": "invitation"
             }
           },
+          "LinkPreview": {
+            "fields": {
+              "description": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "fetchedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "imageBlobId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "siteName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "LinkPreviewStatus",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "title": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "url": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "description": {
+                  "column": "description"
+                },
+                "fetchedAt": {
+                  "column": "fetched_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "imageBlobId": {
+                  "column": "image_blob_id"
+                },
+                "siteName": {
+                  "column": "site_name"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "title": {
+                  "column": "title"
+                },
+                "url": {
+                  "column": "url"
+                }
+              },
+              "namespaceId": "public",
+              "table": "link_preview"
+            }
+          },
           "Membership": {
             "fields": {
               "hiddenAt": {
@@ -1180,6 +1306,188 @@
               },
               "namespaceId": "public",
               "table": "message"
+            }
+          },
+          "MessageAttachment": {
+            "fields": {
+              "blobId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "contentType": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "filename": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "position": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "roomId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "sizeBytes": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "uploaderId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "blobId": {
+                  "column": "blob_id"
+                },
+                "contentType": {
+                  "column": "content_type"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "filename": {
+                  "column": "filename"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "messageId": {
+                  "column": "message_id"
+                },
+                "position": {
+                  "column": "position"
+                },
+                "roomId": {
+                  "column": "room_id"
+                },
+                "sizeBytes": {
+                  "column": "size_bytes"
+                },
+                "uploaderId": {
+                  "column": "uploader_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message_attachment"
+            }
+          },
+          "MessageLinkPreview": {
+            "fields": {
+              "description": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "imageBlobId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "siteName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "title": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "url": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "description": {
+                  "column": "description"
+                },
+                "imageBlobId": {
+                  "column": "image_blob_id"
+                },
+                "messageId": {
+                  "column": "message_id"
+                },
+                "siteName": {
+                  "column": "site_name"
+                },
+                "title": {
+                  "column": "title"
+                },
+                "url": {
+                  "column": "url"
+                }
+              },
+              "namespaceId": "public",
+              "table": "message_link_preview"
             }
           },
           "MessageMentionRecipient": {
@@ -3920,6 +4228,87 @@
                 }
               ]
             },
+            "link_preview": {
+              "checks": [
+                {
+                  "expression": "\"status\" IN ('ready', 'failed')",
+                  "name": "link_preview_status_check_27d2066a",
+                  "prefix": "link_preview_status_check"
+                }
+              ],
+              "columns": {
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "fetched_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "image_blob_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "site_name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "LinkPreviewStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "url": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "status",
+                    "fetched_at"
+                  ],
+                  "name": "link_preview_status_fetched_at_idx_30a983cc",
+                  "prefix": "link_preview_status_fetched_at_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "url"
+                  ]
+                }
+              ]
+            },
             "membership": {
               "checks": [
                 {
@@ -4089,6 +4478,132 @@
                   ]
                 }
               ]
+            },
+            "message_attachment": {
+              "columns": {
+                "blob_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "content_type": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "filename": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "position": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "room_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "size_bytes": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "uploader_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "message_id"
+                  ],
+                  "name": "message_attachment_message_id_idx_8a7ff1ba",
+                  "prefix": "message_attachment_message_id_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "room_id",
+                    "created_at"
+                  ],
+                  "name": "message_attachment_room_id_created_at_idx_3f0ddf95",
+                  "prefix": "message_attachment_room_id_created_at_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "message_link_preview": {
+              "columns": {
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "image_blob_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "message_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "site_name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "url": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "message_id"
+                ]
+              },
+              "uniques": []
             },
             "message_mention_recipient": {
               "columns": {
@@ -4875,8 +5390,8 @@
             "room_event": {
               "checks": [
                 {
-                  "expression": "\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'retention_changed', 'receipt_updated', 'group_changed')",
-                  "name": "room_event_type_check_02d9b1d8",
+                  "expression": "\"type\" IN ('message_created', 'message_edited', 'message_redacted', 'message_deleted', 'message_hidden', 'reaction_added', 'reaction_removed', 'member_joined', 'member_left', 'member_kicked', 'member_banned', 'member_unbanned', 'role_changed', 'permission_override_changed', 'room_created', 'room_updated', 'room_moved', 'room_deleted', 'pin_added', 'pin_removed', 'attachment_removed', 'retention_changed', 'receipt_updated', 'group_changed')",
+                  "name": "room_event_type_check_3c77a9c9",
                   "prefix": "room_event_type_check"
                 }
               ],
@@ -5958,6 +6473,13 @@
             }
           },
           "valueSet": {
+            "LinkPreviewStatus": {
+              "kind": "valueSet",
+              "values": [
+                "ready",
+                "failed"
+              ]
+            },
             "OverrideEffect": {
               "kind": "valueSet",
               "values": [
@@ -5988,6 +6510,7 @@
                 "room_deleted",
                 "pin_added",
                 "pin_removed",
+                "attachment_removed",
                 "retention_changed",
                 "receipt_updated",
                 "group_changed"
@@ -6051,10 +6574,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "7bac4d33d0d5b538fec0c703d35c4685450f94e6d32c32a4ae0751ef82fc38a9"
+    "storageHash": "9a78b92efef249ea7b1ea08f7890ba5ef4eac36e9703456da8f1dfebcd3e205e"
   },
   "execution": {
-    "executionHash": "fa040e2fffd64f7f07787776e6a0392881010e7249c1a13ab4f302cd7b4e8a59",
+    "executionHash": "cd2fa71f78bcb174f33413eb759a718b4afb650a46c5bae6a195123100fd5840",
     "mutations": {
       "defaults": [
         {
@@ -6120,7 +6643,29 @@
           "ref": {
             "column": "id",
             "namespace": "public",
+            "table": "link_preview"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
             "table": "message"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "ulid",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "message_attachment"
           }
         },
         {

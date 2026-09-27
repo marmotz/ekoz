@@ -1,9 +1,16 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '../config/config.service.js';
+import { UserSummaryReader } from '../users/user-summary.reader.js';
+import { AdminAttachmentsController } from './admin-attachments.controller.js';
+import { AdminBlobsController } from './admin-blobs.controller.js';
+import { AdminStorageService } from './admin-storage.service.js';
+import { AdminStorageDashboardController } from './admin-storage-dashboard.controller.js';
+import { AdminUserStorageController } from './admin-user-storage.controller.js';
 import { BlobController } from './blob.controller.js';
 import { BlobService } from './blob.service.js';
 import { BlobAccessRegistry } from './blob-access.registry.js';
 import { BlobGcService } from './blob-gc.service.js';
+import { BlobReferenceRemoverRegistry } from './blob-reference-remover.registry.js';
 import { FileAccessRegistry } from './file-access.registry.js';
 import { FilesController } from './files.controller.js';
 import { LocalStorageDriver } from './local-storage.driver.js';
@@ -28,7 +35,16 @@ import { UploadSweeperService } from './upload-sweeper.service.js';
  */
 @Global()
 @Module({
-  controllers: [BlobController, MyStorageController, UploadController, FilesController],
+  controllers: [
+    BlobController,
+    MyStorageController,
+    UploadController,
+    FilesController,
+    AdminUserStorageController,
+    AdminStorageDashboardController,
+    AdminAttachmentsController,
+    AdminBlobsController,
+  ],
   providers: [
     {
       provide: STORAGE_DRIVER,
@@ -57,6 +73,9 @@ import { UploadSweeperService } from './upload-sweeper.service.js';
     UploadService,
     UploadSweeperService,
     FileAccessRegistry,
+    BlobReferenceRemoverRegistry,
+    AdminStorageService,
+    UserSummaryReader,
   ],
   exports: [
     BlobService,
@@ -65,7 +84,9 @@ import { UploadSweeperService } from './upload-sweeper.service.js';
     StorageQuotaService,
     UploadService,
     MediaToolsService,
+    MediaAnnotationService,
     FileAccessRegistry,
+    BlobReferenceRemoverRegistry,
   ],
 })
 export class StorageModule {}

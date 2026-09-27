@@ -36,17 +36,31 @@ export interface ListMessagesParams {
   limit?: number;
 }
 
-/** `POST /rooms/:id/messages` body. Not in the OpenAPI description, so declared by hand. */
+/**
+ * `POST /rooms/:id/messages` body. Not in the OpenAPI description, so declared by hand.
+ * `body` may be omitted when `attachments` carries at least one upload id (`message.empty`
+ * otherwise, technical.md §S9).
+ */
 export interface SendMessageBody {
-  body: string;
+  body?: string;
   replyToId?: string;
   mentions?: MentionInput[];
+  /** Ready upload ids to attach, at most 100. */
+  attachments?: string[];
+  /** Must be one of the http(s) links present in `body`. */
+  linkPreviewUrl?: string;
 }
 
-/** `PATCH /rooms/:id/messages/:messageId` body. `mentions` absent leaves the targets alone. */
+/**
+ * `PATCH /rooms/:id/messages/:messageId` body. `mentions` absent leaves the targets alone.
+ */
 export interface EditMessageBody {
-  body: string;
+  body?: string;
   mentions?: MentionInput[];
+  /** Ready upload ids to add and existing attachment ids to remove, each at most 100. */
+  attachments?: { add?: string[]; remove?: string[] };
+  /** Absent: unchanged. A URL: replace/set. `null`: remove the preview. */
+  linkPreviewUrl?: string | null;
 }
 
 export interface MessagesResource {
@@ -58,6 +72,8 @@ export interface MessagesResource {
   edit(roomId: string, messageId: string, body: EditMessageBody): Promise<Message>;
   /** `DELETE /rooms/:id/messages/:messageId`: the author (`room.delete_own`) or a moderator (`room.delete_any`). */
   delete(roomId: string, messageId: string): Promise<void>;
+  /** `DELETE /rooms/:id/messages/:messageId/attachments/:attachmentId` (needs `room.delete_own` or `room.delete_any`). */
+  removeAttachment(roomId: string, messageId: string, attachmentId: string): Promise<void>;
   /** `PUT /rooms/:id/pins/:messageId`: pin a message; the pin embeds it. */
   pin(roomId: string, messageId: string): Promise<MessagePin>;
   /** `DELETE /rooms/:id/pins/:messageId`. */
@@ -108,6 +124,13 @@ export function createMessagesResource(session: SessionManager): MessagesResourc
 
     delete(roomId, messageId) {
       return session.request<void>('DELETE', `${base(roomId)}/${encodeURIComponent(messageId)}`);
+    },
+
+    removeAttachment(roomId, messageId, attachmentId) {
+      return session.request<void>(
+        'DELETE',
+        `${base(roomId)}/${encodeURIComponent(messageId)}/attachments/${encodeURIComponent(attachmentId)}`,
+      );
     },
 
     pin(roomId, messageId) {

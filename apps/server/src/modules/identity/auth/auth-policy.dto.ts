@@ -9,6 +9,8 @@ export const AuthPolicySchema = z.object({
   emailVerificationRequired: z.boolean(),
   /** Minimum accepted password length. */
   passwordMinLength: z.number().int(),
+  /** `link_previews.enabled`: whether the composer may request link previews. */
+  linkPreviews: z.boolean(),
 });
 export type AuthPolicyBody = z.infer<typeof AuthPolicySchema>;
 export class AuthPolicyDto extends createZodDto(AuthPolicySchema) {}

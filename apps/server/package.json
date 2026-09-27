@@ -56,6 +56,7 @@
     "@prisma/orm-postgres": "^8.0.0-rc.11",
     "dotenv": "^17.4.2",
     "file-type": "^22.1.1",
+    "htmlparser2": "^12.0.0",
     "nestjs-zod": "5.5.0",
     "nodemailer": "^9.1.1",
     "pino": "^10.3.1",

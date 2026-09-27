@@ -12,6 +12,7 @@ import type {
   DeleteMeBody,
   EmailAcceptedResponse,
   MeView,
+  MyStorageView,
   UpdateProfileBody,
   UsernameChangeOutcome,
   UsernameChangeState,
@@ -28,6 +29,7 @@ export interface MeResource {
   cancelUsernameRequest(): Promise<void>;
   changePassword(body: ChangePasswordBody): Promise<void>;
   deleteAccount(body: DeleteMeBody): Promise<void>;
+  storage(): Promise<MyStorageView>;
 }
 
 export function createMeResource(session: SessionManager): MeResource {
@@ -73,6 +75,10 @@ export function createMeResource(session: SessionManager): MeResource {
     async deleteAccount(body) {
       await session.request<void>('DELETE', '/me', { body });
       await session.clear();
+    },
+
+    storage() {
+      return session.request<MyStorageView>('GET', '/me/storage');
     },
   };
 }

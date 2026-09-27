@@ -41,6 +41,7 @@ describe('identity — auth policy (integration)', () => {
       registrationMode: 'invite',
       emailVerificationRequired: true,
       passwordMinLength: MIN_PASSWORD_LENGTH,
+      linkPreviews: false,
     });
     expect(res.headers['cache-control']).toBe('no-store');
   });
