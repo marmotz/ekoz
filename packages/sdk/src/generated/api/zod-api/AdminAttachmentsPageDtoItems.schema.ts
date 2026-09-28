@@ -2,11 +2,13 @@
 import { type AdminAttachmentsPageDtoItemsMessageDto, AdminAttachmentsPageDtoItemsMessageSchema } from './AdminAttachmentsPageDtoItemsMessage.schema.js';
 import { type AdminAttachmentsPageDtoItemsRoomDto, AdminAttachmentsPageDtoItemsRoomSchema } from './AdminAttachmentsPageDtoItemsRoom.schema.js';
 import { type AdminAttachmentsPageDtoItemsUploaderDto, AdminAttachmentsPageDtoItemsUploaderSchema } from './AdminAttachmentsPageDtoItemsUploader.schema.js';
-import { DateTimeFilter, StringFilter } from './filters.js';
+import { DateTimeFilter, IntFilter, StringFilter } from './filters.js';
 import { z } from 'zod';
 
 export const AdminAttachmentsPageDtoItemsSchema: z.ZodType<AdminAttachmentsPageDtoItemsDto> = z.object({
   id: z.string(),
+  blobId: z.string(),
+  refCount: z.int().min(-9007199254740991).max(9007199254740991),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),
@@ -17,6 +19,8 @@ export const AdminAttachmentsPageDtoItemsSchema: z.ZodType<AdminAttachmentsPageD
 });
 export type AdminAttachmentsPageDtoItemsDto = {
   id: string;
+  blobId: string;
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -28,6 +32,8 @@ export type AdminAttachmentsPageDtoItemsDto = {
 
 export const AdminAttachmentsPageDtoItemsDeepSchema: z.ZodType<AdminAttachmentsPageDtoItemsDeepDto> = z.object({
   id: z.string(),
+  blobId: z.string(),
+  refCount: z.int().min(-9007199254740991).max(9007199254740991),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),
@@ -38,6 +44,8 @@ export const AdminAttachmentsPageDtoItemsDeepSchema: z.ZodType<AdminAttachmentsP
 });
 export type AdminAttachmentsPageDtoItemsDeepDto = {
   id: string;
+  blobId: string;
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -49,6 +57,8 @@ export type AdminAttachmentsPageDtoItemsDeepDto = {
 
 export const AdminAttachmentsPageDtoItemsCreateSchema: z.ZodType<AdminAttachmentsPageDtoItemsCreateDto> = z.object({
   id: z.string(),
+  blobId: z.string(),
+  refCount: z.int().min(-9007199254740991).max(9007199254740991),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),
@@ -59,6 +69,8 @@ export const AdminAttachmentsPageDtoItemsCreateSchema: z.ZodType<AdminAttachment
 });
 export type AdminAttachmentsPageDtoItemsCreateDto = {
   id: string;
+  blobId: string;
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -70,6 +82,8 @@ export type AdminAttachmentsPageDtoItemsCreateDto = {
 
 export const AdminAttachmentsPageDtoItemsCreateDeepSchema: z.ZodType<AdminAttachmentsPageDtoItemsCreateDeepDto> = z.object({
   id: z.string(),
+  blobId: z.string(),
+  refCount: z.int().min(-9007199254740991).max(9007199254740991),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),
@@ -80,6 +94,8 @@ export const AdminAttachmentsPageDtoItemsCreateDeepSchema: z.ZodType<AdminAttach
 });
 export type AdminAttachmentsPageDtoItemsCreateDeepDto = {
   id: string;
+  blobId: string;
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -91,6 +107,8 @@ export type AdminAttachmentsPageDtoItemsCreateDeepDto = {
 
 export const AdminAttachmentsPageDtoItemsUpdateSchema: z.ZodType<AdminAttachmentsPageDtoItemsUpdateDto> = z.object({
   id: z.string(),
+  blobId: z.string(),
+  refCount: z.int().min(-9007199254740991).max(9007199254740991),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),
@@ -101,6 +119,8 @@ export const AdminAttachmentsPageDtoItemsUpdateSchema: z.ZodType<AdminAttachment
 }).partial();
 export type AdminAttachmentsPageDtoItemsUpdateDto = {
   id?: string;
+  blobId?: string;
+  refCount?: number;
   filename?: string;
   contentType?: string;
   sizeBytes?: string;
@@ -112,6 +132,8 @@ export type AdminAttachmentsPageDtoItemsUpdateDto = {
 
 export const AdminAttachmentsPageDtoItemsUpdateDeepSchema: z.ZodType<AdminAttachmentsPageDtoItemsUpdateDeepDto> = z.object({
   id: z.string(),
+  blobId: z.string(),
+  refCount: z.int().min(-9007199254740991).max(9007199254740991),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),
@@ -122,6 +144,8 @@ export const AdminAttachmentsPageDtoItemsUpdateDeepSchema: z.ZodType<AdminAttach
 }).partial();
 export type AdminAttachmentsPageDtoItemsUpdateDeepDto = {
   id?: string;
+  blobId?: string;
+  refCount?: number;
   filename?: string;
   contentType?: string;
   sizeBytes?: string;
@@ -133,6 +157,8 @@ export type AdminAttachmentsPageDtoItemsUpdateDeepDto = {
 
 const AdminAttachmentsPageDtoItemsWhereSchemaBase = z.object({
   id: StringFilter.optional(),
+  blobId: StringFilter.optional(),
+  refCount: IntFilter.optional(),
   filename: StringFilter.optional(),
   contentType: StringFilter.optional(),
   sizeBytes: StringFilter.optional(),
@@ -147,6 +173,8 @@ export type AdminAttachmentsPageDtoItemsWhereDto = z.infer<typeof AdminAttachmen
 
 const AdminAttachmentsPageDtoItemsWhereDeepSchemaBase = z.object({
   id: StringFilter.optional(),
+  blobId: StringFilter.optional(),
+  refCount: IntFilter.optional(),
   filename: StringFilter.optional(),
   contentType: StringFilter.optional(),
   sizeBytes: StringFilter.optional(),
@@ -161,6 +189,8 @@ export type AdminAttachmentsPageDtoItemsWhereDeepDto = z.infer<typeof AdminAttac
 
 export const AdminAttachmentsPageDtoItemsSelectSchema = z.object({
   id: z.boolean().optional(),
+  blobId: z.boolean().optional(),
+  refCount: z.boolean().optional(),
   filename: z.boolean().optional(),
   contentType: z.boolean().optional(),
   sizeBytes: z.boolean().optional(),
@@ -173,6 +203,8 @@ export type AdminAttachmentsPageDtoItemsSelectDto = z.infer<typeof AdminAttachme
 
 export const AdminAttachmentsPageDtoItemsSelectDeepSchema = z.object({
   id: z.boolean().optional(),
+  blobId: z.boolean().optional(),
+  refCount: z.boolean().optional(),
   filename: z.boolean().optional(),
   contentType: z.boolean().optional(),
   sizeBytes: z.boolean().optional(),

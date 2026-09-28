@@ -14,6 +14,9 @@ import { Route as InvitationsRouteImport } from './routes/invitations'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as UsernameRequestsRouteImport } from './routes/username-requests'
+import { Route as FilesIndexRouteImport } from './routes/files/index'
+import { Route as SettingsSharingRouteImport } from './routes/settings/sharing'
+import { Route as StorageIndexRouteImport } from './routes/storage/index'
 import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as UsersUserIdRouteImport } from './routes/users/$userId'
 import { Route as UsersNewRouteImport } from './routes/users/new'
@@ -43,6 +46,21 @@ const UsernameRequestsRoute = UsernameRequestsRouteImport.update({
   path: '/username-requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FilesIndexRoute = FilesIndexRouteImport.update({
+  id: '/files/',
+  path: '/files/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSharingRoute = SettingsSharingRouteImport.update({
+  id: '/settings/sharing',
+  path: '/settings/sharing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageIndexRoute = StorageIndexRouteImport.update({
+  id: '/storage/',
+  path: '/storage/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -65,8 +83,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/username-requests': typeof UsernameRequestsRoute
+  '/settings/sharing': typeof SettingsSharingRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/users/new': typeof UsersNewRoute
+  '/files/': typeof FilesIndexRoute
+  '/storage/': typeof StorageIndexRoute
   '/users/': typeof UsersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -75,8 +96,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/username-requests': typeof UsernameRequestsRoute
+  '/settings/sharing': typeof SettingsSharingRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/users/new': typeof UsersNewRoute
+  '/files': typeof FilesIndexRoute
+  '/storage': typeof StorageIndexRoute
   '/users': typeof UsersIndexRoute
 }
 export interface FileRoutesById {
@@ -86,8 +110,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/username-requests': typeof UsernameRequestsRoute
+  '/settings/sharing': typeof SettingsSharingRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/users/new': typeof UsersNewRoute
+  '/files/': typeof FilesIndexRoute
+  '/storage/': typeof StorageIndexRoute
   '/users/': typeof UsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -98,8 +125,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/username-requests'
+    | '/settings/sharing'
     | '/users/$userId'
     | '/users/new'
+    | '/files/'
+    | '/storage/'
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,8 +138,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/username-requests'
+    | '/settings/sharing'
     | '/users/$userId'
     | '/users/new'
+    | '/files'
+    | '/storage'
     | '/users'
   id:
     | '__root__'
@@ -118,8 +151,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/username-requests'
+    | '/settings/sharing'
     | '/users/$userId'
     | '/users/new'
+    | '/files/'
+    | '/storage/'
     | '/users/'
   fileRoutesById: FileRoutesById
 }
@@ -129,8 +165,11 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
   UsernameRequestsRoute: typeof UsernameRequestsRoute
+  SettingsSharingRoute: typeof SettingsSharingRoute
   UsersUserIdRoute: typeof UsersUserIdRoute
   UsersNewRoute: typeof UsersNewRoute
+  FilesIndexRoute: typeof FilesIndexRoute
+  StorageIndexRoute: typeof StorageIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
 }
 
@@ -171,6 +210,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsernameRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/files/': {
+      id: '/files/'
+      path: '/files'
+      fullPath: '/files/'
+      preLoaderRoute: typeof FilesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/sharing': {
+      id: '/settings/sharing'
+      path: '/settings/sharing'
+      fullPath: '/settings/sharing'
+      preLoaderRoute: typeof SettingsSharingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage/': {
+      id: '/storage/'
+      path: '/storage'
+      fullPath: '/storage/'
+      preLoaderRoute: typeof StorageIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users/': {
       id: '/users/'
       path: '/users'
@@ -201,8 +261,11 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
   UsernameRequestsRoute: UsernameRequestsRoute,
+  SettingsSharingRoute: SettingsSharingRoute,
   UsersUserIdRoute: UsersUserIdRoute,
   UsersNewRoute: UsersNewRoute,
+  FilesIndexRoute: FilesIndexRoute,
+  StorageIndexRoute: StorageIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
 }
 export const routeTree = rootRouteImport

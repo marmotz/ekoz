@@ -180,8 +180,8 @@ algorithm. The capability list (grows only additively):
 room.read, room.post, room.edit_own, room.delete_own, room.edit_any,
 room.delete_any, room.react, room.pin, room.invite, room.kick, room.ban,
 room.manage_members, room.manage_roles, room.manage_permissions,
-room.manage_retention, room.manage_groups, space.create_child, space.manage,
-directory.publish
+room.manage_retention, room.manage_groups, room.attach, space.create_child,
+space.manage, directory.publish
 ```
 
 Roles: `space_admin`, `room_admin`, `moderator`, `member`, `reader` — plus the
@@ -189,6 +189,12 @@ server-level `owner`, an implicit allow-all outside this set.
 
 `room.manage_groups` (create, rename, delete room groups and change their
 members) is granted by default to `space_admin` and `room_admin`.
+
+`room.attach` (add files to a message) is granted by default to
+`space_admin`, `room_admin`, `moderator` and `member`, not `reader`. It gates
+attaching only: posting a message still needs `room.post`, so a `room.post`
+deny blocks attachments too even with `room.attach` allowed — see
+[Attachments](messages-and-interactions.md#attachments).
 
 A caller's effective role on a room, in order: an explicit `Membership` on the
 room; else the role inherited from the nearest ancestor space membership; else

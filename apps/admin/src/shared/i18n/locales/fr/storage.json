@@ -1,0 +1,31 @@
+{
+  "title": "Stockage",
+  "dashboard": {
+    "usage": "Utilisation",
+    "capacity": "Capacité",
+    "unlimited": "Illimité",
+    "blobCount": "Blobs",
+    "pendingUploads": "Envois en attente",
+    "driver": "Pilote",
+    "topConsumers": "Plus gros consommateurs",
+    "mediaTools": {
+      "title": "Outils média",
+      "available": "ffmpeg disponible",
+      "unavailable": "ffmpeg introuvable",
+      "installHint": "Installez ffmpeg pour activer les miniatures vidéo et la détection de durée.",
+      "version": "Version {{version}}"
+    }
+  },
+  "userCard": {
+    "title": "Stockage",
+    "used": "Utilisé",
+    "pending": "En attente",
+    "quota": "Quota",
+    "override": {
+      "default": "Défaut",
+      "custom": "Personnalisé",
+      "unlimited": "Illimité"
+    },
+    "save": "Enregistrer le quota"
+  }
+}

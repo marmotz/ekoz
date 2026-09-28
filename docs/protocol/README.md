@@ -72,13 +72,15 @@ with SemVer, independently of the server implementation. See
 - [Synchronisation](synchronisation.md): `GET /sync` per-room catch-up,
   `GET /events` SSE stream, the per-account feed and its `feedSeq` cursor.
   **Draft**, ahead of issue #11.
+- [Files and sharing](files-and-sharing.md): resumable uploads (tus 1.0),
+  signed file download URLs, link previews and the caller's own storage
+  usage. Fully implemented server-side (issues #136-#149).
 
 ## Sections to write
 
 1. Authentication and sessions (SSE ticket; the rest moved to
    [Identity and profiles](identity.md)).
-2. Files and blobs.
-3. Notifications.
-4. Administration and audit.
-5. Discovery and server↔server federation.
-6. Extensions and fallback rendering.
+2. Notifications.
+3. Administration and audit.
+4. Discovery and server↔server federation.
+5. Extensions and fallback rendering.

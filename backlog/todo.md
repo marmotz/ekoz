@@ -63,7 +63,7 @@ _in discussion, technical design in [technical.md](./technical.md)_ — 0/4 task
 
 ## Content and sharing ·  [overview](features/content-and-sharing/overview.md)
 
-_todo, see [technical.md](./technical.md)_ — 18/21 tasks done
+_done, see [technical.md](./technical.md)_ — 21/21 tasks done
 
 | Done | Issue                                              | Title                                                                                          | Blocked by                   |
 |------|----------------------------------------------------|------------------------------------------------------------------------------------------------|------------------------------|
@@ -85,9 +85,9 @@ _todo, see [technical.md](./technical.md)_ — 18/21 tasks done
 | [x]  | [#153](https://github.com/marmotz/ekoz/issues/153) | Web client: link preview card in the composer and in messages                                  | #152                         |
 | [x]  | [#154](https://github.com/marmotz/ekoz/issues/154) | Web client: room Files panel and account storage section                                       | #147, #150                   |
 | [x]  | [#155](https://github.com/marmotz/ekoz/issues/155) | Web client: edit attachments and link preview in message edit mode                             | #152, #153                   |
-| [ ]  | [#156](https://github.com/marmotz/ekoz/issues/156) | Admin console: sharing settings screen                                                         | #149                         |
-| [ ]  | [#157](https://github.com/marmotz/ekoz/issues/157) | Admin console: storage dashboard, file moderation and user storage card                        | #149                         |
-| [ ]  | [#158](https://github.com/marmotz/ekoz/issues/158) | Content and sharing docs: protocol and technical pages                                         | #137, #145, #146, #147, #148 |
+| [x]  | [#156](https://github.com/marmotz/ekoz/issues/156) | Admin console: sharing settings screen                                                         | #149                         |
+| [x]  | [#157](https://github.com/marmotz/ekoz/issues/157) | Admin console: storage dashboard, file moderation and user storage card                        | #149                         |
+| [x]  | [#158](https://github.com/marmotz/ekoz/issues/158) | Content and sharing docs: protocol and technical pages                                         | #137, #145, #146, #147, #148 |
 
 ## Documentation site ·  [overview](features/documentation-site/overview.md)
 

@@ -26,6 +26,7 @@ Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning
 - Add group settings: participants with an admin badge, rename, add members with or without the past messages, remove a member, promote or demote an admin, and leave, warning the only admin that the group will be deleted (#185).
 - Document the direct messages client in `docs/technical/web-client-direct-messages.md` (#185).
 - Regenerate the API types: conversations and contacts endpoints, group management and the profile `id` (#166, #171, #172).
+- Regenerate the API types: the admin attachment search response shape (#157).
 - Send the presence heartbeat with the stream, marking the user idle after 60 s hidden or 5 min without input, and add an "Appear away" / "Appear online" entry to the user menu (#133).
 - Make the user appear away as soon as they sign out (#133).
 - Show a presence dot on message authors, the members panel, the profile card and the own avatar in the user menu, fed by the stream and cleared on reconnection (#133, #135).

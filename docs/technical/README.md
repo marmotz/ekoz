@@ -40,6 +40,11 @@ has its own page with full context, alternatives and consequences:
 - [Server initialization](server-initialization.md).
 - [Server secret box and signing keys](server-secret-box-and-signing-keys.md).
 - [File storage and quotas](file-storage-and-quotas.md).
+- [Resumable uploads](resumable-uploads.md) — the tus-subset protocol, pending-upload lifecycle.
+- [Signed file URLs](signed-file-urls.md) — short-lived tokens, access re-checked on every download.
+- [Media thumbnails](media-thumbnails.md) — optional ffmpeg/ffprobe, video/image metadata.
+- [Link previews](link-previews.md) — the SSRF policy, cache and throttle.
+- [Admin settings API](admin-settings-api.md) — runtime-mutable settings over HTTP, audit trail.
 - [Observability and instrumentation](observability.md).
 - [Server error reporting](error-reporting.md).
 - [Stack POC — NestJS 12 + Prisma + Bun](poc-nestjs12-prisma-bun.md).
