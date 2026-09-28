@@ -4,6 +4,7 @@ import { EmailSection } from '@/features/profile/components/email-section';
 import { PasswordSection } from '@/features/profile/components/password-section';
 import { ProfileSection } from '@/features/profile/components/profile-section';
 import { SessionsSection } from '@/features/profile/components/sessions-section';
+import { StorageSection } from '@/features/profile/components/storage-section';
 import { UsernameSection } from '@/features/profile/components/username-section';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { useMe } from '@/shared/sdk/use-me';
@@ -26,6 +27,7 @@ export function AccountPage() {
       <EmailSection me={me.data} />
       <PasswordSection />
       <SessionsSection />
+      <StorageSection />
       <DangerZone />
     </div>
   );

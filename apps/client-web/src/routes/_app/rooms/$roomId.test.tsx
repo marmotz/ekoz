@@ -71,6 +71,8 @@ function renderRoom(path: string, capabilities: string[], roomType = 'channel') 
         redactedAt: null,
         hiddenAt: null,
         createdAt: '2026-01-01T10:00:00.000Z',
+        attachments: [],
+        linkPreview: null,
       },
     ],
     lastSeq: '1',
@@ -186,6 +188,8 @@ it('jumps back to the newest messages, dropping at from the URL', async () => {
               redactedAt: null,
               hiddenAt: null,
               createdAt: '2026-01-01T10:00:00.000Z',
+              attachments: [],
+              linkPreview: null,
             },
           ],
           lastSeq: '9',
@@ -346,6 +350,8 @@ const pinEntry = (seq: number, body: string) => ({
     redactedAt: null,
     hiddenAt: null,
     createdAt: '2026-01-01T10:00:00.000Z',
+    attachments: [],
+    linkPreview: null,
   },
 });
 

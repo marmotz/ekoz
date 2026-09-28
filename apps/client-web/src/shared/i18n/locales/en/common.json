@@ -196,6 +196,14 @@
       "revokedOthers_one": "{{count}} session signed out.",
       "revokedOthers_other": "{{count}} sessions signed out."
     },
+    "storage": {
+      "title": "Storage",
+      "description": "Space used by your uploaded files.",
+      "loading": "Loading storage usage",
+      "error": "Storage usage could not be loaded.",
+      "usage": "{{used}} of {{quota}} used",
+      "unlimited": "{{used}} used - unlimited storage"
+    },
     "danger": {
       "title": "Danger zone",
       "description": "Deleting your account cannot be undone.",
@@ -249,6 +257,44 @@
       "failed": "Not sent",
       "retry": "Retry",
       "editedAt": "Edited {{date}}"
+    },
+    "attachments": {
+      "download": "Download {{filename}}",
+      "playVideo": "Play {{filename}}",
+      "remove": {
+        "action": "Remove file",
+        "title": "Remove this file?",
+        "description": "\"{{filename}}\" will be removed from the message for everyone. This cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Remove",
+        "errors": {
+          "permissionDenied": "You do not have permission to remove this file.",
+          "notFound": "This file no longer exists.",
+          "network": "The server could not be reached.",
+          "generic": "The file could not be removed."
+        }
+      },
+      "upload": {
+        "attach": "Attach a file",
+        "tray": "Attachments",
+        "remove": "Remove {{filename}}",
+        "retry": "Retry",
+        "progress": "{{percent}}%",
+        "errors": {
+          "quotaExceeded": "Your storage quota is full.",
+          "tooLarge": "This file is too large.",
+          "typeRejected": "This file type is not allowed.",
+          "capacityExceeded": "The server has run out of storage space.",
+          "expired": "This upload has expired.",
+          "network": "The server could not be reached.",
+          "generic": "This file could not be uploaded."
+        }
+      }
+    },
+    "linkPreview": {
+      "next": "Preview the next link",
+      "dismiss": "Remove the link preview",
+      "remove": "Remove the link preview"
     },
     "receipts": {
       "readBy": "Read by {{names}}",
@@ -403,6 +449,10 @@
       "hint": "Enter to save, Escape to cancel.",
       "discard": "Discard your changes to the message being edited?",
       "deleted": "The message you were editing was deleted.",
+      "attachments": {
+        "remove": "Remove {{filename}}",
+        "keep": "Keep {{filename}}"
+      },
       "errors": {
         "permissionDenied": "You can no longer edit this message.",
         "bodyTooLong": "This message is too long.",
@@ -501,6 +551,17 @@
       "empty": "No rooms yet."
     },
     "unnamed": "Unnamed room",
+    "files": {
+      "toggle": "Files",
+      "title": "Files",
+      "description": "The room's shared media and documents.",
+      "mediaTab": "Media",
+      "documentsTab": "Documents",
+      "loading": "Loading files",
+      "emptyMedia": "No media shared yet.",
+      "emptyDocuments": "No documents shared yet.",
+      "loadMore": "Load more"
+    },
     "welcome": {
       "title": "Welcome",
       "empty": "You are not in any room yet. Browse the directory to find a public channel to join.",

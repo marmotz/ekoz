@@ -28,6 +28,7 @@ function renderReset({
     registrationMode: 'open',
     emailVerificationRequired: true,
     passwordMinLength,
+    linkPreviews: false,
   });
   createClientMock.mockReturnValue(fake.sdk);
   const rendered = renderWithProviders(

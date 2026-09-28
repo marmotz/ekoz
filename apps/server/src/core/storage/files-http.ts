@@ -12,8 +12,7 @@ function isInlineType(contentType: string): boolean {
   return (
     contentType.startsWith('image/') ||
     contentType.startsWith('audio/') ||
-    contentType.startsWith('video/') ||
-    contentType === 'application/pdf'
+    contentType.startsWith('video/')
   );
 }
 

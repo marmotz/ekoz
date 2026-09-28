@@ -1,4 +1,4 @@
-import type { Message, RoomEvent } from '@ekozhq/sdk';
+import type { Message, RawAttachmentTarget, RoomEvent } from '@ekozhq/sdk';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -54,14 +54,26 @@ function timeline(seqs: number[], lastSeq = String(Math.max(0, ...seqs))): Timel
   };
 }
 
-function created(seq: number, id = `m${seq}`, senderId: string | null = 'u2'): RoomEvent {
+function created(
+  seq: number,
+  id = `m${seq}`,
+  senderId: string | null = 'u2',
+  attachments: RawAttachmentTarget[] = [],
+): RoomEvent {
   return {
     type: 'message_created',
     roomId: 'r1',
     seq: String(seq),
     senderId,
     createdAt: '2026-01-02T00:00:00.000Z',
-    content: { messageId: id, body: `live ${seq}`, replyToId: null, mentions: [] },
+    content: {
+      messageId: id,
+      body: `live ${seq}`,
+      replyToId: null,
+      mentions: [],
+      attachments,
+      linkPreview: null,
+    },
   };
 }
 
@@ -208,6 +220,66 @@ describe('applyRoomEvent', () => {
     expect(applyRoomEvent(timeline([1]), edited).refetch).toEqual([]);
   });
 
+  it('maps the raw attachment targets of a created message and asks for a refetch', () => {
+    const attachment: RawAttachmentTarget = {
+      id: 'a1',
+      filename: 'photo.png',
+      contentType: 'image/png',
+      sizeBytes: '1024',
+      position: 0,
+    };
+
+    const { timeline: next, refetch } = applyRoomEvent(
+      timeline([1, 2]),
+      created(3, 'm3', 'u2', [attachment]),
+    );
+
+    expect(refetch).toEqual(['m3']);
+    expect(next.messages.at(-1)?.attachments).toEqual([
+      {
+        id: 'a1',
+        filename: 'photo.png',
+        contentType: 'image/png',
+        sizeBytes: '1024',
+        width: null,
+        height: null,
+        durationMs: null,
+        hasThumbnail: false,
+      },
+    ]);
+  });
+
+  it('asks for a refetch when an attachment is removed from a loaded message', () => {
+    const removed: RoomEvent = {
+      type: 'attachment_removed',
+      roomId: 'r1',
+      seq: '3',
+      senderId: 'u1',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { messageId: 'm2', attachmentId: 'a1' },
+    };
+
+    const base = timeline([1, 2]);
+    const { timeline: next, refetch } = applyRoomEvent(base, removed);
+
+    expect(refetch).toEqual(['m2']);
+    expect(next.lastSeq).toBe('3');
+    expect(next.messages).toBe(base.messages);
+  });
+
+  it('does not refetch an attachment removal on a message that is not loaded', () => {
+    const removed: RoomEvent = {
+      type: 'attachment_removed',
+      roomId: 'r1',
+      seq: '9',
+      senderId: 'u1',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      content: { messageId: 'old', attachmentId: 'a1' },
+    };
+
+    expect(applyRoomEvent(timeline([1]), removed).refetch).toEqual([]);
+  });
+
   it('turns a message_deleted into a tombstone keyed by messageSeq', () => {
     const deleted: RoomEvent = {
       type: 'message_deleted',
@@ -290,6 +362,8 @@ describe('pending messages', () => {
     body: 'hi',
     mentions: [],
     replyToId: null,
+    attachments: [],
+    linkPreviewUrl: null,
     state: 'sending' as const,
   };
 
@@ -328,6 +402,8 @@ describe('pending messages', () => {
       body: 'yo',
       mentions: [],
       replyToId: null,
+      attachments: [],
+      linkPreviewUrl: null,
       state: 'sending' as const,
     };
     const base = addPending(addPending(timeline([1]), pending), other);
@@ -501,6 +577,8 @@ describe('detached timeline', () => {
       body: 'hi',
       mentions: [],
       replyToId: null,
+      attachments: [],
+      linkPreviewUrl: null,
       state: 'sending',
     });
 

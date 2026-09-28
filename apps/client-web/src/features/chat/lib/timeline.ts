@@ -1,4 +1,10 @@
-import type { MentionTarget, Message, RoomEvent } from '@ekozhq/sdk';
+import type {
+  AttachmentView,
+  LinkPreviewView,
+  MentionTarget,
+  Message,
+  RoomEvent,
+} from '@ekozhq/sdk';
 
 import {
   deriveMentionsMe,
@@ -40,6 +46,13 @@ export interface TimelineMessage {
   createdAt: string;
   /** Driven by `reaction_*` events; empty for a tombstone. */
   reactions: Reaction[];
+  /**
+   * From the server on REST pages. A live `message_created` carries only the raw
+   * targets (technical.md §S9), so those entries have no `width`/`height`/`hasThumbnail`
+   * until the message is refetched — see `applyRoomEvent`.
+   */
+  attachments: AttachmentView[];
+  linkPreview: LinkPreviewView | null;
 }
 
 export type SendFailureReason =
@@ -52,6 +65,15 @@ export type SendFailureReason =
   | 'network'
   | 'unknown';
 
+/** A ready upload carried by a pending message, with its local preview until reconciled. */
+export interface PendingAttachment {
+  uploadId: string;
+  filename: string;
+  contentType: string;
+  /** Object URL for an image file; revoked once the pending entry is reconciled or dropped. */
+  previewUrl: string | null;
+}
+
 /** An own message being sent (or that failed to send), rendered after the confirmed ones. */
 export interface PendingMessage {
   localId: string;
@@ -60,6 +82,10 @@ export interface PendingMessage {
   mentions: MentionTarget[];
   /** The message this one answers, so a pending or retried reply already shows its quote. */
   replyToId: string | null;
+  /** The uploads attached at send time; retried as is. */
+  attachments: PendingAttachment[];
+  /** The chosen link preview target at send time, if any; retried as is. */
+  linkPreviewUrl: string | null;
   state: 'sending' | 'failed';
   reason?: SendFailureReason;
 }
@@ -116,6 +142,8 @@ export function toTimelineMessage(message: Message): TimelineMessage {
       emoji,
       userIds: [...userIds],
     })),
+    attachments: [...message.attachments],
+    linkPreview: message.linkPreview,
   };
 }
 
@@ -307,7 +335,7 @@ export function applyRoomEvent(
     case 'message_created': {
       // Detached: inserting it would leave a gap; it is loaded when the window catches up.
       if (timeline.hasMoreNewer) return { timeline: advanced, refetch: [] };
-      const { messageId, body, replyToId, mentions } = event.content;
+      const { messageId, body, replyToId, mentions, attachments, linkPreview } = event.content;
       const message: TimelineMessage = {
         id: messageId,
         roomId: event.roomId,
@@ -322,13 +350,29 @@ export function applyRoomEvent(
         hiddenAt: null,
         createdAt: event.createdAt,
         reactions: [],
+        // Raw event targets have no width/height/hasThumbnail: refetch fills them in.
+        attachments: attachments.map((attachment) => ({
+          id: attachment.id,
+          filename: attachment.filename,
+          contentType: attachment.contentType,
+          sizeBytes: attachment.sizeBytes,
+          width: null,
+          height: null,
+          durationMs: null,
+          hasThumbnail: false,
+        })),
+        linkPreview,
       };
       return {
         timeline: { ...advanced, messages: insertBySeq(timeline.messages, message) },
-        refetch: [],
+        refetch: attachments.length > 0 ? [messageId] : [],
       };
     }
     case 'message_edited': {
+      const known = timeline.messages.some((message) => message.id === event.content.messageId);
+      return { timeline: advanced, refetch: known ? [event.content.messageId] : [] };
+    }
+    case 'attachment_removed': {
       const known = timeline.messages.some((message) => message.id === event.content.messageId);
       return { timeline: advanced, refetch: known ? [event.content.messageId] : [] };
     }

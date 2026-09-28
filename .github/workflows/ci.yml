@@ -1,9 +1,11 @@
 name: CI
 
 on:
-  push:
-    branches: [develop, main]
-  pull_request:
+  workflow_dispatch:
+  # Disabled: push/pull_request triggers temporarily off (no CI credit left).
+  # push:
+  #   branches: [develop, main]
+  # pull_request:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}

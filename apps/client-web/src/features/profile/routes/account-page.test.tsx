@@ -71,6 +71,7 @@ it('composes the sections in order', async () => {
     'Email address',
     'Password',
     'Sessions',
+    'Storage',
     'Danger zone',
   ];
   const shown = screen

@@ -10,10 +10,15 @@ describe('contentDispositionFor', () => {
     expect(contentDispositionFor('image/svg+xml', 'a.svg')).toContain('attachment');
   });
 
-  it('is inline for audio, video and pdf', () => {
+  it('is inline for audio and video', () => {
     expect(contentDispositionFor('audio/mpeg', 'a.mp3')).toBe('inline');
     expect(contentDispositionFor('video/mp4', 'a.mp4')).toBe('inline');
-    expect(contentDispositionFor('application/pdf', 'a.pdf')).toBe('inline');
+  });
+
+  it('is attachment for PDF (downloads instead of opening in the browser)', () => {
+    expect(contentDispositionFor('application/pdf', 'a.pdf')).toBe(
+      "attachment; filename*=UTF-8''a.pdf",
+    );
   });
 
   it('is attachment with an encoded filename for everything else', () => {

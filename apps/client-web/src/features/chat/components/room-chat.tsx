@@ -283,6 +283,7 @@ export function RoomChat({
           allowCollective={room.type === 'channel'}
           block={block}
           loading={!timeline.data}
+          canAttach={capabilities.includes('room.attach')}
           onTyping={() => sdk?.presence.reporter.notifyTyping(room.id)}
           onSend={(message) => {
             void send(message, replyTarget?.id ?? null);

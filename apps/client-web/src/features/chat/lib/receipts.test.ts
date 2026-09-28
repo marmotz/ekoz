@@ -18,6 +18,8 @@ function message(seq: number, overrides: Partial<TimelineMessage> = {}): Timelin
     hiddenAt: null,
     createdAt: '2026-01-01T10:00:00.000Z',
     reactions: [],
+    attachments: [],
+    linkPreview: null,
     ...overrides,
   };
 }

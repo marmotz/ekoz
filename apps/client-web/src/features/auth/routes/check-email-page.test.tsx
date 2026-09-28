@@ -26,6 +26,7 @@ function fakeWithPolicy(emailVerificationRequired: boolean) {
     registrationMode: 'open',
     emailVerificationRequired,
     passwordMinLength: 12,
+    linkPreviews: false,
   });
   createClientMock.mockReturnValue(fake.sdk);
   return fake;

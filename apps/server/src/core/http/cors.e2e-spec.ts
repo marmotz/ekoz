@@ -65,4 +65,18 @@ describe('CORS (e2e)', () => {
 
     expect(res.headers['access-control-allow-origin']).toBeUndefined();
   });
+
+  it('allows the tus upload headers on a preflight request', async () => {
+    const res = await request(app.getHttpServer())
+      .options('/uploads')
+      .set('Origin', 'https://admin.ekoz.example.com')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'authorization, upload-length, upload-metadata')
+      .expect(204);
+
+    expect(res.headers['access-control-allow-headers']).toContain('upload-length');
+    expect(res.headers['access-control-allow-headers']).toContain('upload-metadata');
+    expect(res.headers['access-control-expose-headers']).toContain('location');
+    expect(res.headers['access-control-expose-headers']).toContain('upload-offset');
+  });
 });

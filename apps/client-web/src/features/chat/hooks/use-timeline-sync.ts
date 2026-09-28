@@ -69,6 +69,7 @@ export function useTimelineSync(roomId: string) {
           void queryClient.invalidateQueries({ queryKey: chatKeys.pins(roomId) });
           break;
         case 'message_edited':
+        case 'attachment_removed':
           void queryClient.invalidateQueries({
             queryKey: chatKeys.message(roomId, event.content.messageId),
           });

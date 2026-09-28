@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, useChildMatches, useNavigate } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 
+import { FilesPanel } from '@/features/chat/components/files-panel';
+import { FilesToggle } from '@/features/chat/components/files-toggle';
 import { PinsPanel } from '@/features/chat/components/pins-panel';
 import { PinsToggle } from '@/features/chat/components/pins-toggle';
 import { RoomChat, type RoomChatHandle } from '@/features/chat/components/room-chat';
@@ -26,6 +28,7 @@ function RoomPage() {
   const hasChildPage = useChildMatches().length > 0;
   const chatRef = useRef<RoomChatHandle>(null);
   const [pinsOpen, setPinsOpen] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
   useMembersLive(roomId);
   useGroupsLive(roomId);
 
@@ -49,6 +52,9 @@ function RoomPage() {
                       open={pinsOpen}
                       onToggle={() => setPinsOpen((open) => !open)}
                     />
+                  )}
+                  {hasChildPage ? null : (
+                    <FilesToggle open={filesOpen} onToggle={() => setFilesOpen((open) => !open)} />
                   )}
                   {hasMembers ? <MembersToggle roomId={room.id} /> : null}
                 </>
@@ -91,6 +97,13 @@ function RoomPage() {
               open={pinsOpen && !hasChildPage}
               onOpenChange={setPinsOpen}
               onSelect={(pin) => chatRef.current?.jumpToMessage(pin.messageId, pin.message.seq)}
+            />
+            <FilesPanel
+              roomId={room.id}
+              enabled={canRead}
+              open={filesOpen && !hasChildPage}
+              onOpenChange={setFilesOpen}
+              onSelect={(file) => chatRef.current?.jumpToMessage(file.messageId)}
             />
           </>
         );

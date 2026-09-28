@@ -23,6 +23,8 @@ function message(seq: number): TimelineMessage {
     hiddenAt: null,
     createdAt: '2026-01-01T10:00:00.000Z',
     reactions: [],
+    attachments: [],
+    linkPreview: null,
   };
 }
 

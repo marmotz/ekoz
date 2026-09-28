@@ -1,4 +1,10 @@
-import type { EkozClient, SessionEventMap, SessionEventName, UserSummary } from '@ekozhq/sdk';
+import type {
+  EkozClient,
+  FileRef,
+  SessionEventMap,
+  SessionEventName,
+  UserSummary,
+} from '@ekozhq/sdk';
 import { vi } from 'vitest';
 
 type Listener = (...args: unknown[]) => void;
@@ -87,7 +93,7 @@ export function createFakeReporter() {
 
 /**
  * Stand-in for an `EkozClient`: a working `on`/`off`/`once` emitter, a session
- * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `receipts`, `presence`, `groups`, `mentions`, `rooms`, `conversations`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
+ * whose state the test controls, and stubbed `discovery`, `setup`, `auth`, `me`, `sessions`, `users`, `messages`, `uploads`, `files`, `linkPreviews`, `receipts`, `presence`, `groups`, `mentions`, `rooms`, `conversations`, `roomInvitations`, `directory`, `sync` and `stream`. Tests drive it with
  * `emit()` and `setSession()`; nothing touches the network.
  */
 export function createFakeSdk(initial?: FakeSession) {
@@ -132,6 +138,7 @@ export function createFakeSdk(initial?: FakeSession) {
         registrationMode: 'open',
         emailVerificationRequired: true,
         passwordMinLength: 12,
+        linkPreviews: false,
       })),
       register: vi.fn(async () => ({})),
       login: vi.fn(async () => ({})),
@@ -156,6 +163,11 @@ export function createFakeSdk(initial?: FakeSession) {
       cancelUsernameRequest: vi.fn(async () => {}),
       changePassword: vi.fn(async () => {}),
       deleteAccount: vi.fn(async () => {}),
+      storage: vi.fn(async () => ({
+        usedBytes: '0',
+        pendingBytes: '0',
+        quotaBytes: [] as string[],
+      })),
     },
     sessions: {
       list: vi.fn(async () => []),
@@ -183,6 +195,31 @@ export function createFakeSdk(initial?: FakeSession) {
       pins: vi.fn(async () => [] as unknown[]),
       react: vi.fn(async () => undefined),
       unreact: vi.fn(async () => undefined),
+      removeAttachment: vi.fn(async () => undefined),
+    },
+    uploads: {
+      upload: vi.fn(async () => ({
+        id: 'upload-1',
+        promise: Promise.resolve({ id: 'upload-1', state: 'ready' }),
+      })),
+      resume: vi.fn(async () => ({
+        id: 'upload-1',
+        promise: Promise.resolve({ id: 'upload-1', state: 'ready' }),
+      })),
+      cancel: vi.fn(async () => undefined),
+      get: vi.fn(async () => ({ id: 'upload-1', state: 'ready' })),
+    },
+    files: {
+      urls: vi.fn(async (_refs: FileRef[]) => ({ items: [] as unknown[] })),
+      roomFiles: vi.fn(
+        async (
+          _roomId: string,
+          _params?: { kind?: 'media' | 'documents'; before?: string; limit?: number },
+        ) => ({ items: [] as unknown[], nextCursor: null as string | null }),
+      ),
+    },
+    linkPreviews: {
+      fetch: vi.fn(async (_url: string) => null),
     },
     receipts: {
       set: vi.fn(async (_roomId: string, seq: string) => ({ userId: defaultMe.id, seq })),

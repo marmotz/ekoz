@@ -5,7 +5,7 @@
  * discriminated union on `type` instead (web-client-chat technical design §5).
  */
 
-import type { MentionTarget } from './wire.js';
+import type { LinkPreviewView, MentionTarget } from './wire.js';
 
 export interface RoomEventBase {
   roomId: string;
@@ -18,6 +18,19 @@ export interface RoomEventBase {
   originServer?: string;
 }
 
+/**
+ * Raw attachment target embedded in `message_created` content — not the
+ * resolved media metadata (no `width`/`height`/`hasThumbnail`/`durationMs`),
+ * per messages-and-interactions.md §Room events.
+ */
+export interface RawAttachmentTarget {
+  id: string;
+  filename: string;
+  contentType: string;
+  sizeBytes: string;
+  position: number;
+}
+
 export interface MessageCreatedEvent extends RoomEventBase {
   type: 'message_created';
   content: {
@@ -25,7 +38,15 @@ export interface MessageCreatedEvent extends RoomEventBase {
     body: string;
     replyToId: string | null;
     mentions: MentionTarget[];
+    attachments: RawAttachmentTarget[];
+    linkPreview: LinkPreviewView | null;
   };
+}
+
+/** An attachment was removed from a message (by its author or a moderator); clients refetch the message. */
+export interface AttachmentRemovedEvent extends RoomEventBase {
+  type: 'attachment_removed';
+  content: { messageId: string; attachmentId: string };
 }
 
 export interface MessageEditedEvent extends RoomEventBase {
@@ -118,6 +139,7 @@ export type RoomEvent =
   | ReactionRemovedEvent
   | PinAddedEvent
   | PinRemovedEvent
+  | AttachmentRemovedEvent
   | UnknownRoomEvent;
 
 /** `GET /sync` response, with `events` typed by {@link RoomEvent}. */

@@ -4,7 +4,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { expect, it, vi } from 'vitest';
 
-import { useAuthPolicy } from '@/features/auth/api/use-auth-policy';
+import { useAuthPolicy } from '@/shared/auth/use-auth-policy';
 import { SdkContext } from '@/shared/sdk/use-sdk';
 
 const policy = { registrationMode: 'open', emailVerificationRequired: true, passwordMinLength: 12 };
