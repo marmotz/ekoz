@@ -32,6 +32,8 @@ interface TopConsumerRow {
 
 interface AttachmentSearchRow {
   id: string;
+  blobId: string;
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: bigint;
@@ -200,12 +202,14 @@ export class AdminStorageService {
     const hasCursor = beforeCreatedAt !== null;
 
     const plan = this.prisma.raw.sql`
-      SELECT a.id AS id, a.filename AS filename, a.content_type AS "contentType",
+      SELECT a.id AS id, a.blob_id AS "blobId", b.ref_count AS "refCount",
+             a.filename AS filename, a.content_type AS "contentType",
              a.size_bytes AS "sizeBytes", a.created_at AS "createdAt",
              a.message_id AS "messageId", a.room_id AS "roomId", r.name AS "roomName",
              a.uploader_id AS "uploaderId"
       FROM message_attachment a
       LEFT JOIN room r ON r.id = a.room_id
+      JOIN blob b ON b.id = a.blob_id
       WHERE (${hasQ} = false OR a.filename ILIKE ${qPattern})
         AND (${hasUploader} = false OR a.uploader_id = ${query.uploaderId ?? ''})
         AND (${hasRoom} = false OR a.room_id = ${query.roomId ?? ''})
@@ -220,6 +224,8 @@ export class AdminStorageService {
     `
       .returnsRow({
         id: { codecId: 'pg/text@1', nullable: false },
+        blobId: { codecId: 'pg/text@1', nullable: false },
+        refCount: { codecId: 'pg/int4@1', nullable: false },
         filename: { codecId: 'pg/text@1', nullable: false },
         contentType: { codecId: 'pg/text@1', nullable: false },
         sizeBytes: { codecId: 'pg/int8@1', nullable: false },
@@ -238,6 +244,8 @@ export class AdminStorageService {
     const summaries = await this.userSummaries.readMany(page.map((row) => row.uploaderId));
     const items: AdminAttachmentItem[] = page.map((row) => ({
       id: row.id,
+      blobId: row.blobId,
+      refCount: row.refCount,
       filename: row.filename,
       contentType: row.contentType,
       sizeBytes: row.sizeBytes.toString(),

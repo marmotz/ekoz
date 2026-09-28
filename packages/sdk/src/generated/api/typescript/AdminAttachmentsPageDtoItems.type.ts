@@ -2,12 +2,18 @@
 import type { AdminAttachmentsPageDtoItemsMessageDto } from './AdminAttachmentsPageDtoItemsMessage.type.js';
 import type { AdminAttachmentsPageDtoItemsRoomDto } from './AdminAttachmentsPageDtoItemsRoom.type.js';
 import type { AdminAttachmentsPageDtoItemsUploaderDto } from './AdminAttachmentsPageDtoItemsUploader.type.js';
-import type { DateTimeFilter, StringFilter } from './filters.js';
+import type { DateTimeFilter, IntFilter, StringFilter } from './filters.js';
 
 
 
 export type AdminAttachmentsPageDtoItemsDto = {
   id: string;
+  blobId: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -22,6 +28,12 @@ export type AdminAttachmentsPageDtoItemsDto = {
 
 export type AdminAttachmentsPageDtoItemsDeepDto = {
   id: string;
+  blobId: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -36,6 +48,12 @@ export type AdminAttachmentsPageDtoItemsDeepDto = {
 
 export type AdminAttachmentsPageDtoItemsCreateDto = {
   id: string;
+  blobId: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -50,6 +68,12 @@ export type AdminAttachmentsPageDtoItemsCreateDto = {
 
 export type AdminAttachmentsPageDtoItemsCreateDeepDto = {
   id: string;
+  blobId: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -64,6 +88,12 @@ export type AdminAttachmentsPageDtoItemsCreateDeepDto = {
 
 export type AdminAttachmentsPageDtoItemsUpdateDto = Partial<{
   id: string;
+  blobId: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -78,6 +108,12 @@ export type AdminAttachmentsPageDtoItemsUpdateDto = Partial<{
 
 export type AdminAttachmentsPageDtoItemsUpdateDeepDto = Partial<{
   id: string;
+  blobId: string;
+  /**
+   * @min -9007199254740991
+   * @max 9007199254740991
+   */
+  refCount: number;
   filename: string;
   contentType: string;
   sizeBytes: string;
@@ -92,6 +128,8 @@ export type AdminAttachmentsPageDtoItemsUpdateDeepDto = Partial<{
 
 export type AdminAttachmentsPageDtoItemsWhereDto = {
   id?: StringFilter;
+  blobId?: StringFilter;
+  refCount?: IntFilter;
   filename?: StringFilter;
   contentType?: StringFilter;
   sizeBytes?: StringFilter;
@@ -103,6 +141,8 @@ export type AdminAttachmentsPageDtoItemsWhereDto = {
 
 export type AdminAttachmentsPageDtoItemsWhereDeepDto = {
   id?: StringFilter;
+  blobId?: StringFilter;
+  refCount?: IntFilter;
   filename?: StringFilter;
   contentType?: StringFilter;
   sizeBytes?: StringFilter;
@@ -114,6 +154,8 @@ export type AdminAttachmentsPageDtoItemsWhereDeepDto = {
 
 export type AdminAttachmentsPageDtoItemsSelectDto = {
   id?: boolean;
+  blobId?: boolean;
+  refCount?: boolean;
   filename?: boolean;
   contentType?: boolean;
   sizeBytes?: boolean;
@@ -125,6 +167,8 @@ export type AdminAttachmentsPageDtoItemsSelectDto = {
 
 export type AdminAttachmentsPageDtoItemsSelectDeepDto = {
   id?: boolean;
+  blobId?: boolean;
+  refCount?: boolean;
   filename?: boolean;
   contentType?: boolean;
   sizeBytes?: boolean;

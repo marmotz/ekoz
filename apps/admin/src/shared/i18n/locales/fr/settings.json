@@ -1,0 +1,35 @@
+{
+  "sharing": {
+    "title": "Partage"
+  },
+  "fields": {
+    "maxFileBytes": "Taille de fichier maximale",
+    "defaultQuotaBytes": "Quota de stockage par défaut",
+    "pendingTtl": "Durée de vie des envois en attente",
+    "filterMode": "Mode de filtrage des envois",
+    "filterTypes": "Types de contenu filtrés",
+    "maxPerMessage": "Pièces jointes max par message",
+    "capacityBytes": "Capacité de stockage globale",
+    "linkPreviewsEnabled": "Aperçus de liens activés",
+    "linkPreviewsCacheTtl": "Durée de vie du cache des aperçus de liens",
+    "linkPreviewsThrottle": "Limitation des aperçus de liens",
+    "filesUrlTtl": "Durée de vie des URL de fichiers signées"
+  },
+  "source": {
+    "default": "Défaut",
+    "file": "Fichier de config",
+    "settings": "Modifié",
+    "env": "Environnement"
+  },
+  "locked": "Verrouillé",
+  "actions": {
+    "resetToDefault": "Réinitialiser"
+  },
+  "toasts": {
+    "saved": "Paramètre enregistré.",
+    "reset": "Paramètre réinitialisé."
+  },
+  "errors": {
+    "invalidJson": "JSON invalide."
+  }
+}

@@ -59,6 +59,10 @@ export class AdminAttachmentsQueryDto extends createZodDto(AdminAttachmentsQuery
 /** One item of `GET /admin/attachments`. */
 export const AdminAttachmentItemSchema = z.object({
   id: z.string(),
+  /** The underlying `Blob.id`, target of `DELETE /admin/blobs/:id`. */
+  blobId: z.string(),
+  /** `Blob.refCount`: how many attachments, link previews and avatars share this blob. */
+  refCount: z.number().int(),
   filename: z.string(),
   contentType: z.string(),
   sizeBytes: z.string(),

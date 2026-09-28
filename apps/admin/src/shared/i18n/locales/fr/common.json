@@ -3,7 +3,10 @@
   "nav": {
     "users": "Comptes",
     "invitations": "Invitations",
-    "usernameRequests": "Demandes de changement d'identifiant"
+    "usernameRequests": "Demandes de changement d'identifiant",
+    "settingsSharing": "Partage",
+    "storage": "Stockage",
+    "files": "Fichiers"
   },
   "topbar": {
     "signOut": "Se déconnecter",

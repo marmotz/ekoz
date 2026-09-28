@@ -164,7 +164,8 @@ not let a caller post without `room.post`.
 - `POST /rooms/:id/messages` accepts `attachments?: uploadId[]` (max
   `attachments.max_per_message`, default `10`): ids of the caller's own,
   `ready`, not-yet-expired uploads (see
-  [Storage](../technical/file-storage-and-quotas.md) for `POST /uploads`). A
+  [Files and sharing](files-and-sharing.md#resumable-uploads-tus-10) for
+  `POST /uploads`). A
   message needs a `body` or at least one attachment (`message.empty`, `422`).
   Consuming an upload moves its blob reference to the attachment; the `Upload`
   row is deleted, no net effect on the blob's reference count.
@@ -189,7 +190,7 @@ not let a caller post without `room.post`.
   `upload.not_ready` (`409`), `upload.expired` (`410`).
 - Files are downloaded through signed URLs (`POST /files/urls` with
   `{ kind: "attachment", id, variant }`), not this endpoint — see
-  [Storage](../technical/file-storage-and-quotas.md).
+  [Files and sharing](files-and-sharing.md#downloads-through-signed-urls).
 
 ## Link previews
 

@@ -1,0 +1,32 @@
+{
+  "title": "Fichiers",
+  "search": {
+    "filename": "Nom de fichier",
+    "uploader": "Auteur",
+    "room": "Salon",
+    "type": "Type",
+    "allTypes": "Tous les types",
+    "media": "Médias",
+    "documents": "Documents"
+  },
+  "columns": {
+    "filename": "Nom de fichier",
+    "size": "Taille",
+    "type": "Type",
+    "room": "Salon",
+    "uploader": "Auteur",
+    "created": "Envoyé le"
+  },
+  "actions": {
+    "open": "Ouvrir",
+    "removeEverywhere": "Supprimer partout"
+  },
+  "confirm": {
+    "removeTitle": "Supprimer ce fichier partout ?",
+    "removeDescription_one": "Il est référencé à {{count}} endroit. Cette action est irréversible.",
+    "removeDescription_other": "Il est référencé à {{count}} endroits. Cette action est irréversible."
+  },
+  "toasts": {
+    "removed": "Fichier supprimé partout."
+  }
+}

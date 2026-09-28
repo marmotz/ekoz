@@ -159,6 +159,10 @@ All notable changes to the Ekoz protocol. Format
 - Admin storage in [`identity.md`](identity.md): `GET` / `PUT` / `DELETE
   /admin/users/:id/storage(-quota)`, `GET /admin/storage`, `GET
   /admin/attachments`, and `DELETE /admin/blobs/:id`. (#146)
+- New [`files-and-sharing.md`](files-and-sharing.md): resumable uploads (tus
+  1.0 core plus creation, termination and expiration), signed file download
+  URLs, `GET /me/storage`, link previews, and their `upload.*` / `files.*` /
+  `link_preview.*` error codes. (#138, #139, #140, #141, #144)
 
 ### Changed
 
@@ -198,6 +202,8 @@ All notable changes to the Ekoz protocol. Format
   when no admin remains.
 - A deleted room answers `room.not_found` (`404`) to every caller, including its former
   members.
+- `PUT /me/avatar` now counts against the account's storage quota and can answer
+  `upload.quota_exceeded` (`403`). (#138)
 
 ### Fixed
 

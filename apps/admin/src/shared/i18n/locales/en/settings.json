@@ -1,0 +1,35 @@
+{
+  "sharing": {
+    "title": "Sharing"
+  },
+  "fields": {
+    "maxFileBytes": "Max file size",
+    "defaultQuotaBytes": "Default storage quota",
+    "pendingTtl": "Pending upload TTL",
+    "filterMode": "Upload filter mode",
+    "filterTypes": "Filtered content types",
+    "maxPerMessage": "Max attachments per message",
+    "capacityBytes": "Global storage capacity",
+    "linkPreviewsEnabled": "Link previews enabled",
+    "linkPreviewsCacheTtl": "Link preview cache TTL",
+    "linkPreviewsThrottle": "Link preview throttle",
+    "filesUrlTtl": "Signed file URL TTL"
+  },
+  "source": {
+    "default": "Default",
+    "file": "Config file",
+    "settings": "Overridden",
+    "env": "Environment"
+  },
+  "locked": "Locked",
+  "actions": {
+    "resetToDefault": "Reset to default"
+  },
+  "toasts": {
+    "saved": "Setting saved.",
+    "reset": "Setting reset to default."
+  },
+  "errors": {
+    "invalidJson": "Invalid JSON."
+  }
+}

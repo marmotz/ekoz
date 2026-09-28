@@ -3,7 +3,10 @@
   "nav": {
     "users": "Users",
     "invitations": "Invitations",
-    "usernameRequests": "Username requests"
+    "usernameRequests": "Username requests",
+    "settingsSharing": "Sharing",
+    "storage": "Storage",
+    "files": "Files"
   },
   "topbar": {
     "signOut": "Sign out",

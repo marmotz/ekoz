@@ -210,7 +210,10 @@ account is revoked; the calling session stays open.
 Multipart, field `file`. Real image type sniffed server-side.
 
 - `200`: `{ avatarUrl: string }`.
-- Errors: `identity.avatar_rejected` (`422`), `identity.avatar_too_large` (`413`).
+- Errors: `identity.avatar_rejected` (`422`), `identity.avatar_too_large` (`413`),
+  `upload.quota_exceeded` (`403`, the account's storage quota would be
+  exceeded — avatars count against it, see
+  [Files and sharing](files-and-sharing.md#error-codes-reference)).
 
 ### `DELETE /me/avatar`
 

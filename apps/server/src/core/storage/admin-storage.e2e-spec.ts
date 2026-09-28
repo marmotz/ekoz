@@ -221,6 +221,8 @@ describe('admin storage (integration)', () => {
     expect(byName.body.items[0].room).toMatchObject({ id: channel.id });
     expect(byName.body.items[0].message).toMatchObject({ id: message1.body.id });
     expect(byName.body.items[0].uploader.id).toBeDefined();
+    expect(byName.body.items[0].blobId).toBeDefined();
+    expect(byName.body.items[0].refCount).toBe(1);
 
     const byRoom = await request(server())
       .get('/admin/attachments')

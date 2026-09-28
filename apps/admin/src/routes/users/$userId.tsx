@@ -6,6 +6,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from '@/shared/i18n/use-translation';
 import { AppShell } from '@/shared/layout/app-shell';
+import {
+  type ByteUnit,
+  bytesToUnitAmount,
+  formatBytes,
+  unitAmountToBytes,
+} from '@/shared/lib/bytes';
 import { RequireOwner } from '@/shared/sdk/require-owner';
 import { useSdk } from '@/shared/sdk/session';
 import { Badge } from '@/shared/ui/badge';
@@ -112,16 +118,19 @@ function UserDetailRoute() {
         {detailQuery.isPending || !detailQuery.data ? (
           <Skeleton className="h-64 w-full" />
         ) : (
-          <UserDetailBody
-            user={detailQuery.data}
-            isLastOwner={(ownerCountQuery.data?.items.length ?? 2) <= 1}
-            onSuspend={() => setSuspendOpen(true)}
-            onUnsuspend={() => unsuspendMutation.mutate()}
-            onDelete={() => setDeleteOpen(true)}
-            onTriggerPasswordReset={() => passwordResetMutation.mutate()}
-            onGrantOwner={() => grantOwnerMutation.mutate()}
-            onRevokeOwner={() => revokeOwnerMutation.mutate()}
-          />
+          <div className="flex flex-col gap-6">
+            <UserDetailBody
+              user={detailQuery.data}
+              isLastOwner={(ownerCountQuery.data?.items.length ?? 2) <= 1}
+              onSuspend={() => setSuspendOpen(true)}
+              onUnsuspend={() => unsuspendMutation.mutate()}
+              onDelete={() => setDeleteOpen(true)}
+              onTriggerPasswordReset={() => passwordResetMutation.mutate()}
+              onGrantOwner={() => grantOwnerMutation.mutate()}
+              onRevokeOwner={() => revokeOwnerMutation.mutate()}
+            />
+            <StorageCard userId={userId} />
+          </div>
         )}
 
         <Dialog open={suspendOpen} onOpenChange={setSuspendOpen}>
@@ -267,6 +276,149 @@ function UserDetailBody({
           </Button>
         </div>
       )}
+    </div>
+  );
+}
+
+type QuotaMode = 'default' | 'custom' | 'unlimited';
+
+function StorageCard({ userId }: { userId: string }) {
+  const { t } = useTranslation(['storage', 'common']);
+  const sdk = useSdk();
+  const queryClient = useQueryClient();
+
+  const storageQuery = useQuery({
+    queryKey: ['admin', 'users', userId, 'storage'],
+    queryFn: () => sdk?.admin.users.storage(userId),
+    enabled: !!sdk,
+  });
+
+  function requireSdk() {
+    if (!sdk) throw new Error('SDK not ready');
+    return sdk;
+  }
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ['admin', 'users', userId, 'storage'] });
+
+  const setQuotaMutation = useMutation({
+    mutationFn: (quotaBytes: string | null) =>
+      requireSdk().admin.users.setStorageQuota(userId, quotaBytes),
+    onSuccess: () => {
+      toast.success(t('common:actions.save'));
+      void invalidate();
+    },
+  });
+
+  const resetQuotaMutation = useMutation({
+    mutationFn: () => requireSdk().admin.users.resetStorageQuota(userId),
+    onSuccess: () => void invalidate(),
+  });
+
+  if (storageQuery.isPending || !storageQuery.data) {
+    return <Skeleton className="h-32 w-full" />;
+  }
+
+  return (
+    <StorageCardBody
+      data={storageQuery.data}
+      saving={setQuotaMutation.isPending || resetQuotaMutation.isPending}
+      onSetQuota={(quotaBytes) => setQuotaMutation.mutate(quotaBytes)}
+      onReset={() => resetQuotaMutation.mutate()}
+    />
+  );
+}
+
+function StorageCardBody({
+  data,
+  saving,
+  onSetQuota,
+  onReset,
+}: {
+  data: { usedBytes: string; pendingBytes: string; quotaBytes: string | null; overridden: boolean };
+  saving: boolean;
+  onSetQuota: (quotaBytes: string | null) => void;
+  onReset: () => void;
+}) {
+  const { t } = useTranslation(['storage', 'common']);
+  const initialMode: QuotaMode = !data.overridden
+    ? 'default'
+    : data.quotaBytes === null
+      ? 'unlimited'
+      : 'custom';
+  const initialAmount =
+    data.quotaBytes !== null
+      ? bytesToUnitAmount(Number(data.quotaBytes))
+      : { amount: 0, unit: 'GB' as ByteUnit };
+
+  const [mode, setMode] = useState<QuotaMode>(initialMode);
+  const [amount, setAmount] = useState(String(initialAmount.amount));
+  const [unit, setUnit] = useState<ByteUnit>(initialAmount.unit);
+
+  const dirty =
+    mode !== initialMode ||
+    (mode === 'custom' && (amount !== String(initialAmount.amount) || unit !== initialAmount.unit));
+
+  function handleSave() {
+    if (mode === 'default') {
+      onReset();
+      return;
+    }
+    if (mode === 'unlimited') {
+      onSetQuota(null);
+      return;
+    }
+    onSetQuota(String(unitAmountToBytes(Number(amount), unit)));
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border p-4">
+      <h2 className="text-sm font-semibold">{t('storage:userCard.title')}</h2>
+      <dl className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <dt className="text-muted-foreground">{t('storage:userCard.used')}</dt>
+          <dd>{formatBytes(data.usedBytes)}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t('storage:userCard.pending')}</dt>
+          <dd>{formatBytes(data.pendingBytes)}</dd>
+        </div>
+      </dl>
+      <div className="flex items-center gap-2">
+        <select
+          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          value={mode}
+          onChange={(event) => setMode(event.target.value as QuotaMode)}
+        >
+          <option value="default">{t('storage:userCard.override.default')}</option>
+          <option value="custom">{t('storage:userCard.override.custom')}</option>
+          <option value="unlimited">{t('storage:userCard.override.unlimited')}</option>
+        </select>
+        {mode === 'custom' && (
+          <>
+            <Input
+              type="number"
+              min={0}
+              className="w-28"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+            />
+            <select
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              value={unit}
+              onChange={(event) => setUnit(event.target.value as ByteUnit)}
+            >
+              <option value="MB">MB</option>
+              <option value="GB">GB</option>
+            </select>
+          </>
+        )}
+        {dirty && (
+          <Button size="sm" disabled={saving} onClick={handleSave}>
+            {t('storage:userCard.save')}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

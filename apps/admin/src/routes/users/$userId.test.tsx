@@ -114,4 +114,68 @@ describe('/users/$userId', () => {
 
     await waitFor(() => expect(sdk.admin.users.triggerPasswordReset).toHaveBeenCalledWith('u1'));
   });
+
+  it('renders the storage card with usage and quota', async () => {
+    const sdk = createMockSdk();
+    vi.mocked(sdk.admin.users.get).mockResolvedValue({ ...detail, isOwner: false } as never);
+    vi.mocked(sdk.admin.users.storage).mockResolvedValue({
+      usedBytes: '1073741824',
+      pendingBytes: '0',
+      quotaBytes: null,
+      overridden: false,
+    });
+
+    mount(sdk);
+
+    await waitFor(() => expect(screen.getByText('1 GB')).toBeInTheDocument());
+  });
+
+  it('sets a custom storage quota override', async () => {
+    const sdk = createMockSdk();
+    vi.mocked(sdk.admin.users.get).mockResolvedValue({ ...detail, isOwner: false } as never);
+    vi.mocked(sdk.admin.users.storage).mockResolvedValue({
+      usedBytes: '0',
+      pendingBytes: '0',
+      quotaBytes: null,
+      overridden: false,
+    });
+    vi.mocked(sdk.admin.users.setStorageQuota).mockResolvedValue(undefined);
+
+    mount(sdk);
+
+    const select = await screen.findByDisplayValue('Default');
+    fireEvent.change(select, { target: { value: 'custom' } });
+
+    const unitSelect = await screen.findByDisplayValue('GB');
+    fireEvent.change(unitSelect, { target: { value: 'MB' } });
+
+    const amountInput = screen.getByRole('spinbutton');
+    fireEvent.change(amountInput, { target: { value: '5' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /save quota/i }));
+
+    await waitFor(() =>
+      expect(sdk.admin.users.setStorageQuota).toHaveBeenCalledWith('u1', '5242880'),
+    );
+  });
+
+  it('resets an overridden quota back to default', async () => {
+    const sdk = createMockSdk();
+    vi.mocked(sdk.admin.users.get).mockResolvedValue({ ...detail, isOwner: false } as never);
+    vi.mocked(sdk.admin.users.storage).mockResolvedValue({
+      usedBytes: '0',
+      pendingBytes: '0',
+      quotaBytes: '1000000000',
+      overridden: true,
+    });
+    vi.mocked(sdk.admin.users.resetStorageQuota).mockResolvedValue(undefined);
+
+    mount(sdk);
+
+    const select = await screen.findByDisplayValue('Custom');
+    fireEvent.change(select, { target: { value: 'default' } });
+    fireEvent.click(screen.getByRole('button', { name: /save quota/i }));
+
+    await waitFor(() => expect(sdk.admin.users.resetStorageQuota).toHaveBeenCalledWith('u1'));
+  });
 });

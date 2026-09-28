@@ -1,0 +1,31 @@
+{
+  "title": "Storage",
+  "dashboard": {
+    "usage": "Usage",
+    "capacity": "Capacity",
+    "unlimited": "Unlimited",
+    "blobCount": "Blobs",
+    "pendingUploads": "Pending uploads",
+    "driver": "Driver",
+    "topConsumers": "Top consumers",
+    "mediaTools": {
+      "title": "Media tools",
+      "available": "ffmpeg available",
+      "unavailable": "ffmpeg not found",
+      "installHint": "Install ffmpeg to enable video thumbnails and duration detection.",
+      "version": "Version {{version}}"
+    }
+  },
+  "userCard": {
+    "title": "Storage",
+    "used": "Used",
+    "pending": "Pending",
+    "quota": "Quota",
+    "override": {
+      "default": "Default",
+      "custom": "Custom",
+      "unlimited": "Unlimited"
+    },
+    "save": "Save quota"
+  }
+}

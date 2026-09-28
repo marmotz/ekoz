@@ -54,6 +54,7 @@ that does not touch this file.
 - Uploaded content type is sniffed from the bytes instead of trusted from the caller, with a configurable allow/block list. (#136)
 - Object storage can run against an S3-compatible bucket instead of the local disk. (#137)
 - Avatar uploads are now checked against the caller's storage quota and the server's global capacity. (#138)
+- `GET /admin/attachments` items now carry the blob id and its reference count. (#157)
 
 ### Fixed
 

@@ -1,0 +1,32 @@
+{
+  "title": "Files",
+  "search": {
+    "filename": "Filename",
+    "uploader": "Uploader",
+    "room": "Room",
+    "type": "Type",
+    "allTypes": "All types",
+    "media": "Media",
+    "documents": "Documents"
+  },
+  "columns": {
+    "filename": "Filename",
+    "size": "Size",
+    "type": "Type",
+    "room": "Room",
+    "uploader": "Uploader",
+    "created": "Uploaded"
+  },
+  "actions": {
+    "open": "Open",
+    "removeEverywhere": "Remove everywhere"
+  },
+  "confirm": {
+    "removeTitle": "Remove this file everywhere?",
+    "removeDescription_one": "It is referenced in {{count}} place. This cannot be undone.",
+    "removeDescription_other": "It is referenced in {{count}} places. This cannot be undone."
+  },
+  "toasts": {
+    "removed": "File removed everywhere."
+  }
+}
