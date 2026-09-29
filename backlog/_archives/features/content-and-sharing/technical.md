@@ -2,33 +2,33 @@
 
 Technical design for file and link sharing across `apps/server`, `packages/sdk`,
 `apps/client-web` and `apps/admin`. Product decisions are in
-[overview.md](./overview.md); this page grounds them in the code.
+[overview.md](overview.md); this page grounds them in the code.
 
-Related: [file storage and quotas](../../../docs/technical/file-storage-and-quotas.md),
-[configuration model](../../../docs/technical/configuration-model.md),
-[retention and tombstones](../../../docs/technical/retention-and-tombstones.md),
-[permission model](../../../docs/technical/permission-model.md),
-[messages and interactions protocol](../../../docs/protocol/messages-and-interactions.md),
-[conversations technical design](../../_archives/features/conversations/technical.md).
+Related: [file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md),
+[configuration model](../../../../docs/technical/configuration-model.md),
+[retention and tombstones](../../../../docs/technical/retention-and-tombstones.md),
+[permission model](../../../../docs/technical/permission-model.md),
+[messages and interactions protocol](../../../../docs/protocol/messages-and-interactions.md),
+[conversations technical design](../conversations/technical.md).
 
 ## 1. Findings from the current code
 
 | # | Finding | Where | Consequence |
 |---|---------|-------|-------------|
-| F1 | `BlobService` already does content-addressed ingest (hash to a temp file, reuse an existing row, else `driver.put` + insert) with `retain` / `release` counters. `IngestOptions.declaredType` is stored as is; magic-byte validation is left to "content-and-sharing". | [blob.service.ts:47](../../../apps/server/src/core/storage/blob.service.ts) | Reused. Ingest gains the uploader and the sniffed type. |
-| F2 | `Blob` has no uploader column, and `sizeBytes` is an `int4` (2 GiB ceiling) with a comment saying attachments must revisit it. | [contract.prisma:105](../../../apps/server/src/core/prisma/contract.prisma) | Migration: `sizeBytes` becomes `BigInt`, new `uploaderId`. Quota cannot be computed without it. |
-| F3 | GC race: `ingest` can return an existing row at `refCount = 0` whose `createdAt` is older than the grace period; the sweep ([blob-gc.service.ts:49](../../../apps/server/src/core/storage/blob-gc.service.ts)) can delete it before the caller's `retain` commits. The sweep reads the rows, then deletes them without re-checking `refCount`. | [blob.service.ts:61](../../../apps/server/src/core/storage/blob.service.ts), [blob-gc.service.ts:53](../../../apps/server/src/core/storage/blob-gc.service.ts) | Dedup makes this likely once many files are shared. Fixed in S2. |
-| F4 | `GET /blobs/:id` is authenticated by Bearer token. Access is **per blob** through `BlobAccessRegistry` (any policy that says yes grants access). The only policy is the avatar one. | [blob.controller.ts:40](../../../apps/server/src/core/storage/blob.controller.ts), [profile.service.ts:50](../../../apps/server/src/modules/identity/profile/profile.service.ts) | Access by blob does not fit attachments: one blob can sit in a private room and in a public one, and the filename belongs to the attachment. Attachments get their own download route (S6). |
-| F5 | Only the `local` driver exists; `storage.driver = "s3"` throws at boot. The `s3.*` keys are declared in the registry. `presignGet` is optional in the driver contract. | [storage.module.ts:28](../../../apps/server/src/core/storage/storage.module.ts), [storage-driver.ts](../../../apps/server/src/core/storage/storage-driver.ts) | S3 driver in S3 (decision in the overview discussion). |
-| F6 | Avatar upload goes through multer **memory** storage (`FileInterceptor('file')`), then `fileTypeFromBuffer`. `file-type` only detects binary signatures: plain text, CSV, JSON or source code give `null`. | [profile.controller.ts:72](../../../apps/server/src/modules/identity/profile/profile.controller.ts), [avatar.ts:17](../../../apps/server/src/modules/identity/profile/avatar.ts) | Memory buffering is unusable for 25 MiB files; uploads are streamed (S4). Text files need a fallback classification (S5). |
-| F7 | `sendMessage` requires `room.post` and a non-empty `body` (`z.string().min(1)`). `editMessage` only takes `body`. `redactMessage` is the shared delete core (user deletion and retention delete mode). The retention hide mode only sets `hiddenAt`, and `listMessages` still returns hidden messages with their body. | [messages.service.ts:38](../../../apps/server/src/modules/conversations/messages/messages.service.ts), [messages.dto.ts](../../../apps/server/src/modules/conversations/messages/messages.dto.ts), [retention-worker.service.ts](../../../apps/server/src/modules/conversations/retention/retention-worker.service.ts) | Attachments hook into send, edit and `redactMessage`. A hidden message keeps its attachments, but they are not downloadable by ordinary readers (S6). |
-| F8 | `message_created` content is a fixed Zod shape; `message_edited` carries only `{ messageId, editedAt }`, and the web client refetches the message on it. | [room-event.types.ts:93](../../../apps/server/src/modules/conversations/events/room-event.types.ts), [timeline.ts:196](../../../apps/client-web/src/features/chat/lib/timeline.ts) | Attachments and the link preview are added to `message_created` (additive). An edit that changes attachments reuses `message_edited` with no client change. |
-| F9 | Capabilities are a closed, additive list. The role defaults are upserted on every boot by a seeder. | [capabilities.ts](../../../apps/server/src/modules/conversations/permissions/capabilities.ts), [role-default-capabilities.seeder.ts](../../../apps/server/src/modules/conversations/permissions/role-default-capabilities.seeder.ts) | `room.attach` is added to the list and the matrix; existing databases get it on the next boot. |
-| F10 | `ConfigService.set` / `clear` / `describe` and the `settings` table exist, but no HTTP route exposes them. Server administration excluded runtime configuration editing. | [config.service.ts:94](../../../apps/server/src/core/config/config.service.ts), [contract.prisma:28](../../../apps/server/src/core/prisma/contract.prisma) | New generic `/admin/settings` API (S11). |
-| F11 | The SDK transport is `fetch` based: it accepts `FormData` and a `blob` response mode, with no upload progress. The web client loads avatars as a `Blob` through the SDK and shows them with an object URL, because `<img src>` cannot send a Bearer token. | [http-client.ts:85](../../../packages/sdk/src/transport/http-client.ts), [use-avatar-src.ts](../../../apps/client-web/src/shared/sdk/use-avatar-src.ts) | Object URLs cannot stream a video. Media use signed URLs (S6). Upload progress comes from chunked uploads (S4, SDK1). |
-| F12 | Server tests run under Vitest with `environment: 'node'`, not Bun. | [vitest.config.ts](../../../apps/server/vitest.config.ts) | Bun-only built-ins (`HTMLRewriter`, `Bun.S3Client`) cannot be used in code that tests exercise. |
-| F13 | The composer is a plain textarea with `onSend(body)`. Sending is optimistic (`useSendMessage`), with a pending entry reconciled on success. | [composer.tsx:23](../../../apps/client-web/src/features/chat/components/composer.tsx), [use-send-message.ts](../../../apps/client-web/src/features/chat/hooks/use-send-message.ts) | The composer gains an attachment tray and a link preview card; a pending entry carries its uploads. |
-| F14 | The boundaries rule forbids a feature module (`src/modules/*`) from importing another one; `src/core/*` is importable by all. | [eslint.config.mjs](../../../apps/server/eslint.config.mjs) | Uploads, quotas, media and signed URLs go in `core/storage` (shared by identity avatars and conversations). Attachments and link previews go in `modules/conversations`, which owns messages. |
+| F1 | `BlobService` already does content-addressed ingest (hash to a temp file, reuse an existing row, else `driver.put` + insert) with `retain` / `release` counters. `IngestOptions.declaredType` is stored as is; magic-byte validation is left to "content-and-sharing". | [blob.service.ts:47](../../../../apps/server/src/core/storage/blob.service.ts) | Reused. Ingest gains the uploader and the sniffed type. |
+| F2 | `Blob` has no uploader column, and `sizeBytes` is an `int4` (2 GiB ceiling) with a comment saying attachments must revisit it. | [contract.prisma:105](../../../../apps/server/src/core/prisma/contract.prisma) | Migration: `sizeBytes` becomes `BigInt`, new `uploaderId`. Quota cannot be computed without it. |
+| F3 | GC race: `ingest` can return an existing row at `refCount = 0` whose `createdAt` is older than the grace period; the sweep ([blob-gc.service.ts:49](../../../../apps/server/src/core/storage/blob-gc.service.ts)) can delete it before the caller's `retain` commits. The sweep reads the rows, then deletes them without re-checking `refCount`. | [blob.service.ts:61](../../../../apps/server/src/core/storage/blob.service.ts), [blob-gc.service.ts:53](../../../../apps/server/src/core/storage/blob-gc.service.ts) | Dedup makes this likely once many files are shared. Fixed in S2. |
+| F4 | `GET /blobs/:id` is authenticated by Bearer token. Access is **per blob** through `BlobAccessRegistry` (any policy that says yes grants access). The only policy is the avatar one. | [blob.controller.ts:40](../../../../apps/server/src/core/storage/blob.controller.ts), [profile.service.ts:50](../../../../apps/server/src/modules/identity/profile/profile.service.ts) | Access by blob does not fit attachments: one blob can sit in a private room and in a public one, and the filename belongs to the attachment. Attachments get their own download route (S6). |
+| F5 | Only the `local` driver exists; `storage.driver = "s3"` throws at boot. The `s3.*` keys are declared in the registry. `presignGet` is optional in the driver contract. | [storage.module.ts:28](../../../../apps/server/src/core/storage/storage.module.ts), [storage-driver.ts](../../../../apps/server/src/core/storage/storage-driver.ts) | S3 driver in S3 (decision in the overview discussion). |
+| F6 | Avatar upload goes through multer **memory** storage (`FileInterceptor('file')`), then `fileTypeFromBuffer`. `file-type` only detects binary signatures: plain text, CSV, JSON or source code give `null`. | [profile.controller.ts:72](../../../../apps/server/src/modules/identity/profile/profile.controller.ts), [avatar.ts:17](../../../../apps/server/src/modules/identity/profile/avatar.ts) | Memory buffering is unusable for 25 MiB files; uploads are streamed (S4). Text files need a fallback classification (S5). |
+| F7 | `sendMessage` requires `room.post` and a non-empty `body` (`z.string().min(1)`). `editMessage` only takes `body`. `redactMessage` is the shared delete core (user deletion and retention delete mode). The retention hide mode only sets `hiddenAt`, and `listMessages` still returns hidden messages with their body. | [messages.service.ts:38](../../../../apps/server/src/modules/conversations/messages/messages.service.ts), [messages.dto.ts](../../../../apps/server/src/modules/conversations/messages/messages.dto.ts), [retention-worker.service.ts](../../../../apps/server/src/modules/conversations/retention/retention-worker.service.ts) | Attachments hook into send, edit and `redactMessage`. A hidden message keeps its attachments, but they are not downloadable by ordinary readers (S6). |
+| F8 | `message_created` content is a fixed Zod shape; `message_edited` carries only `{ messageId, editedAt }`, and the web client refetches the message on it. | [room-event.types.ts:93](../../../../apps/server/src/modules/conversations/events/room-event.types.ts), [timeline.ts:196](../../../../apps/client-web/src/features/chat/lib/timeline.ts) | Attachments and the link preview are added to `message_created` (additive). An edit that changes attachments reuses `message_edited` with no client change. |
+| F9 | Capabilities are a closed, additive list. The role defaults are upserted on every boot by a seeder. | [capabilities.ts](../../../../apps/server/src/modules/conversations/permissions/capabilities.ts), [role-default-capabilities.seeder.ts](../../../../apps/server/src/modules/conversations/permissions/role-default-capabilities.seeder.ts) | `room.attach` is added to the list and the matrix; existing databases get it on the next boot. |
+| F10 | `ConfigService.set` / `clear` / `describe` and the `settings` table exist, but no HTTP route exposes them. Server administration excluded runtime configuration editing. | [config.service.ts:94](../../../../apps/server/src/core/config/config.service.ts), [contract.prisma:28](../../../../apps/server/src/core/prisma/contract.prisma) | New generic `/admin/settings` API (S11). |
+| F11 | The SDK transport is `fetch` based: it accepts `FormData` and a `blob` response mode, with no upload progress. The web client loads avatars as a `Blob` through the SDK and shows them with an object URL, because `<img src>` cannot send a Bearer token. | [http-client.ts:85](../../../../packages/sdk/src/transport/http-client.ts), [use-avatar-src.ts](../../../../apps/client-web/src/shared/sdk/use-avatar-src.ts) | Object URLs cannot stream a video. Media use signed URLs (S6). Upload progress comes from chunked uploads (S4, SDK1). |
+| F12 | Server tests run under Vitest with `environment: 'node'`, not Bun. | [vitest.config.ts](../../../../apps/server/vitest.config.ts) | Bun-only built-ins (`HTMLRewriter`, `Bun.S3Client`) cannot be used in code that tests exercise. |
+| F13 | The composer is a plain textarea with `onSend(body)`. Sending is optimistic (`useSendMessage`), with a pending entry reconciled on success. | [composer.tsx:23](../../../../apps/client-web/src/features/chat/components/composer.tsx), [use-send-message.ts](../../../../apps/client-web/src/features/chat/hooks/use-send-message.ts) | The composer gains an attachment tray and a link preview card; a pending entry carries its uploads. |
+| F14 | The boundaries rule forbids a feature module (`src/modules/*`) from importing another one; `src/core/*` is importable by all. | [eslint.config.mjs](../../../../apps/server/eslint.config.mjs) | Uploads, quotas, media and signed URLs go in `core/storage` (shared by identity avatars and conversations). Attachments and link previews go in `modules/conversations`, which owns messages. |
 
 ## 2. Server — storage core (`src/core/storage`)
 
@@ -183,7 +183,7 @@ The overview discussion retained short-lived signed URLs, so that
 - Access rules (`AttachmentAccessPolicy` in conversations, S9): `room.read` on the
   attachment's room, the message not redacted, and if the message is hidden, the
   caller must also hold `room.delete_any` (moderation sees hidden content, as in
-  [retention and tombstones](../../../docs/technical/retention-and-tombstones.md)).
+  [retention and tombstones](../../../../docs/technical/retention-and-tombstones.md)).
   A cached `preview` item: any authenticated user (public web content, used by the
   composer before sending).
 - Serving: `local` driver → streamed with `Range` / `206`, `ETag` = hash,
@@ -239,7 +239,7 @@ short delay).
   reservation (the charge stays with the original uploader).
 - Computed with queries on the indexed `uploader_id`, not with a counter table.
   This departs from "an accounting table (user, room, global)" in
-  [file storage and quotas](../../../docs/technical/file-storage-and-quotas.md),
+  [file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md),
   which is updated accordingly. Counters could drift from `refCount`, the query
   cannot, and no product decision needs a per-room total.
 - `GET /me/storage` → `{ usedBytes, pendingBytes, quotaBytes: string | null }`
@@ -414,7 +414,7 @@ antivirus scanning (listed in section 9).
 
 ## 6. Web client (`apps/client-web`)
 
-- **Composer** ([composer.tsx](../../../apps/client-web/src/features/chat/components/composer.tsx)):
+- **Composer** ([composer.tsx](../../../../apps/client-web/src/features/chat/components/composer.tsx)):
   an attach button (file picker), drag and drop on the chat view, and pasting
   images. An **attachment tray** above the textarea: one chip per file with name,
   size, progress bar, cancel, error. Send is enabled when there is text or at
@@ -438,7 +438,7 @@ antivirus scanning (listed in section 9).
   `SignedUrlCache`. The link preview card is shown under the body, with a remove
   button for the author.
 - **Editing**: add or remove attachments and change or remove the preview in
-  the edit mode that [web client message actions](../../_archives/features/web-client-message-actions/overview.md)
+  the edit mode that [web client message actions](../web-client-message-actions/overview.md)
   provides (dependency). Until it exists, only the dedicated "remove file" action
   is available.
 - **Files panel**: a "Files" entry in the room header opens a side panel with
@@ -492,7 +492,7 @@ New routes (TanStack Router file routes, nav registry entries):
   optional in `POST /rooms/:id/messages`, which widens the input. A message
   without a body now exists: clients must not assume `body !== ''` means "not
   deleted"; `redactedAt` stays the deletion marker. The web client's
-  [timeline.ts](../../../apps/client-web/src/features/chat/lib/timeline.ts)
+  [timeline.ts](../../../../apps/client-web/src/features/chat/lib/timeline.ts)
   is checked for that.
 - **Avatar path**: now charged against the quota. An avatar upload by a user
   already over quota is refused with `upload.quota_exceeded` (new error on
@@ -511,7 +511,7 @@ New routes (TanStack Router file routes, nav registry entries):
   preview card cycling, message rendering, files panel, account storage); admin
   route tests.
 - **Out of scope**: hash blocklist, antivirus, federation file access (see
-  [federation](../federation/overview.md)), room avatars (`Room.avatarBlobId`
+  [federation](../../../features/federation/overview.md)), room avatars (`Room.avatarBlobId`
   exists but has no consumer), resumable uploads across a page reload in the
   web client (the SDK allows it via `resume`; the demo client does not persist
   drafts).

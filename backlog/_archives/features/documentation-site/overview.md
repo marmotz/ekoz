@@ -1,6 +1,6 @@
 # Documentation site
 
-**Status**: done, see [technical.md](./technical.md)
+**Status**: done, see [technical.md](technical.md)
 
 ## Contexte
 

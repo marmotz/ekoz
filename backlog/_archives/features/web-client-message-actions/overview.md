@@ -79,5 +79,5 @@ interactions from others live.
 
 ## Feature order
 
-- [Content and sharing](../../../features/content-and-sharing/overview.md) builds on the edit
+- [Content and sharing](../content-and-sharing/overview.md) builds on the edit
   UI to add and remove attachments on a message.

@@ -1,6 +1,6 @@
 # Content and sharing
 
-**Status**: done, see [technical.md](./technical.md)
+**Status**: done, see [technical.md](technical.md)
 
 ## Context
 
@@ -50,7 +50,7 @@ client, admin console and documentation.
   the quota is charged to the original uploader and released when the file is no
   longer referenced.
 - Physical storage is modular: local disk, S3-compatible service or other. See
-  [file storage and quotas](../../../docs/technical/file-storage-and-quotas.md).
+  [file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md).
 - Profile avatars are files handled by the same system (deduplicated blobs),
   attached to a profile rather than to a message.
 - The server generates thumbnails for images and videos only when the optional
@@ -96,14 +96,14 @@ client, admin console and documentation.
 
 ## Depends on
 
-- [Conversations](../../_archives/features/conversations/overview.md), for sharing content in rooms.
-- [Server administration](../../_archives/features/server-administration/overview.md), for storage
+- [Conversations](../conversations/overview.md), for sharing content in rooms.
+- [Server administration](../server-administration/overview.md), for storage
   limits and the link preview option.
-- [Web client message actions](../../_archives/features/web-client-message-actions/overview.md), for
+- [Web client message actions](../web-client-message-actions/overview.md), for
   the message edit UI that adding / removing attachments plugs into.
 
 ## Feature order
 
-- [Federation](../federation/overview.md) extends file access to authorised
+- [Federation](../../../features/federation/overview.md) extends file access to authorised
   remote members.
-- [Extensibility](../extensibility/overview.md) allows adding content types.
+- [Extensibility](../../../features/extensibility/overview.md) allows adding content types.

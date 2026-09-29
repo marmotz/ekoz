@@ -1,14 +1,14 @@
 # Web client direct messages
 
-**Status**: done, see [technical.md](./technical.md)
+**Status**: done, see [technical.md](technical.md)
 
 ## Context
 
 The protocol has one-to-one (`dm`) and private group (`group_dm`) conversations:
 rooms outside the space hierarchy and the directory, with fixed or role-less
 membership (`POST /dms`, deduplicated per pair, and `POST /group-dms`), see
-[rooms and permissions](../../../docs/protocol/rooms-and-permissions.md#direct-and-group-conversations).
-[`web-client-rooms`](../../_archives/features/web-client-rooms/overview.md) explicitly left them out of
+[rooms and permissions](../../../../docs/protocol/rooms-and-permissions.md#direct-and-group-conversations).
+[`web-client-rooms`](../web-client-rooms/overview.md) explicitly left them out of
 scope: the client neither lists nor creates them.
 
 Gaps found while scoping, against the current server:
@@ -31,7 +31,7 @@ sidebar and chat in them with the same message view as rooms.
 - **Finding someone**: a "new conversation" picker with a server-side user
   search limited to people the caller shares at least one room with, plus an
   exact-identifier lookup that reaches any user. The member profile
-  ([`web-client-members`](../../_archives/features/web-client-members/overview.md)) is another entry
+  ([`web-client-members`](../web-client-members/overview.md)) is another entry
   point.
 - **Sidebar**: a dedicated "Direct messages" section below the space tree,
   ordered by last activity.
@@ -59,15 +59,15 @@ sidebar and chat in them with the same message view as rooms.
 ## Out of scope
 
 - Unread counts and read markers:
-  [`web-client-read-state`](../../_archives/features/web-client-read-state/overview.md).
-- Notifying new direct messages: [`notifications`](../notifications/overview.md).
+  [`web-client-read-state`](../web-client-read-state/overview.md).
+- Notifying new direct messages: [`notifications`](../../../features/notifications/overview.md).
 
 ## Dependencies
 
-- [`web-client-members`](../../_archives/features/web-client-members/overview.md): the member profile is
+- [`web-client-members`](../web-client-members/overview.md): the member profile is
   an entry point for "send a message".
-- [`web-client-chat`](../../_archives/features/web-client-chat/overview.md): message view reused as is.
-- [`notifications`](../notifications/overview.md): direct messages are a notifiable
+- [`web-client-chat`](../web-client-chat/overview.md): message view reused as is.
+- [`notifications`](../../../features/notifications/overview.md): direct messages are a notifiable
   event, handled there.
 - Server side: a conversations listing, a user search, group admin management
   (admin flag, rename, add/remove, deletion on last admin leaving), history

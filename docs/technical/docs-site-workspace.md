@@ -5,7 +5,7 @@
 `apps/docs` hosts the public documentation site (Docusaurus). It must serve three
 content sets with different lifecycles: operator guides (never versioned), the protocol
 specification and the SDK documentation (both versioned). The overall design is in
-`backlog/features/documentation-site/technical.md`; this page records the choices made
+`backlog/_archives/features/documentation-site/technical.md`; this page records the choices made
 while scaffolding the workspace.
 
 ## Decision

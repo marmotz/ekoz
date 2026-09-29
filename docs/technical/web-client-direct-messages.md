@@ -18,7 +18,7 @@ was not enough:
   had no `id` to start a conversation from.
 
 The feature-level design is in
-[`backlog/features/web-client-direct-messages/technical.md`](../../backlog/features/web-client-direct-messages/technical.md);
+[`backlog/_archives/features/web-client-direct-messages/technical.md`](../../backlog/_archives/features/web-client-direct-messages/technical.md);
 this page records what shipped and why. It builds on [web client rooms](web-client-rooms.md),
 [web client chat](web-client-chat.md), the [permission model](permission-model.md) and the
 [rooms and permissions protocol](../protocol/rooms-and-permissions.md).

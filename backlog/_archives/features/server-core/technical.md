@@ -214,7 +214,7 @@ On start, `BootstrapService`:
 Per [file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md).
 First increment ships the schema, the `local` driver and deduplication.
 Per-user quota, MIME filtering by magic bytes and message attachments come with
-[content and sharing](../../../features/content-and-sharing/overview.md).
+[content and sharing](../content-and-sharing/overview.md).
 
 ### Driver interface
 

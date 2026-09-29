@@ -18,7 +18,7 @@ list) and one limit (the edit window, added to the messages policy).
 | `apps/client-web` | Timeline reactions, context menu, reaction picker and chips, reply, inline edit, delete dialog, pinned panel. |
 
 Out of scope: editing attachments
-([`content-and-sharing`](../../../features/content-and-sharing/overview.md)); mention chips and
+([`content-and-sharing`](../content-and-sharing/overview.md)); mention chips and
 mention editing
 ([`web-client-mentions`](../web-client-mentions/technical.md)); the formatting
 toolbar

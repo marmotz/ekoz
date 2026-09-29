@@ -53,6 +53,6 @@ who is typing; their own presence and typing are published.
 - [`web-client-chat`](../web-client-chat/overview.md): realtime stream, composer.
 - Delivered **after** [`web-client-members`](../web-client-members/overview.md)
   (members panel, profile) and
-  [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md)
+  [`web-client-direct-messages`](../web-client-direct-messages/overview.md)
   (conversations in the sidebar): this feature adds presence to all surfaces
   at once.

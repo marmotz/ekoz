@@ -28,7 +28,7 @@ member-level actions (direct message, moderation).
   sheet.
 - Shown to anyone who can read the room, including a non-member reading a public
   room. It covers spaces' channels; direct and group conversations reuse it in
-  [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md).
+  [`web-client-direct-messages`](../web-client-direct-messages/overview.md).
 - Lists the effective members (explicit plus inherited from ancestor spaces), with
   a total count.
 - Two views, switchable:
@@ -60,7 +60,7 @@ member-level actions (direct message, moderation).
 - Presence: dots and the "hide offline members" filter are added to this panel by
   [`web-client-presence-and-typing`](../web-client-presence-and-typing/overview.md).
 - Member actions (direct message, invite, role change, remove, ban): owned by
-  [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md) and
+  [`web-client-direct-messages`](../web-client-direct-messages/overview.md) and
   [`web-client-room-moderation`](../../../features/web-client-room-moderation/overview.md).
 
 ## Dependencies
@@ -73,6 +73,6 @@ member-level actions (direct message, moderation).
 - [`web-client-room-moderation`](../../../features/web-client-room-moderation/technical.md) puts its
   moderator-side UI in `features/members` (panel rows and sections) and builds on
   `shared/members` and `shared/profile`.
-- Consumed by [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md),
+- Consumed by [`web-client-direct-messages`](../web-client-direct-messages/overview.md),
   [`web-client-room-moderation`](../../../features/web-client-room-moderation/overview.md) and
   [`web-client-mentions`](../web-client-mentions/overview.md).

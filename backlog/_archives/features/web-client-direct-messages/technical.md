@@ -3,31 +3,31 @@
 Technical design for one-to-one (`dm`) and group (`group_dm`) conversations in
 `apps/client-web`, the server changes they need in `apps/server`, and the
 matching SDK bindings in `packages/sdk`. Product decisions are in
-[overview.md](./overview.md); this page grounds them in the code.
+[overview.md](overview.md); this page grounds them in the code.
 
-Related: [rooms and permissions protocol](../../../docs/protocol/rooms-and-permissions.md),
-[permission model](../../../docs/technical/permission-model.md),
-[web client rooms](../../../docs/technical/web-client-rooms.md),
-[web client chat](../../../docs/technical/web-client-chat.md),
-[OpenAPI description and SDK types](../../../docs/technical/openapi-description-and-sdk-types.md).
+Related: [rooms and permissions protocol](../../../../docs/protocol/rooms-and-permissions.md),
+[permission model](../../../../docs/technical/permission-model.md),
+[web client rooms](../../../../docs/technical/web-client-rooms.md),
+[web client chat](../../../../docs/technical/web-client-chat.md),
+[OpenAPI description and SDK types](../../../../docs/technical/openapi-description-and-sdk-types.md).
 
 ## 1. Findings from the current code
 
 | # | Finding | Where | Consequence |
 |---|---------|-------|-------------|
-| F1 | `GET /rooms` filters to `type IN ('space', 'channel')`; nothing lists the caller's `dm` / `group_dm`. | [rooms.service.ts:98](../../../apps/server/src/modules/conversations/rooms/rooms.service.ts) | A new listing (S2). |
-| F2 | The `group_dm` creator gets a per-user `room.manage_members` allow override. That capability only gates join-request listing / approve / reject. Removing a member needs `room.kick`, adding needs `room.invite`, renaming needs `space.manage` (`PATCH /rooms/:id`), none of which a `member` holds. | [dm.service.ts:121](../../../apps/server/src/modules/conversations/dm/dm.service.ts), [membership.service.ts:426](../../../apps/server/src/modules/conversations/membership/membership.service.ts), [membership.service.ts:547](../../../apps/server/src/modules/conversations/membership/membership.service.ts), [rooms.service.ts:195](../../../apps/server/src/modules/conversations/rooms/rooms.service.ts) | The "light admin" cannot manage anything today; group management needs its own endpoints (S4). |
-| F3 | `leave` deletes a `group_dm` membership but not the user's `RoomMemberPermission` rows. | [membership.service.ts:207](../../../apps/server/src/modules/conversations/membership/membership.service.ts) | An admin who leaves and is re-added would still be admin. Fixed in S4. |
-| F4 | `leave` on a `dm` only sets `Membership.hiddenAt`; nothing ever clears it, and no read path looks at it. | [membership.service.ts:214](../../../apps/server/src/modules/conversations/membership/membership.service.ts), [contract.prisma:517](../../../apps/server/src/core/prisma/contract.prisma) | "Delete the conversation" and reappearance need S1 and S2. |
-| F5 | `POST /dms` and `POST /group-dms` never check that the target users exist or are active. | [dm.service.ts:30](../../../apps/server/src/modules/conversations/dm/dm.service.ts) | A conversation can be opened with a deleted or unknown id. Validated in S3. |
-| F6 | `GET /users/:identifier` returns `{ identifier, displayName, bio, avatarUrl }`, no `id`, while `POST /dms` takes a `userId`. | [profile.dto.ts:32](../../../apps/server/src/modules/identity/profile/profile.dto.ts) | An exact-identifier lookup cannot start a conversation. `id` is added (S3). |
-| F7 | No user search exists; the only lookup is by exact identifier. | [profile.controller.ts:108](../../../apps/server/src/modules/identity/profile/profile.controller.ts) | A new search (S3). |
-| F8 | Message reads (`listMessages`, `getMessage`, `listPins`) and `GET /sync` only check `room.read`: any member reads the full history. | [messages.service.ts:215](../../../apps/server/src/modules/conversations/messages/messages.service.ts), [sync.service.ts:29](../../../apps/server/src/modules/conversations/streaming/sync.service.ts) | Per-member history limits need a floor enforced on each read path (S1). |
-| F9 | Feed fan-out goes to every membership of the room, at append time. Events that reference an older message (`message_edited`, `reaction_added`, `pin_added`, ...) carry only `messageId`, never a body. | [feed-fanout.service.ts:28](../../../apps/server/src/modules/conversations/streaming/feed-fanout.service.ts), [room-event.types.ts:93](../../../apps/server/src/modules/conversations/events/room-event.types.ts) | A member with a history floor may receive such an event about a hidden message, but cannot read its content: `getMessage` answers `404`. No fan-out change needed. |
-| F10 | `permission_override_changed` requires an `effect` (`allow` / `deny`); there is no "removed" shape. `member` does not hold `room.manage_members` by default. | [room-event.types.ts:66](../../../apps/server/src/modules/conversations/events/room-event.types.ts), [role-default-capabilities.ts](../../../apps/server/src/modules/conversations/permissions/role-default-capabilities.ts) | Revoking an admin writes `deny`, which is equivalent to the default and needs no new event shape. |
-| F11 | In the client, `useRoomAccess` resolves a room from `GET /rooms` (no `dm`), then `GET /rooms/:id`, readable only for `public` rooms or a pending invitation. A `dm` link ends as `unavailable`. | [use-room-access.ts](../../../apps/client-web/src/features/rooms/hooks/use-room-access.ts) | Conversations get their own route and gate (4.3, 4.4). |
-| F12 | `RoomChat` takes `{ room, capabilities, membership }` and is independent of the room type. `RoomHeader` already has `dm` / `groupDm` type labels. The shell exposes `registerSidebarSection`; realtime marks unseen rooms for any `roomId`. | [$roomId.tsx](../../../apps/client-web/src/routes/_app/rooms/$roomId.tsx), [room-header.tsx](../../../apps/client-web/src/features/rooms/components/room-header.tsx), [sidebar-section-registry.ts](../../../apps/client-web/src/shared/layout/sidebar-section-registry.ts), [realtime-provider.tsx](../../../apps/client-web/src/shared/realtime/realtime-provider.tsx) | The message view is reused as is; a new sidebar section and header. |
-| F13 | `AccountService.findByIdentifier` also accepts an email address, so `GET /users/:identifier` resolves emails. | [account.service.ts:217](../../../apps/server/src/modules/identity/accounts/account.service.ts) | The client never sends an email-shaped input to the lookup (4.6). The server behaviour itself is out of scope here. |
+| F1 | `GET /rooms` filters to `type IN ('space', 'channel')`; nothing lists the caller's `dm` / `group_dm`. | [rooms.service.ts:98](../../../../apps/server/src/modules/conversations/rooms/rooms.service.ts) | A new listing (S2). |
+| F2 | The `group_dm` creator gets a per-user `room.manage_members` allow override. That capability only gates join-request listing / approve / reject. Removing a member needs `room.kick`, adding needs `room.invite`, renaming needs `space.manage` (`PATCH /rooms/:id`), none of which a `member` holds. | [dm.service.ts:121](../../../../apps/server/src/modules/conversations/dm/dm.service.ts), [membership.service.ts:426](../../../../apps/server/src/modules/conversations/membership/membership.service.ts), [membership.service.ts:547](../../../../apps/server/src/modules/conversations/membership/membership.service.ts), [rooms.service.ts:195](../../../../apps/server/src/modules/conversations/rooms/rooms.service.ts) | The "light admin" cannot manage anything today; group management needs its own endpoints (S4). |
+| F3 | `leave` deletes a `group_dm` membership but not the user's `RoomMemberPermission` rows. | [membership.service.ts:207](../../../../apps/server/src/modules/conversations/membership/membership.service.ts) | An admin who leaves and is re-added would still be admin. Fixed in S4. |
+| F4 | `leave` on a `dm` only sets `Membership.hiddenAt`; nothing ever clears it, and no read path looks at it. | [membership.service.ts:214](../../../../apps/server/src/modules/conversations/membership/membership.service.ts), [contract.prisma:517](../../../../apps/server/src/core/prisma/contract.prisma) | "Delete the conversation" and reappearance need S1 and S2. |
+| F5 | `POST /dms` and `POST /group-dms` never check that the target users exist or are active. | [dm.service.ts:30](../../../../apps/server/src/modules/conversations/dm/dm.service.ts) | A conversation can be opened with a deleted or unknown id. Validated in S3. |
+| F6 | `GET /users/:identifier` returns `{ identifier, displayName, bio, avatarUrl }`, no `id`, while `POST /dms` takes a `userId`. | [profile.dto.ts:32](../../../../apps/server/src/modules/identity/profile/profile.dto.ts) | An exact-identifier lookup cannot start a conversation. `id` is added (S3). |
+| F7 | No user search exists; the only lookup is by exact identifier. | [profile.controller.ts:108](../../../../apps/server/src/modules/identity/profile/profile.controller.ts) | A new search (S3). |
+| F8 | Message reads (`listMessages`, `getMessage`, `listPins`) and `GET /sync` only check `room.read`: any member reads the full history. | [messages.service.ts:215](../../../../apps/server/src/modules/conversations/messages/messages.service.ts), [sync.service.ts:29](../../../../apps/server/src/modules/conversations/streaming/sync.service.ts) | Per-member history limits need a floor enforced on each read path (S1). |
+| F9 | Feed fan-out goes to every membership of the room, at append time. Events that reference an older message (`message_edited`, `reaction_added`, `pin_added`, ...) carry only `messageId`, never a body. | [feed-fanout.service.ts:28](../../../../apps/server/src/modules/conversations/streaming/feed-fanout.service.ts), [room-event.types.ts:93](../../../../apps/server/src/modules/conversations/events/room-event.types.ts) | A member with a history floor may receive such an event about a hidden message, but cannot read its content: `getMessage` answers `404`. No fan-out change needed. |
+| F10 | `permission_override_changed` requires an `effect` (`allow` / `deny`); there is no "removed" shape. `member` does not hold `room.manage_members` by default. | [room-event.types.ts:66](../../../../apps/server/src/modules/conversations/events/room-event.types.ts), [role-default-capabilities.ts](../../../../apps/server/src/modules/conversations/permissions/role-default-capabilities.ts) | Revoking an admin writes `deny`, which is equivalent to the default and needs no new event shape. |
+| F11 | In the client, `useRoomAccess` resolves a room from `GET /rooms` (no `dm`), then `GET /rooms/:id`, readable only for `public` rooms or a pending invitation. A `dm` link ends as `unavailable`. | [use-room-access.ts](../../../../apps/client-web/src/features/rooms/hooks/use-room-access.ts) | Conversations get their own route and gate (4.3, 4.4). |
+| F12 | `RoomChat` takes `{ room, capabilities, membership }` and is independent of the room type. `RoomHeader` already has `dm` / `groupDm` type labels. The shell exposes `registerSidebarSection`; realtime marks unseen rooms for any `roomId`. | [$roomId.tsx](../../../../apps/client-web/src/routes/_app/rooms/$roomId.tsx), [room-header.tsx](../../../../apps/client-web/src/features/rooms/components/room-header.tsx), [sidebar-section-registry.ts](../../../../apps/client-web/src/shared/layout/sidebar-section-registry.ts), [realtime-provider.tsx](../../../../apps/client-web/src/shared/realtime/realtime-provider.tsx) | The message view is reused as is; a new sidebar section and header. |
+| F13 | `AccountService.findByIdentifier` also accepts an email address, so `GET /users/:identifier` resolves emails. | [account.service.ts:217](../../../../apps/server/src/modules/identity/accounts/account.service.ts) | The client never sends an email-shaped input to the lookup (4.6). The server behaviour itself is out of scope here. |
 
 ## 2. Server changes (`apps/server`, `conversations` module)
 
@@ -75,7 +75,7 @@ conversation from the picker), again keeping the floor.
 ### S2. `GET /me/conversations`
 
 The caller's `dm` and `group_dm`, one raw SQL query like `GET /rooms`
-([rooms.service.ts:94](../../../apps/server/src/modules/conversations/rooms/rooms.service.ts)).
+([rooms.service.ts:94](../../../../apps/server/src/modules/conversations/rooms/rooms.service.ts)).
 It sits under `/me/` next to `GET /me/room-invitations`.
 
 A conversation is listed for the caller when:
@@ -166,17 +166,17 @@ the first admin through the existing override.
 
 ### Cross-cutting server work
 
-- Protocol: [rooms-and-permissions.md](../../../docs/protocol/rooms-and-permissions.md)
+- Protocol: [rooms-and-permissions.md](../../../../docs/protocol/rooms-and-permissions.md)
   documents `GET /me/conversations`, `GET /me/contacts`, the `/group-dms/:id/*`
   endpoints, the admin override semantics, group deletion, the history floor
   on message reads and sync, `dm` leave setting the floor, and reappearance.
-  [identity.md](../../../docs/protocol/identity.md) documents `id` on the public
-  profile. [messages-and-interactions.md](../../../docs/protocol/messages-and-interactions.md)
-  and [synchronisation.md](../../../docs/protocol/synchronisation.md) mention
+  [identity.md](../../../../docs/protocol/identity.md) documents `id` on the public
+  profile. [messages-and-interactions.md](../../../../docs/protocol/messages-and-interactions.md)
+  and [synchronisation.md](../../../../docs/protocol/synchronisation.md) mention
   the floor. `docs/protocol/CHANGELOG.md` is updated: the endpoints and the
   profile `id` are additive, the history floor is a behaviour change, per
-  [SDK packaging and protocol policy](../../../docs/technical/sdk-packaging-and-protocol-policy.md).
-- [permission-model.md](../../../docs/technical/permission-model.md): the
+  [SDK packaging and protocol policy](../../../../docs/technical/sdk-packaging-and-protocol-policy.md).
+- [permission-model.md](../../../../docs/technical/permission-model.md): the
   group admin section is updated (the override is now effective through
   dedicated endpoints; revoking writes `deny`).
 - `bun run openapi:emit`; new error codes `room.user_not_found` and
@@ -294,7 +294,7 @@ shows the other person's identifier. Actions:
   `room.dm_self`).
 
 The feature also exports `StartConversationButton({ userId })` (get-or-create
-then navigate). [`web-client-members`](../../_archives/features/web-client-members/overview.md)
+then navigate). [`web-client-members`](../web-client-members/overview.md)
 places it in the member profile, whichever of the two features ships second.
 
 ### 4.7 Group settings

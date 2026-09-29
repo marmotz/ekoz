@@ -61,7 +61,7 @@ A public endpoint next to the messages controller, on the pattern of
   call, so a hot reload is visible on the next request.
 - Nothing secret: the limit is observable by sending a long message.
 - The response is an object, not a bare number, so later limits can be added
-  additively (attachments in [`content-and-sharing`](../../../features/content-and-sharing/overview.md)).
+  additively (attachments in [`content-and-sharing`](../content-and-sharing/overview.md)).
 - Protocol: a "Policy" section in
   [messages-and-interactions.md](../../../../docs/protocol/messages-and-interactions.md)
   and an entry in the protocol `CHANGELOG.md`. Also state there that the info

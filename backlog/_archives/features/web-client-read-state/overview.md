@@ -37,7 +37,7 @@ invitations stay current without reloading.
 - **Collapsed spaces**: a collapsed space shows the sum of its descendants' unread
   counts; an expanded one shows none.
 - **Out of scope**: DM and group DM counters, owned by
-  [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md).
+  [`web-client-direct-messages`](../web-client-direct-messages/overview.md).
 
 ## Dependencies
 

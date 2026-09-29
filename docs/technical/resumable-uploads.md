@@ -47,7 +47,7 @@ The upload holds exactly **one blob reference** from the moment it finalizes
 until either it is attached to a message (the reference moves to the
 `MessageAttachment` in the same transaction, so there is never a net
 `retain`/`release` at that point — see the content-and-sharing
-[technical design §S9](../../backlog/features/content-and-sharing/technical.md))
+[technical design §S9](../../backlog/_archives/features/content-and-sharing/technical.md))
 or it expires.
 
 `UploadSweeperService`

@@ -11,7 +11,7 @@ administration originally **excluded** exposing this over HTTP at all — there
 was a resolver and a table, but no route. The content-and-sharing feature
 needed an admin screen for `uploads.*`, `storage.capacity_bytes`,
 `link_previews.*` and `files.url_ttl` (see the [content and sharing technical
-design](../../backlog/features/content-and-sharing/technical.md), §S11),
+design](../../backlog/_archives/features/content-and-sharing/technical.md), §S11),
 which is what finally required building the HTTP surface. This page documents
 that surface — the resolution layering itself stays in
 [configuration model](configuration-model.md), not duplicated here.

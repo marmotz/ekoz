@@ -108,7 +108,7 @@ its users and its spaces, through a web application deployed with the server.
 
 - [Conversations](../conversations/overview.md) introduce the server owner role,
   which holds global administration.
-- [Content and sharing](../../../features/content-and-sharing/overview.md) expose the storage
+- [Content and sharing](../content-and-sharing/overview.md) expose the storage
   and link preview settings to the server owner.
 - [Notifications](../../../features/notifications/overview.md) expose channel enablement and the
   global rules to the server owner.

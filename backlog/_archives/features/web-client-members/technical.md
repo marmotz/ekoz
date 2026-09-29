@@ -20,7 +20,7 @@ instead of "Unknown user".
 Out of scope: presence and the "hide offline members" filter
 ([`web-client-presence-and-typing`](../web-client-presence-and-typing/overview.md));
 member-level actions in the card (direct message, invite, role change, remove, ban),
-added by [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md) and
+added by [`web-client-direct-messages`](../web-client-direct-messages/overview.md) and
 [`web-client-room-moderation`](../../../features/web-client-room-moderation/overview.md); the panel in
 `dm` / `group_dm` rooms (reused by `web-client-direct-messages`).
 

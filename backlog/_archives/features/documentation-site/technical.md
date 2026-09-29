@@ -1,11 +1,11 @@
 # Documentation site — technical design
 
-Grounded in the current state of the repo (root [package.json](../../../package.json),
-[biome.json](../../../biome.json), [lefthook.yml](../../../lefthook.yml),
-[.github/workflows/ci.yml](../../../.github/workflows/ci.yml),
-[scripts/check-changelog.sh](../../../scripts/check-changelog.sh),
-[scripts/release-publish.sh](../../../scripts/release-publish.sh),
-[.changeset/config.json](../../../.changeset/config.json)) and on the sibling
+Grounded in the current state of the repo (root [package.json](../../../../package.json),
+[biome.json](../../../../biome.json), [lefthook.yml](../../../../lefthook.yml),
+[.github/workflows/ci.yml](../../../../.github/workflows/ci.yml),
+[scripts/check-changelog.sh](../../../../scripts/check-changelog.sh),
+[scripts/release-publish.sh](../../../../scripts/release-publish.sh),
+[.changeset/config.json](../../../../.changeset/config.json)) and on the sibling
 Docusaurus setup at
 [`marmotz/kurotako` `apps/docs`](https://github.com/marmotz/kurotako/tree/develop/apps/docs),
 reused as the reference implementation for config, TypeDoc wiring, local search and the
@@ -13,7 +13,7 @@ GitHub Pages deploy workflow.
 
 ## New workspace: `apps/docs`
 
-Added to the `apps/*` workspace glob in [package.json](../../../package.json) (already
+Added to the `apps/*` workspace glob in [package.json](../../../../package.json) (already
 matches, no change needed there). Not published to npm (`"private": true`), so it needs
 no entry in `.changeset/config.json`'s `ignore` list — that list is only consulted for
 workspaces Changesets would otherwise try to version, and a private package without a
@@ -158,14 +158,14 @@ truth. The `protocol` instance is **not** a copy: its docs plugin `path` points 
 publishable as is (no issue numbers, no `apps/server` or `docs/technical` links).
 `docs/protocol/README.md` is the overview page and `CHANGELOG.md` the changelog page. A
 hand-adapted copy in `apps/docs/protocol/` was tried first and rejected because it
-drifted (see [docs-site-workspace](../../../docs/technical/docs-site-workspace.md)).
+drifted (see [docs-site-workspace](../../../../docs/technical/docs-site-workspace.md)).
 `docs/technical/*.md` is not published.
 
 `apps/docs/sdk/guide/*.md` are new, hand-written usage guides — nothing to migrate from.
 `apps/docs/docs/*` (Guides instance) are new pages; `installation.md` /
 `configuration.md` / `operations.md` draw on
-[apps/server/README.md](../../../apps/server/README.md) and
-[apps/server/compose.yaml](../../../apps/server/compose.yaml) (docker compose) for
+[apps/server/README.md](../../../../apps/server/README.md) and
+[apps/server/compose.yaml](../../../../apps/server/compose.yaml) (docker compose) for
 accuracy, not on `docs/technical/` (internal design rationale, not operator-facing).
 
 ## Versioning workflow (manual)
@@ -249,7 +249,7 @@ zone hosts `marmotz.dev` (outside this repo's scope).
 ## Changelog discipline
 
 `apps/docs` is an `apps/*` workspace, so it falls under
-[scripts/check-changelog.sh](../../../scripts/check-changelog.sh)'s existing loop
+[scripts/check-changelog.sh](../../../../scripts/check-changelog.sh)'s existing loop
 (`for app in apps/admin apps/client-web apps/server`) — **that loop needs
 `apps/docs` added**, or a change to `apps/docs/src` (its actual `src/`, if any custom
 React bits are added later) would silently skip the changelog gate. `apps/docs/CHANGELOG.md`

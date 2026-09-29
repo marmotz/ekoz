@@ -47,7 +47,7 @@ Provide the foundations the first increment builds on:
   ([file storage and quotas](../../../../docs/technical/file-storage-and-quotas.md)). The
   first increment ships the `local` driver and the deduplicated schema;
   per-user quotas, MIME filtering and per-message attachments are delivered with
-  [content and sharing](../../../features/content-and-sharing/overview.md).
+  [content and sharing](../content-and-sharing/overview.md).
 - Outbound email is modular; the first increment ships the SMTP driver only
   ([the design records of the functional spec / notifications](../../../features/notifications/overview.md)).
   Email templates are in English.

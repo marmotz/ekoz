@@ -40,7 +40,7 @@ exchanges without weighing down the operation of a standalone instance.
   home identity.
 - [Conversations](../../_archives/features/conversations/overview.md), for shared rooms, private
   messages and read receipts.
-- [Content and sharing](../content-and-sharing/overview.md), for files exchanged
+- [Content and sharing](../../_archives/features/content-and-sharing/overview.md), for files exchanged
   with remote members.
 - [Server administration](../../_archives/features/server-administration/overview.md), to approve,
   supervise and interrupt peer relationships.

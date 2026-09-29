@@ -62,7 +62,7 @@ Messages must be retained according to configurable retention rules.
 
 ## Feature order
 
-- [Content and sharing](../../../features/content-and-sharing/overview.md) extends room
+- [Content and sharing](../content-and-sharing/overview.md) extends room
   messages.
 - [Notifications](../../../features/notifications/overview.md) consume message and room events.
 - [Federation](../../../features/federation/overview.md) extends rooms, private messages and

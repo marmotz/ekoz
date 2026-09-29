@@ -87,7 +87,7 @@ Notes:
   room with no marker the scan relies on `(room_id, created_at)`. The `LIMIT 100`
   bounds the work by matching rows, not by room history.
 - The lateral sub-select is written so `dm` / `group_dm` can reuse it later
-  (owned by [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md)).
+  (owned by [`web-client-direct-messages`](../web-client-direct-messages/overview.md)).
 
 ### S3. Protocol, OpenAPI, tests
 

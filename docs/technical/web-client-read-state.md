@@ -127,4 +127,4 @@ Display, in `RoomTree`:
   converges on the next invalidation or reload; no behaviour relies on `member_kicked`
   reaching the kicked user.
 - **L6.** Direct messages are out of scope; their unread counts belong to
-  [`web-client-direct-messages`](../../backlog/features/web-client-direct-messages/overview.md).
+  [`web-client-direct-messages`](../../backlog/_archives/features/web-client-direct-messages/overview.md).

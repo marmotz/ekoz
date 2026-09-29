@@ -4,7 +4,7 @@
 
 File sharing must stay modular on the storage side and must not let a user
 saturate the server. Avatars are files too. The
-[content and sharing](../../backlog/features/content-and-sharing/technical.md)
+[content and sharing](../../backlog/_archives/features/content-and-sharing/technical.md)
 feature (message attachments, link previews) grounded the original decisions
 below in real code and revised two of them: quota accounting and blob
 garbage collection.

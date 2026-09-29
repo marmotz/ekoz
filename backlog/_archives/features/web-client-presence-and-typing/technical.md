@@ -210,7 +210,7 @@ user.
 - own avatar in the user menu, from `reporter.state`;
 - members panel, member profile and direct conversations: they do not exist yet;
   their features ([`web-client-members`](../web-client-members/overview.md),
-  [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md)) are
+  [`web-client-direct-messages`](../web-client-direct-messages/overview.md)) are
   delivered first, and this feature adds `usePresence` to their avatars.
 
 ### C4. "Appear away" toggle
@@ -257,7 +257,7 @@ SDK-side scheduling, client activity thresholds), linked from
 Server S1-S7 first (it unblocks everything and fixes F1 alone), then the SDK,
 then the client. The C3 surfaces for the members panel, profile and direct
 conversations require [`web-client-members`](../web-client-members/overview.md)
-and [`web-client-direct-messages`](../../../features/web-client-direct-messages/overview.md).
+and [`web-client-direct-messages`](../web-client-direct-messages/overview.md).
 
 ## Implementation tasks
 
