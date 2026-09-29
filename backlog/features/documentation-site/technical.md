@@ -36,15 +36,7 @@ apps/docs/
       operations.md
     security.md
     faq.md
-  protocol/                    # instance id "protocol" — versioned
-    intro.md
-    discovery.md
-    identity.md
-    rooms-and-permissions.md
-    messages-and-interactions.md
-    presence-and-typing.md
-    synchronisation.md
-    changelog.md                 # points at docs/protocol/CHANGELOG.md content
+  # instance id "protocol": versioned, no local folder, reads ../../docs/protocol
   sdk/                          # instance id "sdk" — versioned
     guide/
       quickstart.md
@@ -60,7 +52,7 @@ apps/docs/
   src/css/custom.css
   static/
     img/
-    CNAME                        # "docs.ekoz.marmotz.dev"
+    CNAME                        # "ekoz.marmotz.dev"
   CHANGELOG.md
 ```
 
@@ -80,7 +72,7 @@ extra instance gets its own `id`, `path`, `routeBasePath` and therefore its own
 ```typescript
 const config: Config = {
   title: 'Ekoz',
-  url: 'https://docs.ekoz.marmotz.dev',
+  url: 'https://ekoz.marmotz.dev',
   baseUrl: '/',
   organizationName: 'marmotz',
   projectName: 'ekoz',
@@ -161,14 +153,13 @@ along with everything else. No independent versioning logic needed for the API p
 ## Content sourcing — reuse vs. duplicate
 
 `docs/protocol/*.md` and `docs/technical/*.md` at the repo root stay the source of
-truth (unchanged by this feature). `apps/docs/protocol/*.md` are **separate files**
-adapted for an external reader (published spec prose, not contributor-facing design
-notes) — not a build-time copy/transform, to avoid coupling the site's structure to the
-internal doc's structure. Keeping them in sync is a manual editorial step: whoever
-changes protocol behavior updates both `docs/protocol/` (per
-[apps/server/AGENTS.md](../../../apps/server/AGENTS.md)'s Definition of Done) and, when
-the change is user-facing, `apps/docs/protocol/`. This feature does not add a linter for
-that; a future issue can revisit if drift becomes a problem in practice.
+truth. The `protocol` instance is **not** a copy: its docs plugin `path` points at
+`../../docs/protocol`, so the published spec is the repository spec, written to be
+publishable as is (no issue numbers, no `apps/server` or `docs/technical` links).
+`docs/protocol/README.md` is the overview page and `CHANGELOG.md` the changelog page. A
+hand-adapted copy in `apps/docs/protocol/` was tried first and rejected because it
+drifted (see [docs-site-workspace](../../../docs/technical/docs-site-workspace.md)).
+`docs/technical/*.md` is not published.
 
 `apps/docs/sdk/guide/*.md` are new, hand-written usage guides — nothing to migrate from.
 `apps/docs/docs/*` (Guides instance) are new pages; `installation.md` /
@@ -183,7 +174,7 @@ No automation in `scripts/release-publish.sh`. At release time:
 
 - **Protocol**: after updating `docs/protocol/CHANGELOG.md` with a new version heading,
   run `bun run --filter '@ekozhq/docs' docusaurus docs:version:protocol <x.y>` from
-  `apps/docs`. This copies `protocol/` into `protocol_versioned_docs/<x.y>/` and appends
+  `apps/docs`. This copies `docs/protocol/` into `protocol_versioned_docs/<x.y>/` and appends
   `<x.y>` to `protocol_versions.json`.
 - **SDK**: after `bun run release` publishes `@ekozhq/sdk@<x.y.z>` to npm, run
   `docusaurus docs:version:sdk <x.y>` (minor precision, matching how the protocol is
@@ -251,8 +242,8 @@ not a PR gate.
 
 **GitHub Pages setup** (one-time, done by a maintainer, not part of any script in this
 repo): repo Settings → Pages → source "GitHub Actions"; add custom domain
-`docs.ekoz.marmotz.dev` (matches `static/CNAME`); enable "Enforce HTTPS"; add the DNS
-`CNAME` record pointing `docs.ekoz.marmotz.dev` at `marmotz.github.io` in whichever DNS
+`ekoz.marmotz.dev` (matches `static/CNAME`); enable "Enforce HTTPS"; add the DNS
+`CNAME` record pointing `ekoz.marmotz.dev` at `marmotz.github.io` in whichever DNS
 zone hosts `marmotz.dev` (outside this repo's scope).
 
 ## Changelog discipline

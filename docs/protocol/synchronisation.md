@@ -1,16 +1,13 @@
 # Synchronisation
 
-Catch-up (`GET /sync`) and real-time delivery (`GET /events`, SSE). This is the
-wire contract for `apps/server`'s `conversations` feature, the streaming slice
-(issue #11) — a mismatch between this page and `apps/server` is a bug, fixed
-here first (see [HTTP API conventions](../technical/api-conventions.md)).
+Catch-up (`GET /sync`) and real-time delivery (`GET /events`, SSE). This page is the
+wire contract for the streaming surface of an Ekoz server.
 
 ## Conventions
 
 - Error responses are `application/problem+json` with a stable `code`
-  (see [HTTP API conventions](../technical/api-conventions.md)).
-- Two independent cursors: a room's own `seq`
-  (see [event log and ordering](../technical/event-log-and-ordering.md)) for
+  (RFC 9457).
+- Two independent cursors: a room's own `seq` for
   `GET /sync`, and a per-account `feedSeq` for `GET /events`'s `Last-Event-ID`.
   They are not comparable to each other — `feedSeq` is a single server-wide
   sequence, not reset per account, so gaps between an account's own rows are
@@ -72,13 +69,8 @@ connection carries everything, distinguished by the SSE `event:` field
 - Errors (before the stream opens): `auth.unauthenticated` (`401`, missing,
   unknown, already-used or expired ticket).
 
-Delivery for the durable half (`room_event` / `account` frames) is poll-based
-for this increment — the server re-reads `AccountFeedEvent` for the connected
-account on a short interval rather than pushing on write — the same
-"in-process now" simplification the presence store documents. Presence and
-typing are pushed live through an in-process broadcaster instead, since they
-are never persisted. A keepalive comment (`: keepalive`) is sent periodically
-to hold the connection open through a buffering reverse proxy; the server also
+Presence and typing frames are live-only and never persisted. A keepalive
+comment (`: keepalive`) is sent periodically to hold the connection open through a buffering reverse proxy; the server also
 sets `X-Accel-Buffering: no` for nginx.
 
 A room event is fanned out to the **effective** members of its room: those with
@@ -88,14 +80,9 @@ its channels without having joined each one. The fan-out checks that a
 membership exists, not the `room.read` capability: a `deny` override on
 `room.read` is not honoured by the feed (`GET /sync` still enforces it).
 
-The account feed (`AccountFeedEvent`, server-internal) is a fan-out projection
-with its own `feedSeq`, populated in the same transaction as the `room_event`
-it mirrors (issue #11 folds fan-out directly into `EventLogService.append`,
-not a separate async worker as originally sketched) — so a message's
-`room_event.seq` is authoritative for room state (`GET /sync`), while
-`feedSeq` only orders what one account's stream has seen. The feed table is
-pruned server-side by age (rows older than a fixed retention window); pruning
-by "every session's acked `feedSeq`" is not implemented — there is no table
-tracking a per-session delivery cursor yet, only the client-held
-`Last-Event-ID`. `GET /sync` remains the source of truth for anything older
-than what the feed retains.
+The per-account feed is a fan-out projection of the room logs with its own
+`feedSeq`, written together with the `room_event` it mirrors. A message's
+`room_event.seq` is therefore authoritative for room state (`GET /sync`), while
+`feedSeq` only orders what one account's stream has seen. The feed is pruned by
+age: `GET /sync` remains the source of truth for anything older than what the
+feed retains.

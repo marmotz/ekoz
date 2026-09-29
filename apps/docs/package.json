@@ -1,0 +1,33 @@
+{
+  "name": "@ekozhq/docs",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "clean": "rm -rf node_modules build .docusaurus",
+    "dev": "docusaurus start --no-open --port 6010",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve --no-open --port 6010",
+    "version-docs": "bun scripts/version-docs.ts",
+    "version-docs:check": "bun scripts/version-docs.ts --check",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/plugin-content-docs": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@easyops-cn/docusaurus-search-local": "^0.55.3",
+    "@mdx-js/react": "^3.1.1",
+    "docusaurus-plugin-typedoc": "1.4.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typedoc": "0.28.20",
+    "typedoc-plugin-markdown": "4.13.1"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "3.10.2",
+    "@docusaurus/tsconfig": "3.10.2",
+    "@docusaurus/types": "3.10.2"
+  }
+}

@@ -1,86 +1,62 @@
+---
+slug: /
+---
+
 # Ekoz protocol
 
-The exchange contract between clients and servers, and between servers. Versioned
-with SemVer, independently of the server implementation. See
-[CHANGELOG.md](CHANGELOG.md).
-
-> Status: skeleton. The detail will be written feature by feature, alongside the
-> technical design of the server (`server`) and the SDK (`sdk-js`).
+The Ekoz protocol is the exchange contract between clients and servers, and between
+servers. It is versioned with [SemVer](https://semver.org/), independently of any
+server implementation, and this section is written for anyone building a client, a
+server or a bridge against it. Every change is listed in the [changelog](CHANGELOG.md).
 
 ## Principles
 
-- Transport: HTTP(S) only. TLS mandatory.
-- Client → server: REST/JSON API.
-- Server → client: one **SSE** stream per client, multiplexing rooms and
-  account-scoped events (see [real-time transport](../technical/realtime-transport.md)).
-- Server → server: signed REST/JSON API (Ed25519), discovery via
-  `/.well-known/ekoz` (see [discovery.md](discovery.md) and
-  [federation protocol](../technical/federation-protocol.md)).
-- Technical error messages in English.
-- Error responses: `application/problem+json` (RFC 9457) with a stable
-  domain-namespaced `code` (see [HTTP API conventions](../technical/api-conventions.md)).
-- Entity identifiers: ULID (opaque 26-char string; see
-  [entity identifier format](../technical/entity-identifier-format.md)). Timestamps:
-  UTC ISO-8601.
-- Protocol version: every client request carries an `X-Ekoz-Protocol` header
-  naming the protocol **major** it was built against (currently `0`). A client
-  checks its major against `protocol_versions` in the discovery document
-  ([discovery.md](discovery.md)) before issuing resource calls; a server rejects
-  a request whose major it cannot serve (see
-  [SDK packaging and protocol-version policy](../technical/sdk-packaging-and-protocol-policy.md)).
+- **Transport**: HTTP(S) only, TLS mandatory.
+- **Client to server**: a REST/JSON API.
+- **Server to client**: one Server-Sent Events (SSE) stream per client, multiplexing
+  every room the account belongs to and account-scoped events. See
+  [Synchronisation](synchronisation.md).
+- **Server to server**: a signed REST/JSON API (Ed25519), with discovery through
+  `/.well-known/ekoz`. See [Discovery](discovery.md).
+- **Errors**: `application/problem+json` (RFC 9457) with a stable, domain-namespaced
+  `code` such as `room.not_found`. Technical error messages are in English.
+- **Identifiers**: ULID (an opaque 26-character string). Timestamps are UTC ISO-8601.
+  The only exception is the user-facing account identifier, `name/server`.
+- **Protocol version**: every client request carries an `X-Ekoz-Protocol` header naming
+  the protocol **major** it was built against (currently `0`). A client checks its major
+  against `protocol_versions` in the [discovery document](discovery.md) before issuing
+  resource calls, and a server rejects a request whose major it cannot serve.
 
 ## Event model
 
-- Each room has an ordered log: events identified by a `seq` monotonic **per
-  room**.
+- Each room has an ordered log of events identified by a `seq`, monotonic **per room**.
 - The home server of a room is authoritative for assigning `seq` values.
-- Synchronisation: `GET /sync?room=&since=<seq>`. The SSE stream carries the same
-  events in real time. See [Synchronisation](synchronisation.md) for the full
-  contract, and [event log and ordering](../technical/event-log-and-ordering.md)
-  for the design behind it.
+- Catch-up is `GET /sync?room=&since=<seq>`; the SSE stream carries the same events in
+  real time. See [Synchronisation](synchronisation.md).
 
 ## Core objects
 
-- Identity: `name/server` (see [user identifier](../technical/user-identifier.md)).
-- `room` with `type`: `space` | `channel` | `dm` | `group_dm`
-  (see [conversation data model](../technical/conversation-data-model.md) and
-  [Spaces, rooms, roles and permissions](rooms-and-permissions.md)).
-- `message` (see [Messages and interactions](messages-and-interactions.md)),
-  `attachment` (not specified yet), `membership` (not specified yet).
-- Log event types: see the "Room events" table on each section page above; the
-  full `RoomEventType` enum is additive-only.
+- **Identity**: `name/server`. See [Identity and profiles](identity.md).
+- **Room**, with a `type` of `space`, `channel`, `dm` or `group_dm`. See
+  [Spaces, rooms, roles and permissions](rooms-and-permissions.md).
+- **Message**, with reactions, pins and read markers. See
+  [Messages and interactions](messages-and-interactions.md).
+- **Attachment** and link preview. See [Files and sharing](files-and-sharing.md).
+- The set of room event types is additive-only: clients must ignore types they do not
+  know.
 
-## Sections written
+## Reading order
 
-- [Identity and profiles](identity.md): setup, registration (open / invite /
-  admin), login / refresh / logout, sessions, email verification, password
-  reset, own and public profiles, invitations, owner administration — method,
-  path, request body, success shape and `problem+json` codes for each.
-- [Spaces, rooms, roles and permissions](rooms-and-permissions.md): room
-  hierarchy CRUD and move, the capability ACL and its resolver, and the
-  `room_*` / `permission_override_changed` event payloads — method, path,
-  request body, success shape and `problem+json` codes for each. Fully
-  implemented server-side (issues #1-#3).
-- [Messages and interactions](messages-and-interactions.md): send / edit /
-  delete, restricted-Markdown grammar, structured mentions, replies, pins,
-  reactions, read markers, and their `room_event` payloads. **Draft** —
-  transcribed from the settled technical design ahead of the server
-  implementation (issues #7-#9); reconciled against real behaviour once they
-  ship.
-- [Presence and typing](presence-and-typing.md): heartbeat-derived presence,
-  visibility rules, ephemeral typing signals. **Draft**, ahead of issue #10.
-- [Synchronisation](synchronisation.md): `GET /sync` per-room catch-up,
-  `GET /events` SSE stream, the per-account feed and its `feedSeq` cursor.
-  **Draft**, ahead of issue #11.
-- [Files and sharing](files-and-sharing.md): resumable uploads (tus 1.0),
-  signed file download URLs, link previews and the caller's own storage
-  usage. Fully implemented server-side (issues #136-#149).
+1. [Discovery](discovery.md): find a server and verify what it signs.
+2. [Identity and profiles](identity.md): set up, register, sign in, manage sessions.
+3. [Spaces, rooms, roles and permissions](rooms-and-permissions.md): the conversation
+   structure and the permission model.
+4. [Messages and interactions](messages-and-interactions.md): the message lifecycle.
+5. [Files and sharing](files-and-sharing.md): uploads, downloads, link previews.
+6. [Synchronisation](synchronisation.md) and [Presence and typing](presence-and-typing.md):
+   real-time delivery.
 
-## Sections to write
+## Not specified yet
 
-1. Authentication and sessions (SSE ticket; the rest moved to
-   [Identity and profiles](identity.md)).
-2. Notifications.
-3. Administration and audit.
-4. Discovery and server↔server federation.
-5. Extensions and fallback rendering.
+Notifications, administration and audit, server-to-server federation and extensions
+with fallback rendering are not covered by this version of the specification.

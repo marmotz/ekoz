@@ -1,0 +1,5 @@
+build/
+.docusaurus/
+
+# TypeDoc output (regenerated on every build); frozen copies live under sdk_versioned_docs/
+sdk/api/

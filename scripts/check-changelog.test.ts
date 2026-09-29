@@ -57,6 +57,8 @@ beforeEach(() => {
   git('init', '-q', '-b', 'main');
   write('apps/client-web/src/a.ts', 'export const a = 1;\n');
   write('apps/client-web/CHANGELOG.md', CHANGELOG);
+  write('apps/docs/docs/a.md', 'a\n');
+  write('apps/docs/CHANGELOG.md', CHANGELOG);
   write('packages/sdk/src/a.ts', 'export const a = 1;\n');
   write('.changeset/README.md', '# Changesets\n');
   git('add', '-A');
@@ -119,4 +121,103 @@ it('accepts a new changeset for packages/sdk', () => {
   });
 
   expect(result.status).toBe(0);
+});
+
+it.each(['docs', 'sdk', 'src'])(
+  'fails when apps/docs/%s content changes without a changelog entry',
+  (dir) => {
+    const result = check({ [`apps/docs/${dir}/a.md`]: 'changed\n' });
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain('apps/docs');
+  },
+);
+
+it('passes when apps/docs content changes with an [Unreleased] entry', () => {
+  const result = check({
+    'apps/docs/docs/a.md': 'changed\n',
+    'apps/docs/CHANGELOG.md': CHANGELOG.replace(
+      '- Existing entry.\n',
+      '- Existing entry.\n- Docs entry.\n',
+    ),
+  });
+
+  expect(result.status).toBe(0);
+});
+
+it('ignores apps/docs test-only changes', () => {
+  expect(check({ 'apps/docs/test/a.test.ts': 'test' }).status).toBe(0);
+});
+
+const ENTRY = CHANGELOG.replace('- Existing entry.\n', '- Existing entry.\n- New entry.\n');
+
+/** Leaves `files` uncommitted on a branch off base, then runs the script in `mode`. */
+function checkUncommitted(
+  mode: '--worktree' | '--staged',
+  files: Record<string, string>,
+  stage: boolean,
+) {
+  git('checkout', '-q', '-b', 'change');
+  for (const [path, content] of Object.entries(files)) write(path, content);
+  if (stage) git('add', '-A');
+  return spawnSync('bash', [script, mode, 'base'], { cwd: repo, encoding: 'utf8' });
+}
+
+it('--worktree fails on an uncommitted src change without an entry', () => {
+  const result = checkUncommitted(
+    '--worktree',
+    { 'apps/client-web/src/a.ts': 'export const a = 2;\n' },
+    false,
+  );
+
+  expect(result.status).toBe(1);
+  expect(result.stdout).toContain('apps/client-web');
+});
+
+it('--worktree counts untracked files and an uncommitted entry', () => {
+  const result = checkUncommitted(
+    '--worktree',
+    {
+      'apps/client-web/src/new.ts': 'export const n = 1;\n',
+      'apps/client-web/CHANGELOG.md': ENTRY,
+    },
+    false,
+  );
+
+  expect(result.status).toBe(0);
+});
+
+it('--worktree does not stage anything', () => {
+  checkUncommitted('--worktree', { 'apps/client-web/src/new.ts': 'export const n = 1;\n' }, false);
+
+  const staged = execFileSync('git', ['diff', '--cached', '--name-only'], {
+    cwd: repo,
+    encoding: 'utf8',
+  });
+  expect(staged).toBe('');
+});
+
+it('--staged only sees staged content', () => {
+  git('checkout', '-q', '-b', 'change');
+  write('apps/client-web/src/a.ts', 'export const a = 2;\n');
+  git('add', '-A');
+  write('apps/client-web/CHANGELOG.md', ENTRY);
+
+  const result = spawnSync('bash', [script, '--staged', 'base'], { cwd: repo, encoding: 'utf8' });
+
+  expect(result.status).toBe(1);
+});
+
+it('--staged passes once the entry is staged too', () => {
+  const result = checkUncommitted(
+    '--staged',
+    { 'apps/client-web/src/a.ts': 'export const a = 2;\n', 'apps/client-web/CHANGELOG.md': ENTRY },
+    true,
+  );
+
+  expect(result.status).toBe(0);
+});
+
+it('does not require an apps/docs entry for docs/protocol changes', () => {
+  expect(check({ 'docs/protocol/a.md': 'changed\n' }).status).toBe(0);
 });

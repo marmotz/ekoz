@@ -9,3 +9,5 @@ pre-commit:
       stage_fixed: true
     - name: typecheck
       run: bun run typecheck
+    - name: changelog
+      run: bash scripts/check-changelog.sh --staged develop

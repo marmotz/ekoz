@@ -30,10 +30,14 @@ for all of them (Bun workspaces).
 - `CHANGELOG.md` per publishable package, managed by Changesets. Add a changeset
   (`bunx changeset`) whenever `packages/*/src` changes.
 - **Changelog gate (enforced by CI, `scripts/check-changelog.sh`).** A non-test
-  change under `apps/{admin,client-web,server}/src` needs a new line under
+  change under `apps/{admin,client-web,server}/src` (for `apps/docs`: `src/`, `docs/`
+  or `sdk/`) needs a new line under
   `## [Unreleased]` in that app's `CHANGELOG.md`. Regenerated files under
   `src/generated` count as `src/` changes (e.g. `bun run generate` touching
-  `apps/client-web`). Check every touched app before finishing.
+  `apps/client-web`). Check every touched app before finishing with
+  `bash scripts/check-changelog.sh --worktree develop` (sees uncommitted and
+  untracked files; the default mode only reads commits). The pre-commit hook runs
+  the `--staged` mode.
 - Tests are part of every change (create / update / delete). Nothing is "done"
   until its tests are written and green.
 

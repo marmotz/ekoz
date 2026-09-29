@@ -18,6 +18,7 @@ has its own page with full context, alternatives and consequences:
 - [Web client composer formatting](web-client-composer-formatting.md): toolbar and shortcuts, Enter rules, links, code blocks and their highlighting, message length counter and the messages policy endpoint.
 - [Web client rooms](web-client-rooms.md): sidebar section slot and rooms tree, `RoomGate` states, rooms pages, query keys and the server, protocol and SDK changes behind them.
 - [Web client members](web-client-members.md): shared members query and live refresh, authors who left, public profile card, members panel and the `GET /users?ids=` endpoint behind them.
+- [Documentation site workspace](docs-site-workspace.md) — Docusaurus, three docs instances, local search.
 - [Admin console Node entry point](admin-console-node-entry.md) — the `server.entry.mjs` adapter.
 - [SDK packaging and protocol-version policy](sdk-packaging-and-protocol-policy.md).
 - [HTTP API conventions](api-conventions.md) — problem+json, correlation, validation.

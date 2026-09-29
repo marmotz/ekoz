@@ -1,16 +1,13 @@
 # Presence and typing
 
-Online/away/offline presence and typing indicators. This is the wire contract
-for `apps/server`'s `conversations` feature, the presence slice (issue #10) —
-a mismatch between this page and `apps/server` is a bug, fixed here first (see
-[HTTP API conventions](../technical/api-conventions.md)).
+Online/away/offline presence and typing indicators. This page is the wire contract
+for presence and typing signals.
 
 ## Conventions
 
 - Error responses are `application/problem+json` with a stable `code`
-  (see [HTTP API conventions](../technical/api-conventions.md)).
-- Neither presence nor typing is ever written to the `room_event` log
-  (see [event log and ordering](../technical/event-log-and-ordering.md)) or
+  (RFC 9457).
+- Neither presence nor typing is ever written to the `room_event` log or
   persisted at all: both are ephemeral, in-process state, delivered only over
   the SSE stream (see [Synchronisation](synchronisation.md)) via a live
   push — not the durable account feed, so a connection that was down when a

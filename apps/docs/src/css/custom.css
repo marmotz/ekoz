@@ -1,0 +1,11 @@
+/* Docusaurus theme overrides. */
+
+.version-dropdown--protocol::before {
+  content: "Protocol ";
+  color: var(--ifm-color-emphasis-600);
+}
+
+.version-dropdown--sdk::before {
+  content: "SDK ";
+  color: var(--ifm-color-emphasis-600);
+}

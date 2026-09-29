@@ -33,7 +33,8 @@ that feature's `backlog/features/<slug>/technical.md`, not in `docs/technical/`.
   `## [Unreleased]` section is always at the top, with `Added` / `Changed` /
   `Fixed` / `Deprecated` / `Removed` / `Security` categories.
 - Any change that touches a workspace's `src/` adds an entry under its
-  `## [Unreleased]`.
+  `## [Unreleased]`. For `apps/docs`, the content directories `docs/` and `sdk/`
+  count as `src/`.
 - `packages/sdk` versioning and npm publication go through **Changesets**
   (`bunx changeset` from the repo root); its `CHANGELOG.md` is generated, not
   hand-edited.
