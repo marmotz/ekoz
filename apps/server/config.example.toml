@@ -81,7 +81,7 @@ key = "${EKOZ_SECRET_KEY}"
 [storage]
 # Backend driver:
 #   "local" : files on the server filesystem (see [storage.local]). Implemented.
-#   "s3"    : S3-compatible object store (see [storage.s3]). Schema only for now.
+#   "s3"    : S3-compatible object store (see [storage.s3]). Implemented.
 # Default: "local".
 driver = "local"
 # Grace period, in seconds, before the GC sweep deletes a blob that has stayed
@@ -96,7 +96,7 @@ gc_grace_seconds = 3600
 path = "./var/blobs"
 
 # [storage.s3] — only used when driver = "s3". All infra + secret; leave unset
-# (or set from the environment) until S3 support lands.
+# (or set from the environment) when using the S3 driver.
 #[storage.s3]
 # Endpoint URL of the S3-compatible service (omit for AWS S3 itself).
 #endpoint = "${EKOZ_STORAGE__S3__ENDPOINT}"
@@ -107,6 +107,9 @@ path = "./var/blobs"
 # Access key id / secret access key for the bucket.
 #access_key_id = "${EKOZ_STORAGE__S3__ACCESS_KEY_ID}"
 #secret_access_key = "${EKOZ_STORAGE__S3__SECRET_ACCESS_KEY}"
+# Use path-style addressing (bucket in the URL path) instead of virtual-hosted
+# style. Required by most self-hosted services such as MinIO. Default: false.
+#force_path_style = false
 
 
 # ---------------------------------------------------------------------------

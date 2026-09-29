@@ -1,24 +1,20 @@
 # Identity and profiles
 
-Setup, credentials, sessions, profiles and owner administration. This is the
-wire contract the SDK's identity resources bind against (see the
-[SDK foundations technical design](../../backlog/_archives/features/sdk-foundations/technical.md)
-§10–§11); a mismatch between this page and `apps/server` is a bug, fixed here
-first (see [HTTP API conventions](../technical/api-conventions.md)).
+Setup, credentials, sessions, profiles and owner administration. This page is
+the wire contract an implementer binds against to authenticate users and manage
+accounts.
 
 ## Conventions
 
-- Every request from an SDK build carries `X-Ekoz-Protocol: <major>` naming
-  the protocol major it targets (see [README](README.md#principles) and the
-  [SDK packaging and protocol-version policy](../technical/sdk-packaging-and-protocol-policy.md)).
-  Ignored by the server today; a tolerant reader lands with a separate
-  `server` task.
+- Every client request carries `X-Ekoz-Protocol: <major>` naming the protocol
+  major it targets (see [Protocol overview](README.md#principles)). Servers do
+  not reject on it yet, but clients should always send it.
 - Error responses are `application/problem+json` with a stable `code`
-  (see [HTTP API conventions](../technical/api-conventions.md)). This surface
+  (RFC 9457). This surface
   uses two namespaces: `auth.*` for tokens, sessions and credentials,
   `identity.*` for accounts, profiles and identifiers.
 - Timestamps: UTC ISO-8601. Identifiers: ULID, except the user-facing
-  identifier which is `name/server` (see [user identifier](../technical/user-identifier.md)).
+  identifier which is `name/server`.
 - Sensitive endpoints (`login`, `register`, `verify-email/resend`,
   `password-reset/request`) are additionally rate-limited; a throttled request
   gets `auth.too_many_requests` (`429`) with `Retry-After`.
@@ -374,8 +370,7 @@ Body: `{ userId }`. `204`. Errors: `identity.user_not_found` (`404`).
 
 ### `GET /admin/settings`
 
-Every configuration parameter's resolved value and provenance (technical.md
-§2, issue #145). `200`: `ConfigParameterView[]`.
+Every configuration parameter's resolved value and provenance. `200`: `ConfigParameterView[]`.
 
 ### `PUT /admin/settings/:key`
 
@@ -408,7 +403,7 @@ Reverts a key to its file / default value, audited the same way as `PUT`.
 
 ### `GET /admin/users/:id/storage`
 
-A user's storage usage and effective quota (technical.md §S11, issue #146).
+A user's storage usage and effective quota.
 `200`: `{ usedBytes, pendingBytes, quotaBytes, overridden }` — `quotaBytes` is
 `null` when unlimited; `overridden` is `true` when a `StorageQuotaOverride`
 row exists (a `null` override, i.e. an explicit "unlimited", still counts).
@@ -427,7 +422,7 @@ same way. `204`. Errors: `storage.user_not_found` (`404`).
 
 ### `GET /admin/storage`
 
-Server-wide dashboard (technical.md §S11, issue #146). `200`:
+Server-wide dashboard. `200`:
 `{ usedBytes, capacityBytes, blobCount, pendingUploads, topConsumers, driver, mediaTools }`.
 
 - `capacityBytes`: `storage.capacity_bytes`, `null` when unbounded.
@@ -437,7 +432,7 @@ Server-wide dashboard (technical.md §S11, issue #146). `200`:
 
 ### `GET /admin/attachments`
 
-Cross-room attachment search, newest first (technical.md §S11, issue #146).
+Cross-room attachment search, newest first.
 
 - Query: `?q=&uploaderId=&roomId=&type=media|documents&before=&limit=`. `q`
   matches the filename; `before` is an attachment id (keyset cursor).
@@ -447,7 +442,7 @@ Cross-room attachment search, newest first (technical.md §S11, issue #146).
 ### `DELETE /admin/blobs/:id`
 
 Force-removes a blob from every message attachment, link-preview image and
-avatar referencing it (technical.md §S11, issue #146): each reference is
+avatar referencing it: each reference is
 deleted (a room whose attachment is removed gets `attachment_removed`, like a
 moderator removal) and the blob reference released. Audited as
 `storage.content_removed` with the content hash. `204`. Errors:

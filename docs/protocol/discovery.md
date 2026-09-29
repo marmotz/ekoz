@@ -2,9 +2,8 @@
 
 Every Ekoz server publishes a small, unauthenticated document that lets clients
 and peer servers learn how to reach it and how to verify what it signs. It
-decouples the identity domain (`name/server`, see
-[user identifier](../technical/user-identifier.md)) from the hosting
-infrastructure (see [federation protocol](../technical/federation-protocol.md)).
+decouples the identity domain (`name/server`) from the hosting
+infrastructure.
 
 ## Request
 

@@ -1,10 +1,7 @@
 # Files and sharing
 
 Resumable uploads, signed file downloads, link previews and the caller's own
-storage usage. This is the wire contract for `apps/server`'s storage core
-(`src/core/storage`, `src/core/link-previews`) — a mismatch between this page
-and `apps/server` is a bug, fixed here first (see
-[HTTP API conventions](../technical/api-conventions.md)).
+storage usage. This page is the wire contract for the storage surface of an Ekoz server.
 
 Attachments on messages (`Message.attachments`, `POST`/`PATCH
 /rooms/:id/messages(/:messageId)`, `attachment_removed`) and inline link
@@ -13,7 +10,7 @@ previews (`Message.linkPreview`) are documented in
 page covers the storage primitives they build on. Admin storage routes
 (`/admin/settings`, `/admin/storage`, `/admin/attachments`, `/admin/blobs`,
 `/admin/users/:id/storage(-quota)`) are in
-[Identity and profiles](identity.md#owner-administration-adminowner-only).
+[Identity and profiles](identity.md#owner-administration-admin-owner-only).
 
 ## Conventions
 
@@ -22,8 +19,8 @@ page covers the storage primitives they build on. Admin storage routes
 - Timestamps: UTC ISO-8601. Identifiers: ULID. Byte counts (`sizeBytes`,
   `usedBytes`, `quotaBytes`, ...) are decimal **strings**, like `Room.lastSeq`.
 - `POST /uploads` and its sibling `/uploads/:id` routes are excluded from the
-  generated OpenAPI document — `tus` headers are not describable by OpenAPI —
-  and documented here by hand; the SDK binds them directly.
+  generated OpenAPI document (`tus` headers are not describable by OpenAPI) and
+  are documented here by hand.
 
 ## Resumable uploads (tus 1.0)
 
@@ -123,8 +120,7 @@ without replaying tus semantics.
 `receiving` or `ready` without being attached to a message. A background
 sweeper deletes expired `receiving`/`failed` uploads (and their staging
 bytes) and releases the blob reference of expired `ready` ones, the same
-pattern as the blob garbage collector (see
-[file storage and quotas](../technical/file-storage-and-quotas.md)). An
+pattern as the blob garbage collector. An
 expired upload answers `upload.expired` (`410`) to every further request on
 it.
 
@@ -168,7 +164,7 @@ loses the ability to use a URL they already hold, even before it expires.
   attachment's room, the message must not be redacted, and if the message is
   hidden the caller must also hold `room.delete_any` (moderation can still
   see hidden content). A `preview` ref is open to any authenticated caller
-  the token names. See [permission model](../technical/permission-model.md).
+  the token names.
 - Range support: a `Range: bytes=start-end` request header (single range
   only) is honoured when the storage driver supports it, answering `206`
   with `Content-Range`; an unsatisfiable range answers `416`.
@@ -219,8 +215,7 @@ Fetch (or return the cached) preview metadata for a URL. Throttled per user
   candidate address required to be public (no loopback, private, link-local,
   CGNAT, multicast or cloud-metadata address), the connection pinned to the
   checked address, redirects re-checked, a fixed timeout, and the response
-  body size-capped. See
-  [link previews](../technical/link-previews.md) for the full policy.
+  body size-capped.
 - Cache TTL: `link_previews.cache_ttl` (default `24h`); a failed fetch is
   cached too, for a shorter period, so a broken URL is not retried on every
   request.

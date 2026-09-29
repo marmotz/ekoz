@@ -27,6 +27,8 @@
     "format": "biome format --write .",
     "prepare": "lefthook install",
     "release": "bash scripts/release-publish.sh",
+    "release:version": "changeset version && bun run --filter '@ekozhq/docs' version-docs",
+    "docs:version": "bun run --filter '@ekozhq/docs' version-docs",
     "update:minor": "bun x npm-check-updates -i -t minor -ws",
     "update:latest": "bun x npm-check-updates -i -t latest -ws",
     "wa": "bun --cwd=apps/admin",

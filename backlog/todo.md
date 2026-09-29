@@ -91,13 +91,13 @@ _done, see [technical.md](./technical.md)_ — 21/21 tasks done
 
 ## Documentation site ·  [overview](features/documentation-site/overview.md)
 
-_technical design — see [technical.md](technical.md)_ — 0/6 tasks done
+_done, see [technical.md](./technical.md)_ — 6/6 tasks done
 
 | Done | Issue                                              | Title                                                                                 | Blocked by |
 |------|----------------------------------------------------|---------------------------------------------------------------------------------------|------------|
-| [ ]  | [#236](https://github.com/marmotz/ekoz/issues/236) | docs: scaffold apps/docs workspace with 3 Docusaurus docs instances                   | —          |
-| [ ]  | [#237](https://github.com/marmotz/ekoz/issues/237) | docs: write the Guides instance (quickstart, installation, server ops, security, FAQ) | #236       |
-| [ ]  | [#238](https://github.com/marmotz/ekoz/issues/238) | docs: write the Protocol instance from docs/protocol/*                                | #236       |
-| [ ]  | [#239](https://github.com/marmotz/ekoz/issues/239) | docs: write the SDK guide and wire TypeDoc API reference                              | #236       |
-| [ ]  | [#240](https://github.com/marmotz/ekoz/issues/240) | ci: dedicated docs.yml workflow deploying apps/docs to GitHub Pages                   | #236       |
-| [ ]  | [#241](https://github.com/marmotz/ekoz/issues/241) | ci: add apps/docs to the check-changelog.sh app loop                                  | #236       |
+| [x]  | [#236](https://github.com/marmotz/ekoz/issues/236) | docs: scaffold apps/docs workspace with 3 Docusaurus docs instances                   | —          |
+| [x]  | [#237](https://github.com/marmotz/ekoz/issues/237) | docs: write the Guides instance (quickstart, installation, server ops, security, FAQ) | #236       |
+| [x]  | [#238](https://github.com/marmotz/ekoz/issues/238) | docs: write the Protocol instance from docs/protocol/*                                | #236       |
+| [x]  | [#239](https://github.com/marmotz/ekoz/issues/239) | docs: write the SDK guide and wire TypeDoc API reference                              | #236       |
+| [x]  | [#240](https://github.com/marmotz/ekoz/issues/240) | ci: dedicated docs.yml workflow deploying apps/docs to GitHub Pages                   | #236       |
+| [x]  | [#241](https://github.com/marmotz/ekoz/issues/241) | ci: add apps/docs to the check-changelog.sh app loop                                  | #236       |

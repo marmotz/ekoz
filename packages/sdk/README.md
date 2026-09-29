@@ -1,4 +1,4 @@
-# @ekoz/sdk
+# @ekozhq/sdk
 
 JavaScript/TypeScript SDK for the Ekoz protocol. It encapsulates all network access to
 an Ekoz server so that no client ever has to call `fetch` directly.
@@ -18,13 +18,13 @@ bun link
 Then, from a consumer checkout:
 
 ```bash
-bun link @ekoz/sdk
+bun link @ekozhq/sdk
 ```
 
 ## Quick start
 
 ```ts
-import { createClient } from '@ekoz/sdk';
+import { createClient } from '@ekozhq/sdk';
 
 const client = createClient({ server: 'ekoz.example.com' });
 
@@ -137,7 +137,7 @@ process restart — fine for a short-lived server process or for tests.
 Browser example, backed by `localStorage`:
 
 ```ts
-import type { SessionState, SessionStore } from '@ekoz/sdk';
+import type { SessionState, SessionStore } from '@ekozhq/sdk';
 
 function localStorageSessionStore(key = 'ekoz.session'): SessionStore {
   return {
@@ -156,7 +156,7 @@ const client = createClient({ server: 'ekoz.example.com', store: localStorageSes
 Node / Bun example — the same `memoryStore()` the SDK uses by default:
 
 ```ts
-import { memoryStore } from '@ekoz/sdk';
+import { memoryStore } from '@ekozhq/sdk';
 
 const client = createClient({ server: 'ekoz.example.com', store: memoryStore() });
 ```

@@ -1,25 +1,22 @@
 # Spaces, rooms, roles and permissions
 
 Room hierarchy, membership lifecycle, direct/group conversations, the public
-directory, capability ACL and their event-log surface. This is the wire
-contract for `apps/server`'s `conversations` feature (issues #1-#6); a
-mismatch between this page and `apps/server` is a bug, fixed here first (see
-[HTTP API conventions](../technical/api-conventions.md)).
+directory, capability ACL and their event-log surface. This page is the wire
+contract for the conversation structure of an Ekoz server.
 
 Messages/reactions/receipts, presence/typing and synchronisation each have
-their own sibling page: [Messages and interactions](messages-and-interactions.md)
-(#7-#9), [Presence and typing](presence-and-typing.md) (#10),
-[Synchronisation](synchronisation.md) (#11). Retention (#12) and local
-moderation (#13) are not covered yet.
+their own sibling page: [Messages and interactions](messages-and-interactions.md),
+[Presence and typing](presence-and-typing.md) and
+[Synchronisation](synchronisation.md). Retention and local moderation are not
+covered yet.
 
 ## Conventions
 
 - Error responses are `application/problem+json` with a stable `code`
-  (see [HTTP API conventions](../technical/api-conventions.md)), namespace
+  (RFC 9457), namespace
   `room.*`.
 - Timestamps: UTC ISO-8601. Identifiers: ULID
-  (see [user identifier](../technical/user-identifier.md) for the one
-  exception, the account's own `name/server`).
+  (the one exception is the account's own `name/server`).
 - `Room.lastSeq` is a 64-bit integer, serialised as a decimal **string** (not a
   JSON number) to avoid precision loss past 2^53.
 
@@ -44,8 +41,7 @@ moderation (#13) are not covered yet.
 }
 ```
 
-`type` is one of `space` | `channel` | `dm` | `group_dm`
-(see [conversation data model](../technical/conversation-data-model.md));
+`type` is one of `space` | `channel` | `dm` | `group_dm`;
 `POST /spaces` and `POST /rooms` (below) create `space` / `channel`,
 `POST /dms` and `POST /group-dms` (see [Direct and group
 conversations](#direct-and-group-conversations)) create `dm` / `group_dm`.
@@ -148,9 +144,7 @@ Update name / topic / visibility / read-only. Needs `space.manage`.
 
 Move a room under a new parent, or detach a space to the root
 (`parentId: null`). Needs `space.manage` on `:id`. Rewrites the whole subtree's
-ancestry in one transaction (see
-[event log and ordering](../technical/event-log-and-ordering.md) for the
-transactional-write pattern this follows).
+ancestry in one transaction.
 
 - Body: `{ parentId }` (`parentId: null` only valid for a `space`; a `channel`
   must stay attached to a space).
@@ -172,9 +166,8 @@ children — delete or move them first.
 ## Permissions
 
 Capability-based ACL: a closed, protocol-versioned set of capability strings
-resolved against named roles, with overrides — see
-[permission model](../technical/permission-model.md) for the full resolution
-algorithm. The capability list (grows only additively):
+resolved against named roles, with overrides
+(see [Permissions](#permissions)). The capability list (grows only additively):
 
 ```
 room.read, room.post, room.edit_own, room.delete_own, room.edit_any,
@@ -232,7 +225,7 @@ role override. Needs `room.manage_permissions` on `:id`. Emits
 ## Membership
 
 Join/leave, invitations, invite-only join requests, kick, ban/unban and role
-change (technical.md §9, issue #4).
+change.
 
 ### The `Membership` object
 
@@ -562,7 +555,7 @@ Emits `group_changed` (`member_removed`).
 
 ## Direct and group conversations
 
-`dm` and `group_dm` rooms (technical.md §7, issue #5): outside the hierarchy
+`dm` and `group_dm` rooms: outside the hierarchy
 (`parentId` always `null`), never in `RoomClosure` beyond their self row, and
 never in the [public directory](#directory) (that filters to `type =
 "channel"`). Both use the same `Room` object as spaces/channels.
@@ -570,7 +563,7 @@ never in the [public directory](#directory) (that filters to `type =
 A `dm`'s two members are always `member`; a `group_dm`'s creator additionally
 gets a per-user `room.manage_members` override, which makes them a **group
 admin** (a "light `room_admin`" scoped to member management only, not the full
-`room_admin` role — see [permission model](../technical/permission-model.md)).
+`room_admin` role).
 All other capabilities resolve through the normal `member` defaults.
 
 ### History floor
@@ -664,7 +657,7 @@ later request on it answers `404 room.not_found`.
 
 ## Directory
 
-Public listing and search of `channel` rooms (technical.md §8, issue #6).
+Public listing and search of `channel` rooms.
 `dm` / `group_dm` and non-`public` channels never appear here.
 
 ### `GET /directory`
@@ -695,12 +688,11 @@ Flip a room to `visibility: "private"`, delisting it. Needs
 ## Room events
 
 Every state change in this feature appends a `room_event`
-(see [event log and ordering](../technical/event-log-and-ordering.md)): a
 row keyed `(roomId, seq)`, `seq` monotonic per room. `RoomEventType` is a
-closed, additively-grown enum; only the types below carry a payload this
-increment actually writes. Every other declared type
-(`message_hidden`, `retention_changed`) is reserved for the issue that
-implements it (#12) — its payload shape is not fixed yet.
+closed, additively-grown enum; only the types below carry a payload that
+servers write today. Every other declared type
+(`message_hidden`, `retention_changed`) is reserved and its payload shape is
+not fixed yet.
 `message_*` / `reaction_*` / `pin_*` / `receipt_updated` payloads are on
 [Messages and interactions](messages-and-interactions.md#room-events).
 

@@ -1,10 +1,7 @@
 # Messages and interactions
 
 Sending, editing, deleting and pinning messages; reactions; read markers. This
-is the wire contract for `apps/server`'s `conversations` feature, the messages
-slice (issues #7-#9) — a mismatch between this page and `apps/server` is a bug,
-fixed here first (see
-[HTTP API conventions](../technical/api-conventions.md)).
+is the wire contract for the messaging surface of an Ekoz server.
 
 ## Conventions
 
@@ -59,12 +56,11 @@ fixed here first (see
 }
 ```
 
-`seq` equals the `seq` of the message's `message_created` event (technical.md
-§10); later events about the same message (`message_edited`,
+`seq` equals the `seq` of the message's `message_created` event; later events about the same message (`message_edited`,
 `message_redacted`, reactions, pins, receipts) get their own higher `seq`. A
 redacted message has `body: ""` and `redactedAt` set; `hiddenAt` is carried on
-the wire but not yet set by anything (the retention worker that sets it is
-issue #12).
+the wire but is not set by any current server behaviour (it is reserved for
+retention).
 
 `mentions` are the message's [mention targets](#mentions), ordered by first use.
 `mentionsMe` is the caller's own relation to the message: `direct` when it
@@ -454,7 +450,7 @@ deleter, reactor, pinner); `content` only ever carries the delta.
 | `message_edited` | `{ messageId, editedAt }` — never the previous body; clients refetch the message for attachment or link-preview changes too |
 | `message_redacted` | `{ reason: "user" \| "retention" }` — this REWRITES the original `message_created` row (same `seq`); it is not a new event |
 | `message_deleted` | `{ messageId, messageSeq, reason: "user" \| "retention" }` — the live notification of a deletion, appended with its own `seq`; `messageSeq` is the `seq` of the original (now tombstoned) row |
-| `message_hidden` | reserved for the retention worker (issue #12); no payload shape fixed yet |
+| `message_hidden` | reserved for retention; no payload shape fixed yet |
 | `reaction_added` | `{ messageId, emoji }` |
 | `reaction_removed` | `{ messageId, emoji }` |
 | `pin_added` | `{ messageId }` |
